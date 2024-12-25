@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SIYA Server Manager
  * Description: Server integration and yield augmentation plugin for WooCommerce.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Your Name
  * Text Domain: siya
  */
