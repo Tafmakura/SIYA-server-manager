@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include necessary files
-require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce-functions.php';
+//require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce-functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/cpt-functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/admin-functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/server-integration-functions.php';
