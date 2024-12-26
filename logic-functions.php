@@ -1,4 +1,6 @@
 <?php 
+//Delete
+
 function provision_and_register_server($subscription_id, $post_id) {
     error_log('provision_and_register_server called for subscription ID: ' . $subscription_id . ', post ID: ' . $post_id);
     
