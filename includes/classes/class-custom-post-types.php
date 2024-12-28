@@ -7,7 +7,7 @@ class CustomPostTypes {
         add_action('init', array($this, 'create_server_post_type'));
 
 
-        echo "44444444444444444444444444444444444444444 44444444444d4466";
+        echo "44444444444444444444444444444444444444444 44444444444d44666";
 
     }
 
