@@ -17,12 +17,12 @@ class Setup {
     private function initialize_hooks() {
         // Add any initialization hooks here
         add_action('init', array($this, 'initialize_custom_post_types'));
-        echo "test";
+      
     }
 
     public function initialize_custom_post_types() {
         // Initialize custom post types
-        if (class_exists('Siya\CustomPostTypes')) {
+        if (class_exists('CustomPostTypes')) {
             new CustomPostTypes();
         }
     }
