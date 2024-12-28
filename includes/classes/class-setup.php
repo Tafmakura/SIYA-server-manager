@@ -9,11 +9,9 @@ class Setup {
     }
 
     private function include_files() {
-        // Debugging statements to verify paths
-
         require_once plugin_dir_path(__DIR__) . '/functions/admin-functions.php';
         require_once plugin_dir_path(__DIR__) . '/functions/logic-functions.php';
-        require_once plugin_dir_path(__DIR__) . '/classes/class-cpts.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-custom-post-types.php';
     }
 
     private function initialize_hooks() {
@@ -23,8 +21,8 @@ class Setup {
 
     public function initialize_custom_post_types() {
         // Initialize custom post types
-        if (class_exists('Siya\CPTs')) {
-            new CPTs();
+        if (class_exists('Siya\CustomPostTypes')) {
+            new CustomPostTypes();
         }
     }
 }

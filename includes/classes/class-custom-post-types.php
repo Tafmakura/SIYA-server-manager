@@ -2,7 +2,7 @@
 
 namespace Siya;
 
-class CustomPostTypes extends Setup{
+class CustomPostTypes {
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
     }
