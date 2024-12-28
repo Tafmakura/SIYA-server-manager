@@ -13,8 +13,8 @@ class Setup {
         error_log('Admin functions path: ' . plugin_dir_path(__FILE__) . '/../functions/admin-functions.php');
         error_log('Logic functions path: ' . plugin_dir_path(__FILE__) . '/../functions/logic-functions.php');
 
-        require_once plugin_dir_path(__FILE__) . '/../functions/admin-functions.php';
-        require_once plugin_dir_path(__FILE__) . '/../functions/logic-functions.php';
+    //    require_once plugin_dir_path(__FILE__) . '/../functions/admin-functions.php';
+     //   require_once plugin_dir_path(__FILE__) . '/../functions/logic-functions.php';
     }
 
     private function initialize_hooks() {
