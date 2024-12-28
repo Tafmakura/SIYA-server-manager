@@ -21,10 +21,13 @@ class Setup {
 
     public function initialize_custom_post_types() {
 
-        echo "444444444444444444444444444444444444444444444444444444";
 
         // Initialize custom post types
         if (class_exists('CustomPostTypes')) {
+
+
+        echo "444444444444444444444444444444444444444444444444444444";
+
             new CustomPostTypes();
           
         }
