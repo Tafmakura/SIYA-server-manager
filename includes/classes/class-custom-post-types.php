@@ -6,12 +6,15 @@ class CustomPostTypes {
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
 
-        echo "444444444444444444444444444444444444444444444444444444";
-
-
     }
 
     public function create_server_post_type() {
+
+
+        echo "44444444444444444444444444444444444444444444444444444455";
+
+
+
         $labels = array(
             'name'               => _x('Servers', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('Server', 'post type singular name', 'your-text-domain'),
