@@ -8,7 +8,7 @@
  */
 
 // Include the Setup class
-require_once plugin_dir_path(__DIR__) . 'includes/classes/class-setup.php';
+require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
 use Siya\Setup;
 
