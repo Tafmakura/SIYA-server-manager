@@ -5,9 +5,7 @@ namespace Siya;
 class CustomPostTypes {
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
-
-        echo "44444444444444444444444444444444444444444 44444444444d443333";
-
+        echo "44444444444444444444444444444444444444444 44444444444d33333";
     }
 
     public function create_server_post_type() {
