@@ -9,8 +9,8 @@ class Setup {
     }
 
     private function include_files() {
-        require_once plugin_dir_path(__FILE__) . '../functions/admin-functions.php';
-        require_once plugin_dir_path(__FILE__) . '../functions/logic-functions.php';
+        require_once plugin_dir_path(__FILE__) . '/../functions/admin-functions.php';
+        require_once plugin_dir_path(__FILE__) . '/../functions/logic-functions.php';
     }
 
     private function initialize_hooks() {
