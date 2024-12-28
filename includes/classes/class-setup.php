@@ -21,10 +21,14 @@ class Setup {
     }
 
     public function initialize_custom_post_types() {
+
+        echo "tesddddddddsgdfsfdjshdkjfhksjhdfkjhskdjhfkjshdkfjhsjhdfkjhskdjfhksjdhfkjshdfddt";
+
+
         // Initialize custom post types
         if (class_exists('CustomPostTypes')) {
             new CustomPostTypes();
-            echo "tesddddddddsgdfsfdjshdkjfhksjhdfkjhskdjhfkjshdkfjhsjhdfkjhskdjfhksjdhfkjshdfddt";
+          
         }
     }
 }
