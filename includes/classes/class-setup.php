@@ -25,10 +25,7 @@ class Setup {
         // Initialize custom post types
         if (class_exists('Siya\CustomPostTypes')) {
 
-
-        echo "444444444444444444444444444444444444444444444444444444";
-
-            new CustomPostTypes();
+            new \Siya\CustomPostTypes();
           
         }
     }
