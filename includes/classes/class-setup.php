@@ -17,14 +17,11 @@ class Setup {
     private function initialize_hooks() {
         // Add any initialization hooks here
         add_action('init', array($this, 'initialize_custom_post_types'));
-        echo "tesddddddddsgdfsfdjshdkjfhksjhdfkjhskdjhfkjshdkfjhsjhdfkjhskdjfhksjdhfkjshdfddt";
-
-      
     }
 
     public function initialize_custom_post_types() {
 
-
+        echo "tesddddddddsgdfsfdjshdkjfhksjhdfkjhskdjhfkjshdkfjhsjhdfkjhskdjfhksjdhfkjshdfddt";
 
         // Initialize custom post types
         if (class_exists('CustomPostTypes')) {
