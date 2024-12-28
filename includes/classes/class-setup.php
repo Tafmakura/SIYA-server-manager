@@ -21,12 +21,9 @@ class Setup {
 
     public function initialize_custom_post_types() {
 
-
         // Initialize custom post types
         if (class_exists('Siya\CustomPostTypes')) {
-
             new \Siya\CustomPostTypes();
-          
         }
     }
 }
