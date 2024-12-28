@@ -48,5 +48,6 @@ class CustomPostTypes {
         );
 
         register_post_type('server', $args);
+        flush_rewrite_rules(); // Only use this temporarily
     }
 }
