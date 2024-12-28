@@ -11,10 +11,6 @@ class CustomPostTypes {
     public function create_server_post_type() {
 
 
-        echo "44444444444444444444444444444444444444444 44444444444d445d5";
-
-
-
         $labels = array(
             'name'               => _x('Servers', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('Server', 'post type singular name', 'your-text-domain'),
