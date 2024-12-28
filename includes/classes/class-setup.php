@@ -24,6 +24,7 @@ class Setup {
         // Initialize custom post types
         if (class_exists('CustomPostTypes')) {
             new CustomPostTypes();
+            echo "tesddddddddsgdfsfdjshdkjfhksjhdfkjhskdjhfkjshdkfjhsjhdfkjhskdjfhksjdhfkjshdfddt";
         }
     }
 }
