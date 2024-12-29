@@ -8,7 +8,7 @@ class AdminMenus {
     }
 
     /**
-     * Add top-level SIYA menu and API Settings submenu to the WordPress admin.
+     * Add top-level SIYA menu to the WordPress admin.
      */
     public function add_siya_menu() {
         add_menu_page(
@@ -16,18 +16,9 @@ class AdminMenus {
             'SIYA',                            // Menu title
             'manage_options',                  // Capability
             'siya-menu',                       // Menu slug
-            '',                                // Callback function (empty for top-level menu)
+            array('Siya\AdminSettings', 'runcloud_settings_page'), // Callback function
             'dashicons-admin-generic',         // Icon URL
             6                                  // Position
-        );
-
-        add_submenu_page(
-            'siya-menu',                       // Parent slug
-            'RunCloud and Hetzner Settings',   // Page title
-            'API Settings',                    // Menu title
-            'manage_options',                  // Capability
-            'api-settings',                    // Menu slug
-            array('Siya\AdminSettings', 'runcloud_settings_page') // Callback function
         );
     }
 }
