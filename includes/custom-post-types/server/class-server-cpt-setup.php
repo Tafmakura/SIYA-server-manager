@@ -1,16 +1,17 @@
-<?php 
+<?php
 
-namespace Siya;
+namespace SIYA\CustomPostTypes;
 
-class CustomPostTypes {
+class ServerSetup {
+
     public function __construct() {
-        $this->create_server_post_type();
+        $this->register_cpt();
     }
 
     /**
      * Registers a custom post type for servers.
      */
-    public function create_server_post_type() {
+    public function register_cpt() {
         $labels = array(
             'name'               => _x('Servers', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('Server', 'post type singular name', 'your-text-domain'),
