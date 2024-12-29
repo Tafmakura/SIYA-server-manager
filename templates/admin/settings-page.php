@@ -1,5 +1,5 @@
 <div class="wrap">
-    <h1><?php _e('RunCloud and Hetzner Settings', 'your-text-domain'); ?></h1>
+    <h1><?php _e('SIYA (Server Integration & Yield Augmentaion) ', 'your-text-domain'); ?></h1>
     <form method="post" action="options.php">
         <?php
         settings_fields('api-settings-group');
