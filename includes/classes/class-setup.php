@@ -15,6 +15,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/functions/logic-functions.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-menus.php';
     }
 
     /**
@@ -23,6 +24,7 @@ class Setup {
     private function initialize_hooks() {
         add_action('init', array($this, 'initialize_custom_post_types'));
         add_action('admin_init', array($this, 'initialize_admin_settings'));
+        add_action('admin_menu', array($this, 'initialize_admin_menus'));
     }
 
     /**
@@ -38,8 +40,13 @@ class Setup {
      * Initialize admin settings.
      */
     public function initialize_admin_settings() {
-        if (class_exists('Siya\AdminSettings')) {
-            new \Siya\AdminSettings();
-        }
+        new AdminSettings();
+    }
+
+    /**
+     * Initialize admin menus.
+     */
+    public function initialize_admin_menus() {
+        new AdminMenus();
     }
 }
