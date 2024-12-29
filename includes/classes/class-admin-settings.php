@@ -42,18 +42,7 @@ class AdminSettings {
      * Render the settings page.
      */
     public static function runcloud_settings_page() {
-        ?>
-        <div class="wrap">
-            <h1><?php _e('RunCloud and Hetzner Settings', 'your-text-domain'); ?></h1>
-            <form method="post" action="options.php">
-                <?php
-                settings_fields('api-settings-group');
-                do_settings_sections('api-settings');
-                submit_button();
-                ?>
-            </form>
-        </div>
-        <?php
+        include plugin_dir_path(__DIR__) . '/templates/admin/settings-page.php';
     }
 
     /**
