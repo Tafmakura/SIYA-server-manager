@@ -13,9 +13,14 @@ class Setup {
      */
     private function include_files() {
         require_once plugin_dir_path(__DIR__) . '/functions/logic-functions.php';
-        require_once plugin_dir_path(__DIR__) . '/classes/class-custom-post-types.php';
+        //require_once plugin_dir_path(__DIR__) . '/classes/class-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-menus.php';
+
+
+        require_once plugin_dir_path(__DIR__) . '/custom-post-types/server/class-server-cpt.php';
+
+
     }
 
     /**
@@ -31,9 +36,7 @@ class Setup {
      * Initialize custom post types.
      */
     public function initialize_custom_post_types() {
-        if (class_exists('Siya\CustomPostTypes')) {
-            new \Siya\CustomPostTypes();
-        }
+        new \Siya\CustomPostTypes\Server();
     }
 
     /**
