@@ -2,13 +2,15 @@
 /**
  * Plugin Name: SIYA Server Manager
  * Description: Server integration and yield augmentation plugin for WooCommerce.
-
- * Version: 1.0.3
+ * Version: 0.0.10
  * Author: Tafadzwa Makura
  * Text Domain: arsol
  */
 
-// Include necessary files
-//require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce-functions.php';
-require_once plugin_dir_path( __FILE__ ) . 'admin-functions.php';
-require_once plugin_dir_path( __FILE__ ) . 'logic-functions.php';
+// Include the Setup class
+require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
+
+use Siya\Setup;
+
+// Instantiate the Setup class
+$siyaServerManager = new Setup();
