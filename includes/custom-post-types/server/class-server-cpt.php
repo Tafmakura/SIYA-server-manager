@@ -3,6 +3,34 @@
 namespace SIYA\CustomPostTypes;
 
 class Server {
+
+    private $server_internal_id;
+    private $server_deployed_id;
+    private $server_provisioned_id;
+    private $server_name;
+    private $server_type;
+    private $server_os;
+    private $server_os_version;
+    private $server_region;
+    private $server_deployed_status;
+    private $server_deployed_date;
+    private $server_manager;
+    private $server_provisoned_status;
+    private $server_provisioned_date;
+    private $server_provider;
+    private $server_status;
+    private $server_status_date;
+    private $server_ipv4;
+    private $server_ipv6;
+    private $server_size;
+    private $server_image;
+    private $server_backup_enabled;
+    private $server_backup_schedule;
+    private $server_backup_retention;
+    private $server_monitoring_enabled;
+    private $server_monitoring_interval;
+
+
     public function __construct() {
         $this->register_cpt();
     }
