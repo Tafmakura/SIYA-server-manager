@@ -1,28 +1,21 @@
 <div class="wrap">
-    <h1><?php _e('SIYA (Server Integration & Yield Augmentaion) ', 'your-text-domain'); ?></h1>
+    <h1><?php _e('SIYA (Server Integration & Yield Augmentation)', 'arsol_siya'); ?></h1>
+    <p><?php _e('Configure your API settings below. Ensure all fields are filled correctly.', 'arsol_siya'); ?></p>
     <form method="post" action="options.php">
         <?php
         settings_fields('api-settings-group');
         do_settings_sections('api-settings');
-        submit_button();
         ?>
+        <table class="form-table">
+            <tr valign="top">
+                <th scope="row"><?php _e('API Key', 'arsol_siya'); ?></th>
+                <td><input type="text" name="api_key" value="<?php echo esc_attr(get_option('api_key')); ?>" /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><?php _e('API Secret', 'arsol_siya'); ?></th>
+                <td><input type="text" name="api_secret" value="<?php echo esc_attr(get_option('api_secret')); ?>" /></td>
+            </tr>
+        </table>
+        <?php submit_button(); ?>
     </form>
 </div>
-
-<?php
-// API key field callback for RunCloud
-function runcloud_api_key_field() {
-    $api_key = get_option('runcloud_api_key');
-    ?>
-    <input type="text" name="runcloud_api_key" value="<?php echo esc_attr($api_key); ?>" />
-    <?php
-}
-
-// API key field callback for Hetzner
-function hetzner_api_key_field() {
-    $api_key = get_option('hetzner_api_key');
-    ?>
-    <input type="text" name="hetzner_api_key" value="<?php echo esc_attr($api_key); ?>" />
-    <?php
-}
-?>

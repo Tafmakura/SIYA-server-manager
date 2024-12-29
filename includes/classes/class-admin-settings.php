@@ -16,14 +16,14 @@ class AdminSettings {
 
         add_settings_section(
             'api_settings_section', // ID
-            __('API Settings', 'your-text-domain'), // Title
+            __('API Settings', 'arsol_siya'), // Title
             null, // Callback
             'api-settings' // Page
         );
 
         add_settings_field(
             'runcloud_api_key', // ID
-            __('RunCloud API Key', 'your-text-domain'), // Title
+            __('RunCloud API Key', 'arsol_siya'), // Title
             array($this, 'runcloud_api_key_field'), // Callback
             'api-settings', // Page
             'api_settings_section' // Section
@@ -31,7 +31,7 @@ class AdminSettings {
 
         add_settings_field(
             'hetzner_api_key', // ID
-            __('Hetzner API Key', 'your-text-domain'), // Title
+            __('Hetzner API Key', 'arsol_siya'), // Title
             array($this, 'hetzner_api_key_field'), // Callback
             'api-settings', // Page
             'api_settings_section' // Section
