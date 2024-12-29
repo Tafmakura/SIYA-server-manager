@@ -8,23 +8,36 @@ class Setup {
         $this->initialize_hooks();
     }
 
+    /**
+     * Include necessary files.
+     */
     private function include_files() {
-        require_once plugin_dir_path(__DIR__) . '/functions/admin-functions.php';
         require_once plugin_dir_path(__DIR__) . '/functions/logic-functions.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings.php';
     }
 
+    /**
+     * Initialize WordPress hooks.
+     */
     private function initialize_hooks() {
-        // Add any initialization hooks here
         add_action('init', array($this, 'initialize_custom_post_types'));
+        add_action('admin_init', array($this, 'initialize_admin_settings'));
     }
 
+    /**
+     * Initialize custom post types.
+     */
     public function initialize_custom_post_types() {
-        // Initialize custom post types
         if (class_exists('Siya\CustomPostTypes')) {
             new \Siya\CustomPostTypes();
         }
+    }
+
+    /**
+     * Initialize admin settings.
+     */
+    public function initialize_admin_settings() {
         if (class_exists('Siya\AdminSettings')) {
             new \Siya\AdminSettings();
         }
