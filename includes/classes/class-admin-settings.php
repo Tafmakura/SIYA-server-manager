@@ -4,39 +4,7 @@ namespace Siya;
 
 class AdminSettings {
     public function __construct() {
-        add_action('admin_menu', array($this, 'runcloud_settings_menu'));
-        add_action('admin_init', array($this, 'register_api_settings'));
-    }
-
-    /**
-     * Add settings menu to the WordPress admin.
-     */
-    public function runcloud_settings_menu() {
-        add_options_page(
-            'RunCloud and Hetzner Settings',  // Page title
-            'API Settings',                   // Menu title
-            'manage_options',                 // Capability
-            'api-settings',                   // Menu slug
-            array($this, 'runcloud_settings_page') // Callback function
-        );
-    }
-
-    /**
-     * Render the settings page.
-     */
-    public function runcloud_settings_page() {
-        ?>
-        <div class="wrap">
-            <h1><?php _e('RunCloud and Hetzner Settings', 'your-text-domain'); ?></h1>
-            <form method="post" action="options.php">
-                <?php
-                settings_fields('api-settings-group');
-                do_settings_sections('api-settings');
-                submit_button();
-                ?>
-            </form>
-        </div>
-        <?php
+        $this->register_api_settings();
     }
 
     /**
@@ -68,6 +36,24 @@ class AdminSettings {
             'api-settings', // Page
             'api_settings_section' // Section
         );
+    }
+
+    /**
+     * Render the settings page.
+     */
+    public static function runcloud_settings_page() {
+        ?>
+        <div class="wrap">
+            <h1><?php _e('RunCloud and Hetzner Settings', 'your-text-domain'); ?></h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('api-settings-group');
+                do_settings_sections('api-settings');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
     }
 
     /**
