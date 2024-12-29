@@ -40,13 +40,17 @@ class Setup {
      * Initialize admin settings.
      */
     public function initialize_admin_settings() {
-        new AdminSettings();
+        if (class_exists('Siya\AdminSettings')) {
+            new \Siya\AdminSettings();
+        }
     }
 
     /**
      * Initialize admin menus.
      */
     public function initialize_admin_menus() {
-        new AdminMenus();
+        if (class_exists('Siya\AdminMenus')) {
+            new \Siya\AdminMenus();
+        }
     }
 }
