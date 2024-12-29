@@ -7,6 +7,9 @@ class CustomPostTypes {
         $this->create_server_post_type();
     }
 
+    /**
+     * Registers a custom post type for servers.
+     */
     public function create_server_post_type() {
         $labels = array(
             'name'               => _x('Servers', 'post type general name', 'your-text-domain'),
@@ -33,7 +36,7 @@ class CustomPostTypes {
             'has_archive'        => true,
             'hierarchical'       => false,
             'menu_position'      => null,
-            'supports'           => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments')
+            'supports'           => array('title','editor','author','thumbnail','excerpt','comments')
         );
 
         register_post_type('server', $args);
