@@ -42,7 +42,7 @@ class AdminSettings {
      * Render the settings page.
      */
     public static function runcloud_settings_page() {
-        include plugin_dir_path(__DIR__) . '/templates/admin/settings-page.php';
+        include plugin_dir_path(__DIR__) . '../templates/admin/settings-page.php';
     }
 
     /**
