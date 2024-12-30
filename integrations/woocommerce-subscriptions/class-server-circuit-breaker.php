@@ -4,7 +4,7 @@ namespace Siya\Integrations\WoocommerceSubscriptions;
 
 use SIYA\CustomPostTypes\ServerPost;
 
-class CircuitBreaker {
+class ServerCircuitBreaker {
     private $subscription;
     private $server;
     private $max_attempts = 3;

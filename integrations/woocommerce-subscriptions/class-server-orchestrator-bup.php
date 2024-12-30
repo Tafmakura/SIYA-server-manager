@@ -1,13 +1,13 @@
 <?php
 
-namespace Siya\Integrations;
+namespace Siya\Integrations\WoocommerceSubscriptions;
 
 use SIYA\CustomPostTypes\ServerPost;
 use Siya\Integrations\ServerManagers\Runcloud\Runcloud;
 use Siya\Integrations\ServerProviders\Hetzner\Hetzner;
 use Siya\Integrations\WoocommerceSubscriptions\CircuitBreaker;
 
-class WoocommerceSubscriptions {
+class ServerOrchestrator {
    
     const POST_TYPE = 'server';
     const META_PREFIX = 'arsol_server_';
