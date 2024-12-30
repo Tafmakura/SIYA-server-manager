@@ -15,6 +15,7 @@ class Setup {
 
         // Core Classes
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/includes/classes/class-setup-custom-post-types.php';
         
         // Interfaces
         
