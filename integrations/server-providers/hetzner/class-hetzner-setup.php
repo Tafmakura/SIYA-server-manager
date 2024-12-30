@@ -1,6 +1,6 @@
 <?php 
 
-namespace Siya\Integrations\ServerProviders;
+namespace Siya\Integrations\ServerProviders\Hetzner;
 
 use Siya\Interfaces\ServerProviderSetup;
 

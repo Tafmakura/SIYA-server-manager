@@ -2,71 +2,245 @@
 
 namespace SIYA\CustomPostTypes;
 
-class Server {
-
-    private $server_internal_id;
+class ServerPost {
+    const META_PREFIX = 'arsol_server_';
+    private $post_id;
+  
+    private $server_post_name;
+    private $server_post_creation_date;
     private $server_deployed_id;
     private $server_provisioned_id;
-    private $server_name;
+    private $server_subscription_id;
+    private $server_max_applications;
+    private $server_deployed_applications;
+    private $server_max_staging_sites;
+    private $server_deployed_staging_sites;
     private $server_type;
-    private $server_os;
-    private $server_os_version;
-    private $server_region;
+    private $server_provisioned_os;
+    private $server_provisioned_os_version;
+    private $server_provisioned_region;
+    private $server_deployment_manager;
+    private $server_deployed_name;
     private $server_deployed_status;
     private $server_deployed_date;
-    private $server_manager;
+    private $server_provisioning_provider;
+    private $server_provisoned_name;
     private $server_provisoned_status;
     private $server_provisioned_date;
-    private $server_provider;
-    private $server_status;
     private $server_status_date;
-    private $server_ipv4;
-    private $server_ipv6;
-    private $server_size;
-    private $server_image;
+    private $server_provisioned_ipv4;
+    private $server_provisioned_ipv6;
     private $server_backup_enabled;
     private $server_backup_schedule;
     private $server_backup_retention;
-    private $server_monitoring_enabled;
-    private $server_monitoring_interval;
+    private $server_provisioned_root_password;
 
-
-    public function __construct() {
-        $this->register_cpt();
+    public function __construct($post_id) {
+        $this->post_id = $post_id;
+        $this->load_meta_data();
     }
 
-    /**
-     * Registers a custom post type for servers.
-     */
-    public function register_cpt() {
-        $labels = array(
-            'name'               => _x('Servers', 'post type general name', 'your-text-domain'),
-            'singular_name'      => _x('Server', 'post type singular name', 'your-text-domain'),
-            'menu_name'          => _x('Servers', 'admin menu', 'your-text-domain'),
-            'add_new'            => _x('Add New', 'server', 'your-text-domain'),
-            'add_new_item'       => __('Add New Server', 'your-text-domain'),
-            'edit_item'          => __('Edit Server', 'your-text-domain'),
-            'view_item'          => __('View Server', 'your-text-domain'),
-            'all_items'          => __('All Servers', 'your-text-domain'),
-            'search_items'       => __('Search Servers', 'your-text-domain'),
-            'not_found'          => __('No servers found.', 'your-text-domain'),
-            'not_found_in_trash' => __('No servers found in Trash.', 'your-text-domain')
+    private function load_meta_data() {
+        $this->server_post_name = get_post_meta($this->post_id, self::META_PREFIX . 'post_name', true);
+        $this->server_deployed_id = get_post_meta($this->post_id, self::META_PREFIX . 'deployed_id', true);
+        $this->server_provisioned_id = get_post_meta($this->post_id, self::META_PREFIX . 'provisioned_id', true);
+        $this->server_subscription_id = get_post_meta($this->post_id, self::META_PREFIX . 'subscription_id', true);
+        $this->server_max_applications = get_post_meta($this->post_id, self::META_PREFIX . 'max_applications', true);
+        $this->server_deployed_applications = get_post_meta($this->post_id, self::META_PREFIX . 'deployed_applications', true);
+        $this->server_max_staging_sites = get_post_meta($this->post_id, self::META_PREFIX . 'max_staging_sites', true);
+        $this->server_deployed_staging_sites = get_post_meta($this->post_id, self::META_PREFIX . 'deployed_staging_sites', true);
+        $this->server_type = get_post_meta($this->post_id, self::META_PREFIX . 'type', true);
+        $this->server_provisioned_os = get_post_meta($this->post_id, self::META_PREFIX . 'os', true);
+        $this->server_provisioned_os_version = get_post_meta($this->post_id, self::META_PREFIX . 'os_version', true);
+        $this->server_provisioned_region = get_post_meta($this->post_id, self::META_PREFIX . 'region', true);
+        $this->server_deployment_manager = get_post_meta($this->post_id, self::META_PREFIX . 'manager', true);
+        $this->server_deployed_name = get_post_meta($this->post_id, self::META_PREFIX . 'deployed_name', true);
+        $this->server_deployed_status = get_post_meta($this->post_id, self::META_PREFIX . 'deployed_status', true);
+        $this->server_deployed_date = get_post_meta($this->post_id, self::META_PREFIX . 'deployed_date', true);
+        $this->server_provisioning_provider = get_post_meta($this->post_id, self::META_PREFIX . 'provider', true);
+        $this->server_provisoned_name = get_post_meta($this->post_id, self::META_PREFIX . 'provisioned_name', true);
+        $this->server_provisoned_status = get_post_meta($this->post_id, self::META_PREFIX . 'provisioned_status', true);
+        $this->server_provisioned_date = get_post_meta($this->post_id, self::META_PREFIX . 'provisioned_date', true);
+        $this->server_status_date = get_post_meta($this->post_id, self::META_PREFIX . 'status_date', true);
+        $this->server_provisioned_ipv4 = get_post_meta($this->post_id, self::META_PREFIX . 'ipv4', true);
+        $this->server_provisioned_ipv6 = get_post_meta($this->post_id, self::META_PREFIX . 'ipv6', true);
+        $this->server_backup_enabled = get_post_meta($this->post_id, self::META_PREFIX . 'backup_enabled', true);
+        $this->server_backup_schedule = get_post_meta($this->post_id, self::META_PREFIX . 'backup_schedule', true);
+        $this->server_backup_retention = get_post_meta($this->post_id, self::META_PREFIX . 'backup_retention', true);
+        $this->server_provisioned_root_password = get_post_meta($this->post_id, self::META_PREFIX . 'root_password', true);
+    }
+    
+    private function create_server_post($subscription_id) {
+        $post_data = array(
+            'post_title'    => 'Server ' . $subscription_id,
+            'post_status'   => 'publish',
+            'post_type'     => 'server'
         );
+        return wp_insert_post($post_data);
+    }
 
+    public static function get_server_post_id_by_subscription($subscription_id) {
         $args = array(
-            'labels'             => $labels,
-            'public'             => true,
-            'show_ui'            => true,
-            'show_in_menu'       => true,
-            'query_var'          => true,
-            'rewrite'            => array('slug' => 'server', 'with_front' => false),
-            'capability_type'    => 'post',
-            'has_archive'        => true,
-            'hierarchical'       => false,
-            'menu_position'      => null,
-            'supports'           => array('title','editor','author','thumbnail','excerpt','comments')
+            'post_type' => 'server',
+            'meta_query' => array(
+                array(
+                    'key' => self::META_PREFIX . 'subscription_id',
+                    'value' => $subscription_id
+                )
+            )
         );
+        $query = new \WP_Query($args);
+        return $query->posts ? $query->posts[0]->ID : null;
+    }
 
-        register_post_type('server', $args);
+    public static function get_server_post_by_subscription_id($subscription_id) {
+        $server_id = self::get_server_post_id_by_subscription($subscription_id);
+        return $server_id ? self::get_server_post_by_id($server_id) : null;
+    }
+
+    public static function get_server_post_by_id($server_id) {
+        return new self($server_id);
+    }
+
+    public static function get_server_post_by_subscription($subscription_id) {
+        $args = array(
+            'post_type' => 'server',
+            'meta_query' => array(
+                array(
+                    'key' => self::META_PREFIX . 'subscription_id',
+                    'value' => $subscription_id
+                )
+            )
+        );
+        $query = new \WP_Query($args);
+        return $query->posts ? new self($query->posts[0]->ID) : null;
+    }
+
+    public function update_provisioned_server_data($post_id, array $provisioned_data) {
+        $this->post_id = $post_id;
+        
+        $defaults = array(
+            'id' => '',
+            'os' => '',
+            'os_version' => '',
+            'region' => '',
+            'provider' => '',
+            'name' => '',
+            'status' => '',
+            'date' => current_time('mysql'),
+            'ipv4' => '',
+            'ipv6' => '',
+            'root_password' => ''
+        );
+        
+        $data = wp_parse_args($provisioned_data, $defaults);
+        
+        foreach ($data as $key => $value) {
+            update_post_meta($post_id, self::META_PREFIX . $key, sanitize_text_field($value));
+        }
+        
+        return true;
+    }
+
+    public function get_provisioned_server_data($post_id) {
+        $this->post_id = $post_id;
+        
+        $provisioned_data = array(
+            'id' => get_post_meta($post_id, self::META_PREFIX . 'id', true),
+            'os' => get_post_meta($post_id, self::META_PREFIX . 'os', true),
+            'os_version' => get_post_meta($post_id, self::META_PREFIX . 'os_version', true),
+            'region' => get_post_meta($post_id, self::META_PREFIX . 'region', true),
+            'provider' => get_post_meta($post_id, self::META_PREFIX . 'provider', true),
+            'name' => get_post_meta($post_id, self::META_PREFIX . 'name', true),
+            'status' => get_post_meta($post_id, self::META_PREFIX . 'status', true),
+            'date' => get_post_meta($post_id, self::META_PREFIX . 'date', true),
+            'ipv4' => get_post_meta($post_id, self::META_PREFIX . 'ipv4', true),
+            'ipv6' => get_post_meta($post_id, self::META_PREFIX . 'ipv6', true),
+            'root_password' => get_post_meta($post_id, self::META_PREFIX . 'root_password', true)
+        );
+        
+        return array_filter($provisioned_data);
+    }
+
+    public function update_deployed_server_data($post_id, array $deployed_data) {
+        $this->post_id = $post_id;
+        
+        $defaults = array(
+            'deployed_id' => '',
+            'deployed_applications' => 0,
+            'deployed_staging_sites' => 0,
+            'deployment_manager' => '',
+            'deployed_name' => '',
+            'deployed_status' => '',
+            'deployed_date' => current_time('mysql')
+        );
+        
+        $data = wp_parse_args($deployed_data, $defaults);
+        
+        foreach ($data as $key => $value) {
+            update_post_meta($post_id, self::META_PREFIX . $key, sanitize_text_field($value));
+        }
+        
+        return true;
+    }
+
+    public function get_deployed_server_data($post_id) {
+        $this->post_id = $post_id;
+        
+        $deployed_data = array(
+            'deployed_id' => get_post_meta($post_id, self::META_PREFIX . 'deployed_id', true),
+            'deployed_applications' => get_post_meta($post_id, self::META_PREFIX . 'deployed_applications', true),
+            'deployed_staging_sites' => get_post_meta($post_id, self::META_PREFIX . 'deployed_staging_sites', true),
+            'deployment_manager' => get_post_meta($post_id, self::META_PREFIX . 'deployment_manager', true),
+            'deployed_name' => get_post_meta($post_id, self::META_PREFIX . 'deployed_name', true),
+            'deployed_status' => get_post_meta($post_id, self::META_PREFIX . 'deployed_status', true),
+            'deployed_date' => get_post_meta($post_id, self::META_PREFIX . 'deployed_date', true)
+        );
+        
+        return array_filter($deployed_data);
+    }
+
+    public function update_server_post_data($post_id, array $post_data) {
+        $this->post_id = $post_id;
+        
+        $defaults = array(
+            'post_name' => '',
+            'subscription_id' => '',
+            'max_applications' => 0,
+            'max_staging_sites' => 0,
+            'type' => '',
+            'backup_enabled' => false,
+            'backup_schedule' => '',
+            'backup_retention' => 0,
+            'creation_date' => current_time('mysql'),
+            'status_date' => current_time('mysql')
+        );
+        
+        $data = wp_parse_args($post_data, $defaults);
+        
+        foreach ($data as $key => $value) {
+            update_post_meta($post_id, self::META_PREFIX . $key, sanitize_text_field($value));
+        }
+        
+        return true;
+    }
+
+    public function get_server_post_data($post_id) {
+        $this->post_id = $post_id;
+        
+        $post_data = array(
+            'post_name' => get_post_meta($post_id, self::META_PREFIX . 'post_name', true),
+            'subscription_id' => get_post_meta($post_id, self::META_PREFIX . 'subscription_id', true),
+            'max_applications' => get_post_meta($post_id, self::META_PREFIX . 'max_applications', true),
+            'max_staging_sites' => get_post_meta($post_id, self::META_PREFIX . 'max_staging_sites', true),
+            'type' => get_post_meta($post_id, self::META_PREFIX . 'type', true),
+            'backup_enabled' => get_post_meta($post_id, self::META_PREFIX . 'backup_enabled', true),
+            'backup_schedule' => get_post_meta($post_id, self::META_PREFIX . 'backup_schedule', true),
+            'backup_retention' => get_post_meta($post_id, self::META_PREFIX . 'backup_retention', true),
+            'creation_date' => get_post_meta($post_id, self::META_PREFIX . 'creation_date', true),
+            'status_date' => get_post_meta($post_id, self::META_PREFIX . 'status_date', true)
+        );
+        
+        return array_filter($post_data);
     }
 }

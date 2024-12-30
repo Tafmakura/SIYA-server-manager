@@ -1,13 +1,14 @@
 <?php 
 
-Siya\Interfaces;
+namespace Siya\Interfaces;
 
 interface ServerManager {
-    public function setup(); // Must Return ServerManagerSetup class instance use > public function setup(): ClassName ; )
+    public function setup(): ServerManagerSetup; 
     public function deploy_server();
-    public function render_settings_page();
     public function connect_server();
+    public function disconnect_server();
     public function ping_server();
     public function get_server_status();
-    public function disconnect_server();
+    public function create_server_in_server_manager();
+    public function connect_server_manager_to_provisioned_server();
 }

@@ -50,9 +50,6 @@ function provision_and_register_server($subscription_id, $post_id) {
     return $result;
 }
 
-
-
-
 function provision_server_with_hetzner($subscription_id, $post_id) {
     $api_key = get_option('hetzner_api_key');
     $data = array(
@@ -121,18 +118,6 @@ function provision_server_with_hetzner($subscription_id, $post_id) {
 
     return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 function register_server_with_runcloud($subscription_id, $ip_address, $server_name, $post_id) {
     error_log('register_server_with_runcloud called for subscription ID: ' . $subscription_id . ', post ID: ' . $post_id);
@@ -215,12 +200,6 @@ function register_server_with_runcloud($subscription_id, $ip_address, $server_na
 
     return false; // Failure
 }
-
-
-
-
-
-
 
 
 add_action('woocommerce_subscription_status_pending_to_active', 'create_runcloud_server_on_activate', 20, 1);
