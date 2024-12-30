@@ -43,6 +43,10 @@ class Setup {
         add_action('init', array($this, 'initialize_custom_post_types'));
         add_action('admin_init', array($this, 'initialize_admin_settings'));
         add_action('admin_menu', array($this, 'initialize_admin_menus'));
+        
+        // Hook server orchestrator to subscription status changes
+        add_action('woocommerce_subscription_status_active', array($this, 'initialize_server_orchestration'), 10, 1);
+        add_action('woocommerce_subscription_status_processing', array($this, 'initialize_server_orchestration'), 10, 1);
     }
 
     /**
@@ -67,6 +71,13 @@ class Setup {
     public function initialize_admin_menus() {
         if (class_exists('Siya\AdminMenus')) {
             new \Siya\AdminMenus();
+        }
+    }
+
+    public function initialize_server_orchestration($subscription) {
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
+            $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
+            $orchestrator->handle_subscription($subscription);
         }
     }
 }
