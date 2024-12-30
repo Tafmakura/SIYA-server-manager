@@ -16,13 +16,13 @@ class Hetzner implements ServerProvider {
         return new HetznerSetup();
     }
 
-    public function provision_server(string $name, array $config = []) {
+    public function provision_server() {
         $defaults = array(
+            'name' => 'wordpress-' . time(),
             'server_type' => 'cx11',
             'location'    => 'nbg1',
             'image'      => 'ubuntu-20.04'
         );
-
         $server_config = wp_parse_args($config, $defaults);
         
         $response = wp_remote_post($this->api_endpoint . '/servers', [
