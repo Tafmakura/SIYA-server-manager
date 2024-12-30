@@ -34,139 +34,54 @@ class ServerOrchestrator {
         }
 
         // Add hooks for subscription status changes
-        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'create_server_on_activate'), 20, 1);
+        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
         add_action('woocommerce_subscription_status_active', array($this, 'force_on_hold_and_check_server_status'), 10, 1);
     }
 
-    public function create_server_for_subscription($subscription_id) {
-        $post_data = array(
-            'post_title'    => 'Server ' . $subscription_id,
-            'post_status'   => 'publish',
-            'post_type'     => self::POST_TYPE
-        );
-        return wp_insert_post($post_data);
-    }
-
-    public function get_server_by_subscription_id($subscription_id) {
-        $server_id = $this->get_server_id_by_subscription($subscription_id);
-        return $server_id ? ServerPost::get_server_post_by_id($server_id) : null;
-    }
-
-    public function get_server_id_by_subscription($subscription_id) {
-        $args = array(
-            'post_type' => self::POST_TYPE,
-            'meta_query' => array(
-                array(
-                    'key' => self::META_PREFIX . 'subscription_id',
-                    'value' => $subscription_id
-                )
-            )
-        );
-        $query = new \WP_Query($args);
-        return $query->posts ? $query->posts[0]->ID : null;
-    }
-
-    private function provision_and_deploy_server($subscription_id, $post_id) {
-        try {
-            // Step 1: Provision with Hetzner
-            $server_name = 'wp-' . date('y-m-d') . '-' . $subscription_id;
-            $provisioned_server = $this->hetzner->provision_server($server_name);
-            
-            // Step 2: Update post meta with provisioned data
-            update_post_meta($post_id, 'arsol_server_provisioned_id', $provisioned_server['server']['id']);
-            update_post_meta($post_id, 'arsol_server_ipv4', $provisioned_server['server']['public_net']['ipv4']['ip']);
-            
-            // Step 3: Deploy with RunCloud
-            $this->runcloud->deploy_server(
-                $server_name,
-                $provisioned_server['server']['public_net']['ipv4']['ip'],
-                'nginx',
-                'containerized'
-            );
-
-            return true;
-        } catch (\Exception $e) {
-            throw new \Exception('Server provisioning failed: ' . $e->getMessage());
-        }
-    }
-
-    public function create_server_on_activate($subscription) {
+    public function provision_and_deploy_server($subscription) {
+        // Get subscription ID
         $subscription_id = $subscription->get_id();
-        $post_id = get_post_meta($subscription_id, self::META_PREFIX . 'post_id', true);
-        
-        $subscription->add_order_note(
-            __('[create-activate-1] Retrieved server post ID: ' . $post_id . ' for subscription ID: ' . $subscription_id, 'your-text-domain')
-        );
 
-        if (!$post_id) {
-            $subscription->add_order_note(
-                __('[create-activate-2] Creating new server post for subscription ID: ' . $subscription_id, 'your-text-domain')
-            );
+        try {
+            // Step 1: Create server post
+            $server_post = new ServerPost();
+            $post_id = $server_post->create_server_post($subscription_id);
+            $subscription->add_order_note('Server post created successfully');
 
-            $post_id = $this->create_server_for_subscription($subscription_id);
-            
-            if (is_wp_error($post_id)) {
-                $subscription->add_order_note(
-                    __('[create-activate-3] Failed to create server post. Error: ' . $post_id->get_error_message(), 'your-text-domain')
-                );
-                return;
+            // Step 2: Provision Hetzner server
+            $server_data = $this->hetzner->provision_server();
+            if (!$server_data) {
+                throw new \Exception('Failed to provision Hetzner server');
             }
+            $subscription->add_order_note(sprintf(
+                'Hetzner server provisioned successfully. IP: %s', 
+                $server_data['server']['public_net']['ipv4']['ip']
+            ));
 
-            $subscription->add_order_note(
-                __('[create-activate-4] Successfully created server post with ID: ' . $post_id, 'your-text-domain')
+            // Step 3: Deploy to RunCloud
+            $deploy_result = $this->runcloud->deploy_server(
+                'wordpress-' . $subscription_id,
+                $server_data['server']['public_net']['ipv4']['ip']
             );
-
-            update_post_meta($post_id, self::META_PREFIX . 'deployed', 0);
-            update_post_meta($post_id, self::META_PREFIX . 'connected', 0);
-            update_post_meta($subscription_id, self::META_PREFIX . 'post_id', $post_id);
-            update_post_meta($post_id, self::META_PREFIX . 'subscription_id', $subscription_id);
-
-            $subscription->add_order_note(
-                __('[create-activate-5] Successfully created server entity.', 'your-text-domain')
-            );
-        } else {
-            $subscription->add_order_note(
-                __('[create-activate-6] Server post already exists for subscription ID: ' . $subscription_id, 'your-text-domain')
-            );
-        }
-
-        $server_deployed = get_post_meta($post_id, self::META_PREFIX . 'deployed', true);
-        $server_connected = get_post_meta($post_id, self::META_PREFIX . 'connected', true);
-
-        $subscription->add_order_note(
-            __('[create-activate-7] Server deployed: ' . $server_deployed . ', server connected: ' . $server_connected, 'your-text-domain')
-        );
-
-        if ($server_deployed != 1 || $server_connected != 1) {
-            try {
-                $this->provision_and_deploy_server($subscription_id, $post_id);
-
-                update_post_meta($post_id, self::META_PREFIX . 'deployed', 1);
-                update_post_meta($post_id, self::META_PREFIX . 'connected', 1);
-
-                $subscription->add_order_note(
-                    __('[create-activate-9] Successfully provisioned and registered server.', 'your-text-domain')
-                );
-            } catch (\Exception $e) {
-                $subscription->add_order_note(
-                    __('[create-activate-8] Failed to provision and register server: ' . $e->getMessage(), 'your-text-domain')
-                );
-                $subscription->update_status('on-hold');
+            if (!$deploy_result) {
+                throw new \Exception('Failed to deploy server to RunCloud');
             }
-        } else {
-            $subscription->add_order_note(
-                __('[create-activate-10] Server already deployed and connected.', 'your-text-domain')
-            );
-        }
+            $subscription->add_order_note('Server deployed successfully to RunCloud');
 
-        $parent_order = $subscription->get_parent();
-        if ($parent_order) {
-            $parent_order->update_status('completed');
+            // Step 4: Update server post meta
+            $server_post->update_provisioned_server_data($post_id, [
+                'id' => $server_data['server']['id'],
+                'ipv4' => $server_data['server']['public_net']['ipv4']['ip'],
+                'ipv6' => $server_data['server']['public_net']['ipv6']['ip'],
+                'status' => $server_data['server']['status']
+            ]);
+
+        } catch (\Exception $e) {
+            $subscription->add_order_note('Error: ' . $e->getMessage());
+            $subscription->update_status('on-hold');
         }
     }
 
-    public function force_on_hold_and_check_server_status($subscription_id) {
-        $circuit_breaker = new CircuitBreaker($subscription_id);
-        $circuit_breaker->force_on_hold_and_check_server_status();
-    }
 }
+
+
