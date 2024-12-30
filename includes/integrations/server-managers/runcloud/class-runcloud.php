@@ -4,7 +4,7 @@ namespace Siya\Integrations\ServerManagers\Runcloud;
 
 use Siya\Interfaces\ServerManager;
 
-class Runcloud implements ServerManager {
+class Runcloud /*implements ServerManager*/ {
     private $api_key;
     private $api_endpoint = 'https://manage.runcloud.io/api/v3';
 

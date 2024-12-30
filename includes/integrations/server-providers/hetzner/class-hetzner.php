@@ -4,7 +4,7 @@ namespace Siya\Integrations\ServerProviders\Hetzner;
 
 use Siya\Interfaces\ServerProvider;
 
-class Hetzner implements ServerProvider {
+class Hetzner /*implements ServerProvider*/ {
     private $api_key;
     private $api_endpoint = 'https://api.hetzner.cloud/v1';
 
