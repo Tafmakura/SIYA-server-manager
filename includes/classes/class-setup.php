@@ -33,10 +33,6 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/integrations/server-managers/runcloud/class-runcloud-setup.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
-
-        // Admin
-        require_once plugin_dir_path(__DIR__) . '/admin/class-admin-settings.php';
-        require_once plugin_dir_path(__DIR__) . '/admin/class-admin-menus.php';
     }
 
     /**
