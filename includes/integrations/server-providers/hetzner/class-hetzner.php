@@ -17,13 +17,19 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function provision_server() {
+        $server_name = get_post_meta(get_the_ID(), 'arsol_server_post_name', true);
+        
+        if (empty($server_name)) {
+            throw new \Exception('Server name not found in post meta');
+        }
+
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'name' => 'wordpress-' . time(),
+                'name' => $server_name,
                 'server_type' => 'cx22',
                 'location' => 'nbg1',
                 'image' => 'ubuntu-20.04'
