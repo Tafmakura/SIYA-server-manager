@@ -16,7 +16,7 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    public function provision_server($server_namel) {
+    public function provision_server($server_name) {
      
         if (empty($server_name)) {
             throw new \Exception('Server name required');

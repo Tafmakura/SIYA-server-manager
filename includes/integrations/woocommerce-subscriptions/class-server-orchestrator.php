@@ -89,7 +89,6 @@ class ServerOrchestrator {
                 throw new \Exception($error_message);
             }
             $server = $server_data['server'];
-            $server_name = get_post_meta($post_id, 'arsol_server_post_name', true);
             $success_message = sprintf(
                 "Hetzner server provisioned successfully! %s" .
                 "Server Name: %s%s" .
