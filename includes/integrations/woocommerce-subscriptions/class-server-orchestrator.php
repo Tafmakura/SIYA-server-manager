@@ -52,13 +52,13 @@ class ServerOrchestrator {
 
     public function provision_and_deploy_server($subscription) {
         $subscription_id = $this->subscription_id;
-
+    
         try {
             // Step 1: Create server post
             $server_post = new ServerPost();
             $server_name = 'ARSOL' . $subscription_id;
             $post_id = $server_post->create_server_post($subscription_id);
-
+    
             // Step 2: Update server post meta
             $server_post->update_meta_data($post_id, [
                 'arsol_server_post_name' => $server_name,
@@ -66,7 +66,7 @@ class ServerOrchestrator {
                 'arsol_server_subscription_id' => $subscription_id,
                 'arsol_server_status' => 'pending'
             ]);
-
+    
             $subscription->add_order_note(
                 sprintf(
                     'Server post created successfully.%sPost ID: %d%sServer Name: %s',
@@ -76,7 +76,7 @@ class ServerOrchestrator {
                     $server_name
                 )
             );
-
+    
             // Step 3: Provision Hetzner server
             $server_data = $this->hetzner->provision_server($server_name);
             if (!$server_data) {
@@ -104,7 +104,7 @@ class ServerOrchestrator {
                 $server['datacenter']['location']['name']
             );
             $subscription->add_order_note($success_message);
-
+    
             // Step 4: Update server post metadata
             $metadata = [
                 'arsol_server_provider' => 'hetzner',
@@ -117,27 +117,27 @@ class ServerOrchestrator {
                 'arsol_server_server_type' => $server['server_type']['name'],
                 'arsol_server_created_date' => $server['created']
             ];
-            
+    
             $server_post->update_meta_data($post_id, $metadata);
             $subscription->add_order_note(sprintf(
                 "Server metadata updated successfully:%s%s",
                 PHP_EOL,
                 print_r($metadata, true)
             ));
-
+    
             // Step 5: Deploy to RunCloud
             error_log(sprintf('[SIYA Server Manager] Step 5: Starting deployment to RunCloud for subscription %d', $subscription_id));
             $web_server_type = 'nginx';
             $installation_type = 'native';
             $provider = get_post_meta($post_id, 'arsol_server_provider', true);
-
+    
             // Get server name from meta
             $server_name = get_post_meta($post_id, 'arsol_server_post_name', true);
             if (empty($server_name)) {
                 $server_name = 'ARSOL' . $subscription_id;
                 update_post_meta($post_id, 'arsol_server_post_name', $server_name);
             }
-
+    
             // Update request body with server name from meta
             $deploy_result = $this->runcloud->deploy_server(
                 $server_name,
@@ -146,35 +146,38 @@ class ServerOrchestrator {
                 $installation_type,
                 $provider
             );
-
+    
             // Log the full response regardless of success or failure
             $response_body = $this->runcloud->get_last_response();
             $formatted_response = json_encode($response_body, JSON_PRETTY_PRINT);
-
+    
             if (!$deploy_result) {
                 $error_message = sprintf(
                     "Failed to deploy server to RunCloud%s%s" .
                     "Full API Response:%s%s",
                     PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
                 );
+                $subscription->add_order_note($error_message);
+                $subscription->add_subscription_note($error_message);
                 throw new \Exception($error_message);
             }
-
+    
             $success_message = sprintf(
                 "RunCloud deployment successful!%s%s" .
                 "Full API Response:%s%s",
                 PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
             );
             $subscription->add_order_note($success_message);
-
+            $subscription->add_subscription_note($success_message);
+    
             // Update server metadata with RunCloud deployment details
             $server_post->update_meta_data($post_id, [
                 'arsol_server_runcloud_server_id' => $deploy_result['id'] ?? null,
                 'arsol_server_deployment_date' => current_time('mysql')
             ]);
-
+    
             error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
-
+    
         } catch (\Exception $e) {
             // Log the full error message
             error_log(sprintf(
@@ -183,17 +186,22 @@ class ServerOrchestrator {
                 PHP_EOL,
                 $e->getMessage()
             ));
-            
+    
             // Add detailed note to subscription
             $subscription->add_order_note(sprintf(
                 "Error occurred during server provisioning:%s%s",
                 PHP_EOL,
                 $e->getMessage()
             ));
-            
+            $subscription->add_subscription_note(sprintf(
+                "Error occurred during server provisioning:%s%s",
+                PHP_EOL,
+                $e->getMessage()
+            ));
+    
             $subscription->update_status('on-hold');
         }
-    }
+    }    
 
 }
 

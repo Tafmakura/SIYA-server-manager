@@ -81,30 +81,23 @@ class Runcloud /*implements ServerManager*/ {
             error_log('RunCloud API Error: ' . $response->get_error_message());
             return new \WP_Error('api_request_failed', 'API request failed: ' . $response->get_error_message());
         }
-
-
+        
         $response_body = wp_remote_retrieve_body($response);
-        error_log('RunCloud API Response Body: ' . var_export($response_body, true));
-
-        /*
         $status_code = wp_remote_retrieve_response_code($response);
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-
-        error_log('[1] RunCloud API Response Status: ' . $status_code);
-        error_log('[2] RunCloud API Response Body: ' . print_r($body, true));
-
-        error_log('[3] RunCloud API Response Body: ' . var_export($response, true));
-        */
-
+        $body = json_decode($response_body, true);
+        
+        error_log('RunCloud API Response Body: ' . var_export($body, true));
+        
         if ($status_code !== 201 && $status_code !== 200) {
-            $error_message = isset($body['message']) ? $body['message'] : 'Server creation failed';
-            $error_details = isset($body['errors']) ? $body['errors'] : [];
+            $error_message = $body['message'] ?? 'Server creation failed';
+            $error_details = $body['errors'] ?? [];
             
             return new \WP_Error('deployment_failed', $error_message, [
                 'status' => $status_code,
                 'error_details' => $error_details
             ]);
         }
+        
 
         $server_id = isset($body['data']['id']) ? $body['data']['id'] : $body['id'];
         if (empty($server_id)) {
