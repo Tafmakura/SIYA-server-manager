@@ -47,7 +47,7 @@ class ServerOrchestrator {
             // Step 1: Create server post
             $server_post = new ServerPost();
             $post_id = $server_post->create_server_post($subscription_id);
-            $subscription->add_order_note('Server post created successfully. Post ID: ' . $post_id);
+            $subscription->add_order_note('Server post created successfully.' . PHP_EOL . 'Post ID: ' . $post_id);
 
             // Step 2: Provision Hetzner server
             $server_data = $this->hetzner->provision_server();
@@ -55,17 +55,22 @@ class ServerOrchestrator {
                 $error_response = $this->hetzner->get_last_response();
                 $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
                 $error_message = sprintf(
-                    "Failed to provision Hetzner server\nAPI Response:\n%s",
-                    $error_body
+                    "Failed to provision Hetzner server%s%sAPI Response:%s%s",
+                    PHP_EOL, PHP_EOL, PHP_EOL, $error_body
                 );
                 throw new \Exception($error_message);
             }
             $server = $server_data['server'];
             $success_message = sprintf(
-                'Hetzner server provisioned successfully! ✓\nIP: %s\nCreated: %s\nServer Type: %s\nLocation: %s',
-                $server['public_net']['ipv4']['ip'],
-                $server['created'],
-                $server['server_type']['name'],
+                "Hetzner server provisioned successfully! ✓%s" .
+                "IP: %s%s" .
+                "Created: %s%s" .
+                "Server Type: %s%s" .
+                "Location: %s",
+                PHP_EOL,
+                $server['public_net']['ipv4']['ip'], PHP_EOL,
+                $server['created'], PHP_EOL,
+                $server['server_type']['name'], PHP_EOL,
                 $server['datacenter']['location']['name']
             );
             $subscription->add_order_note($success_message);
@@ -79,13 +84,14 @@ class ServerOrchestrator {
                 $error_response = $this->runcloud->get_last_response();
                 $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
                 $error_message = sprintf(
-                    "Failed to deploy server to RunCloud\nAPI Response:\n%s",
-                    $error_body
+                    "Failed to deploy server to RunCloud%s%sAPI Response:%s%s",
+                    PHP_EOL, PHP_EOL, PHP_EOL, $error_body
                 );
                 throw new \Exception($error_message);
             }
             $subscription->add_order_note(sprintf(
-                'RunCloud deployment response: %s',
+                "RunCloud deployment response:%s%s",
+                PHP_EOL,
                 print_r($deploy_result, true)
             ));
 
@@ -98,21 +104,24 @@ class ServerOrchestrator {
             ];
             $server_post->update_provisioned_server_data($post_id, $server_meta);
             $subscription->add_order_note(sprintf(
-                'Server post meta updated with: %s',
+                "Server post meta updated with:%s%s",
+                PHP_EOL,
                 print_r($server_meta, true)
             ));
 
         } catch (\Exception $e) {
             // Log the full error message
             error_log(sprintf(
-                '[SIYA Server Manager] Error in subscription %d: %s',
+                '[SIYA Server Manager] Error in subscription %d:%s%s',
                 $subscription_id,
+                PHP_EOL,
                 $e->getMessage()
             ));
             
             // Add detailed note to subscription
             $subscription->add_order_note(sprintf(
-                "Error occurred during server provisioning:\n%s",
+                "Error occurred during server provisioning:%s%s",
+                PHP_EOL,
                 $e->getMessage()
             ));
             
