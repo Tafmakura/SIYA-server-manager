@@ -23,10 +23,7 @@ class Hetzner /*implements ServerProvider*/ {
 
         $server_name = get_post_meta($post_id, 'arsol_server_post_name', true);
         
-        if (empty($server_name)) {
-            throw new \Exception('Server name not found in post meta for post ID: ' . $post_id);
-        }
-
+ 
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
