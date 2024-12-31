@@ -25,18 +25,12 @@ class Runcloud /*implements ServerManager*/ {
         string $installationType,
         ?string $provider = null
     ) {
-        // Get name from post meta
-        $server_name = get_post_meta(get_the_ID(), 'arsol_server_post_name', true);
-        if (empty($server_name)) {
-            throw new \InvalidArgumentException('Server name not found in post meta');
-        }
-
-        if (empty($ipAddress) || empty($webServerType) || empty($installationType)) {
-            throw new \InvalidArgumentException('IP Address, Web Server Type and Installation Type are required');
+        if (empty($name) || empty($ipAddress) || empty($webServerType) || empty($installationType)) {
+            throw new \InvalidArgumentException('Name, IP Address, Web Server Type and Installation Type are required');
         }
 
         // Step 1: Create server in RunCloud
-        $create_response = $this->create_server_in_server_manager($server_name, $ipAddress, $webServerType, $installationType, $provider);
+        $create_response = $this->create_server_in_server_manager($name, $ipAddress, $webServerType, $installationType, $provider);
         
         if (is_wp_error($create_response)) {
             throw new \Exception('Failed to deploy server in RunCloud: ' . $create_response->get_error_message());
