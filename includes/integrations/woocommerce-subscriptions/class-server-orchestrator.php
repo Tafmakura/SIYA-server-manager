@@ -41,14 +41,13 @@ class ServerOrchestrator {
     }
 
     public function provision_and_deploy_server($subscription) {
-        // Get subscription ID
         $subscription_id = $subscription->get_id();
 
         try {
             // Step 1: Create server post
             $server_post = new ServerPost();
             $post_id = $server_post->create_server_post($subscription_id);
-            $subscription->add_order_note('Server post created successfully');
+            $subscription->add_order_note('Server post created successfully. Post ID: ' . $post_id);
 
             // Step 2: Provision Hetzner server
             $server_data = $this->hetzner->provision_server();
@@ -56,8 +55,8 @@ class ServerOrchestrator {
                 throw new \Exception('Failed to provision Hetzner server');
             }
             $subscription->add_order_note(sprintf(
-                'Hetzner server provisioned successfully. IP: %s', 
-                $server_data['server']['public_net']['ipv4']['ip']
+                'Hetzner server provisioning response: %s', 
+                print_r($server_data, true)
             ));
 
             // Step 3: Deploy to RunCloud
@@ -68,15 +67,23 @@ class ServerOrchestrator {
             if (!$deploy_result) {
                 throw new \Exception('Failed to deploy server to RunCloud');
             }
-            $subscription->add_order_note('Server deployed successfully to RunCloud');
+            $subscription->add_order_note(sprintf(
+                'RunCloud deployment response: %s',
+                print_r($deploy_result, true)
+            ));
 
             // Step 4: Update server post meta
-            $server_post->update_provisioned_server_data($post_id, [
+            $server_meta = [
                 'id' => $server_data['server']['id'],
                 'ipv4' => $server_data['server']['public_net']['ipv4']['ip'],
                 'ipv6' => $server_data['server']['public_net']['ipv6']['ip'],
                 'status' => $server_data['server']['status']
-            ]);
+            ];
+            $server_post->update_provisioned_server_data($post_id, $server_meta);
+            $subscription->add_order_note(sprintf(
+                'Server post meta updated with: %s',
+                print_r($server_meta, true)
+            ));
 
         } catch (\Exception $e) {
             $subscription->add_order_note('Error: ' . $e->getMessage());
