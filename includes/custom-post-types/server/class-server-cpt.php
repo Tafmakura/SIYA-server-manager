@@ -35,7 +35,7 @@ class ServerPost {
     private $server_backup_retention;
     private $server_provisioned_root_password;
 
-    public function __construct($post_id) {
+    public function __construct() {
         $this->post_id = $post_id;
         $this->load_meta_data();
     }
