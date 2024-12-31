@@ -83,7 +83,6 @@ class ServerOrchestrator {
                 'server_id' => $server['id'],
                 'ipv4' => $server['public_net']['ipv4']['ip'],
                 'ipv6' => $server['public_net']['ipv6']['ip'],
-                'status' => $server['status'],
                 'location' => $server['datacenter']['location']['name'],
                 'server_type' => $server['server_type']['name'],
                 'created_date' => $server['created']
