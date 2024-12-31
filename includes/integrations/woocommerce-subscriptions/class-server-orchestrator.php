@@ -33,7 +33,7 @@ class ServerOrchestrator {
         $this->runcloud = new Runcloud();
         $this->hetzner = new Hetzner();
         
-        if ($this->$subscription_id) {
+        if ($this->subscription_id) {
             error_log('[SIYA Server Manager] Checking for existing server');
             $server = $this->get_server_by_subscription_id($subscription_id);
             if ($server) {
