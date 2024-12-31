@@ -12,6 +12,7 @@ class ServerOrchestrator {
     const POST_TYPE = 'server';
     const META_PREFIX = 'arsol_server_';
 
+    private $subscription;
     private $subscription_id;
     public $server_provider;
     public $server_manager;
@@ -19,8 +20,9 @@ class ServerOrchestrator {
     private $runcloud;
     private $hetzner;
 
-    public function __construct($subscription_id) {
-        $this->subscription_id = $subscription_id;
+    public function __construct($subscription) {
+        $this->subscription = $subscription;
+        $this->subscription_id = $subscription->get_id();
         $this->runcloud = new Runcloud();
         $this->hetzner = new Hetzner();
         
