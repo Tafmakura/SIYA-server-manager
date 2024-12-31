@@ -24,7 +24,7 @@ class Hetzner /*implements ServerProvider*/ {
             ],
             'body' => json_encode([
                 'name' => 'wordpress-' . time(),
-                'server_type' => 'cx11',
+                'server_type' => 'cx22',
                 'location' => 'nbg1',
                 'image' => 'ubuntu-20.04'
             ])
