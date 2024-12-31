@@ -31,14 +31,14 @@ class Runcloud /*implements ServerManager*/ {
         $create_response = $this->create_server_in_server_manager($name, $ipAddress, $webServerType, $installationType, $provider);
         
         if (is_wp_error($create_response)) {
-            throw new \Exception('Failed to create server: ' . $create_response->get_error_message());
+            throw new \Exception('Failed to deploy server in RunCloud: ' . $create_response->get_error_message());
         }
 
         // Step 2: Connect server to server manager
         $connection_response = $this->connect_server_manager_to_provisioned_server($create_response['data']['id'], $ipAddress);
         
         if (is_wp_error($connection_response)) {
-            throw new \Exception('Failed to connect server: ' . $connection_response->get_error_message());
+            throw new \Exception('Failed to connect server in RunCloud: ' . $connection_response->get_error_message());
         }
 
         return $create_response;
