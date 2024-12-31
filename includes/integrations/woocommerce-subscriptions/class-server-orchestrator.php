@@ -26,7 +26,7 @@ class ServerOrchestrator {
         $this->runcloud = new Runcloud();
         $this->hetzner = new Hetzner();
         
-        if ($subscription_id) {
+        if ($this->$subscription_id) {
             $server = $this->get_server_by_subscription_id($subscription_id);
             if ($server) {
                 $this->server_provider = get_post_meta($server->ID, 'arsol_server_provider', true);
