@@ -52,7 +52,13 @@ class ServerOrchestrator {
             // Step 2: Provision Hetzner server
             $server_data = $this->hetzner->provision_server();
             if (!$server_data) {
-                throw new \Exception('Failed to provision Hetzner server');
+                $error_response = $this->hetzner->get_last_response();
+                $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
+                $error_message = sprintf(
+                    "Failed to provision Hetzner server\nAPI Response:\n%s",
+                    $error_body
+                );
+                throw new \Exception($error_message);
             }
             $server = $server_data['server'];
             $success_message = sprintf(
@@ -70,7 +76,13 @@ class ServerOrchestrator {
                 $server_data['server']['public_net']['ipv4']['ip']
             );
             if (!$deploy_result) {
-                throw new \Exception('Failed to deploy server to RunCloud');
+                $error_response = $this->runcloud->get_last_response();
+                $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
+                $error_message = sprintf(
+                    "Failed to deploy server to RunCloud\nAPI Response:\n%s",
+                    $error_body
+                );
+                throw new \Exception($error_message);
             }
             $subscription->add_order_note(sprintf(
                 'RunCloud deployment response: %s',
@@ -91,7 +103,19 @@ class ServerOrchestrator {
             ));
 
         } catch (\Exception $e) {
-            $subscription->add_order_note('Error: ' . $e->getMessage());
+            // Log the full error message
+            error_log(sprintf(
+                '[SIYA Server Manager] Error in subscription %d: %s',
+                $subscription_id,
+                $e->getMessage()
+            ));
+            
+            // Add detailed note to subscription
+            $subscription->add_order_note(sprintf(
+                "Error occurred during server provisioning:\n%s",
+                $e->getMessage()
+            ));
+            
             $subscription->update_status('on-hold');
         }
     }
