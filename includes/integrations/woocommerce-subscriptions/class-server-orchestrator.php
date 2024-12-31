@@ -41,12 +41,12 @@ class ServerOrchestrator {
     }
 
     public function provision_and_deploy_server($subscription) {
-        $subscription_id = $subscription->get_id();
+        $subscription_id = $this->subscription_id;
 
         try {
             // Step 1: Create server post
             $server_post = new ServerPost();
-            $server_name = 'wordpress-' . $subscription_id;
+            $server_name = 'ARSOL' . $subscription_id;
             $post_id = $server_post->create_server_post($subscription_id);
 
             // Step 2: Update server post meta
@@ -128,20 +128,32 @@ class ServerOrchestrator {
                 $installation_type,
                 $provider
             );
+
+            // Log the full response regardless of success or failure
+            $response_body = $this->runcloud->get_last_response();
+            $formatted_response = json_encode($response_body, JSON_PRETTY_PRINT);
+
             if (!$deploy_result) {
-                $error_response = $this->runcloud->get_last_response();
-                $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
                 $error_message = sprintf(
-                    "Failed to deploy server to RunCloud%s%sAPI Response:%s%s",
-                    PHP_EOL, PHP_EOL, PHP_EOL, $error_body
+                    "Failed to deploy server to RunCloud%s%s" .
+                    "Full API Response:%s%s",
+                    PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
                 );
                 throw new \Exception($error_message);
             }
-            $subscription->add_order_note(sprintf(
-                "RunCloud deployment response:%s%s",
-                PHP_EOL,
-                print_r($deploy_result, true)
-            ));
+
+            $success_message = sprintf(
+                "RunCloud deployment successful!%s%s" .
+                "Full API Response:%s%s",
+                PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
+            );
+            $subscription->add_order_note($success_message);
+
+            // Update server metadata with RunCloud deployment details
+            $server_post->update_meta_data($post_id, [
+                self::META_PREFIX . 'runcloud_server_id' => $deploy_result['id'] ?? null,
+                self::META_PREFIX . 'deployment_date' => current_time('mysql')
+            ]);
 
         } catch (\Exception $e) {
             // Log the full error message
