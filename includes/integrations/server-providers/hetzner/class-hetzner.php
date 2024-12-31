@@ -16,14 +16,8 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    public function provision_server($post_id = null) {
-        if (!$post_id) {
-            throw new \Exception('Post ID is required to provision server');
-        }
-
-        $server_name = get_post_meta($post_id, 'arsol_server_post_name', true);
-        
- 
+    public function provision_server() {
+    
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
