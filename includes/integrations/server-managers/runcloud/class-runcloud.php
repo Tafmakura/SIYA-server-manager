@@ -19,17 +19,13 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function deploy_server(
-        string $name,
+        string $server_name,
         string $ipAddress,
         string $webServerType,
         string $installationType,
         ?string $provider = null
     ) {
         // Get name from post meta
-        $server_name = get_post_meta(get_the_ID(), 'arsol_server_post_name', true);
-        if (empty($server_name)) {
-            throw new \InvalidArgumentException('Server name not found in post meta');
-        }
 
         if (empty($ipAddress) || empty($webServerType) || empty($installationType)) {
             throw new \InvalidArgumentException('IP Address, Web Server Type and Installation Type are required');
