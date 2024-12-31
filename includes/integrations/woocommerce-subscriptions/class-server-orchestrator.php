@@ -46,10 +46,28 @@ class ServerOrchestrator {
         try {
             // Step 1: Create server post
             $server_post = new ServerPost();
+            $server_name = 'wordpress-' . $subscription_id;
             $post_id = $server_post->create_server_post($subscription_id);
-            $subscription->add_order_note('Server post created successfully.' . PHP_EOL . 'Post ID: ' . $post_id);
 
-            // Step 2: Provision Hetzner server
+            // Step 2: Update server post meta
+            $server_post->update_meta_data($post_id, [
+                self::META_PREFIX . 'post_name' => $server_name,
+                self::META_PREFIX . 'post_creation_date' => current_time('mysql'),
+                self::META_PREFIX . 'subscription_id' => $subscription_id,
+                self::META_PREFIX . 'status' => 'pending'
+            ]);
+
+            $subscription->add_order_note(
+                sprintf(
+                    'Server post created successfully.%sPost ID: %d%sServer Name: %s',
+                    PHP_EOL,
+                    $post_id,
+                    PHP_EOL,
+                    $server_name
+                )
+            );
+
+            // Step 3: Provision Hetzner server
             $server_data = $this->hetzner->provision_server();
             if (!$server_data) {
                 $error_response = $this->hetzner->get_last_response();
@@ -61,13 +79,16 @@ class ServerOrchestrator {
                 throw new \Exception($error_message);
             }
             $server = $server_data['server'];
+            $server_name = get_post_meta($post_id, self::META_PREFIX . 'post_name', true);
             $success_message = sprintf(
-                "Hetzner server provisioned successfully! ✓%s" .
+                "Hetzner server provisioned successfully! %s" .
+                "Server Name: %s%s" .
                 "IP: %s%s" .
                 "Created: %s%s" .
                 "Server Type: %s%s" .
                 "Location: %s",
                 PHP_EOL,
+                $server_name, PHP_EOL,
                 $server['public_net']['ipv4']['ip'], PHP_EOL,
                 $server['created'], PHP_EOL,
                 $server['server_type']['name'], PHP_EOL,
@@ -75,17 +96,17 @@ class ServerOrchestrator {
             );
             $subscription->add_order_note($success_message);
 
-            // Step 3: Update server post metadata
+            // Step 4: Update server post metadata
             $metadata = [
-                'provider' => 'hetzner',
-                'manager' => 'runcloud',
-                'plan_identifier' => $this->server_plan_identifier,
-                'server_id' => $server['id'],
-                'ipv4' => $server['public_net']['ipv4']['ip'],
-                'ipv6' => $server['public_net']['ipv6']['ip'],
-                'location' => $server['datacenter']['location']['name'],
-                'server_type' => $server['server_type']['name'],
-                'created_date' => $server['created']
+                self::META_PREFIX . 'provider' => 'hetzner',
+                self::META_PREFIX . 'manager' => 'runcloud',
+                self::META_PREFIX . 'plan_identifier' => $this->server_plan_identifier,
+                self::META_PREFIX . 'server_id' => $server['id'],
+                self::META_PREFIX . 'ipv4' => $server['public_net']['ipv4']['ip'],
+                self::META_PREFIX . 'ipv6' => $server['public_net']['ipv6']['ip'],
+                self::META_PREFIX . 'location' => $server['datacenter']['location']['name'],
+                self::META_PREFIX . 'server_type' => $server['server_type']['name'],
+                self::META_PREFIX . 'created_date' => $server['created']
             ];
             
             $server_post->update_meta_data($post_id, $metadata);
@@ -95,10 +116,17 @@ class ServerOrchestrator {
                 print_r($metadata, true)
             ));
 
-            // Step 4: Deploy to RunCloud
+            // Step 5: Deploy to RunCloud
+            $web_server_type = 'nginx';
+            $installation_type = 'native';
+            $provider = get_post_meta($post_id, self::META_PREFIX . 'provider', true);
+
             $deploy_result = $this->runcloud->deploy_server(
                 'wordpress-' . $subscription_id,
-                $server['public_net']['ipv4']['ip']
+                $server['public_net']['ipv4']['ip'],
+                $web_server_type,
+                $installation_type,
+                $provider
             );
             if (!$deploy_result) {
                 $error_response = $this->runcloud->get_last_response();

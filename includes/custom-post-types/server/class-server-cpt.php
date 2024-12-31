@@ -116,6 +116,7 @@ class ServerPost {
         $this->post_id = $post_id;
         
         $defaults = array(
+            'post_name' => '',
             'subscription_id' => '',
             'provisioned_id' => '',
             'provisioned_os' => '',
