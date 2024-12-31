@@ -29,9 +29,9 @@ class ServerOrchestrator {
         if ($subscription_id) {
             $server = $this->get_server_by_subscription_id($subscription_id);
             if ($server) {
-                $this->server_provider = get_post_meta($server->ID, self::META_PREFIX . 'provider', true);
-                $this->server_manager = get_post_meta($server->ID, self::META_PREFIX . 'manager', true);
-                $this->server_plan_identifier = get_post_meta($server->ID, self::META_PREFIX . 'plan_identifier', true);
+                $this->server_provider = get_post_meta($server->ID, 'arsol_server_provider', true);
+                $this->server_manager = get_post_meta($server->ID, 'arsol_server_manager', true);
+                $this->server_plan_identifier = get_post_meta($server->ID, 'arsol_server_plan_identifier', true);
             }
         }
 
@@ -51,10 +51,10 @@ class ServerOrchestrator {
 
             // Step 2: Update server post meta
             $server_post->update_meta_data($post_id, [
-                self::META_PREFIX . 'post_name' => $server_name,
-                self::META_PREFIX . 'post_creation_date' => current_time('mysql'),
-                self::META_PREFIX . 'subscription_id' => $subscription_id,
-                self::META_PREFIX . 'status' => 'pending'
+                'arsol_server_post_name' => $server_name,
+                'arsol_server_post_creation_date' => current_time('mysql'),
+                'arsol_server_subscription_id' => $subscription_id,
+                'arsol_server_status' => 'pending'
             ]);
 
             $subscription->add_order_note(
@@ -79,7 +79,7 @@ class ServerOrchestrator {
                 throw new \Exception($error_message);
             }
             $server = $server_data['server'];
-            $server_name = get_post_meta($post_id, self::META_PREFIX . 'post_name', true);
+            $server_name = get_post_meta($post_id, 'arsol_server_post_name', true);
             $success_message = sprintf(
                 "Hetzner server provisioned successfully! %s" .
                 "Server Name: %s%s" .
@@ -98,15 +98,15 @@ class ServerOrchestrator {
 
             // Step 4: Update server post metadata
             $metadata = [
-                self::META_PREFIX . 'provider' => 'hetzner',
-                self::META_PREFIX . 'manager' => 'runcloud',
-                self::META_PREFIX . 'plan_identifier' => $this->server_plan_identifier,
-                self::META_PREFIX . 'server_id' => $server['id'],
-                self::META_PREFIX . 'ipv4' => $server['public_net']['ipv4']['ip'],
-                self::META_PREFIX . 'ipv6' => $server['public_net']['ipv6']['ip'],
-                self::META_PREFIX . 'location' => $server['datacenter']['location']['name'],
-                self::META_PREFIX . 'server_type' => $server['server_type']['name'],
-                self::META_PREFIX . 'created_date' => $server['created']
+                'arsol_server_provider' => 'hetzner',
+                'arsol_server_manager' => 'runcloud',
+                'arsol_server_plan_identifier' => $this->server_plan_identifier,
+                'arsol_server_server_id' => $server['id'],
+                'arsol_server_ipv4' => $server['public_net']['ipv4']['ip'],
+                'arsol_server_ipv6' => $server['public_net']['ipv6']['ip'],
+                'arsol_server_location' => $server['datacenter']['location']['name'],
+                'arsol_server_server_type' => $server['server_type']['name'],
+                'arsol_server_created_date' => $server['created']
             ];
             
             $server_post->update_meta_data($post_id, $metadata);
@@ -119,7 +119,7 @@ class ServerOrchestrator {
             // Step 5: Deploy to RunCloud
             $web_server_type = 'nginx';
             $installation_type = 'native';
-            $provider = get_post_meta($post_id, self::META_PREFIX . 'provider', true);
+            $provider = get_post_meta($post_id, 'arsol_server_provider', true);
 
             $deploy_result = $this->runcloud->deploy_server(
                 'wordpress-' . $subscription_id,
@@ -151,8 +151,8 @@ class ServerOrchestrator {
 
             // Update server metadata with RunCloud deployment details
             $server_post->update_meta_data($post_id, [
-                self::META_PREFIX . 'runcloud_server_id' => $deploy_result['id'] ?? null,
-                self::META_PREFIX . 'deployment_date' => current_time('mysql')
+                'arsol_server_runcloud_server_id' => $deploy_result['id'] ?? null,
+                'arsol_server_deployment_date' => current_time('mysql')
             ]);
 
         } catch (\Exception $e) {
