@@ -139,7 +139,7 @@ class ServerOrchestrator {
             }
     
             // Update request body with server name from meta
-            $deploy_result = $this->runcloud->deploy_server(
+            $deploy_result = $this->runcloud->create_server_in_server_manager(
                 $server_name,
                 $server['public_net']['ipv4']['ip'],
                 $web_server_type,

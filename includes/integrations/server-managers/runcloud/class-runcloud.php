@@ -18,7 +18,7 @@ class Runcloud /*implements ServerManager*/ {
         return new RuncloudSetup();
     }
 
-    public function deploy_server(
+    public function create_server_in_server_manager(
         string $server_name,
         string $ipAddress,
         string $webServerType,
@@ -31,27 +31,6 @@ class Runcloud /*implements ServerManager*/ {
             throw new \InvalidArgumentException('IP Address, Web Server Type and Installation Type are required');
         }
 
-        // Step 1: Create server in RunCloud
-        $create_response = $this->create_server_in_server_manager($server_name, $ipAddress, $webServerType, $installationType, $provider);
-        
-        if (is_wp_error($create_response)) {
-            throw new \Exception('Failed to deploy server in RunCloud: ' . $create_response());
-        }
-
-        // Step 2: Connect server to server manager
-
-        /*
-        $connection_response = $this->connect_server_manager_to_provisioned_server($create_response['data']['id'], $ipAddress);
-        
-        if (is_wp_error($connection_response)) {
-            throw new \Exception('Failed to connect to server in RunCloud: ' . $connection_response->get_error_message());
-        }
-
-        return $create_response;
-        */
-    }
-
-    private function create_server_in_server_manager($name, $ipAddress, $webServerType, $installationType, $provider) {
         $args = [
             'name' => $name,
             'ipAddress' => $ipAddress,
@@ -109,11 +88,6 @@ class Runcloud /*implements ServerManager*/ {
             'data' => ['id' => $server_id],
             'full_response' => $body // Include the full response body
         ];
-
-        
-
-
-
     }
     
 
