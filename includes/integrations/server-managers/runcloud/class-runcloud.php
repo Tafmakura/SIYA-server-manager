@@ -79,7 +79,15 @@ class Runcloud /*implements ServerManager*/ {
         if ($status_code !== 201) {
             $body = json_decode(wp_remote_retrieve_body($response), true);
             $error_message = isset($body['message']) ? $body['message'] : 'Unknown error';
-            return new \WP_Error('deployment_failed', $error_message, array('status' => $status_code));
+            return new \WP_Error(
+            'deployment_failed', 
+            $error_message, 
+            array(
+                'status' => $status_code,
+                'response_body' => $body,
+                'raw_response' => wp_remote_retrieve_body($response)
+            )
+            );
         }
 
         return json_decode(wp_remote_retrieve_body($response), true);
