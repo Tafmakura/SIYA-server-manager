@@ -70,7 +70,7 @@ class ServerPost {
         $this->server_provisioned_root_password = get_post_meta($this->post_id, self::META_PREFIX . 'root_password', true);
     }
     
-    private function create_server_post($subscription_id) {
+    public function create_server_post($subscription_id) {
         $post_data = array(
             'post_title'    => 'Server ' . $subscription_id,
             'post_status'   => 'publish',
