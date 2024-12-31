@@ -88,16 +88,14 @@ class ServerPost {
         return $query->posts ? $query->posts[0]->ID : null;
     }
 
-    public static function get_server_post_by_subscription_id($subscription_id) {
-        $server_id = self::get_server_post_id_by_subscription($subscription_id);
-        return $server_id ? self::get_server_post_by_id($server_id) : null;
-    }
-
+   
     public static function get_server_post_by_id($server_id) {
         return new self($server_id);
     }
-
-    public static function get_server_post_by_subscription($subscription_id) {
+   
+   
+   
+    public static function get_server_post_by_subscription_id($subscription_id) {
         $args = array(
             'post_type' => 'server',
             'meta_query' => array(
