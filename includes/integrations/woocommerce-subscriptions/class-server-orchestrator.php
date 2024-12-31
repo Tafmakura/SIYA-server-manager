@@ -193,7 +193,7 @@ class ServerOrchestrator {
                 PHP_EOL,
                 $e->getMessage()
             ));
-            $subscription->add_subscription_note(sprintf(
+            $subscription->add_order_note(sprintf(
                 "Error occurred during server provisioning:%s%s",
                 PHP_EOL,
                 $e->getMessage()
