@@ -3,6 +3,8 @@
 namespace Siya\Integrations\ServerManagers\Runcloud;
 
 use Siya\Interfaces\ServerManager;
+use phpseclib3\Net\SSH2;
+use phpseclib3\Crypt\PublicKeyLoader;
 
 class Runcloud /*implements ServerManager*/ {
     private $api_key;
@@ -153,13 +155,48 @@ class Runcloud /*implements ServerManager*/ {
             return new \WP_Error('invalid_script', 'Invalid installation script received from RunCloud');
         }
 
-        // TODO: Implement SSH connection and script execution
-        // This would involve:
-        // 1. Establishing SSH connection to $ipAddress
-        // 2. Executing $script_data['data']['script']
-        // 3. Handling execution results
-        
-        return true;
+        try {
+            // Initialize SSH connection
+            $ssh = new SSH2($ipAddress, 22);
+            
+            // Get SSH credentials from WordPress options
+            $ssh_username = get_option('server_ssh_username', 'root');
+            $ssh_key_path = get_option('server_ssh_private_key_path');
+            
+            if (empty($ssh_key_path)) {
+                $ssh_password = get_option('server_ssh_password');
+                if (!$ssh->login($ssh_username, $ssh_password)) {
+                    return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
+                }
+            } else {
+                $key = PublicKeyLoader::load(file_get_contents($ssh_key_path));
+                if (!$ssh->login($ssh_username, $key)) {
+                    return new \WP_Error('ssh_key_auth_failed', 'SSH key authentication failed');
+                }
+            }
+
+            // Execute the installation script
+            $result = $ssh->exec($script_data['data']['script']);
+            
+            // Log the execution result
+            error_log('RunCloud Installation Script Result: ' . $result);
+            
+            if ($ssh->getExitStatus() !== 0) {
+                return new \WP_Error(
+                    'script_execution_failed',
+                    'Installation script execution failed',
+                    array('output' => $result)
+                );
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'ssh_connection_failed',
+                'Failed to establish SSH connection: ' . $e->getMessage()
+            );
+        }
     }
 
     public function ping_server() {
