@@ -113,39 +113,39 @@ class ServerPost {
         $this->post_id = $post_id;
         
         $defaults = array(
-            'post_name' => '',
-            'subscription_id' => '',
-            'provisioned_id' => '',
-            'provisioned_os' => '',
-            'provisioned_os_version' => '',
-            'provisioned_region' => '',
-            'provisioning_provider' => '',
-            'provisioned_name' => '',
-            'provisioned_status' => '',
-            'provisioned_date' => '',
-            'provisioned_ipv4' => '',
-            'provisioned_ipv6' => '',
-            'provisioned_root_password' => '',
-            'provisioned_applications' => 0,
-            'provisioned_staging_sites' => 0,
-            'deployed_id' => '',
-            'deployed_applications' => 0,
-            'deployed_staging_sites' => 0,
-            'deployment_manager' => '',
-            'deployed_name' => '',
-            'deployed_status' => '',
-            'deployed_date' =>'',
-            'max_applications' => 0,
-            'max_staging_sites' => 0,
-            'type' => '',
-            'manager' => '',
-            'status_date' => current_time('mysql'),
+            'arsol_server_post_name' => '',
+            'arsol_server_subscription_id' => '',
+            'arsol_server_provisioned_id' => '',
+            'arsol_server_os' => '',
+            'arsol_server_os_version' => '',
+            'arsol_server_region' => '',
+            'arsol_server_provider' => '',
+            'arsol_server_provisioned_name' => '',
+            'arsol_server_provisioned_status' => '',
+            'arsol_server_provisioned_date' => '',
+            'arsol_server_ipv4' => '',
+            'arsol_server_ipv6' => '',
+            'arsol_server_root_password' => '',
+            'arsol_server_provisioned_applications' => 0,
+            'arsol_server_provisioned_staging_sites' => 0,
+            'arsol_server_deployed_id' => '',
+            'arsol_server_deployed_applications' => 0,
+            'arsol_server_deployed_staging_sites' => 0,
+            'arsol_server_deployment_manager' => '',
+            'arsol_server_deployed_name' => '',
+            'arsol_server_deployed_status' => '',
+            'arsol_server_deployed_date' => '',
+            'arsol_server_max_applications' => 0,
+            'arsol_server_max_staging_sites' => 0,
+            'arsol_server_type' => '',
+            'arsol_server_manager' => '',
+            'arsol_server_status_date' => current_time('mysql'),
         );
         
         $data = wp_parse_args($meta_data, $defaults);
         
         foreach ($data as $key => $value) {
-            update_post_meta($post_id, 'arsol_server_' . $key, sanitize_text_field($value));
+            update_post_meta($post_id, $key, sanitize_text_field($value));
         }
         
         return true;
