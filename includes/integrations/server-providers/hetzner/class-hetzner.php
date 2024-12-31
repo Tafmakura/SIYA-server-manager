@@ -17,24 +17,16 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function provision_server() {
-        $defaults = array(
-            'name' => 'wordpress-' . time(),
-            'server_type' => 'cx11',
-            'location'    => 'nbg1',
-            'image'      => 'ubuntu-20.04'
-        );
-        $server_config = wp_parse_args($config, $defaults);
-        
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'name' => $name,
-                'server_type' => $server_config['server_type'],
-                'location' => $server_config['location'],
-                'image' => $server_config['image']
+                'name' => 'wordpress-' . time(),
+                'server_type' => 'cx11',
+                'location' => 'nbg1',
+                'image' => 'ubuntu-20.04'
             ])
         ]);
 
