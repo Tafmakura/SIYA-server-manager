@@ -88,6 +88,10 @@ class Runcloud /*implements ServerManager*/ {
         error_log('RunCloud API Response Status: ' . $status_code);
         error_log('RunCloud API Response Body: ' . print_r($body, true));
 
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('RunCloud API Response Body: ' . var_export($response_body, true));
+
+
         if ($status_code !== 201 && $status_code !== 200) {
             $error_message = isset($body['message']) ? $body['message'] : 'Server creation failed';
             $error_details = isset($body['errors']) ? $body['errors'] : [];
