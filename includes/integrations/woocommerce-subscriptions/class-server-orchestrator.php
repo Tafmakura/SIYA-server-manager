@@ -148,8 +148,6 @@ class ServerOrchestrator {
             );
     
             // Log the full response regardless of success or failure
-            $response_body = $this->runcloud->get_last_response();
-            $formatted_response = json_encode($response_body, JSON_PRETTY_PRINT);
     
             if (!$deploy_result) {
                 $error_message = sprintf(
