@@ -47,117 +47,58 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     private function create_server_in_server_manager($name, $ipAddress, $webServerType, $installationType, $provider) {
-        $process_state = [
-            'api_request_prepared' => false,
-            'api_request_sent' => false,
-            'response_received' => false,
-            'response_validated' => false,
-            'server_created' => false
+        $args = [
+            'name' => $name,
+            'ipAddress' => $ipAddress,
+            'webServerType' => $webServerType,
+            'installationType' => $installationType
         ];
 
-        try {
-            $args = array(
-                'name' => $name,
-                'ipAddress' => $ipAddress,
-                'webServerType' => $webServerType,
-                'installationType' => $installationType
-            );
-
-            if (!empty($provider)) {
-                $args['provider'] = $provider;
-            }
-
-            $process_state['api_request_prepared'] = true;
-            error_log('RunCloud API Request Body: ' . json_encode($args, JSON_PRETTY_PRINT));
-
-            $response = wp_remote_post(
-                $this->api_endpoint . '/servers',
-                array(
-                    'headers' => array(
-                        'Authorization' => 'Bearer ' . $this->api_key,
-                        'Accept' => 'application/json',
-                        'Content-Type' => 'application/json'
-                    ),
-                    'body' => json_encode($args)
-                )
-            );
-
-            $process_state['api_request_sent'] = true;
-
-            if (is_wp_error($response)) {
-                error_log('RunCloud API Error: ' . $response->get_error_message());
-                return new \WP_Error(
-                    'api_request_failed',
-                    'API request failed: ' . $response->get_error_message(),
-                    ['process_state' => $process_state]
-                );
-            }
-
-            $status_code = wp_remote_retrieve_response_code($response);
-            $response_body = wp_remote_retrieve_body($response);
-            $body = json_decode($response_body, true);
-            
-            $process_state['response_received'] = true;
-            
-            error_log('RunCloud API Response Status: ' . $status_code);
-            error_log('RunCloud API Response Body: ' . $response_body);
-
-            if ($status_code !== 201 && $status_code !== 200) {
-                $error_message = 'Server creation failed';
-                $error_details = [];
-
-                if (is_array($body)) {
-                    if (isset($body['message'])) {
-                        $error_message = $body['message'];
-                    }
-                    if (isset($body['errors'])) {
-                        $error_details = $body['errors'];
-                        $error_message .= ' - Details: ' . json_encode($body['errors']);
-                    }
-                }
-
-                error_log('RunCloud API Error Response: ' . print_r($body, true));
-                return new \WP_Error(
-                    'deployment_failed',
-                    $error_message,
-                    array(
-                        'status' => $status_code,
-                        'response_body' => $body,
-                        'error_details' => $error_details,
-                        'process_state' => $process_state
-                    )
-                );
-            }
-
-            $process_state['response_validated'] = true;
-
-            // Handle successful response
-            if (isset($body['id']) || (isset($body['data']) && isset($body['data']['id']))) {
-                $server_id = isset($body['id']) ? $body['id'] : $body['data']['id'];
-                $process_state['server_created'] = true;
-                return array(
-                    'data' => array('id' => $server_id),
-                    'process_state' => $process_state
-                );
-            }
-
-            return new \WP_Error(
-                'invalid_response',
-                'Invalid response format from RunCloud API',
-                array(
-                    'status' => $status_code,
-                    'response_body' => $body,
-                    'process_state' => $process_state
-                )
-            );
-
-        } catch (\Exception $e) {
-            return new \WP_Error(
-                'unexpected_error',
-                'Unexpected error during server creation: ' . $e->getMessage(),
-                ['process_state' => $process_state]
-            );
+        if (!empty($provider)) {
+            $args['provider'] = $provider;
         }
+
+        error_log('RunCloud API Request Body: ' . json_encode($args, JSON_PRETTY_PRINT));
+
+        $response = wp_remote_post(
+            $this->api_endpoint . '/servers',
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->api_key,
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json'
+                ],
+                'body' => json_encode($args)
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            error_log('RunCloud API Error: ' . $response->get_error_message());
+            return new \WP_Error('api_request_failed', 'API request failed: ' . $response->get_error_message());
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+
+        error_log('RunCloud API Response Status: ' . $status_code);
+        error_log('RunCloud API Response Body: ' . json_encode($body, JSON_PRETTY_PRINT));
+
+        if ($status_code !== 201 && $status_code !== 200) {
+            $error_message = isset($body['message']) ? $body['message'] : 'Server creation failed';
+            $error_details = isset($body['errors']) ? $body['errors'] : [];
+            
+            return new \WP_Error('deployment_failed', $error_message, [
+                'status' => $status_code,
+                'error_details' => $error_details
+            ]);
+        }
+
+        $server_id = isset($body['data']['id']) ? $body['data']['id'] : $body['id'];
+        if (empty($server_id)) {
+            return new \WP_Error('invalid_response', 'Invalid response format from RunCloud API');
+        }
+
+        return ['data' => ['id' => $server_id]];
     }
 
     private function connect_server_manager_to_provisioned_server($server_id, $ipAddress) {
