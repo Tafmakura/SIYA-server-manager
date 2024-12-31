@@ -76,15 +76,23 @@ class Runcloud /*implements ServerManager*/ {
         }
 
         $status_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        $formatted_body = $response_body;
+        
+        // Format array responses
+        if (is_array(json_decode($response_body, true))) {
+            $formatted_body = print_r(json_decode($response_body, true), true);
+        }
+
         // Log the complete API response
         error_log('RunCloud API Response >>>>>>>>>>>: ' . print_r(array(
             'status_code' => $status_code,
             'headers' => wp_remote_retrieve_headers($response),
-            'body' => wp_remote_retrieve_body($response)
+            'body' => $formatted_body
         ), true));
 
         if ($status_code !== 201) {
-            $body = json_decode(wp_remote_retrieve_body($response), true);
+            $body = json_decode($response_body, true);
             $error_message = isset($body['message']) ? $body['message'] : 'Unknown error';
             return new \WP_Error(
             'deployment_failed', 
@@ -92,7 +100,7 @@ class Runcloud /*implements ServerManager*/ {
             array(
                 'status' => $status_code,
                 'response_body' => $body,
-                'raw_response' => wp_remote_retrieve_body($response)
+                'raw_response' => $formatted_body
             )
             );
         }
