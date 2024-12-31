@@ -84,8 +84,8 @@ class Runcloud /*implements ServerManager*/ {
         error_log('RunCloud API Response Status: ' . $status_code);
         error_log('RunCloud API Response Body: ' . $response_body);
 
-        if ($status_code !== 201) {
-            $error_message = 'Unknown error occurred';
+        if ($status_code !== 201 && $status_code !== 200) {  // Allow both 201 and 200 status codes
+            $error_message = 'Server creation failed';
             $error_details = [];
 
             if (is_array($body)) {
@@ -98,7 +98,7 @@ class Runcloud /*implements ServerManager*/ {
                 }
             }
 
-            error_log('RunCloud API Error Details: ' . print_r($error_details, true));
+            error_log('RunCloud API Error Response: ' . print_r($body, true));
 
             return new \WP_Error(
                 'deployment_failed',
@@ -109,6 +109,12 @@ class Runcloud /*implements ServerManager*/ {
                     'error_details' => $error_details
                 )
             );
+        }
+
+        // Handle successful response
+        if (isset($body['id']) || (isset($body['data']) && isset($body['data']['id']))) {
+            $server_id = isset($body['id']) ? $body['id'] : $body['data']['id'];
+            return array('data' => array('id' => $server_id));
         }
 
         if (!isset($body['data']) || !isset($body['data']['id'])) {
