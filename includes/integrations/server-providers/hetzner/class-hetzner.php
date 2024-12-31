@@ -16,8 +16,12 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    public function provision_server() {
-    
+    public function provision_server($server_namel) {
+     
+        if (empty($server_name)) {
+            throw new \Exception('Server name required');
+        }
+
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
