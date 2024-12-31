@@ -75,10 +75,31 @@ class ServerOrchestrator {
             );
             $subscription->add_order_note($success_message);
 
-            // Step 3: Deploy to RunCloud
+            // Step 3: Update server post metadata
+            $metadata = [
+                'provider' => 'hetzner',
+                'manager' => 'runcloud',
+                'plan_identifier' => $this->server_plan_identifier,
+                'server_id' => $server['id'],
+                'ipv4' => $server['public_net']['ipv4']['ip'],
+                'ipv6' => $server['public_net']['ipv6']['ip'],
+                'status' => $server['status'],
+                'location' => $server['datacenter']['location']['name'],
+                'server_type' => $server['server_type']['name'],
+                'created_date' => $server['created']
+            ];
+            
+            $server_post->update_meta_data($post_id, $metadata);
+            $subscription->add_order_note(sprintf(
+                "Server metadata updated successfully:%s%s",
+                PHP_EOL,
+                print_r($metadata, true)
+            ));
+
+            // Step 4: Deploy to RunCloud
             $deploy_result = $this->runcloud->deploy_server(
                 'wordpress-' . $subscription_id,
-                $server_data['server']['public_net']['ipv4']['ip']
+                $server['public_net']['ipv4']['ip']
             );
             if (!$deploy_result) {
                 $error_response = $this->runcloud->get_last_response();
@@ -93,20 +114,6 @@ class ServerOrchestrator {
                 "RunCloud deployment response:%s%s",
                 PHP_EOL,
                 print_r($deploy_result, true)
-            ));
-
-            // Step 4: Update server post meta
-            $server_meta = [
-                'id' => $server_data['server']['id'],
-                'ipv4' => $server_data['server']['public_net']['ipv4']['ip'],
-                'ipv6' => $server_data['server']['public_net']['ipv6']['ip'],
-                'status' => $server_data['server']['status']
-            ];
-            $server_post->update_provisioned_server_data($post_id, $server_meta);
-            $subscription->add_order_note(sprintf(
-                "Server post meta updated with:%s%s",
-                PHP_EOL,
-                print_r($server_meta, true)
             ));
 
         } catch (\Exception $e) {
