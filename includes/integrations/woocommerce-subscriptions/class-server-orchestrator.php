@@ -140,20 +140,6 @@ class ServerOrchestrator {
             }
 
             // Update request body with server name from meta
-            $request_body = [
-                'name' => $server_name,
-                'ip' => $server['public_net']['ipv4']['ip'],
-                'provider' => $provider,
-                'webServerType' => $web_server_type,
-                'installationType' => $installation_type
-            ];
-
-            error_log(sprintf(
-                '[SIYA Server Manager] RunCloud deployment request body:%s%s',
-                PHP_EOL,
-                json_encode($request_body, JSON_PRETTY_PRINT)
-            ));
-
             $deploy_result = $this->runcloud->deploy_server(
                 $server_name,
                 $server['public_net']['ipv4']['ip'],
