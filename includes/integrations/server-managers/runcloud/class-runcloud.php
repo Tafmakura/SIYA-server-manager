@@ -146,13 +146,29 @@ class Runcloud /*implements ServerManager*/ {
         );
 
         if (is_wp_error($script_response)) {
+            error_log('RunCloud Script Fetch Error: ' . $script_response->get_error_message());
             return new \WP_Error('script_fetch_failed', 'Failed to get installation script: ' . $script_response->get_error_message());
         }
 
-        $script_data = json_decode(wp_remote_retrieve_body($script_response), true);
-        
+        $response_code = wp_remote_retrieve_response_code($script_response);
+        $script_body = wp_remote_retrieve_body($script_response);
+        $script_data = json_decode($script_body, true);
+
+        error_log('RunCloud Installation Script Response Status: ' . $response_code);
+        error_log('RunCloud Installation Script Response: ' . $script_body);
+
+        if ($response_code !== 200) {
+            return new \WP_Error('invalid_response', 'Invalid response code from RunCloud: ' . $response_code);
+        }
+
+        if (!is_array($script_data) || !isset($script_data['data']) || !isset($script_data['data']['script'])) {
+            return new \WP_Error('invalid_script', 'Invalid installation script format received from RunCloud', array(
+                'response' => $script_data
+            ));
+        }
+
         if (empty($script_data['data']['script'])) {
-            return new \WP_Error('invalid_script', 'Invalid installation script received from RunCloud');
+            return new \WP_Error('empty_script', 'Empty installation script received from RunCloud');
         }
 
         try {
