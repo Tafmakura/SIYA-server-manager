@@ -35,11 +35,12 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            throw new \Exception('Failed to provision server. Response code: ' . $response_code);
+            throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . $response_body);
         }
 
-        return json_decode(wp_remote_retrieve_body($response), true);
+        return json_decode($response_body, true);
     }
 
     public function ping_server() {
@@ -56,8 +57,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 200) {
-            error_log('Hetzner API Error: Ping failed with response code ' . $response_code);
+            error_log('Hetzner API Error: Ping failed with response code ' . $response_code . ', Body: ' . $response_body);
             return false;
         }
 
@@ -82,11 +84,12 @@ class Hetzner /*implements ServerProvider*/ {
         }
     
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            error_log('Hetzner API Error: Received response code ' . $response_code . ' with body: ' . wp_remote_retrieve_body($response));
+            error_log('Hetzner API Error: Protection change failed with response code ' . $response_code . ', Body: ' . $response_body);
         }
     
-        return wp_remote_retrieve_body($response);
+        return $response_body;
     }
 
 
@@ -108,11 +111,12 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            error_log('Hetzner API Error: Received response code ' . $response_code . ' with body: ' . wp_remote_retrieve_body($response));
+            error_log('Hetzner API Error: Remove protection failed with response code ' . $response_code . ', Body: ' . $response_body);
         }
 
-        return wp_remote_retrieve_body($response);
+        return $response_body;
     }
 
     public function shutdown_server() {
@@ -129,8 +133,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            error_log('Hetzner API Error: Shutdown failed with response code ' . $response_code);
+            error_log('Hetzner API Error: Shutdown failed with response code ' . $response_code . ', Body: ' . $response_body);
             return false;
         }
 
@@ -151,8 +156,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            error_log('Hetzner API Error: Poweroff failed with response code ' . $response_code);
+            error_log('Hetzner API Error: Poweroff failed with response code ' . $response_code . ', Body: ' . $response_body);
             return false;
         }
 
@@ -173,8 +179,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            error_log('Hetzner API Error: Poweron failed with response code ' . $response_code);
+            error_log('Hetzner API Error: Poweron failed with response code ' . $response_code . ', Body: ' . $response_body);
             return false;
         }
 
@@ -195,8 +202,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 200) {
-            error_log('Hetzner API Error: Destroy failed with response code ' . $response_code);
+            error_log('Hetzner API Error: Destroy failed with response code ' . $response_code . ', Body: ' . $response_body);
             return false;
         }
 
@@ -217,8 +225,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            error_log('Hetzner API Error: Reboot failed with response code ' . $response_code);
+            error_log('Hetzner API Error: Reboot failed with response code ' . $response_code . ', Body: ' . $response_body);
             return false;
         }
 
