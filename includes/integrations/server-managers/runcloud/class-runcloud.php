@@ -77,7 +77,7 @@ class Runcloud /*implements ServerManager*/ {
 
         $status_code = wp_remote_retrieve_response_code($response);
         // Log the complete API response
-        error_log('RunCloud API Response: ' . print_r(array(
+        error_log('RunCloud API Response >>>>>>>>>>>: ' . print_r(array(
             'status_code' => $status_code,
             'headers' => wp_remote_retrieve_headers($response),
             'body' => wp_remote_retrieve_body($response)
