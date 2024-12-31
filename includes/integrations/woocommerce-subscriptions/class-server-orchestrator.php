@@ -19,7 +19,7 @@ class ServerOrchestrator {
     private $runcloud;
     private $hetzner;
 
-    public function __construct($subscription_id = null) {
+    public function __construct($subscription_id) {
         $this->subscription_id = $subscription_id;
         $this->runcloud = new Runcloud();
         $this->hetzner = new Hetzner();
