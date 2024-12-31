@@ -158,7 +158,6 @@ class ServerOrchestrator {
                     PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
                 );
                 $subscription->add_order_note($error_message);
-                $subscription->add_subscription_note($error_message);
                 throw new \Exception($error_message);
             }
     
@@ -168,7 +167,6 @@ class ServerOrchestrator {
                 PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
             );
             $subscription->add_order_note($success_message);
-            $subscription->add_subscription_note($success_message);
     
             // Update server metadata with RunCloud deployment details
             $server_post->update_meta_data($post_id, [
@@ -188,11 +186,6 @@ class ServerOrchestrator {
             ));
     
             // Add detailed note to subscription
-            $subscription->add_order_note(sprintf(
-                "Error occurred during server provisioning:%s%s",
-                PHP_EOL,
-                $e->getMessage()
-            ));
             $subscription->add_order_note(sprintf(
                 "Error occurred during server provisioning:%s%s",
                 PHP_EOL,
