@@ -88,8 +88,7 @@ class Runcloud /*implements ServerManager*/ {
         error_log('RunCloud API Response Status: ' . $status_code);
         error_log('RunCloud API Response Body: ' . print_r($body, true));
 
-        $response_body = wp_remote_retrieve_body($response);
-        error_log('RunCloud API Response Body: ' . var_export($response_body, true));
+        error_log('RunCloud API Response Body: ' . var_export($response, true));
 
 
         if ($status_code !== 201 && $status_code !== 200) {
