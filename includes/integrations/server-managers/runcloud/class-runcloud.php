@@ -38,7 +38,7 @@ class Runcloud /*implements ServerManager*/ {
         $connection_response = $this->connect_server_manager_to_provisioned_server($create_response['data']['id'], $ipAddress);
         
         if (is_wp_error($connection_response)) {
-            throw new \Exception('Failed to connect server in RunCloud: ' . $connection_response->get_error_message());
+            throw new \Exception('Failed to connect to server in RunCloud: ' . $connection_response->get_error_message());
         }
 
         return $create_response;
@@ -55,6 +55,9 @@ class Runcloud /*implements ServerManager*/ {
         if (!empty($provider)) {
             $args['provider'] = $provider;
         }
+
+        // Log the API request body
+        error_log('RunCloud API Request Body: ' . json_encode($args, JSON_PRETTY_PRINT));
 
         $response = wp_remote_post(
             $this->api_endpoint . '/servers',
