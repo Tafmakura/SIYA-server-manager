@@ -78,7 +78,7 @@ class ServerOrchestrator {
             );
 
             // Step 3: Provision Hetzner server
-            $server_data = $this->hetzner->provision_server();
+            $server_data = $this->hetzner->provision_server($post_id);
             if (!$server_data) {
                 $error_response = $this->hetzner->get_last_response();
                 $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
