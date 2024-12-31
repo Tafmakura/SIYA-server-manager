@@ -54,10 +54,15 @@ class ServerOrchestrator {
             if (!$server_data) {
                 throw new \Exception('Failed to provision Hetzner server');
             }
-            $subscription->add_order_note(sprintf(
-                'Hetzner server provisioning response: %s', 
-                print_r($server_data, true)
-            ));
+            $server = $server_data['server'];
+            $success_message = sprintf(
+                'Hetzner server provisioned successfully! ✓\nIP: %s\nCreated: %s\nServer Type: %s\nLocation: %s',
+                $server['public_net']['ipv4']['ip'],
+                $server['created'],
+                $server['server_type']['name'],
+                $server['datacenter']['location']['name']
+            );
+            $subscription->add_order_note($success_message);
 
             // Step 3: Deploy to RunCloud
             $deploy_result = $this->runcloud->deploy_server(
