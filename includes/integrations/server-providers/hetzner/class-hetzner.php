@@ -16,11 +16,15 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    public function provision_server() {
-        $server_name = get_post_meta(get_the_ID(), 'arsol_server_post_name', true);
+    public function provision_server($post_id = null) {
+        if (!$post_id) {
+            throw new \Exception('Post ID is required to provision server');
+        }
+
+        $server_name = get_post_meta($post_id, 'arsol_server_post_name', true);
         
         if (empty($server_name)) {
-            throw new \Exception('Server name not found in post meta');
+            throw new \Exception('Server name not found in post meta for post ID: ' . $post_id);
         }
 
         $response = wp_remote_post($this->api_endpoint . '/servers', [
