@@ -39,6 +39,8 @@ class Runcloud /*implements ServerManager*/ {
         }
 
         // Step 2: Connect server to server manager
+
+        /*
         $connection_response = $this->connect_server_manager_to_provisioned_server($create_response['data']['id'], $ipAddress);
         
         if (is_wp_error($connection_response)) {
@@ -46,6 +48,7 @@ class Runcloud /*implements ServerManager*/ {
         }
 
         return $create_response;
+        */
     }
 
     private function create_server_in_server_manager($name, $ipAddress, $webServerType, $installationType, $provider) {
