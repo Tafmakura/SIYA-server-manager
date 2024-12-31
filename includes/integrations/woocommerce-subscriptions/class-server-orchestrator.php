@@ -23,12 +23,21 @@ class ServerOrchestrator {
     public function __construct($subscription) {
         $this->subscription = $subscription;
         $this->subscription_id = $subscription->get_id();
+        
+        // Debug logging
+        error_log(sprintf(
+            '[SIYA Server Manager] Constructor - Subscription ID: %s',
+            $this->subscription_id
+        ));
+        
         $this->runcloud = new Runcloud();
         $this->hetzner = new Hetzner();
         
         if ($this->$subscription_id) {
+            error_log('[SIYA Server Manager] Checking for existing server');
             $server = $this->get_server_by_subscription_id($subscription_id);
             if ($server) {
+                error_log('[SIYA Server Manager] Found existing server: ' . $server->ID);
                 $this->server_provider = get_post_meta($server->ID, 'arsol_server_provider', true);
                 $this->server_manager = get_post_meta($server->ID, 'arsol_server_manager', true);
                 $this->server_plan_identifier = get_post_meta($server->ID, 'arsol_server_plan_identifier', true);
