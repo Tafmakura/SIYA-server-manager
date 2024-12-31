@@ -134,7 +134,7 @@ class ServerOrchestrator {
 
             // Log the request body before making the API call
             $request_body = [
-                'name' => 'wordpress-' . $subscription_id,
+                'name' => 'ARSOL' . $subscription_id,
                 'ip' => $server['public_net']['ipv4']['ip'],
                 'provider' => $provider,
                 'webServerType' => $web_server_type,
