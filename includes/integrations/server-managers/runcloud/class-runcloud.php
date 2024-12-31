@@ -102,13 +102,15 @@ class Runcloud /*implements ServerManager*/ {
         if (empty($server_id)) {
             return new \WP_Error('invalid_response', 'Invalid response format from RunCloud API');
         }
+
+        error_log('TESSSSSSSt RunCloud API Request Body: ' . $body);
     
         return [
             'data' => ['id' => $server_id],
             'full_response' => $body // Include the full response body
         ];
 
-        error_log('TESSSSSSSt RunCloud API Request Body: ' . $body);
+        
 
 
 
