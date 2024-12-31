@@ -82,6 +82,11 @@ class Runcloud /*implements ServerManager*/ {
             return new \WP_Error('api_request_failed', 'API request failed: ' . $response->get_error_message());
         }
 
+
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('RunCloud API Response Body: ' . var_export($response_body, true));
+
+        /*
         $status_code = wp_remote_retrieve_response_code($response);
         $body = json_decode(wp_remote_retrieve_body($response), true);
 
@@ -89,7 +94,7 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[2] RunCloud API Response Body: ' . print_r($body, true));
 
         error_log('[3] RunCloud API Response Body: ' . var_export($response, true));
-
+        */
 
         if ($status_code !== 201 && $status_code !== 200) {
             $error_message = isset($body['message']) ? $body['message'] : 'Server creation failed';
