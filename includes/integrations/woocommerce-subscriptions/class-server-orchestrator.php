@@ -132,6 +132,20 @@ class ServerOrchestrator {
             $installation_type = 'native';
             $provider = get_post_meta($post_id, 'arsol_server_provider', true);
 
+            // Log the request body before making the API call
+            $request_body = [
+                'name' => 'wordpress-' . $subscription_id,
+                'ip' => $server['public_net']['ipv4']['ip'],
+                'provider' => $provider,
+                'webServerType' => $web_server_type,
+                'installationType' => $installation_type
+            ];
+            error_log(sprintf(
+                '[SIYA Server Manager] RunCloud deployment request body:%s%s',
+                PHP_EOL,
+                json_encode($request_body, JSON_PRETTY_PRINT)
+            ));
+
             $deploy_result = $this->runcloud->deploy_server(
                 'wordpress-' . $subscription_id,
                 $server['public_net']['ipv4']['ip'],
