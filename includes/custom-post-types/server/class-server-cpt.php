@@ -66,12 +66,23 @@ class ServerPost {
     }
     
     public function create_server_post($subscription_id) {
+        $server_name = 'ARSOL' . $subscription_id;
+        
         $post_data = array(
-            'post_title'    => 'Server ' . $subscription_id,
+            'post_title'    => $server_name,
             'post_status'   => 'publish',
             'post_type'     => 'server'
         );
-        return wp_insert_post($post_data);
+
+        $post_id = wp_insert_post($post_data);
+
+        if (!is_wp_error($post_id)) {
+            update_post_meta($post_id, 'arsol_server_post_name', $server_name);
+            update_post_meta($post_id, 'arsol_server_subscription_id', $subscription_id);
+            update_post_meta($post_id, 'arsol_server_post_creation_date', current_time('mysql'));
+        }
+
+        return $post_id;
     }
 
     public static function get_server_post_id_by_subscription($subscription_id) {
