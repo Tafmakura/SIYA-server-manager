@@ -35,7 +35,7 @@ class Runcloud /*implements ServerManager*/ {
         $create_response = $this->create_server_in_server_manager($server_name, $ipAddress, $webServerType, $installationType, $provider);
         
         if (is_wp_error($create_response)) {
-            throw new \Exception('Failed to deploy server in RunCloud: ' . $create_response->get_error_message());
+            throw new \Exception('Failed to deploy server in RunCloud: ' . $create_response());
         }
 
         // Step 2: Connect server to server manager
