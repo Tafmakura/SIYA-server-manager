@@ -107,6 +107,11 @@ class Runcloud /*implements ServerManager*/ {
             'data' => ['id' => $server_id],
             'full_response' => $body // Include the full response body
         ];
+
+        error_log('TESSSSSSSt RunCloud API Request Body: ' . json_encode($args, JSON_PRETTY_PRINT));
+
+
+
     }
     
 
