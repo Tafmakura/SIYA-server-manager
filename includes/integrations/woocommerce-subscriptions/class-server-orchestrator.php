@@ -127,6 +127,7 @@ class ServerOrchestrator {
             ));
 
             // Step 5: Deploy to RunCloud
+            error_log(sprintf('[SIYA Server Manager] Step 5: Starting deployment to RunCloud for subscription %d', $subscription_id));
             $web_server_type = 'nginx';
             $installation_type = 'native';
             $provider = get_post_meta($post_id, 'arsol_server_provider', true);
@@ -164,6 +165,8 @@ class ServerOrchestrator {
                 'arsol_server_runcloud_server_id' => $deploy_result['id'] ?? null,
                 'arsol_server_deployment_date' => current_time('mysql')
             ]);
+
+            error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
 
         } catch (\Exception $e) {
             // Log the full error message
