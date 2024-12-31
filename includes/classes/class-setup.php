@@ -77,7 +77,6 @@ class Setup {
     public function initialize_server_orchestration($subscription) {
         if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
             $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
-            $orchestrator->handle_subscription($subscription);
         }
     }
 }
