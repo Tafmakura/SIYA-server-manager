@@ -32,12 +32,12 @@ class ServerOrchestrator {
         $server_post = new ServerPost();
         $server = $server_post->get_server_post_by_subscription_id($this->subscription_id);
         if ($server) {
+           
             error_log('[SIYA Server Manager] Found existing server: ' . $server->ID);
-            return true;
-
-            error_log('[SIYA Server Manager] No existing servers found: ' . $server->ID);
+            return $server->ID;
         }
 
+        error_log('[SIYA Server Manager] No existing server found');
         return false;
     }
 
@@ -278,6 +278,7 @@ class ServerOrchestrator {
 
 
     private function subscription_circuit_breaker($subscription) {
+       
         error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
 
         if (is_admin()) {
