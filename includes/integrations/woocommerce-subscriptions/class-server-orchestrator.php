@@ -26,6 +26,7 @@ class ServerOrchestrator {
        
         error_log('HOYO!!!! ');
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
+        add_action('woocommerce_subscription_status_updated', [$this, 'subscription_circuit_breaker'], 10, 1);
     }
 
     public function check_existing_server() {
@@ -277,11 +278,11 @@ class ServerOrchestrator {
     }
 
 
-    private function subscription_circuit_breaker($subscription) {
+    public function subscription_circuit_breaker($subscription) {
        
         error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
 
-        if (is_admin()) {
+        if (!is_admin()) {
             return;
         }
 
