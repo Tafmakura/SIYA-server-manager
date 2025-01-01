@@ -26,7 +26,7 @@ class ServerOrchestrator {
         // Add hooks for subscription status changes
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
        
-        error_log('HOYO!!!! ' . $server->ID);
+        error_log('HOYO!!!! ');
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
     }
 
