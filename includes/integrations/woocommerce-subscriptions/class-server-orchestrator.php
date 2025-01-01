@@ -19,10 +19,8 @@ class ServerOrchestrator {
     private $runcloud;
     private $hetzner;
 
-    public function __construct($subscription) {
-        $this->subscription = $subscription;
-        $this->subscription_id = $subscription->get_id();
-
+    public function __construct() {
+      
         // Add hooks for subscription status changes
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
        
