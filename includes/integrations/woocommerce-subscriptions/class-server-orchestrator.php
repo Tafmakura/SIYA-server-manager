@@ -23,10 +23,8 @@ class ServerOrchestrator {
       
         // Add hooks for subscription status changes
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
-       
-        error_log('HOYO!!!! ');
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
-        add_action('woocommerce_subscription_status_updated', [$this, 'subscription_circuit_breaker'], 10, 1);
+
     }
 
     public function check_existing_server() {
@@ -48,13 +46,18 @@ class ServerOrchestrator {
         // Check if server post already exists
         error_log('[SIYA Server Manager] Checking for existing server');
     
-        $existing_server_post = $this->check_existing_server();
-        if ($existing_server_post) {
-            $this->server_post_id = $existing_server_post->ID;
-        }
-
         $this->subscription_id = $subscription->get_id();
    
+        
+        $existing_server_post = $this->check_existing_server();
+        if (!$existing_server_post) {
+            $this->server_post_id = $existing_server_post->ID;
+
+            error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
+
+        }
+
+        
         // Get current status flags
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
