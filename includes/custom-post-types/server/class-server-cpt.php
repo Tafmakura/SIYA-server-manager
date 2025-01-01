@@ -3,7 +3,7 @@
 namespace SIYA\CustomPostTypes;
 
 class ServerPost {
-    private $post_id;
+    public $post_id;
   
     public $server_post_name;
     public $server_post_status; 

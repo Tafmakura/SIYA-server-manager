@@ -33,7 +33,7 @@ class ServerOrchestrator {
 
         // Add hooks for subscription status changes
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
-        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
+      //  add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
     }
 
     public function check_existing_server() {
@@ -41,11 +41,9 @@ class ServerOrchestrator {
         $server = $server_post->get_server_post_by_subscription_id($this->subscription_id);
         if ($server) {
             error_log('[SIYA Server Manager] Found existing server: ' . $server->ID);
-            $this->server_provider = get_post_meta($server->ID, 'arsol_server_provider', true);
-            $this->server_manager = get_post_meta($server->ID, 'arsol_server_manager', true);
-            $this->server_plan_identifier = get_post_meta($server->ID, 'arsol_server_plan_identifier', true);
             return true;
         }
+        error_log('[SIYA Server Manager] No existing servers found: ' . $server->ID);
         return false;
     }
 
