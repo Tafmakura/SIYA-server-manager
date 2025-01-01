@@ -167,8 +167,7 @@ class ServerOrchestrator {
                     error_log('[SIYA Server Manager] RunCloud deployment successful');
                     $subscription->add_order_note(sprintf(
                         "RunCloud deployment successful with status: %s\nResponse body: %s",
-                        $runcloud_response['status'],
-                        $runcloud_response['body']
+                        print_r($runcloud_response, true)
                     ));
                     
                     // Update server metadata with RunCloud deployment details
