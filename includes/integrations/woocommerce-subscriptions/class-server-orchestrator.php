@@ -158,7 +158,12 @@ class ServerOrchestrator {
                 $subscription->add_order_note($error_message);
                 throw new \Exception($error_message);
             }
-    
+            
+            // Print the status and response body 
+            echo 'Status: ' . $deploy_result['status'] . PHP_EOL; 
+            echo 'Response Body: ' . $deploy_result['body'] . PHP_EOL;
+
+            /*
             $success_message = sprintf(
                 "RunCloud deployment successful!%s%s" .
                 "Full API Response:%s%s",
@@ -171,7 +176,7 @@ class ServerOrchestrator {
                 'arsol_server_runcloud_server_id' => $deploy_result['id'] ?? null,
                 'arsol_server_deployment_date' => current_time('mysql')
             ]);
-    
+            */
             error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
     
         } catch (\Exception $e) {
