@@ -139,7 +139,7 @@ class ServerOrchestrator {
             }
     
             // Update request body with server name from meta
-            $deploy_result = $this->runcloud->create_server_in_server_manager(
+            $runcloud_response = $this->runcloud->create_server_in_server_manager(
                 $server_name,
                 $server['public_net']['ipv4']['ip'],
                 $web_server_type,
@@ -153,38 +153,38 @@ class ServerOrchestrator {
           // Display RUNclousd Results 
 
             // WP Error resulting in failure to send API Request
-            if (is_wp_error($deploy_result)) {
-                error_log('[SIYA Server Manager] RunCloud API Error: ' . $deploy_result->get_error_message());
+            if (is_wp_error($runcloud_response)) {
+                error_log('[SIYA Server Manager] RunCloud API Error: ' . $runcloud_response->get_error_message());
                 $subscription->add_order_note(sprintf(
                     "RunCloud deployment failed (WP_Error).\nError message: %s\nFull response: %s",
-                    $deploy_result->get_error_message(),
-                    print_r($deploy_result, true)
+                    $runcloud_response->get_error_message(),
+                    print_r($runcloud_response, true)
                 ));
 
             // Successful API response
-            } elseif (isset($deploy_result['status'])) {
-                if ($deploy_result['status'] == 201 || $deploy_result['status'] == 200) {
+            } elseif (isset($runcloud_response['status'])) {
+                if ($runcloud_response['status'] == 201 || $runcloud_response['status'] == 200) {
                     error_log('[SIYA Server Manager] RunCloud deployment successful');
                     $subscription->add_order_note(sprintf(
                         "RunCloud deployment successful with status: %s\nResponse body: %s",
-                        $deploy_result['status'],
-                        $deploy_result['body']
+                        $runcloud_response['status'],
+                        $runcloud_response['body']
                     ));
                     
                     // Update server metadata with RunCloud deployment details
                     $server_post->update_meta_data($post_id, [
-                        'arsol_server_runcloud_server_id' => json_decode($deploy_result['body'], true)['id'] ?? null,
+                        'arsol_server_runcloud_server_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
                         'arsol_server_deployment_date' => current_time('mysql')
                     ]);
 
                 // Error due to failed API requests with failed response
                 } else {
-                    error_log('[SIYA Server Manager] RunCloud deployment failed with status: ' . $deploy_result['status']);
+                    error_log('[SIYA Server Manager] RunCloud deployment failed with status: ' . $runcloud_response['status']);
                     $subscription->add_order_note(sprintf(
                         "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
-                        $deploy_result['status'],
-                        $deploy_result['body'],
-                        print_r($deploy_result, true)
+                        $runcloud_response['status'],
+                        $runcloud_response['body'],
+                        print_r($runcloud_response, true)
                     ));
                 }
 
@@ -193,8 +193,8 @@ class ServerOrchestrator {
                 error_log('[SIYA Server Manager] No status returned from RunCloud deployment');
                 $subscription->add_order_note(sprintf(
                     "RunCloud deployment failed - no status returned\nResponse body: %s\nFull response: %s",
-                    $deploy_result['body'] ?? 'No body',
-                    print_r($deploy_result, true)
+                    $runcloud_response['body'] ?? 'No body',
+                    print_r($runcloud_response, true)
                 ));
             }
 
