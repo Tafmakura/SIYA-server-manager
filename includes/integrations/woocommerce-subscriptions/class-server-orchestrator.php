@@ -32,8 +32,8 @@ class ServerOrchestrator {
         }
 
         // Add hooks for subscription status changes
-        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
-      //  add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
+       // add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
+        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
     }
 
     public function check_existing_server() {
