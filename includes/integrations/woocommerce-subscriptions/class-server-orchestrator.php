@@ -279,9 +279,13 @@ class ServerOrchestrator {
     private function subscription_circuit_breaker($subscription) {
         error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
         
-        // Get current status flags
-        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
-        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true); 
+        if (!is_admin()) {
+            return;
+        }
+        $subscription_id = $subscription->get_id();
+        $post_id = get_post_meta($subscription_id, 'arsol_server_post_id', true);
+        $is_provisioned = get_post_meta($post_id, 'arsol_server_deployed_status', true);
+        $is_deployed = get_post_meta($post_id, 'arsol_server_provisioned_status', true);
 
         error_log(sprintf('[SIYA Server Manager] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
