@@ -56,6 +56,7 @@ class ServerOrchestrator {
         
         // Step 1: Create server post only if it doesn't exist
         if (!$this->server_post_id) {
+            error_log('[SIYA Server Manager] creating new server post');
             $server_post = $this->create_and_update_server_post($subscription);
         } else {
             error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
@@ -280,7 +281,7 @@ class ServerOrchestrator {
         if (is_admin()) {
             return;
         }
-        
+
         $subscription_id = $subscription->get_id();
         $post_id = get_post_meta($subscription_id, 'arsol_server_post_id', true);
         $is_provisioned = get_post_meta($post_id, 'arsol_server_deployed_status', true);
