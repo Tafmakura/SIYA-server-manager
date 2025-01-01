@@ -277,7 +277,7 @@ class ServerOrchestrator {
     private function subscription_circuit_breaker($subscription) {
         error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
         
-        if (!is_admin()) {
+        if (is_admin()) {
             return;
         }
         $subscription_id = $subscription->get_id();
