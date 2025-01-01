@@ -57,8 +57,28 @@ class Runcloud /*implements ServerManager*/ {
         $status_code = wp_remote_retrieve_response_code($response); 
         $response_body = wp_remote_retrieve_body($response);
         
+        // WP Error resulting in failure to send API Request
+        if (is_wp_error($response)) {
+            error_log('RunCloud API Error: ' . $response->get_error_message());
+            return [
+                'status' => $status_code,
+                'body' => $response_body,
+                'error' => $response->get_error_message()
+            ];
+        }
+
         error_log('RunCloud API Response Body: ' . var_export(json_decode($response_body, true), true ));
 
+        // Error due to failed API requests with failed response 
+        if ($status_code !== 201 && $status_code !== 200) {
+            return [
+                'status' => $status_code,
+                'body' => $response_body,
+                'error' => 'Failed API Request'
+            ];
+        }
+
+        // Successful API response 
         return [
             'status' => $status_code,
             'body' => $response_body

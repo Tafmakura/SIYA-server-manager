@@ -149,34 +149,51 @@ class ServerOrchestrator {
     
             // Log the full response regardless of success or failure
     
-            if (!$deploy_result) {
-                $error_message = sprintf(
-                    "Failed to deploy server to RunCloud%s%s" .
-                    "Full API Response:%s%s",
-                    PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
-                );
-                $subscription->add_order_note($error_message);
-                throw new \Exception($error_message);
-            }
-            
-            // Log the status and response body
-            error_log('Status: ' . $deploy_result['status']);
-            error_log('Response Body: ' . $deploy_result['body']);
 
-            /*
-            $success_message = sprintf(
-                "RunCloud deployment successful!%s%s" .
-                "Full API Response:%s%s",
-                PHP_EOL, PHP_EOL, PHP_EOL, $formatted_response
-            );
-            $subscription->add_order_note($success_message);
-    
-            // Update server metadata with RunCloud deployment details
-            $server_post->update_meta_data($post_id, [
-                'arsol_server_runcloud_server_id' => $deploy_result['id'] ?? null,
-                'arsol_server_deployment_date' => current_time('mysql')
-            ]);
-            */
+          // Handle the deployment result
+   
+
+            if (is_wp_error($deploy_result)) {
+                error_log('[SIYA Server Manager] RunCloud API Error: ' . $deploy_result->get_error_message());
+                $subscription->add_order_note(sprintf(
+                    "RunCloud deployment failed (WP_Error).\nError message: %s\nFull response: %s",
+                    $deploy_result->get_error_message(),
+                    print_r($deploy_result, true)
+                ));
+            } elseif (isset($deploy_result['status'])) {
+                if ($deploy_result['status'] == 201 || $deploy_result['status'] == 200) {
+                    error_log('[SIYA Server Manager] RunCloud deployment successful');
+                    $subscription->add_order_note(sprintf(
+                        "RunCloud deployment successful with status: %s\nResponse body: %s",
+                        $deploy_result['status'],
+                        $deploy_result['body']
+                    ));
+                    
+                    // Update server metadata with RunCloud deployment details
+                    $server_post->update_meta_data($post_id, [
+                        'arsol_server_runcloud_server_id' => json_decode($deploy_result['body'], true)['id'] ?? null,
+                        'arsol_server_deployment_date' => current_time('mysql')
+                    ]);
+                } else {
+                    error_log('[SIYA Server Manager] RunCloud deployment failed with status: ' . $deploy_result['status']);
+                    $subscription->add_order_note(sprintf(
+                        "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
+                        $deploy_result['status'],
+                        $deploy_result['body'],
+                        print_r($deploy_result, true)
+                    ));
+                }
+            } else {
+                error_log('[SIYA Server Manager] No status returned from RunCloud deployment');
+                $subscription->add_order_note(sprintf(
+                    "RunCloud deployment failed - no status returned\nResponse body: %s\nFull response: %s",
+                    $deploy_result['body'] ?? 'No body',
+                    print_r($deploy_result, true)
+                ));
+            }
+
+            
+          
             error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
     
         } catch (\Exception $e) {
