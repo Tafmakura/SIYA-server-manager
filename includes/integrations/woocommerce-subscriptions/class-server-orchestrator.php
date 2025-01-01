@@ -33,7 +33,7 @@ class ServerOrchestrator {
 
         // Add hooks for subscription status changes
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
-        add_action('woocommerce_subscription_status_active', array($this, 'force_on_hold_and_check_server_status'), 10, 1);
+        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
     }
 
     public function check_existing_server() {
@@ -91,8 +91,6 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
         }
 
-      
-      
         } catch (\Exception $e) {
             // Log the full error message
             error_log(sprintf(
@@ -261,9 +259,51 @@ class ServerOrchestrator {
             'arsol_server_deployed_status' => 1,
             'arsol_server_connection_status' => 0
         ]);
+       
+        $subscription->update_status('active');
 
         error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
+
+        // Refresh the page after processing
+        if (is_admin()) {
+            echo "<script type='text/javascript'>
+                    setTimeout(function(){
+                        location.reload();
+                    }, 1000);
+                </script>";
+        }
+    
     }
+
+
+    private function subscription_circuit_breaker($subscription) {
+        
+        // Get current status flags
+        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true); 
+
+        if($is_provisioned && $is_deployed){
+            return;
+        }
+
+        $subscription->update_status('on-hold');
+        $subscription->add_order_note(
+            "Subscription status set to on-hold. Server provisioning and deployment in progress."
+        );
+
+        $this->provision_and_deploy_server($subscription);
+
+        // Refresh the page after processing
+        echo "<script type='text/javascript'>
+                setTimeout(function(){
+                    location.reload();
+                }, 1000);
+            </script>";
+
+    }
+
+
+
 }
 
 
