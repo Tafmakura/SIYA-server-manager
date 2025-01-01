@@ -147,12 +147,12 @@ class ServerOrchestrator {
                 $provider
             );
     
-            // Log the full response regardless of success or failure
+        
     
 
-          // Handle the deployment result
-   
+          // Display RUNclousd Results 
 
+            // WP Error resulting in failure to send API Request
             if (is_wp_error($deploy_result)) {
                 error_log('[SIYA Server Manager] RunCloud API Error: ' . $deploy_result->get_error_message());
                 $subscription->add_order_note(sprintf(
@@ -160,6 +160,8 @@ class ServerOrchestrator {
                     $deploy_result->get_error_message(),
                     print_r($deploy_result, true)
                 ));
+
+            // Successful API response
             } elseif (isset($deploy_result['status'])) {
                 if ($deploy_result['status'] == 201 || $deploy_result['status'] == 200) {
                     error_log('[SIYA Server Manager] RunCloud deployment successful');
@@ -174,6 +176,8 @@ class ServerOrchestrator {
                         'arsol_server_runcloud_server_id' => json_decode($deploy_result['body'], true)['id'] ?? null,
                         'arsol_server_deployment_date' => current_time('mysql')
                     ]);
+
+                // Error due to failed API requests with failed response
                 } else {
                     error_log('[SIYA Server Manager] RunCloud deployment failed with status: ' . $deploy_result['status']);
                     $subscription->add_order_note(sprintf(
@@ -183,6 +187,8 @@ class ServerOrchestrator {
                         print_r($deploy_result, true)
                     ));
                 }
+
+            // Failed with no status returned from RunCloud deployment
             } else {
                 error_log('[SIYA Server Manager] No status returned from RunCloud deployment');
                 $subscription->add_order_note(sprintf(
