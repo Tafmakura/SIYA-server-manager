@@ -6,6 +6,7 @@ class ServerPost {
     private $post_id;
   
     public $server_post_name;
+    public $server_post_status; 
     public $server_post_creation_date;
     public $server_deployed_id;
     public $server_provisioned_id;
@@ -30,6 +31,7 @@ class ServerPost {
     public $server_provisioned_ipv4;
     public $server_provisioned_ipv6;
     public $server_provisioned_root_password;
+    public $server_connection_status;
 
     public function __construct($post_id = null) {
         if (is_int($post_id) && $post_id > 0) {
@@ -40,6 +42,7 @@ class ServerPost {
 
     private function load_meta_data() {
         $this->server_post_name = get_post_meta($this->post_id, 'arsol_server_post_name', true);
+        $this->server_post_status = get_post_meta($this->post_id, 'arsol_server_post_status', true);  // Added new field
         $this->server_deployed_id = get_post_meta($this->post_id, 'arsol_server_deployed_id', true);
         $this->server_provisioned_id = get_post_meta($this->post_id, 'arsol_server_provisioned_id', true);
         $this->server_subscription_id = get_post_meta($this->post_id,  'arsol_server_subscription_id', true);
@@ -63,6 +66,7 @@ class ServerPost {
         $this->server_provisioned_ipv4 = get_post_meta($this->post_id, 'arsol_server_ipv4', true);
         $this->server_provisioned_ipv6 = get_post_meta($this->post_id, 'arsol_server_ipv6', true);
         $this->server_provisioned_root_password = get_post_meta($this->post_id, 'arsol_server_root_password', true);
+        $this->server_connection_status = get_post_meta($this->post_id, 'arsol_server_connection_status', true);
     }
     
     public function create_server_post($subscription_id) {
@@ -135,6 +139,7 @@ class ServerPost {
         $this->post_id = $post_id;
         
         $meta_data = array(
+            'arsol_server_post_status' => get_post_meta($post_id, 'arsol_server_post_status', true),  // Added new field
             'arsol_server_provisioned_id' => get_post_meta($post_id, 'arsol_server_provisioned_id', true),
             'arsol_server_provisioned_os' => get_post_meta($post_id, 'arsol_server_provisioned_os', true),
             'arsol_server_provisioned_os_version' => get_post_meta($post_id, 'arsol_server_provisioned_os_version', true),
@@ -161,6 +166,7 @@ class ServerPost {
             'arsol_server_type' => get_post_meta($post_id, 'arsol_server_type', true),
             'arsol_server_manager' => get_post_meta($post_id, 'arsol_server_manager', true),
             'arsol_server_status_date' => get_post_meta($post_id, 'arsol_server_status_date', true),
+            'arsol_server_connection_status' => get_post_meta($post_id, 'arsol_server_connection_status', true),
         );
         
         return array_filter($meta_data);
