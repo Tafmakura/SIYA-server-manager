@@ -18,6 +18,7 @@ class ServerOrchestrator {
     public $server_plan_identifier;
     private $runcloud;
     private $hetzner;
+    private $server_post_id;
 
     public function __construct($subscription) {
         $this->subscription = $subscription;
@@ -89,6 +90,7 @@ class ServerOrchestrator {
         $server_post = new ServerPost();
         $server_name = 'ARSOL' . $this->subscription_id;
         $post_id = $server_post->create_server_post($this->subscription_id);
+        $this->server_post_id = $post_id;
 
         // Update server post meta
         $server_post->update_meta_data($post_id, [
@@ -162,7 +164,7 @@ class ServerOrchestrator {
             'arsol_server_connection_status' => 'provisioning'
         ];
 
-        $server_post->update_meta_data($server_post->get_post_id(), $metadata);
+        $server_post->update_meta_data($this->server_post_id, $metadata);
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
             PHP_EOL,
