@@ -308,7 +308,7 @@ class ServerOrchestrator {
         );
 
         error_log('[SIYA Server Manager] Initiating server provision and deploy process');
-       // $this->provision_and_deploy_server($subscription);
+        $this->provision_and_deploy_server($subscription);
 
         error_log('[SIYA Server Manager] Circuit breaker process completed');
 
