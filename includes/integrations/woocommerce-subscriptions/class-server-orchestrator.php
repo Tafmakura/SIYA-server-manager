@@ -52,6 +52,8 @@ class ServerOrchestrator {
         if ($existing_server_post) {
             $this->server_post_id = $existing_server_post->ID;
         }
+
+        $this->subscription_id = $subscription->get_id();
    
         // Get current status flags
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
