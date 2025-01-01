@@ -18,24 +18,17 @@ class ServerOrchestrator {
     public $server_plan_identifier;
     private $runcloud;
     private $hetzner;
- 
 
     public function __construct($subscription) {
         $this->subscription = $subscription;
         $this->subscription_id = $subscription->get_id();
+
+        // Check if server post already exists
+        error_log('[SIYA Server Manager] Checking for existing server');
         
-        // Debug logging
-        error_log(sprintf(
-            '[SIYA Server Manager] Constructor - Subscription ID: %s',
-            $this->subscription_id
-        ));
-        
-        $this->runcloud = new Runcloud();
-        $this->hetzner = new Hetzner();
-        
-        if ($this->subscription_id) {
-            error_log('[SIYA Server Manager] Checking for existing server');
-            $this->check_existing_server();
+        $existing_server_post = $this->check_existing_server();
+        if ($existing_server_post) {
+            $this->server_post_id = $existing_server_post->ID;
         }
 
         // Add hooks for subscription status changes
@@ -51,20 +44,55 @@ class ServerOrchestrator {
             $this->server_provider = get_post_meta($server->ID, 'arsol_server_provider', true);
             $this->server_manager = get_post_meta($server->ID, 'arsol_server_manager', true);
             $this->server_plan_identifier = get_post_meta($server->ID, 'arsol_server_plan_identifier', true);
+            return true;
         }
+        return false;
     }
 
     public function provision_and_deploy_server($subscription) {
         try {
-            // Step 1 and 2: Create server post and update server metadata
+      
+        // Get current status flags
+        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+        
+        // Step 1: Create server post only if it doesn't exist
+        if (!$this->server_post_id) {
             $server_post = $this->create_and_update_server_post($subscription);
+        } else {
+            error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
+            $this->server_post_id = $existing_server->ID;
+        }
 
-            // Step 3 and 4: Provision Hetzner server and update server post metadata
+        // Step 2: Provision Hetzner server if not already provisioned
+        $server_data = null;
+        if (!$is_provisioned) {
+            // Instantiate Hetzner only if needed
+            $this->hetzner = new Hetzner();  
             $server_data = $this->provision_hetzner_server($server_post, $subscription);
+        } else {
+            error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
+            // Get existing server data for Step 3
+            $server_data = [
+                'server' => [
+                    'public_net' => [
+                        'ipv4' => ['ip' => get_post_meta($this->server_post_id, 'arsol_server_ipv4', true)]
+                    ]
+                ]
+            ];
+        }
 
-            // Step 5 and 6: Deploy to RunCloud and update server metadata
+        // Step 3: Deploy to RunCloud if not already deployed
+        if (!$is_deployed) {
+            // Instantiate RunCloud only if needed
+            $this->runcloud = new Runcloud();  
             $this->deploy_to_runcloud_and_update_metadata($server_post, $server_data, $subscription);
+        } else {
+            error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
+        }
 
+      
+      
         } catch (\Exception $e) {
             // Log the full error message
             error_log(sprintf(
@@ -85,7 +113,7 @@ class ServerOrchestrator {
         }
     }
 
-    // Step 1 and 2: Create server post and update server metadata
+    // Step 1: Create server post and update server metadata
     private function create_and_update_server_post($subscription) {
         $server_post = new ServerPost();
         $server_name = 'ARSOL' . $this->subscription_id;
@@ -115,7 +143,7 @@ class ServerOrchestrator {
         return $server_post;
     }
 
-    // Step 3 and 4: Provision Hetzner server and update server post metadata
+    // Step 2: Provision Hetzner server and update server post metadata
     private function provision_hetzner_server($server_post, $subscription) {
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_data = $this->hetzner->provision_server($server_name);
@@ -154,7 +182,7 @@ class ServerOrchestrator {
             'arsol_server_provider' => 'hetzner',
             'arsol_server_manager' => 'runcloud',
             'arsol_server_plan_identifier' => $this->server_plan_identifier,
-            'arsol_server_server_id' => $server['id'],
+            'arsol_provisioned_server_id' => $server['id'],
             'arsol_server_ipv4' => $server['public_net']['ipv4']['ip'],
             'arsol_server_ipv6' => $server['public_net']['ipv6']['ip'],
             'arsol_server_location' => $server['datacenter']['location']['name'],
@@ -174,7 +202,7 @@ class ServerOrchestrator {
         return $server_data;
     }
 
-    // Step 5 and 6: Deploy to RunCloud and update server metadata
+    // Step 3: Deploy to RunCloud and update server metadata
     private function deploy_to_runcloud_and_update_metadata($server_post, $server_data, $subscription) {
         error_log(sprintf('[SIYA Server Manager] Step 5: Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
@@ -228,7 +256,7 @@ class ServerOrchestrator {
 
         // Update server metadata
         $server_post->update_meta_data($this->server_post_id, [
-            'arsol_server_runcloud_server_id' => $response_body_decoded['id'] ?? null,
+            'arsol_server_deployed_server_id' => $response_body_decoded['id'] ?? null,
             'arsol_server_deployment_date' => current_time('mysql'),
             'arsol_server_deployed_status' => 1,
             'arsol_server_connection_status' => 0
