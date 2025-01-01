@@ -54,11 +54,14 @@ class Runcloud /*implements ServerManager*/ {
             ]
         );
 
+        $status_code = wp_remote_retrieve_response_code($response); 
+        $response_body = wp_remote_retrieve_body($response);
+        
         error_log('RunCloud API Response Body: ' . var_export(json_decode($response_body, true), true ));
 
         return [
-            'status' => wp_remote_retrieve_response_code($response),
-            'body' => wp_remote_retrieve_body($response)
+            'status' => $status_code,
+            'body' => $response_body
         ];
     }
 
