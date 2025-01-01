@@ -277,21 +277,32 @@ class ServerOrchestrator {
 
 
     private function subscription_circuit_breaker($subscription) {
+        error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
         
         // Get current status flags
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true); 
 
+        error_log(sprintf('[SIYA Server Manager] Status check - Provisioned: %s, Deployed: %s', 
+            $is_provisioned ? 'true' : 'false',
+            $is_deployed ? 'true' : 'false'
+        ));
+
         if($is_provisioned && $is_deployed){
+            error_log('[SIYA Server Manager] Server is already provisioned and deployed, exiting circuit breaker');
             return;
         }
 
+        error_log('[SIYA Server Manager] Setting subscription to on-hold status');
         $subscription->update_status('on-hold');
         $subscription->add_order_note(
             "Subscription status set to on-hold. Server provisioning and deployment in progress."
         );
 
+        error_log('[SIYA Server Manager] Initiating server provision and deploy process');
         $this->provision_and_deploy_server($subscription);
+
+        error_log('[SIYA Server Manager] Circuit breaker process completed');
 
         // Refresh the page after processing
         echo "<script type='text/javascript'>
@@ -299,9 +310,7 @@ class ServerOrchestrator {
                     location.reload();
                 }, 1000);
             </script>";
-
     }
-
 
 
 }
