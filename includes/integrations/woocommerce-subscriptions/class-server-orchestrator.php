@@ -34,8 +34,10 @@ class ServerOrchestrator {
         if ($server) {
             error_log('[SIYA Server Manager] Found existing server: ' . $server->ID);
             return true;
+
+            error_log('[SIYA Server Manager] No existing servers found: ' . $server->ID);
         }
-        error_log('[SIYA Server Manager] No existing servers found: ' . $server->ID);
+
         return false;
     }
 
