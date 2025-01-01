@@ -86,6 +86,8 @@ class ServerOrchestrator {
                     "Failed to provision Hetzner server%s%sAPI Response:%s%s",
                     PHP_EOL, PHP_EOL, PHP_EOL, $error_body
                 );
+                $subscription->add_order_note($error_message);
+                $subscription->update_status('on-hold'); // Switch subscription status to on hold
                 throw new \Exception($error_message);
             }
             $server = $server_data['server'];
@@ -148,7 +150,7 @@ class ServerOrchestrator {
                 $provider
             );
 
-            // Display RunCloud Results
+            // Display RunCloud Results \/ \/ \/
 
             // WP Error resulting in failure to send API Request
             if (is_wp_error($runcloud_response)) {
