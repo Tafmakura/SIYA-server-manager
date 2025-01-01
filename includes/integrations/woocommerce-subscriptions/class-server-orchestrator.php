@@ -159,9 +159,9 @@ class ServerOrchestrator {
                 throw new \Exception($error_message);
             }
             
-            // Print the status and response body 
-            echo 'Status: ' . $deploy_result['status'] . PHP_EOL; 
-            echo 'Response Body: ' . $deploy_result['body'] . PHP_EOL;
+            // Log the status and response body
+            error_log('Status: ' . $deploy_result['status']);
+            error_log('Response Body: ' . $deploy_result['body']);
 
             /*
             $success_message = sprintf(
