@@ -9,16 +9,16 @@ use Siya\Integrations\ServerProviders\Hetzner\Hetzner;
 class ServerOrchestrator {
    
     const POST_TYPE = 'server';
-    const META_PREFIX = 'arsol_server_';
 
     private $subscription;
     private $subscription_id;
+    private $server_post_id;
     public $server_provider;
     public $server_manager;
     public $server_plan_identifier;
     private $runcloud;
     private $hetzner;
-    private $server_post_id;
+ 
 
     public function __construct($subscription) {
         $this->subscription = $subscription;
@@ -227,7 +227,7 @@ class ServerOrchestrator {
         ));
 
         // Update server metadata
-        $server_post->update_meta_data($server_post->get_post_id(), [
+        $server_post->update_meta_data($this->server_post_id, [
             'arsol_server_runcloud_server_id' => $response_body_decoded['id'] ?? null,
             'arsol_server_deployment_date' => current_time('mysql'),
             'arsol_server_deployed_status' => 1,
