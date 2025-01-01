@@ -123,44 +123,13 @@ class ServerPost {
     public function update_meta_data($post_id, array $meta_data) {
         $this->post_id = $post_id;
         
-        $defaults = array(
-            'arsol_server_post_name' => '',
-            'arsol_server_subscription_id' => '',
-            'arsol_server_provisioned_id' => '',
-            'arsol_server_os' => '',
-            'arsol_server_os_version' => '',
-            'arsol_server_region' => '',
-            'arsol_server_provider' => '',
-            'arsol_server_provisioned_name' => '',
-            'arsol_server_provisioned_status' => '',
-            'arsol_server_provisioned_date' => '',
-            'arsol_server_ipv4' => '',
-            'arsol_server_ipv6' => '',
-            'arsol_server_root_password' => '',
-            'arsol_server_provisioned_applications' => 0,
-            'arsol_server_provisioned_staging_sites' => 0,
-            'arsol_server_deployed_id' => '',
-            'arsol_server_deployed_applications' => 0,
-            'arsol_server_deployed_staging_sites' => 0,
-            'arsol_server_deployment_manager' => '',
-            'arsol_server_deployed_name' => '',
-            'arsol_server_deployed_status' => '',
-            'arsol_server_deployed_date' => '',
-            'arsol_server_max_applications' => 0,
-            'arsol_server_max_staging_sites' => 0,
-            'arsol_server_type' => '',
-            'arsol_server_manager' => '',
-            'arsol_server_status_date' => current_time('mysql'),
-        );
-        
-        $data = wp_parse_args($meta_data, $defaults);
-        
-        foreach ($data as $key => $value) {
+        foreach ($meta_data as $key => $value) {
             update_post_meta($post_id, $key, sanitize_text_field($value));
         }
         
         return true;
     }
+    
 
     public function get_meta_data($post_id) {
         $this->post_id = $post_id;
