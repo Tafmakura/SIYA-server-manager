@@ -80,10 +80,15 @@ class ServerPost {
 
         $post_id = wp_insert_post($post_data);
 
+        error_log('[SIYA Server Manager] Created server post with ID: ' . $post_id);
+
         if (!is_wp_error($post_id)) {
             update_post_meta($post_id, 'arsol_server_post_name', $server_name);
             update_post_meta($post_id, 'arsol_server_subscription_id', $subscription_id);
             update_post_meta($post_id, 'arsol_server_post_creation_date', current_time('mysql'));
+
+            error_log('[SIYA Server Manager] Updated server post meta data ' . $post_id);
+
         }
 
         return $post_id;
