@@ -24,6 +24,9 @@ class Product {
         add_filter('woocommerce_product_data_tabs', [$this, 'add_custom_product_admin_tab']);
         add_action('woocommerce_product_data_panels', [$this, 'add_custom_product_admin_tab_content']);
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_product_admin_tab_content']);
+        
+        // Enqueue custom script for admin
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
     }
 
     public function add_arsol_server_product_option($product_type_options) {
@@ -72,4 +75,9 @@ class Product {
         $custom_field = isset($_POST['_custom_field']) ? sanitize_text_field($_POST['_custom_field']) : '';
         update_post_meta($post_id, '_custom_field', $custom_field);
     }
+
+    public function enqueue_admin_scripts() {
+        wp_enqueue_script('custom-admin-js', plugins_url('/custom-admin.js', __FILE__), array('jquery'), '1.0.0', true);
+    }
 }
+
