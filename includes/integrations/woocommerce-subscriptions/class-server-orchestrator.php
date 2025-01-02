@@ -27,9 +27,9 @@ class ServerOrchestrator {
 
     }
 
-    public function check_existing_server($subscription) {
-        $server_post_class_instance = new ServerPost();
-        $server_post = $server_post_class_instance->get_server_post_by_subscription($subscription);
+    public function check_existing_server($server_post_instance,$subscription) {
+       
+        $server_post_instance = $server_post_class_instance->get_server_post_by_subscription($subscription);
        
        
         if ($server_post) {
@@ -47,16 +47,16 @@ class ServerOrchestrator {
         $this->subscription = $subscription;
         $this->subscription_id = $subscription->get_id();
 
-        $server_post = new ServerPost();
+        $server_post_instance = new ServerPost();
        
         // Step 1: Create server post only if it doesn't exist
 
         // Check if server post already exists
-        $existing_server_post = $this->check_existing_server($subscription);
+        $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
 
         if (!$existing_server_post) {
             error_log('[SIYA Server Manager] creating new server post');
-            $server_post = $this->create_and_update_server_post($subscription);
+            $server_post = $this->create_and_update_server_post($server_post_instance, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
             $this->server_post_id = $existing_server_post->post_id;
@@ -95,7 +95,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Not deployed, skipping Step 3');
             // Instantiate RunCloud only if needed
             $this->runcloud = new Runcloud();  
-            $this->deploy_to_runcloud_and_update_metadata($this->server_post_id, $server_data, $subscription);
+            $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
         }
@@ -121,9 +121,7 @@ class ServerOrchestrator {
     }
 
     // Step 1: Create server post and update server metadata
-    private function create_and_update_server_post($subscription) {
-        
-        $server_post = new ServerPost();
+    private function create_and_update_server_post($server_post_instance, $subscription) {
 
         $post_id = $server_post->create_server_post($this->subscription_id);
         
@@ -160,7 +158,7 @@ class ServerOrchestrator {
     }
 
     // Step 2: Provision Hetzner server and update server post metadata
-    private function provision_hetzner_server($server_post, $subscription) {
+    private function provision_hetzner_server($server_post_instance, $subscription) {
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_data = $this->hetzner->provision_server($server_name);
 
@@ -208,7 +206,7 @@ class ServerOrchestrator {
             'arsol_server_connection_status' => 'provisioning'
         ];
         error_log('[SIYA Server Manager] Server already deployed, skipping Step 3>>>>>>>>>>>>>>>>>>>'.$this->server_post_id);
-        $server_post->update_meta_data($this->server_post_id, $metadata);
+        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
             PHP_EOL,
@@ -219,7 +217,7 @@ class ServerOrchestrator {
     }
 
     // Step 3: Deploy to RunCloud and update server metadata
-    private function deploy_to_runcloud_and_update_metadata($server_post, $server_data, $subscription) {
+    private function deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription) {
         error_log(sprintf('[SIYA Server Manager] Step 5: Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
         $server = $server_data['server'];
@@ -279,8 +277,7 @@ class ServerOrchestrator {
             'arsol_server_connection_status' => 0
         ];
         
-        $server_post = new ServerPost();
-        $server_post->update_meta_data($this->server_post_id, $metadata);
+        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
    
        
         $subscription->update_status('active');
@@ -299,7 +296,7 @@ class ServerOrchestrator {
     }
 
 
-    public function subscription_circuit_breaker($subscription) {
+    public function subscription_circuit_breaker($server_post_instance, $subscription) {
        
         error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
 
