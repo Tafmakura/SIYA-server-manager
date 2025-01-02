@@ -139,9 +139,8 @@ class Product {
         $arsol_max_applications = isset($_POST['_arsol_max_applications']) ? intval($_POST['_arsol_max_applications']) : '';
         $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
         $arsol_wordpress_server = isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no';
-        $arsol_wordpress_ecommerce_server = isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no';
+        $arsol_wordpress_ecommerce_server = isset($_POST['_arsol_ecommerce']) && ($_POST['_arsol_wordpress_server'] === 'yes') ? 'yes' : 'no';
         $arsol_server_type_slug = isset($_POST['_arsol_server_type_slug']) ? sanitize_text_field($_POST['_arsol_server_type_slug']) : '';
-
 
         update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
