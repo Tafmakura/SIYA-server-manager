@@ -126,6 +126,7 @@ class Product {
                     $('#woocommerce-product-data .arsol_server_settings_options').show();
                 } else {
                     $('#woocommerce-product-data .arsol_server_settings_options').hide();
+                    $('.wc-tabs .general_tab a').click();
                 }
             }
 
@@ -139,5 +140,6 @@ class Product {
         <?php
     }
 }
+
 
 
