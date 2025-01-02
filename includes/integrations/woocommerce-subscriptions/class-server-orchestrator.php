@@ -296,7 +296,7 @@ class ServerOrchestrator {
     }
 
 
-    public function subscription_circuit_breaker($server_post_instance, $subscription) {
+    public function subscription_circuit_breaker($subscription) {
        
         error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
 
