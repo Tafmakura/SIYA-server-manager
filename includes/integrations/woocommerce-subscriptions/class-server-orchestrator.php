@@ -27,20 +27,6 @@ class ServerOrchestrator {
 
     }
 
-    public function check_existing_server($server_post_instance, $subscription) {
-       
-        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
-       
-       
-        if ($server_post) {
-            error_log('[SIYA Server Manager] Found existing server: ' . $server_post->post_id);
-            return $server_post;
-        }
-
-        error_log('[SIYA Server Manager] No existing server found');
-        return false;
-    }
-
     public function provision_and_deploy_server($subscription) {
         try {
 
@@ -92,7 +78,7 @@ class ServerOrchestrator {
 
         // Step 3: Deploy to RunCloud if not already deployed
         if (!$is_deployed) {
-            error_log('[SIYA Server Manager] Not deployed, skipping Step 3');
+            error_log('[SIYA Server Manager] Not deployed, deploying to RunCloud');
             // Instantiate RunCloud only if needed
             $this->runcloud = new Runcloud();  
             $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
@@ -284,6 +270,7 @@ class ServerOrchestrator {
 
         error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
+        /* DELETE 
         // Refresh the page after processing
         if (is_admin()) {
             echo "<script type='text/javascript'>
@@ -292,13 +279,30 @@ class ServerOrchestrator {
                     }, 1000);
                 </script>";
         }
+        */
     
     }
 
 
+    public function check_existing_server($server_post_instance, $subscription) {
+       
+        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
+       
+       
+        if ($server_post) {
+            error_log('[SIYA Server Manager] Found existing server: ' . $server_post->post_id);
+            return $server_post;
+        }
+
+        error_log('[SIYA Server Manager] No existing server found');
+        return false;
+    }
+
+
+
     public function subscription_circuit_breaker($subscription) {
        
-        error_log('[SIYA Server Manager] Starting subscription circuit breaker check');
+        error_log('[SIYA Server Manager CB] Starting subscription circuit breaker check');
 
         if (!is_admin()) {
             return;
@@ -307,40 +311,43 @@ class ServerOrchestrator {
         $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
         $this->server_post_id = $server_post->post_id;
 
-        $subscription_id = $subscription->get_id();
+        $this->subscription_id = $subscription->get_id();
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
 
-        error_log(sprintf('[SIYA Server Manager] Status check - Provisioned: %s, Deployed: %s', 
+        error_log(sprintf('[SIYA Server Manager CB] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
             $is_deployed ? 'true' : 'false'
         ));
 
         if($is_provisioned && $is_deployed){
-            error_log('[SIYA Server Manager] Server is already provisioned and deployed, exiting circuit breaker');
+            error_log('[SIYA Server Manager CB] Server is provisioned and deployed, no need to disconnect');
             return;
-        }
+        
+        }else{
 
-        error_log('[SIYA Server Manager] Setting subscription to on-hold status');
-        $subscription->update_status('on-hold');
-        $subscription->add_order_note(
-            "Subscription status set to on-hold. Server provisioning and deployment in progress."
-        );
+            error_log('[SIYA Server Manager  CB] Setting subscription to on-hold status');
+            $subscription->add_order_note(
+                "Subscription status set to on-hold. Server provisioning and deployment in progress."
+            );
+    
+            $subscription->update_status('on-hold');
 
-        error_log('[SIYA Server Manager] Initiating server provision and deploy process');
-        $this->provision_and_deploy_server($subscription);
+            error_log('[SIYA Server Manager CB] Initiating server provision and deploy process');
+            $this->provision_and_deploy_server($subscription);
 
-        error_log('[SIYA Server Manager] Circuit breaker process completed');
 
-        // Refresh the page after processing
-        echo "<script type='text/javascript'>
+            // Refresh the page after processing
+            echo "<script type='text/javascript'>
                 setTimeout(function(){
                     location.reload();
                 }, 1000);
             </script>";
-      
-    }
 
+
+        }
+
+    }
 
 }
 
