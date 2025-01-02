@@ -78,9 +78,7 @@ class Product {
             'label'       => __('Server Type Slug', 'woocommerce'),
             'description' => __('Enter the server type slug.', 'woocommerce'),
             'desc_tip'    => 'true',
-            'custom_attributes' => array(
-                'class' => 'arsol_server_type_slug_field'
-            ),
+            'class'       => 'arsol_server_type_slug_field'
         ));
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
@@ -140,8 +138,6 @@ class Product {
         // If WordPress Server is selected, nullify Server Type Slug
         if ($arsol_wordpress_server === 'yes') {
             $arsol_server_type_slug = '';
-        } else {
-            $arsol_ecommerce = 'no';
         }
 
         update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
