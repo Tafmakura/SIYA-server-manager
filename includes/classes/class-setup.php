@@ -56,7 +56,7 @@ class Setup {
             $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
         }
        // if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
-            $orchestrator = new \Siya\Integrations\WooCommerce\Product();
+            $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
       //  }
 
     }
