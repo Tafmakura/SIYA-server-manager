@@ -59,7 +59,7 @@ class Product {
     }
 
     public function add_arsol_server_settings_tab_content() {
-        echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel arsol_server_settings_options">';
+        echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">';
         echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_server_provider_slug',
