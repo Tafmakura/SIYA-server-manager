@@ -145,7 +145,9 @@ class Product {
         // If WordPress Server is selected, nullify Server Type Slug and save WordPress Ecommerce
         if ($arsol_wordpress_server === 'yes') {
             $arsol_server_type_slug = '';
-        } else {
+        } 
+        
+        if ($arsol_wordpress_server === 'no')  {
             $arsol_wordpress_ecommerce_server = 'no';
         }
 
