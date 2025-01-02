@@ -26,7 +26,7 @@ class Product {
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_product_admin_tab_content']);
         
         // Enqueue custom script for admin
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
+        add_action('admin_footer', [$this, 'add_admin_footer_script']);
     }
 
     public function add_arsol_server_product_option($product_type_options) {
@@ -59,7 +59,7 @@ class Product {
     }
 
     public function add_custom_product_admin_tab_content() {
-        echo '<div id="custom_product_data" class="panel woocommerce_options_panel">';
+        echo '<div id="custom_product_data" class="panel woocommerce_options_panel custom_tab_options">';
         echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
             'id'          => '_custom_field',
@@ -76,8 +76,25 @@ class Product {
         update_post_meta($post_id, '_custom_field', $custom_field);
     }
 
-    public function enqueue_admin_scripts() {
-        wp_enqueue_script('custom-admin-js', plugins_url('/custom-admin.js', __FILE__), array('jquery'), '1.0.0', true);
+    public function add_admin_footer_script() {
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            function toggle_custom_tab() {
+                if ($('#_arsol_server').is(':checked')) {
+                    $('#woocommerce-product-data .custom_tab_options').show();
+                } else {
+                    $('#woocommerce-product-data .custom_tab_options').hide();
+                }
+            }
+
+            toggle_custom_tab();
+
+            $('#_arsol_server').on('change', function() {
+                toggle_custom_tab();
+            });
+        });
+        </script>
+        <?php
     }
 }
-
