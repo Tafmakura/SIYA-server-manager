@@ -28,9 +28,9 @@ class Product {
     public function add_e_visa_product_option($product_type_options) {
         // Add your custom product type options here
         $product_type_options['evisa'] = array(
-            'id'            => '_evisa',
+            'id'            => '_arsol_server',
             'wrapper_class' => 'show_if_simple show_if_variable',
-            'label'         => __( 'eVisa', 'woocommerce' ),
+            'label'         => __( 'Server', 'woocommerce' ),
             'description'   => __( '', 'woocommerce' ),
             'default'       => 'no'
         );
@@ -40,7 +40,7 @@ class Product {
     }
 
     public function save_evisa_option_fields( $post_id ) {
-        $is_e_visa = isset( $_POST['_evisa'] ) ? 'yes' : 'no';
-        update_post_meta( $post_id, '_evisa', $is_e_visa );
+        $is_e_visa = isset( $_POST['_arsol_server'] ) ? 'yes' : 'no';
+        update_post_meta( $post_id, '_arsol_server', $is_e_visa );
     }
 }
