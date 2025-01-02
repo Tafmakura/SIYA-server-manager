@@ -303,7 +303,7 @@ class ServerOrchestrator {
         if (!is_admin()) {
             return;
         }
-
+        $server_post_instance = new ServerPost;
         $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
         $this->server_post_id = $server_post->post_id;
 
