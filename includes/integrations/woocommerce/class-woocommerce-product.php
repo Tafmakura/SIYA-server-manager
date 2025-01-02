@@ -73,13 +73,14 @@ class Product {
             'description' => __('Enter the server plan slug.', 'woocommerce'),
             'desc_tip'    => 'true',
         ));
+        echo '<div class="arsol_server_type_slug_field">';
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_server_type_slug',
             'label'       => __('Server Type Slug', 'woocommerce'),
             'description' => __('Enter the server type slug.', 'woocommerce'),
             'desc_tip'    => 'true',
-            'class'       => 'arsol_server_type_slug_field'
         ));
+        echo '</div>';
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
             'label'       => __('Maximum Applications', 'woocommerce'),
@@ -193,5 +194,6 @@ class Product {
         <?php
     }
 }
+
 
 
