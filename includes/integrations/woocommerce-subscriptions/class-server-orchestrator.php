@@ -205,6 +205,7 @@ class ServerOrchestrator {
             'arsol_server_provisioned_status' => 1,
             'arsol_server_connection_status' => 'provisioning'
         ];
+        error_log('[SIYA Server Manager] Server already deployed, skipping Step 3>>>>>>>>>>>>>>>>>>>'.$this->server_post_id);
         $server_post->update_meta_data($this->server_post_id, $metadata);
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
