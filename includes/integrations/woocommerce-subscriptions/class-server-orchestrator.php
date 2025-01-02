@@ -41,7 +41,7 @@ class ServerOrchestrator {
         return false;
     }
 
-    public function provision_and_deploy_server($server_post_instance, $subscription) {
+    public function provision_and_deploy_server($subscription) {
         try {
 
         $this->subscription = $subscription;
