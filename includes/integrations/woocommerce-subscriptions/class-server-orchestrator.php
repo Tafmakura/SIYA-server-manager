@@ -123,7 +123,7 @@ class ServerOrchestrator {
     // Step 1: Create server post and update server metadata
     private function create_and_update_server_post($server_post_instance, $subscription) {
 
-        $post_id = $server_post->create_server_post($this->subscription_id);
+        $post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post meta
         if ($post_id) {
@@ -135,7 +135,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Created server post with ID: ' . $this->server_post_id);
 
             $server_name = 'ARSOL' . $this->subscription_id;
-            $server_post->update_meta_data($this->server_post_id, [
+            $server_post_instance->update_meta_data($this->server_post_id, [
                 'arsol_server_subscription_id' => $this->subscription_id,
                 'arsol_server_post_name' => $server_name,
                 'arsol_server_post_creation_date' => current_time('mysql'),
@@ -144,7 +144,7 @@ class ServerOrchestrator {
 
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
-            return $server_post;
+            return true;
 
         } elseif ($post_id instanceof \WP_Error) {
             $subscription->add_order_note(
