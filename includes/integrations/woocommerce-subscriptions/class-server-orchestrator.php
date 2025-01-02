@@ -46,6 +46,8 @@ class ServerOrchestrator {
 
         $this->subscription = $subscription;
         $this->subscription_id = $subscription->get_id();
+
+        $server_post = new ServerPost();
        
         // Step 1: Create server post only if it doesn't exist
 
