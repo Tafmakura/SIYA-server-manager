@@ -139,12 +139,12 @@ class ServerOrchestrator {
                 'arsol_server_subscription_id' => $this->subscription_id,
                 'arsol_server_post_name' => $server_name,
                 'arsol_server_post_creation_date' => current_time('mysql'),
-                'arsol_server_provisioned_status' => 1,
+                'arsol_server_post_status' => 1,
             ]);
 
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
-
+            return $server_post;
 
         } elseif ($post_id instanceof \WP_Error) {
             $subscription->add_order_note(
@@ -154,7 +154,7 @@ class ServerOrchestrator {
             throw new \Exception('Failed to create server post');
         }
 
-        return $server_post;
+        
     }
 
     // Step 2: Provision Hetzner server and update server post metadata
