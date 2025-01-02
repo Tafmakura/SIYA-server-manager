@@ -139,15 +139,22 @@ class Product {
         $arsol_max_applications = isset($_POST['_arsol_max_applications']) ? intval($_POST['_arsol_max_applications']) : '';
         $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
         $arsol_wordpress_server = isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no';
-        $arsol_ecommerce = isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no';
+        $arsol_wordpress_ecommerce_server = isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no';
         $arsol_server_type_slug = isset($_POST['_arsol_server_type_slug']) ? sanitize_text_field($_POST['_arsol_server_type_slug']) : '';
+
+        // If WordPress Server is selected, nullify Server Type Slug and save WordPress Ecommerce
+        if ($arsol_wordpress_server === 'yes') {
+            $arsol_server_type_slug = '';
+        } else {
+            $arsol_wordpress_ecommerce_server = 'no';
+        }
 
         update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
         update_post_meta($post_id, '_arsol_max_applications', $arsol_max_applications);
         update_post_meta($post_id, '_arsol_max_staging_sites', $arsol_max_staging_sites);
         update_post_meta($post_id, '_arsol_wordpress_server', $arsol_wordpress_server);
-        update_post_meta($post_id, '_arsol_wordpress_ecommerce_server', $arsol_ecommerce);
+        update_post_meta($post_id, '_arsol_wordpress_ecommerce', $arsol_wordpress_ecommerce_server);
         update_post_meta($post_id, '_arsol_server_type_slug', $arsol_server_type_slug);
     }
 
@@ -195,7 +202,3 @@ class Product {
         <?php
     }
 }
-
-
-
-
