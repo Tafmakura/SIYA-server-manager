@@ -26,7 +26,7 @@ class Product {
         $product_type_options['arsol_server'] = array(
             'id'            => '_arsol_server',
             'wrapper_class' => 'show_if_simple show_if_variable',
-            'label'         => __('Arsol Server', 'woocommerce'),
+            'label'         => __('ARSOl Server', 'woocommerce'),
             'description'   => __('', 'woocommerce'),
             'default'       => 'no'
         );
@@ -39,7 +39,6 @@ class Product {
         update_post_meta($post_id, '_arsol_server', $is_arsol_server);
     }
 }
-
 
 
 
