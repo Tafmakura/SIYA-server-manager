@@ -36,7 +36,7 @@ class Product {
 
     public function save_arsol_server_option_fields($post_id) {
         $is_arsol_server = isset($_POST['_is_arsol_server']) ? 'yes' : 'no';
-        update_post_meta($post_id, 'ddd_is_arsol_server', $is_arsol_server);
+        update_post_meta($post_id, '_is_arsol_server', $is_arsol_server);
     }
 }
 
