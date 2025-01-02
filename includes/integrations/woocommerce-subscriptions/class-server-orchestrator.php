@@ -301,8 +301,8 @@ class ServerOrchestrator {
         }
 
         $subscription_id = $subscription->get_id();
-        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
-        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
 
         error_log(sprintf('[SIYA Server Manager] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
