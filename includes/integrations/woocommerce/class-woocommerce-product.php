@@ -79,6 +79,12 @@ class Product {
             'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
             'desc_tip'    => 'true',
             'type'        => 'number',
+            'custom_attributes' => array(
+                'min' => '0',
+                'max' => '999',
+                'step' => '1',
+                'style' => 'width: 60px;',  // Enough for 3 characters
+            ),
         ));
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_staging_sites',
@@ -86,6 +92,12 @@ class Product {
             'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
             'desc_tip'    => 'true',
             'type'        => 'number',
+            'custom_attributes' => array(
+                'min' => '0',
+                'max' => '999',
+                'step' => '1',
+                'style' => 'width: 60px;',  // Enough for 3 characters
+            ),
         ));
         echo '</div>';
         echo '</div>';
@@ -125,3 +137,4 @@ class Product {
         <?php
     }
 }
+
