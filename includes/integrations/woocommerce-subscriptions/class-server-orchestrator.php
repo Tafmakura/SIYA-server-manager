@@ -12,7 +12,7 @@ class ServerOrchestrator {
 
     private $subscription;
     private $subscription_id;
-    private $server_post_id;
+    public $server_post_id;
     public $server_provider;
     public $server_manager;
     public $server_plan_identifier;
