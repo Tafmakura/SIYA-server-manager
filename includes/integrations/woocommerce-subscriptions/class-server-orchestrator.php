@@ -304,6 +304,9 @@ class ServerOrchestrator {
             return;
         }
 
+        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
+        $this->server_post_id = $server_post->post_id;
+
         $subscription_id = $subscription->get_id();
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
