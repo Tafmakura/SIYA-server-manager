@@ -27,13 +27,13 @@ class ServerOrchestrator {
 
     }
 
-    public function check_existing_server() {
+    public function check_existing_server($subscription) {
         $server_post_class_instance = new ServerPost();
         $server_post = $server_post_class_instance->get_server_post_by_subscription($subscription);
        
        
         if ($server_post) {
-            error_log('[SIYA Server Manager] Found existing server: ' . $server->post_id);
+            error_log('[SIYA Server Manager] Found existing server: ' . $server_post->post_id);
             return $server_post;
         }
 
