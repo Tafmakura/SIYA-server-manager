@@ -103,14 +103,14 @@ class Product {
         ));
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
-            'label'       => __('WordPress', 'woocommerce'),
-            'description' => __('Enable WordPress server settings.', 'woocommerce'),
+            'label'       => __('WordPress Server', 'woocommerce'),
+            'description' => __('', 'woocommerce'),
         ));
         echo '<div class="arsol_ecommerce_field">';
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_ecommerce',
-            'label'       => __('Ecommerce', 'woocommerce'),
-            'description' => __('Enable ecommerce for this server.', 'woocommerce'),
+            'label'       => __('WordPress Ecommerce', 'woocommerce'),
+            'description' => __('', 'woocommerce'),
         ));
         echo '</div>';
         echo '</div>';
@@ -124,6 +124,11 @@ class Product {
         $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
         $arsol_wordpress_server = isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no';
         $arsol_ecommerce = isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no';
+
+        // If WordPress Server is not selected, disable WordPress Ecommerce
+        if ($arsol_wordpress_server === 'no') {
+            $arsol_ecommerce = 'no';
+        }
 
         update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
@@ -154,8 +159,11 @@ class Product {
             function toggle_ecommerce_field() {
                 if ($('#_arsol_wordpress_server').is(':checked')) {
                     $('.arsol_ecommerce_field').show();
+                    $('#_arsol_ecommerce').prop('disabled', false);
                 } else {
                     $('.arsol_ecommerce_field').hide();
+                    $('#_arsol_ecommerce').prop('checked', false);
+                    $('#_arsol_ecommerce').prop('disabled', true);
                 }
             }
 
