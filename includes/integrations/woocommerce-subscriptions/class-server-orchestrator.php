@@ -278,8 +278,9 @@ class ServerOrchestrator {
             'arsol_server_deployed_status' => 1,
             'arsol_server_connection_status' => 0
         ];
+        
         $server_post->update_meta_data($this->server_post_id, $metadata);
-
+   
        
         $subscription->update_status('active');
 
