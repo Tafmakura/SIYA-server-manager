@@ -74,6 +74,15 @@ class Product {
             'desc_tip'    => 'true',
         ));
         woocommerce_wp_text_input(array(
+            'id'          => '_arsol_server_type_slug',
+            'label'       => __('Server Type Slug', 'woocommerce'),
+            'description' => __('Enter the server type slug.', 'woocommerce'),
+            'desc_tip'    => 'true',
+            'custom_attributes' => array(
+                'class' => 'arsol_server_type_slug_field'
+            ),
+        ));
+        woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
             'label'       => __('Maximum Applications', 'woocommerce'),
             'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
@@ -112,14 +121,6 @@ class Product {
             'id'          => '_arsol_ecommerce',
             'label'       => __('WordPress Ecommerce', 'woocommerce'),
             'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
-            'desc_tip'    => 'true',
-        ));
-        echo '</div>';
-        echo '<div class="arsol_server_type_slug_field">';
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_type_slug',
-            'label'       => __('Server Type Slug', 'woocommerce'),
-            'description' => __('Enter the server type slug.', 'woocommerce'),
             'desc_tip'    => 'true',
         ));
         echo '</div>';
@@ -197,4 +198,5 @@ class Product {
         <?php
     }
 }
+
 
