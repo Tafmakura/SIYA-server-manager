@@ -205,7 +205,6 @@ class ServerOrchestrator {
             'arsol_server_provisioned_status' => 1,
             'arsol_server_connection_status' => 'provisioning'
         ];
-
         $server_post->update_meta_data($this->server_post_id, $metadata);
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
@@ -269,12 +268,15 @@ class ServerOrchestrator {
         ));
 
         // Update server metadata
-        $server_post->update_meta_data($this->server_post_id, [
+
+        $metadata = [
             'arsol_server_deployed_server_id' => $response_body_decoded['id'] ?? null,
             'arsol_server_deployment_date' => current_time('mysql'),
             'arsol_server_deployed_status' => 1,
             'arsol_server_connection_status' => 0
-        ]);
+        ];
+        $server_post->update_meta_data($this->server_post_id, $metadata);
+
        
         $subscription->update_status('active');
 
