@@ -120,30 +120,39 @@ class ServerOrchestrator {
 
     // Step 1: Create server post and update server metadata
     private function create_and_update_server_post($subscription) {
+        
         $server_post = new ServerPost();
-        $server_name = 'ARSOL' . $this->subscription_id;
+
         $post_id = $server_post->create_server_post($this->subscription_id);
-        $this->server_post_id = $post_id;
-
+        
         // Update server post meta
-        $server_post->update_meta_data($post_id, [
-            'arsol_server_post_name' => $server_name,
-            'arsol_server_post_creation_date' => current_time('mysql'),
-            'arsol_server_subscription_id' => $this->subscription_id,
-            'arsol_server_status' => 'pending',
-            'arsol_server_connection_status' => 'initializing',
-            'arsol_server_provisioned_status' => 1,
-        ]);
+        if ($post_id) {
 
-        $subscription->add_order_note(
-            sprintf(
-                'Server post created successfully.%sPost ID: %d%sServer Name: %s',
-                PHP_EOL,
-                $post_id,
-                PHP_EOL,
-                $server_name
-            )
-        );
+            $this->server_post_id = $post_id;
+            $subscription->add_order_note(
+                'Server post created successfully with ID: ' . $this->server_post_id
+            );
+            error_log('[SIYA Server Manager] Created server post with ID: ' . $this->server_post_id);
+
+            $server_name = 'ARSOL' . $this->subscription_id;
+            $server_post->update_meta_data($this->server_post_id, [
+                'arsol_server_subscription_id' => $this->subscription_id,
+                'arsol_server_post_name' => $server_name,
+                'arsol_server_post_creation_date' => current_time('mysql'),
+                'arsol_server_provisioned_status' => 1,
+            ]);
+
+            error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
+
+
+
+        } elseif ($post_id instanceof \WP_Error) {
+            $subscription->add_order_note(
+                'Failed to create server post. Error: ' . $post_id->get_error_message()
+            );
+            $subscription->update_status('on-hold'); // Switch subscription status to on hold
+            throw new \Exception('Failed to create server post');
+        }
 
         return $server_post;
     }
@@ -292,9 +301,8 @@ class ServerOrchestrator {
         }
 
         $subscription_id = $subscription->get_id();
-        $post_id = get_post_meta($subscription_id, 'arsol_server_post_id', true);
-        $is_provisioned = get_post_meta($post_id, 'arsol_server_deployed_status', true);
-        $is_deployed = get_post_meta($post_id, 'arsol_server_provisioned_status', true);
+        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
 
         error_log(sprintf('[SIYA Server Manager] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
