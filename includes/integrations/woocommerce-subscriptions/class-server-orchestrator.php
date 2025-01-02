@@ -77,7 +77,7 @@ class ServerOrchestrator {
         if (!$is_provisioned) {
             // Instantiate Hetzner only if needed
             $this->hetzner = new Hetzner();  
-            $server_data = $this->provision_hetzner_server($server_post, $subscription);
+            $server_data = $this->provision_hetzner_server($server_post_instance, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
             // Get existing server data for Step 3
