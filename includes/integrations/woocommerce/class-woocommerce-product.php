@@ -142,14 +142,6 @@ class Product {
         $arsol_wordpress_ecommerce_server = isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no';
         $arsol_server_type_slug = isset($_POST['_arsol_server_type_slug']) ? sanitize_text_field($_POST['_arsol_server_type_slug']) : '';
 
-        // If WordPress Server is selected, nullify Server Type Slug and save WordPress Ecommerce
-        if ($arsol_wordpress_server === 'yes') {
-            $arsol_server_type_slug = '';
-        } 
-        
-        if ($arsol_wordpress_server === 'no')  {
-            $arsol_wordpress_ecommerce_server = 'no';
-        }
 
         update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
