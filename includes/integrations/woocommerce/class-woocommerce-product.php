@@ -26,7 +26,7 @@ class Product {
         $product_type_options['arsol_server'] = array(
             'id'            => '_arsol_server',
             'wrapper_class' => 'show_if_simple show_if_variable',
-            'label'         => __('ARSOl Server', 'woocommerce'),
+            'label'         => __('ARSOL Server', 'woocommerce'),
             'description'   => __('', 'woocommerce'),
             'default'       => 'no'
         );
@@ -36,7 +36,7 @@ class Product {
 
     public function save_arsol_server_option_fields($post_id) {
         $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no';
-        update_post_meta($post_id, '_arsol_server', $is_arsol_server);
+        update_post_meta($post_id, '_arsol_product_server', $is_arsol_server);
     }
 }
 
