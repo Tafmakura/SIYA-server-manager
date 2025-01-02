@@ -27,9 +27,9 @@ class ServerOrchestrator {
 
     }
 
-    public function check_existing_server($server_post_instance,$subscription) {
+    public function check_existing_server($server_post_instance, $subscription) {
        
-        $server_post_instance = $server_post_class_instance->get_server_post_by_subscription($subscription);
+        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
        
        
         if ($server_post) {
@@ -41,7 +41,7 @@ class ServerOrchestrator {
         return false;
     }
 
-    public function provision_and_deploy_server($subscription) {
+    public function provision_and_deploy_server($server_post_instance, $subscription) {
         try {
 
         $this->subscription = $subscription;
@@ -52,7 +52,7 @@ class ServerOrchestrator {
         // Step 1: Create server post only if it doesn't exist
 
         // Check if server post already exists
-        $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
+        $existing_server_post = $this->check_existing_server( $subscription);
 
         if (!$existing_server_post) {
             error_log('[SIYA Server Manager] creating new server post');
