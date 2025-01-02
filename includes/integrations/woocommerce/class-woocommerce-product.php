@@ -66,12 +66,18 @@ class Product {
             'label'       => __('Server Provider Slug', 'woocommerce'),
             'description' => __('Enter the server provider slug.', 'woocommerce'),
             'desc_tip'    => 'true',
+            'custom_attributes' => array(
+                'required' => 'required'
+            ),
         ));
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_server_plan_slug',
             'label'       => __('Server Plan Slug', 'woocommerce'),
             'description' => __('Enter the server plan slug.', 'woocommerce'),
             'desc_tip'    => 'true',
+            'custom_attributes' => array(
+                'required' => 'required'
+            ),
         ));
         echo '<div class="arsol_server_type_slug_field">';
         woocommerce_wp_text_input(array(
@@ -190,6 +196,7 @@ class Product {
                 toggle_ecommerce_and_server_type_fields();
             });
         });
+
         </script>
         <?php
     }
