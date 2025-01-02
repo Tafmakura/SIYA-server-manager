@@ -83,7 +83,8 @@ class Product {
                 'min' => '0',
                 'max' => '999',
                 'step' => '1',
-                'style' => 'width: 3em;',  // Enough for 3 characters
+                'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
+                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
             ),
         ));
         woocommerce_wp_text_input(array(
@@ -96,7 +97,8 @@ class Product {
                 'min' => '0',
                 'max' => '999',
                 'step' => '1',
-                'style' => 'width: 3em;',  // Enough for 3 characters
+                'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
+                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
             ),
         ));
         echo '</div>';
@@ -137,4 +139,5 @@ class Product {
         <?php
     }
 }
+
 
