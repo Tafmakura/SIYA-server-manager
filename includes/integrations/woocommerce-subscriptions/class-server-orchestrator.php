@@ -93,7 +93,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Not deployed, skipping Step 3');
             // Instantiate RunCloud only if needed
             $this->runcloud = new Runcloud();  
-            $this->deploy_to_runcloud_and_update_metadata($server_post, $server_data, $subscription);
+            $this->deploy_to_runcloud_and_update_metadata($this->server_post_id, $server_data, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
         }
