@@ -14,6 +14,7 @@ class ServerOrchestrator {
     private $subscription_id;
     public $server_post_id;
     public $server_provider;
+    public $server_product_id;
     public $server_manager;
     public $server_plan_identifier;
     private $runcloud;
@@ -32,6 +33,13 @@ class ServerOrchestrator {
 
         $this->subscription = $subscription;
         $this->subscription_id = $subscription->get_id();
+        $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+
+        if (!$this->$server_product_id) {
+            error_log('[SIYA Server Manager] No server product found in subscription, moving on');
+            return;
+        }
+
 
         $server_post_instance = new ServerPost();
        
@@ -42,7 +50,7 @@ class ServerOrchestrator {
 
         if (!$existing_server_post) {
             error_log('[SIYA Server Manager] creating new server post');
-            $server_post = $this->create_and_update_server_post($server_post_instance, $subscription);
+            $server_post = $this->create_and_update_server_post($server_product_id, $server_post_instance, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
             $this->server_post_id = $existing_server_post->post_id;
@@ -107,11 +115,11 @@ class ServerOrchestrator {
     }
 
     // Step 1: Create server post and update server metadata
-    private function create_and_update_server_post($server_post_instance, $subscription) {
+    private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
 
         $post_id = $server_post_instance->create_server_post($this->subscription_id);
         
-        // Update server post meta
+        // Update server post metadata
         if ($post_id) {
 
             $this->server_post_id = $post_id;
@@ -120,13 +128,24 @@ class ServerOrchestrator {
             );
             error_log('[SIYA Server Manager] Created server post with ID: ' . $this->server_post_id);
 
-            $server_name = 'ARSOL' . $this->subscription_id;
-            $server_post_instance->update_meta_data($this->server_post_id, [
+            // Get server product metadata
+            $server_product = wc_get_product($server_product_id);
+
+            // Update server post metadata
+            $metadata = [
                 'arsol_server_subscription_id' => $this->subscription_id,
-                'arsol_server_post_name' => $server_name,
+                'arsol_server_post_name' => 'ARSOL' . $this->subscription_id,
                 'arsol_server_post_creation_date' => current_time('mysql'),
                 'arsol_server_post_status' => 1,
-            ]);
+                'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
+                'arsol_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
+                'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
+                'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
+                'arsol_server_type_slug' => $server_product->get_meta('_arsol_server_type_slug', true),
+                'arsol_max_applications' => $server_product->get_meta('_arsol_max_applications', true),
+                'arsol_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true)
+            ];
+            $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
@@ -299,8 +318,59 @@ class ServerOrchestrator {
     }
 
 
+    public function extract_server_product_from_subscription($subscription) {
+        // Ensure the subscription object has the required method and is valid
+        if (!method_exists($subscription, 'get_items') || !$subscription->get_items()) {
+            return false; // Return false if no items are found
+        }
+
+        $matching_product_ids = [];
+
+        // Loop through all items in the subscription
+        foreach ($subscription->get_items() as $item) {
+            // Get the product associated with the item
+            $product = $item->get_product();
+
+            if (!$product) {
+                continue; // Skip if the product is not valid
+            }
+
+            // Check if the product has the desired metadata
+            $meta_value = $product->get_meta('_arsol_server', true); // Fetch single value
+            if (is_array($meta_value) && in_array('yes', $meta_value, true)) {
+                // Add the product ID to the list of matches
+                $matching_product_ids[] = $product->get_id();
+            }
+        }
+
+        // If no matching server products with '_arsol_server' set to 'yes' are found, return false
+        if (empty($matching_product_ids)) {
+            return false;
+        }
+
+        // If more than one matching product is found, add a subscription note and return null
+        if (count($matching_product_ids) > 1) {
+            // Add a note to the subscription explaining the multiple server products
+            $subscription->add_order_note('Multiple server products found with _arsol_server = yes. Please review the subscription.');
+
+            return null; // Return null when more than one matching product is found
+        }
+
+        // Return the product ID if there's exactly one match
+        return $matching_product_ids[0];
+    }
+
+
+
 
     public function subscription_circuit_breaker($subscription) {
+
+        $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+
+        if (!$this->$server_product_id) {
+            error_log('[SIYA Server Manager] No server product found in subscription');
+            return;
+        }
        
         error_log('[SIYA Server Manager CB] Starting subscription circuit breaker check');
 
