@@ -367,7 +367,7 @@ class ServerOrchestrator {
 
         $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
 
-        if (!$this->$server_product_id) {
+        if (!$this->server_product_id) {
             error_log('[SIYA Server Manager] No server product found in subscription');
             return;
         }
