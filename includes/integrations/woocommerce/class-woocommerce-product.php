@@ -20,10 +20,10 @@ class Product {
         add_action('woocommerce_process_product_meta_simple', [$this, 'save_arsol_server_option_fields']);
         add_action('woocommerce_process_product_meta_variable', [$this, 'save_arsol_server_option_fields']);
         
-        // Add custom tab
-        add_filter('woocommerce_product_data_tabs', [$this, 'add_custom_product_admin_tab']);
-        add_action('woocommerce_product_data_panels', [$this, 'add_custom_product_admin_tab_content']);
-        add_action('woocommerce_process_product_meta', [$this, 'save_custom_product_admin_tab_content']);
+        // Add Arsol Server Settings Tab
+        add_filter('woocommerce_product_data_tabs', [$this, 'add_arsol_server_settings_tab']);
+        add_action('woocommerce_product_data_panels', [$this, 'add_arsol_server_settings_tab_content']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_arsol_server_settings_tab_content']);
         
         // Enqueue custom script for admin
         add_action('admin_footer', [$this, 'add_admin_footer_script']);
@@ -47,10 +47,10 @@ class Product {
         update_post_meta($post_id, '_arsol_server', $is_arsol_server);
     }
 
-    public function add_custom_product_admin_tab($tabs) {
-        $tabs['custom_tab'] = array(
-            'label'    => __('Custom Tab', 'woocommerce'),
-            'target'   => 'custom_product_data',
+    public function add_arsol_server_settings_tab($tabs) {
+        $tabs['arsol_server_settings'] = array(
+            'label'    => __('Server Settings', 'woocommerce'),
+            'target'   => 'arsol_server_settings_data',
             'class'    => ['show_if_simple', 'show_if_variable'],
             'priority' => 50,
         );
@@ -58,11 +58,11 @@ class Product {
         return $tabs;
     }
 
-    public function add_custom_product_admin_tab_content() {
-        echo '<div id="custom_product_data" class="panel woocommerce_options_panel custom_tab_options">';
+    public function add_arsol_server_settings_tab_content() {
+        echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel arsol_server_settings_options">';
         echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
-            'id'          => '_custom_field',
+            'id'          => '_arsol_server_custom_field',
             'label'       => __('Custom Field', 'woocommerce'),
             'description' => __('Enter custom field data here.', 'woocommerce'),
             'desc_tip'    => 'true',
@@ -71,27 +71,27 @@ class Product {
         echo '</div>';
     }
 
-    public function save_custom_product_admin_tab_content($post_id) {
-        $custom_field = isset($_POST['_custom_field']) ? sanitize_text_field($_POST['_custom_field']) : '';
-        update_post_meta($post_id, '_custom_field', $custom_field);
+    public function save_arsol_server_settings_tab_content($post_id) {
+        $arsol_server_custom_field = isset($_POST['_arsol_server_custom_field']) ? sanitize_text_field($_POST['_arsol_server_custom_field']) : '';
+        update_post_meta($post_id, '_arsol_server_custom_field', $arsol_server_custom_field);
     }
 
     public function add_admin_footer_script() {
         ?>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
-            function toggle_custom_tab() {
+            function toggle_arsol_server_settings_tab() {
                 if ($('#_arsol_server').is(':checked')) {
-                    $('#woocommerce-product-data .custom_tab_options').show();
+                    $('#woocommerce-product-data .arsol_server_settings_options').show();
                 } else {
-                    $('#woocommerce-product-data .custom_tab_options').hide();
+                    $('#woocommerce-product-data .arsol_server_settings_options').hide();
                 }
             }
 
-            toggle_custom_tab();
+            toggle_arsol_server_settings_tab();
 
             $('#_arsol_server').on('change', function() {
-                toggle_custom_tab();
+                toggle_arsol_server_settings_tab();
             });
         });
         </script>
