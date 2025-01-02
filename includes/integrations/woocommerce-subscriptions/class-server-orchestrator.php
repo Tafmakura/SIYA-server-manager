@@ -61,8 +61,8 @@ class ServerOrchestrator {
         }
 
         // Check server status flags
-        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
-        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
 
         error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s', 
             $this->subscription_id,
@@ -90,6 +90,7 @@ class ServerOrchestrator {
 
         // Step 3: Deploy to RunCloud if not already deployed
         if (!$is_deployed) {
+            error_log('[SIYA Server Manager] Not deployed, skipping Step 3');
             // Instantiate RunCloud only if needed
             $this->runcloud = new Runcloud();  
             $this->deploy_to_runcloud_and_update_metadata($server_post, $server_data, $subscription);
