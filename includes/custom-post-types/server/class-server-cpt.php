@@ -85,26 +85,15 @@ class ServerPost {
         return $created_post_id;
     }
 
-    public static function get_server_post_id_by_subscription($subscription_id) {
-        $args = array(
-            'post_type' => 'server',
-            'meta_query' => array(
-                array(
-                    'key' => 'arsol_server_subscription_id',
-                    'value' => $subscription_id
-                )
-            )
-        );
-        $query = new \WP_Query($args);
-        return $query->posts ? $query->posts[0]->ID : null;
-    }
-
-   
     public static function get_server_post_by_id($server_id) {
         return new self($server_id);
     }
    
-   
+    public static function get_server_post_by_subscription($subscription) {
+        $subscription_id = $subscription->get_id();
+        return self::get_server_post_by_subscription_id($subscription_id);
+    }
+    
    
     public static function get_server_post_by_subscription_id($subscription_id) {
         $args = array(

@@ -28,12 +28,13 @@ class ServerOrchestrator {
     }
 
     public function check_existing_server() {
-        $server_post = new ServerPost();
-        $server = $server_post->get_server_post_by_subscription_id($this->subscription_id);
-        if ($server) {
-           
-            error_log('[SIYA Server Manager] Found existing server: ' . $server->ID);
-            return $server->ID;
+        $server_post_class_instance = new ServerPost();
+        $server_post = $server_post_class_instance->get_server_post_by_subscription($subscription);
+       
+       
+        if ($server_post) {
+            error_log('[SIYA Server Manager] Found existing server: ' . $server->post_id);
+            return $server_post;
         }
 
         error_log('[SIYA Server Manager] No existing server found');
@@ -47,28 +48,21 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager] Checking for existing server');
     
         $this->subscription_id = $subscription->get_id();
-   
-        
-        $existing_server_post = $this->check_existing_server();
-        if (!$existing_server_post) {
-            $this->server_post_id = $existing_server_post->ID;
-
-            error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
-
-        }
-
         
         // Get current status flags
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
         
         // Step 1: Create server post only if it doesn't exist
-        if (!$this->server_post_id) {
+
+        $existing_server_post = $this->check_existing_server($subscription);
+
+        if (!$existing_server_post) {
             error_log('[SIYA Server Manager] creating new server post');
             $server_post = $this->create_and_update_server_post($subscription);
         } else {
             error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
-            $this->server_post_id = $existing_server->ID;
+            $this->server_post_id = $existing_server->post_id;
         }
 
         // Step 2: Provision Hetzner server if not already provisioned
