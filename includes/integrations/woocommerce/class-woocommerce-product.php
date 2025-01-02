@@ -83,7 +83,7 @@ class Product {
                 'min' => '0',
                 'max' => '999',
                 'step' => '1',
-                'style' => 'width: 60px;',  // Enough for 3 characters
+                'style' => 'width: 3em;',  // Enough for 3 characters
             ),
         ));
         woocommerce_wp_text_input(array(
@@ -96,7 +96,7 @@ class Product {
                 'min' => '0',
                 'max' => '999',
                 'step' => '1',
-                'style' => 'width: 60px;',  // Enough for 3 characters
+                'style' => 'width: 3em;',  // Enough for 3 characters
             ),
         ));
         echo '</div>';
