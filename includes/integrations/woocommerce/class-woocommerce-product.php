@@ -104,13 +104,15 @@ class Product {
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
             'label'       => __('WordPress Server', 'woocommerce'),
-            'description' => __('', 'woocommerce'),
+            'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
+            'desc_tip'    => 'true',
         ));
         echo '<div class="arsol_ecommerce_field">';
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_ecommerce',
             'label'       => __('WordPress Ecommerce', 'woocommerce'),
-            'description' => __('', 'woocommerce'),
+            'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
+            'desc_tip'    => 'true',
         ));
         echo '</div>';
         echo '</div>';
