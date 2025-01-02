@@ -62,7 +62,7 @@ class ServerOrchestrator {
             $server_post = $this->create_and_update_server_post($subscription);
         } else {
             error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
-            $this->server_post_id = $existing_server->post_id;
+            $this->server_post_id = $existing_server_post->post_id;
         }
 
         // Step 2: Provision Hetzner server if not already provisioned
