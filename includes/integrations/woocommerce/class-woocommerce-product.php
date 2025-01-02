@@ -62,18 +62,45 @@ class Product {
         echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel arsol_server_settings_options">';
         echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_custom_field',
-            'label'       => __('Custom Field', 'woocommerce'),
-            'description' => __('Enter custom field data here.', 'woocommerce'),
+            'id'          => '_arsol_server_provider_slug',
+            'label'       => __('Server Provider Slug', 'woocommerce'),
+            'description' => __('Enter the server provider slug.', 'woocommerce'),
             'desc_tip'    => 'true',
+        ));
+        woocommerce_wp_text_input(array(
+            'id'          => '_arsol_server_plan_slug',
+            'label'       => __('Server Plan Slug', 'woocommerce'),
+            'description' => __('Enter the server plan slug.', 'woocommerce'),
+            'desc_tip'    => 'true',
+        ));
+        woocommerce_wp_text_input(array(
+            'id'          => '_arsol_max_applications',
+            'label'       => __('Maximum Applications', 'woocommerce'),
+            'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
+            'desc_tip'    => 'true',
+            'type'        => 'number',
+        ));
+        woocommerce_wp_text_input(array(
+            'id'          => '_arsol_max_staging_sites',
+            'label'       => __('Maximum Staging Sites', 'woocommerce'),
+            'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
+            'desc_tip'    => 'true',
+            'type'        => 'number',
         ));
         echo '</div>';
         echo '</div>';
     }
 
     public function save_arsol_server_settings_tab_content($post_id) {
-        $arsol_server_custom_field = isset($_POST['_arsol_server_custom_field']) ? sanitize_text_field($_POST['_arsol_server_custom_field']) : '';
-        update_post_meta($post_id, '_arsol_server_custom_field', $arsol_server_custom_field);
+        $arsol_server_provider_slug = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
+        $arsol_server_plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
+        $arsol_max_applications = isset($_POST['_arsol_max_applications']) ? intval($_POST['_arsol_max_applications']) : '';
+        $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
+
+        update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
+        update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
+        update_post_meta($post_id, '_arsol_max_applications', $arsol_max_applications);
+        update_post_meta($post_id, '_arsol_max_staging_sites', $arsol_max_staging_sites);
     }
 
     public function add_admin_footer_script() {
