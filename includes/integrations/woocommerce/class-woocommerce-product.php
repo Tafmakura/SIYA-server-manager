@@ -103,15 +103,16 @@ class Product {
         ));
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
-            'label'       => __('WordPress Server', 'woocommerce'),
+            'label'       => __('WordPress', 'woocommerce'),
             'description' => __('Enable WordPress server settings.', 'woocommerce'),
         ));
+        echo '<div class="arsol_ecommerce_field">';
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_ecommerce',
             'label'       => __('Ecommerce', 'woocommerce'),
             'description' => __('Enable ecommerce for this server.', 'woocommerce'),
-            'class'       => 'arsol_ecommerce_field'
         ));
+        echo '</div>';
         echo '</div>';
         echo '</div>';
     }
@@ -129,7 +130,7 @@ class Product {
         update_post_meta($post_id, '_arsol_max_applications', $arsol_max_applications);
         update_post_meta($post_id, '_arsol_max_staging_sites', $arsol_max_staging_sites);
         update_post_meta($post_id, '_arsol_wordpress_server', $arsol_wordpress_server);
-        update_post_meta($post_id, '_arsol_ecommerce', $arsol_ecommerce);
+        update_post_meta($post_id, '_arsol_wordpress_ecommerce_server', $arsol_ecommerce);
     }
 
     public function add_admin_footer_script() {
