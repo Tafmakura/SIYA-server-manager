@@ -196,7 +196,6 @@ class Product {
                 toggle_ecommerce_and_server_type_fields();
             });
         });
-
         </script>
         <?php
     }
