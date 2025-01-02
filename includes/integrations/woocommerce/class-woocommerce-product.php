@@ -175,7 +175,6 @@ class Product {
                 if ($('#_arsol_wordpress_server').is(':checked')) {
                     $('.arsol_ecommerce_field').show();
                     $('.arsol_server_type_slug_field').hide();
-                    $('#_arsol_server_type_slug').val('');
                 } else {
                     $('.arsol_ecommerce_field').hide();
                     $('.arsol_server_type_slug_field').show();
