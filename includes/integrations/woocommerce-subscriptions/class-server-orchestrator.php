@@ -52,6 +52,12 @@ class ServerOrchestrator {
         // Get current status flags
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+
+        error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s', 
+            $this->subscription_id,
+            $is_provisioned ? 'true' : 'false',
+            $is_deployed ? 'true' : 'false'
+        ));
         
         // Step 1: Create server post only if it doesn't exist
 
@@ -61,7 +67,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] creating new server post');
             $server_post = $this->create_and_update_server_post($subscription);
         } else {
-            error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>'.$is_provisioned);
+            error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
             $this->server_post_id = $existing_server_post->post_id;
         }
 
