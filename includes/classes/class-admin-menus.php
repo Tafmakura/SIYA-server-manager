@@ -3,10 +3,7 @@
 namespace Siya;
 
 class AdminMenus {
-    private $slugs_page;
-
     public function __construct() {
-        $this->slugs_page = new AdminSettings\Slugs();
         $this->add_siya_menu();
         $this->add_api_submenu();
         $this->add_slugs_submenu();
@@ -37,7 +34,7 @@ class AdminMenus {
             'Slugs',                           // Menu title
             'manage_options',                  // Capability
             'siya-slugs-settings',             // Menu slug
-            array($this->slugs_page, 'settings_page') // Callback function
+            array('Siya\AdminSettings\Slugs', 'settings_page') // Callback function
         );
     }
     
