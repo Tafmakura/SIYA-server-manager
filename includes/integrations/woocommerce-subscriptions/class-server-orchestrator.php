@@ -339,7 +339,20 @@ class ServerOrchestrator {
                 continue;
             }
     
-            // Retrieve the meta value (default way)
+            // Check if the product is a variation
+            if ($product->get_type() === 'variation') {
+                $parent_id = $product->get_parent_id();
+                $parent_product = wc_get_product($parent_id);
+    
+                if (!$parent_product) {
+                    error_log('[SIYA Server Manager] Parent product not found for variation ID: ' . $product->get_id());
+                    continue;
+                }
+    
+                $product = $parent_product; // Use the parent product for further checks
+            }
+    
+            // Retrieve the meta value
             $meta_value = $product->get_meta('_arsol_server', true);
     
             // Log the meta value
@@ -369,6 +382,7 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager] Returning single matching product ID: ' . $matching_product_ids[0]);
         return $matching_product_ids[0];
     }
+    
     
 
 
