@@ -25,30 +25,32 @@ class AdminMenus {
     }
 
     /**
-     * Add API Settings submenu page
-     */
-    public function add_api_submenu() {
-        add_submenu_page(
-            'siya-menu',                       // Parent slug
-            'API Settings',                    // Page title
-            'API Settings',                    // Menu title
-            'manage_options',                  // Capability
-            'siya-api-settings',               // Menu slug
-            array('Siya\AdminSettings\API', 'runcloud_settings_page') // Callback function
-        );
-    }
-
-    /**
      * Add Slugs submenu page
      */
     public function add_slugs_submenu() {
         add_submenu_page(
             'siya-menu',                       // Parent slug
-            'Slugs Settings',                  // Page title
+            'Slugs',                           // Page title
             'Slugs',                           // Menu title
             'manage_options',                  // Capability
             'siya-slugs-settings',             // Menu slug
             array('Siya\AdminSettings\Slugs', 'settings_page') // Callback function
         );
     }
+    
+    /**
+     * Add API Settings submenu page
+     */
+    public function add_api_submenu() {
+        add_submenu_page(
+            'siya-menu',                        // Parent slug
+            'API Keys',                         // Page title
+            'API Keys',                         // Menu title
+            'manage_options',                   // Capability
+            'siya-api-settings',                // Menu slug
+            array('Siya\AdminSettings\API', 'runcloud_settings_page') // Callback function
+        );
+    }
+
+
 }
