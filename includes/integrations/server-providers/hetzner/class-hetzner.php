@@ -193,6 +193,23 @@ class Hetzner /*implements ServerProvider*/ {
         return true;
     }
 
+    public function upgrade_server(){
+
+    }
+
+    public function create_server_snapshot(){
+        
+    }
+
+    public function get_server_snapshots(){
+        
+    }
+
+    public function rebuild_server_from_snapshot(){
+        
+    }
+
+
     public function destroy_server() {
         $server_id = get_option('server_id');
         $response = wp_remote_delete($this->api_endpoint . '/servers/' . $server_id, [
