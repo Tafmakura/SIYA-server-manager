@@ -64,9 +64,10 @@ class Product {
     public function add_arsol_server_settings_tab_content() {
         echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">';
         echo '<div class="options_group">';
-        echo '<div class="inline notice woocommerce-message">';
+        echo '<div class="inline notice woocommerce-message is-dismissible">';
         echo '<p class="help">';
         echo __('Note: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce');
+        echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>';
         echo '</p>';
         echo '</div>';
         woocommerce_wp_text_input(array(
