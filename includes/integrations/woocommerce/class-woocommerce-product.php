@@ -17,8 +17,10 @@ class Product {
 
         // Add custom product type options
         add_filter('product_type_options', [$this, 'add_arsol_server_product_option']);
-        add_action('woocommerce_process_product_meta_simple', [$this, 'save_arsol_server_option_fields']);
-        add_action('woocommerce_process_product_meta_variable', [$this, 'save_arsol_server_option_fields']);
+    
+        // Save the ARSOL server checkbox option
+        add_action('save_post_product', [$this, 'save_arsol_server_option_fields'], 10, 3);
+          
         
         // Add Arsol Server Settings Tab
         add_filter('woocommerce_product_data_tabs', [$this, 'add_arsol_server_settings_tab']);
@@ -42,9 +44,10 @@ class Product {
         return $product_type_options;
     }
 
-    public function save_arsol_server_option_fields($post_id) {
+    public function save_arsol_server_option_fields($post_ID, $product, $update) {
+        // Save the ARSOL server checkbox value
         $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no';
-        update_post_meta($post_id, '_arsol_server', $is_arsol_server);
+        update_post_meta($post_ID, '_arsol_server', $is_arsol_server);
     }
 
     public function add_arsol_server_settings_tab($tabs) {
