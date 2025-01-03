@@ -320,58 +320,56 @@ class ServerOrchestrator {
 
     public function extract_server_product_from_subscription($subscription) {
         error_log('[SIYA Server Manager] Starting server product extraction from subscription ' . $subscription->get_id());
-
+    
         // Ensure the subscription object has the required method and is valid
         if (!method_exists($subscription, 'get_items') || !$subscription->get_items()) {
             error_log('[SIYA Server Manager] No items found in subscription');
             return false;
         }
-
+    
         $matching_product_ids = [];
-
+    
         // Loop through all items in the subscription
         foreach ($subscription->get_items() as $item) {
             // Get the product associated with the item
             $product = $item->get_product();
-
+    
             if (!$product) {
                 error_log('[SIYA Server Manager] Invalid product in subscription item');
                 continue;
             }
-            // Check if the product has the desired metadata
+    
+            // Retrieve the meta value (default way)
             $meta_value = $product->get_meta('_arsol_server', true);
+    
+            // Log the meta value
             error_log(sprintf('[SIYA Server Manager] Product ID %d has _arsol_server value: %s', 
                 $product->get_id(), 
                 print_r($meta_value, true)
             ));
-
-            // Check if meta value is 'yes'
-            if ($meta_value === 'yes') {
-                error_log('[SIYA Server Manager] Found matching server product: ' . $product->get_id());
-                $matching_product_ids[] = $product->get_id();
-            }
-
-            if (is_array($meta_value) && in_array('yes', $meta_value, true)) {
+    
+            // Check if meta value is 'yes' or contains 'yes' in case of array
+            if ($meta_value === 'yes' || (is_array($meta_value) && in_array('yes', $meta_value, true))) {
                 error_log('[SIYA Server Manager] Found matching server product: ' . $product->get_id());
                 $matching_product_ids[] = $product->get_id();
             }
         }
-
+    
         if (empty($matching_product_ids)) {
             error_log('[SIYA Server Manager] No matching server products found');
             return false;
         }
-
+    
         if (count($matching_product_ids) > 1) {
             error_log('[SIYA Server Manager] Multiple server products found: ' . implode(', ', $matching_product_ids));
             $subscription->add_order_note('Multiple server products found with _arsol_server = yes. Please review the subscription.');
             return null;
         }
-
+    
         error_log('[SIYA Server Manager] Returning single matching product ID: ' . $matching_product_ids[0]);
         return $matching_product_ids[0];
     }
-
+    
 
 
 
