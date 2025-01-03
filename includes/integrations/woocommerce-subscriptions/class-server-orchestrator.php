@@ -347,6 +347,8 @@ class ServerOrchestrator {
             if ($product->get_type() === 'variation') {
                 // Get parent product for the variation
                 $parent_id = $product->get_parent_id();
+                error_log(sprintf('[SIYA Server Manager] Parent ID for variation %d: %d', $product_id, $parent_id));
+              
                 $parent_product = wc_get_product($parent_id);
     
                 if (!$parent_product) {
