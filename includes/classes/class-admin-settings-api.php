@@ -52,6 +52,6 @@ class API  {
      * Render the settings page.
      */
     public static function runcloud_settings_page() {
-        include plugin_dir_path(__DIR__) . '../templates/admin/admin-settings-api.php';
+        include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-api.php';
     }
 }
