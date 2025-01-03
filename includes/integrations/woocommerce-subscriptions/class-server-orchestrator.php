@@ -343,7 +343,7 @@ class ServerOrchestrator {
             $meta_value = null;
     
             // Check if the product is a variation
-            if ($product->get_post_type() === 'product_variation') {
+            if (get_post_type($product_id) === 'product_variation') {
                 // Get the parent product for the variation
                 $parent_id = $product->get_parent_id();
                 $parent_product = wc_get_product($parent_id);
