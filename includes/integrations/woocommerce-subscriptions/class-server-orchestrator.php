@@ -319,9 +319,12 @@ class ServerOrchestrator {
 
 
     public function extract_server_product_from_subscription($subscription) {
+        error_log('[SIYA Server Manager] Starting server product extraction from subscription ' . $subscription->get_id());
+
         // Ensure the subscription object has the required method and is valid
         if (!method_exists($subscription, 'get_items') || !$subscription->get_items()) {
-            return false; // Return false if no items are found
+            error_log('[SIYA Server Manager] No items found in subscription');
+            return false;
         }
 
         $matching_product_ids = [];
@@ -332,31 +335,35 @@ class ServerOrchestrator {
             $product = $item->get_product();
 
             if (!$product) {
-                continue; // Skip if the product is not valid
+                error_log('[SIYA Server Manager] Invalid product in subscription item');
+                continue;
             }
 
             // Check if the product has the desired metadata
-            $meta_value = $product->get_meta('_arsol_server', true); // Fetch single value
+            $meta_value = $product->get_meta('_arsol_server', true);
+            error_log(sprintf('[SIYA Server Manager] Product ID %d has _arsol_server value: %s', 
+                $product->get_id(), 
+                print_r($meta_value, true)
+            ));
+
             if (is_array($meta_value) && in_array('yes', $meta_value, true)) {
-                // Add the product ID to the list of matches
+                error_log('[SIYA Server Manager] Found matching server product: ' . $product->get_id());
                 $matching_product_ids[] = $product->get_id();
             }
         }
 
-        // If no matching server products with '_arsol_server' set to 'yes' are found, return false
         if (empty($matching_product_ids)) {
+            error_log('[SIYA Server Manager] No matching server products found');
             return false;
         }
 
-        // If more than one matching product is found, add a subscription note and return null
         if (count($matching_product_ids) > 1) {
-            // Add a note to the subscription explaining the multiple server products
+            error_log('[SIYA Server Manager] Multiple server products found: ' . implode(', ', $matching_product_ids));
             $subscription->add_order_note('Multiple server products found with _arsol_server = yes. Please review the subscription.');
-
-            return null; // Return null when more than one matching product is found
+            return null;
         }
 
-        // Return the product ID if there's exactly one match
+        error_log('[SIYA Server Manager] Returning single matching product ID: ' . $matching_product_ids[0]);
         return $matching_product_ids[0];
     }
 
