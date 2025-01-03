@@ -41,12 +41,57 @@ if (!defined('ABSPATH')) {
 
         <!-- Server Provider Plans Section -->
         <h2>Server Provider Plan Slugs</h2>
+        
+        <!-- DigitalOcean Subsection -->
+        <h3>DigitalOcean</h3>
         <table class="form-table">
+            <tr>
+                <th scope="row">Provider Name Slug</th>
+                <td>
+                    <input type="text" value="digitalocean" disabled />
+                </td>
+            </tr>
             <tr>
                 <th scope="row">Provider Plans Slug</th>
                 <td>
-                    <input type="text" name="siya_provider_plans_slug" 
-                           value="<?php echo esc_attr(get_option('siya_provider_plans_slug', 'provider-plans')); ?>" />
+                    <input type="text" name="siya_digitalocean_plans_slug" 
+                           value="<?php echo esc_attr(get_option('siya_digitalocean_plans_slug', 'digitalocean-plans')); ?>" />
+                </td>
+            </tr>
+        </table>
+
+        <!-- Hetzner Subsection -->
+        <h3>Hetzner</h3>
+        <table class="form-table">
+            <tr>
+                <th scope="row">Provider Name Slug</th>
+                <td>
+                    <input type="text" value="hetzner" disabled />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Provider Plans Slug</th>
+                <td>
+                    <input type="text" name="siya_hetzner_plans_slug" 
+                           value="<?php echo esc_attr(get_option('siya_hetzner_plans_slug', 'hetzner-plans')); ?>" />
+                </td>
+            </tr>
+        </table>
+
+        <!-- Vultr Subsection -->
+        <h3>Vultr</h3>
+        <table class="form-table">
+            <tr>
+                <th scope="row">Provider Name Slug</th>
+                <td>
+                    <input type="text" value="vultr" disabled />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Provider Plans Slug</th>
+                <td>
+                    <input type="text" name="siya_vultr_plans_slug" 
+                           value="<?php echo esc_attr(get_option('siya_vultr_plans_slug', 'vultr-plans')); ?>" />
                 </td>
             </tr>
         </table>
