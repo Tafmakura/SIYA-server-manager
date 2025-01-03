@@ -50,7 +50,7 @@ class ServerOrchestrator {
 
         if (!$existing_server_post) {
             error_log('[SIYA Server Manager] creating new server post');
-            $server_post = $this->create_and_update_server_post($server_product_id, $server_post_instance, $subscription);
+            $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
             $this->server_post_id = $existing_server_post->post_id;
