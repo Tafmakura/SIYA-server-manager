@@ -78,7 +78,7 @@ class Setup {
      */
     public function initialize_admin_settings() {
         if (class_exists('Siya\AdminSettings\API')) {
-            new \Siya\AdminSettings();
+            new \Siya\AdminSettings\API();
         }
     }
 

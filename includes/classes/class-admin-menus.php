@@ -16,7 +16,7 @@ class AdminMenus {
             'SIYA',                            // Menu title
             'manage_options',                  // Capability
             'siya-menu',                       // Menu slug
-            array('Siya\AdminSettings', 'runcloud_settings_page'), // Callback function
+            array('Siya\AdminSettings\API', 'runcloud_settings_page'), // Callback function
             'dashicons-admin-generic',         // Icon URL
             6                                  // Position
         );
