@@ -64,7 +64,7 @@ class Product {
     public function add_arsol_server_settings_tab_content() {
         echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">';
         echo '<div class="options_group">';
-        echo '<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden" style="display: block;">';
+        echo '<div id="arsol_server_settings" class=" wc-metaboxes-wrapper" style="display: block;">';
         echo '<div class="toolbar toolbar-top">';
         echo '<div class="inline notice woocommerce-message is-dismissible">';
         echo '<p class="help">';
