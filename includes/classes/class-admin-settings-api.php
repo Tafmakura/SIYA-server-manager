@@ -81,7 +81,7 @@ class API  {
     public function runcloud_api_key_field() {
         $api_key = get_option('runcloud_api_key');
         ?>
-        <input type="text" name="runcloud_api_key" value="<?php echo esc_attr($api_key); ?>" />
+        <textarea name="runcloud_api_key" rows="3" cols="50" style="width: 100%; max-width: 400px;"><?php echo esc_textarea($api_key); ?></textarea>
         <?php
     }
 
@@ -91,7 +91,7 @@ class API  {
     public function hetzner_api_key_field() {
         $api_key = get_option('hetzner_api_key');
         ?>
-        <input type="text" name="hetzner_api_key" value="<?php echo esc_attr($api_key); ?>" />
+        <textarea name="hetzner_api_key" rows="3" cols="50" style="width: 100%; max-width: 400px;"><?php echo esc_textarea($api_key); ?></textarea>
         <?php
     }
 
@@ -101,7 +101,7 @@ class API  {
     public function digitalocean_api_key_field() {
         $api_key = get_option('digitalocean_api_key');
         ?>
-        <input type="text" name="digitalocean_api_key" value="<?php echo esc_attr($api_key); ?>" />
+        <textarea name="digitalocean_api_key" rows="3" cols="50" style="width: 100%; max-width: 400px;"><?php echo esc_textarea($api_key); ?></textarea>
         <?php
     }
 
@@ -111,7 +111,7 @@ class API  {
     public function vultr_api_key_field() {
         $api_key = get_option('vultr_api_key');
         ?>
-        <input type="text" name="vultr_api_key" value="<?php echo esc_attr($api_key); ?>" />
+        <textarea name="vultr_api_key" rows="3" cols="50" style="width: 100%; max-width: 400px;"><?php echo esc_textarea($api_key); ?></textarea>
         <?php
     }
 }
