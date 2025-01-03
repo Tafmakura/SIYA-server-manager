@@ -3,6 +3,7 @@
 namespace Siya\AdminSettings;
 
 class API  {
+    
     public function __construct() {
         $this->register_api_settings();
     }

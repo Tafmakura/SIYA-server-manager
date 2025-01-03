@@ -19,6 +19,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-menus.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-general.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-slugs.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-api.php';
 
         
@@ -32,8 +33,9 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/custom-post-types/server/class-server-cpt.php';
         
         // Integrations
-        require_once plugin_dir_path(__DIR__) . '/integrations/server-providers/hetzner/class-hetzner.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/server-managers/runcloud/class-runcloud.php';
+        require_once plugin_dir_path(__DIR__) . '/integrations/server-providers/hetzner/class-hetzner.php';
+ 
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
