@@ -339,16 +339,13 @@ class ServerOrchestrator {
                 continue;
             }
     
-            // Initialize variables
             $product_id = $product->get_id();
             $meta_value = null;
     
             // Check if the product is a variation
-            if ($product->get_type() === 'variation') {
-                // Get parent product for the variation
+            if ($product->get_post_type() === 'product_variation') {
+                // Get the parent product for the variation
                 $parent_id = $product->get_parent_id();
-                error_log(sprintf('[SIYA Server Manager] Parent ID for variation %d: %d', $product_id, $parent_id));
-              
                 $parent_product = wc_get_product($parent_id);
     
                 if (!$parent_product) {
@@ -356,12 +353,11 @@ class ServerOrchestrator {
                     continue;
                 }
     
-                // Check parent product's meta value
+                // Check the parent product's _arsol_server meta key
                 $meta_value = $parent_product->get_meta('_arsol_server', true);
     
-                // Update product ID to parent product ID for matching
                 if ($meta_value === 'yes') {
-                    $product_id = $parent_id;
+                    $product_id = $parent_id; // Use parent product ID
                 }
             } else {
                 // For simple products, check the product's meta value
@@ -396,6 +392,7 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager] Returning single matching product ID: ' . $matching_product_ids[0]);
         return $matching_product_ids[0];
     }
+    
     
     
 
