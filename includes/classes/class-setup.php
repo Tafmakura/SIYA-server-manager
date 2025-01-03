@@ -18,6 +18,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-menus.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-general.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-api.php';
 
         
