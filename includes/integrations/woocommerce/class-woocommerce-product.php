@@ -64,6 +64,9 @@ class Product {
     public function add_arsol_server_settings_tab_content() {
         echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">';
         echo '<div class="options_group">';
+        echo '<p class="form-field" style="color: #856404; background-color: #fff3cd; padding: 10px; border: 1px solid #ffeeba; border-radius: 4px;">';
+        echo __('Note: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce');
+        echo '</p>';
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_server_provider_slug',
             'label'       => __('Server Provider Slug', 'woocommerce'),
