@@ -15,7 +15,7 @@ class AdminMenus {
     public function add_siya_menu() {
         add_menu_page(
             'General',                         // Page title
-            'General',                         // Menu title
+            'SIYA',                      // Menu title (changed)
             'manage_options',                  // Capability
             'siya',                            // Menu slug (changed)
             array('Siya\AdminSettings\General', 'settings_page'), // Callback function
