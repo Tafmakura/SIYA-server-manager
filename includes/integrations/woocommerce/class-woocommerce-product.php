@@ -69,7 +69,6 @@ class Product {
         echo '<div class="inline notice woocommerce-message">';
         echo '<p class="help arsol">';
         echo __('Note: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce');
-        echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>';
         echo '</p>';
         echo '</div>';
         echo '</div>';
