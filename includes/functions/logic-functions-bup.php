@@ -406,14 +406,3 @@ function force_on_hold_and_check_server_status($subscription_id) {
             }, 1000);
           </script>";
 }
-
-// ...existing code...
-function update_server_status($post_id, $status) {
-    $server = new ServerPost($post_id);
-    $meta_data = [
-        'arsol_server_provisioned_status' => $status,
-        'arsol_server_status_date' => current_time('mysql')
-    ];
-    $server->update_meta_data($post_id, $meta_data);
-}
-// ...existing code...
