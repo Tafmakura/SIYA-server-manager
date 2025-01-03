@@ -1,8 +1,8 @@
 <?php
 
-namespace Siya;
+namespace Siya\AdminSettings;
 
-class AdminSettings {
+class API  {
     public function __construct() {
         $this->register_api_settings();
     }

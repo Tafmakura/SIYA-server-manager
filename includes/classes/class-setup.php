@@ -18,7 +18,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-menus.php';
-        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-api.php';
 
         
         // Interfaces
@@ -77,7 +77,7 @@ class Setup {
      * Initialize admin settings.
      */
     public function initialize_admin_settings() {
-        if (class_exists('Siya\AdminSettings')) {
+        if (class_exists('Siya\AdminSettings\API')) {
             new \Siya\AdminSettings();
         }
     }
