@@ -339,35 +339,47 @@ class ServerOrchestrator {
                 continue;
             }
     
+            // Initialize variables
+            $product_id = $product->get_id();
+            $meta_value = null;
+    
             // Check if the product is a variation
             if ($product->get_type() === 'variation') {
+                // Get parent product for the variation
                 $parent_id = $product->get_parent_id();
                 $parent_product = wc_get_product($parent_id);
     
                 if (!$parent_product) {
-                    error_log('[SIYA Server Manager] Parent product not found for variation ID: ' . $product->get_id());
+                    error_log(sprintf('[SIYA Server Manager] Parent product not found for variation ID: %d', $product_id));
                     continue;
                 }
     
-                $product = $parent_product; // Use the parent product for further checks
-            }
+                // Check parent product's meta value
+                $meta_value = $parent_product->get_meta('_arsol_server', true);
     
-            // Retrieve the meta value
-            $meta_value = $product->get_meta('_arsol_server', true);
+                // Update product ID to parent product ID for matching
+                if ($meta_value === 'yes') {
+                    $product_id = $parent_id;
+                }
+            } else {
+                // For simple products, check the product's meta value
+                $meta_value = $product->get_meta('_arsol_server', true);
+            }
     
             // Log the meta value
             error_log(sprintf('[SIYA Server Manager] Product ID %d has _arsol_server value: %s', 
-                $product->get_id(), 
+                $product_id, 
                 print_r($meta_value, true)
             ));
     
-            // Check if meta value is 'yes' or contains 'yes' in case of array
-            if ($meta_value === 'yes' || (is_array($meta_value) && in_array('yes', $meta_value, true))) {
-                error_log('[SIYA Server Manager] Found matching server product: ' . $product->get_id());
-                $matching_product_ids[] = $product->get_id();
+            // Check if the meta value is 'yes'
+            if ($meta_value === 'yes') {
+                error_log('[SIYA Server Manager] Found matching server product: ' . $product_id);
+                $matching_product_ids[] = $product_id;
             }
         }
     
+        // Handle the results
         if (empty($matching_product_ids)) {
             error_log('[SIYA Server Manager] No matching server products found');
             return false;
