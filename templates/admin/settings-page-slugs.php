@@ -61,20 +61,36 @@ if (!defined('ABSPATH')) {
                             foreach ($digitalocean_plans as $index => $plan) {
                                 ?>
                                 <div class="plan-row">
-                                    <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
-                                           value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Plan Slug" />
-                                    <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
-                                              maxlength="250" placeholder="Plan Description"><?php echo esc_textarea($plan['description']); ?></textarea>
-                                    <button type="button" class="button remove-plan">Remove</button>
+                                    <div class="plan-field">
+                                        <label>Plan Slug</label>
+                                        <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
+                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                    </div>
+                                    <div class="plan-field">
+                                        <label>Plan Description</label>
+                                        <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
+                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                    </div>
+                                    <div class="plan-field">
+                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                    </div>
                                 </div>
                                 <?php
                             }
                         }
                         ?>
                         <div class="plan-row template" style="display: none;">
-                            <input type="text" name="plan_slug[]" placeholder="Plan Slug" />
-                            <textarea name="plan_description[]" maxlength="250" placeholder="Plan Description"></textarea>
-                            <button type="button" class="button remove-plan">Remove</button>
+                            <div class="plan-field">
+                                <label>Plan Slug</label>
+                                <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                            </div>
+                            <div class="plan-field">
+                                <label>Plan Description</label>
+                                <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                            </div>
+                            <div class="plan-field">
+                                <button type="button" class="button remove-plan">Remove Plan</button>
+                            </div>
                         </div>
                         <button type="button" class="button add-plan">Add Plan</button>
                     </div>
@@ -101,20 +117,36 @@ if (!defined('ABSPATH')) {
                             foreach ($hetzner_plans as $index => $plan) {
                                 ?>
                                 <div class="plan-row">
-                                    <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
-                                           value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Plan Slug" />
-                                    <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
-                                              maxlength="250" placeholder="Plan Description"><?php echo esc_textarea($plan['description']); ?></textarea>
-                                    <button type="button" class="button remove-plan">Remove</button>
+                                    <div class="plan-field">
+                                        <label>Plan Slug</label>
+                                        <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
+                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                    </div>
+                                    <div class="plan-field">
+                                        <label>Plan Description</label>
+                                        <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
+                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                    </div>
+                                    <div class="plan-field">
+                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                    </div>
                                 </div>
                                 <?php
                             }
                         }
                         ?>
                         <div class="plan-row template" style="display: none;">
-                            <input type="text" name="plan_slug[]" placeholder="Plan Slug" />
-                            <textarea name="plan_description[]" maxlength="250" placeholder="Plan Description"></textarea>
-                            <button type="button" class="button remove-plan">Remove</button>
+                            <div class="plan-field">
+                                <label>Plan Slug</label>
+                                <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                            </div>
+                            <div class="plan-field">
+                                <label>Plan Description</label>
+                                <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                            </div>
+                            <div class="plan-field">
+                                <button type="button" class="button remove-plan">Remove Plan</button>
+                            </div>
                         </div>
                         <button type="button" class="button add-plan">Add Plan</button>
                     </div>
@@ -141,20 +173,36 @@ if (!defined('ABSPATH')) {
                             foreach ($vultr_plans as $index => $plan) {
                                 ?>
                                 <div class="plan-row">
-                                    <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
-                                           value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Plan Slug" />
-                                    <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
-                                              maxlength="250" placeholder="Plan Description"><?php echo esc_textarea($plan['description']); ?></textarea>
-                                    <button type="button" class="button remove-plan">Remove</button>
+                                    <div class="plan-field">
+                                        <label>Plan Slug</label>
+                                        <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
+                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                    </div>
+                                    <div class="plan-field">
+                                        <label>Plan Description</label>
+                                        <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
+                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                    </div>
+                                    <div class="plan-field">
+                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                    </div>
                                 </div>
                                 <?php
                             }
                         }
                         ?>
                         <div class="plan-row template" style="display: none;">
-                            <input type="text" name="plan_slug[]" placeholder="Plan Slug" />
-                            <textarea name="plan_description[]" maxlength="250" placeholder="Plan Description"></textarea>
-                            <button type="button" class="button remove-plan">Remove</button>
+                            <div class="plan-field">
+                                <label>Plan Slug</label>
+                                <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                            </div>
+                            <div class="plan-field">
+                                <label>Plan Description</label>
+                                <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                            </div>
+                            <div class="plan-field">
+                                <button type="button" class="button remove-plan">Remove Plan</button>
+                            </div>
                         </div>
                         <button type="button" class="button add-plan">Add Plan</button>
                     </div>
@@ -168,26 +216,46 @@ if (!defined('ABSPATH')) {
 
 <style>
 .plan-row {
-    margin-bottom: 10px;
-    padding: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
     background: #f9f9f9;
     border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-.plan-row input[type="text"] {
-    width: 200px;
-    margin-right: 10px;
+.plan-field {
+    margin-bottom: 15px;
 }
 
-.plan-row textarea {
-    width: 300px;
+.plan-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.plan-field input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+}
+
+.plan-field textarea {
+    width: 100%;
+    max-width: 400px;
     height: 100px;
-    vertical-align: top;
-    margin-right: 10px;
 }
 
 .add-plan {
     margin-top: 10px !important;
+}
+
+.remove-plan {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.remove-plan:hover {
+    background: #dc3545;
+    color: #fff;
 }
 </style>
 
