@@ -66,7 +66,7 @@ class Product {
         echo '<div class="options_group">';
         echo '<div id="arsol_server_settings" style="padding: 9px 12px;">';
         echo '<div class="toolbar toolbar-top">';
-        echo '<div class="inline notice woocommerce-message is-dismissible">';
+        echo '<div class="inline notice woocommerce-message">';
         echo '<p class="help">';
         echo __('Note: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce');
         echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>';
