@@ -338,13 +338,18 @@ class ServerOrchestrator {
                 error_log('[SIYA Server Manager] Invalid product in subscription item');
                 continue;
             }
-
             // Check if the product has the desired metadata
             $meta_value = $product->get_meta('_arsol_server', true);
             error_log(sprintf('[SIYA Server Manager] Product ID %d has _arsol_server value: %s', 
                 $product->get_id(), 
                 print_r($meta_value, true)
             ));
+
+            // Check if meta value is 'yes'
+            if ($meta_value === 'yes') {
+                error_log('[SIYA Server Manager] Found matching server product: ' . $product->get_id());
+                $matching_product_ids[] = $product->get_id();
+            }
 
             if (is_array($meta_value) && in_array('yes', $meta_value, true)) {
                 error_log('[SIYA Server Manager] Found matching server product: ' . $product->get_id());
