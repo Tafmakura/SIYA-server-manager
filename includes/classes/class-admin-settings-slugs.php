@@ -4,7 +4,7 @@ namespace Siya\AdminSettings;
 
 class Slugs {
     private const MENU_SLUG = 'siya-settings';
-    private const OPTION_GROUP = 'arsol-slugs-settings-group';
+    private const OPTION_GROUP = 'siya_settings';
     private const PROVIDERS = [
         'digitalocean' => 'DigitalOcean',
         'hetzner' => 'Hetzner',
