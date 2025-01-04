@@ -213,7 +213,12 @@ jQuery(document).ready(function($) {
 
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
-        updateGroups(provider);
+        updateGroups(provider, function(groups) {
+            var selectedGroup = $('#_arsol_server_group_slug').val();
+            if (selectedGroup) {
+                updatePlans(provider, selectedGroup);
+            }
+        });
     });
 
     $('#_arsol_server_group_slug').on('change', function() {
@@ -234,7 +239,12 @@ jQuery(document).ready(function($) {
     // Initial load
     var initialProvider = $('#_arsol_server_provider_slug').val();
     if (initialProvider) {
-        updateGroups(initialProvider);
+        updateGroups(initialProvider, function(groups) {
+            var selectedGroup = $('#_arsol_server_group_slug').val();
+            if (selectedGroup) {
+                updatePlans(initialProvider, selectedGroup);
+            }
+        });
     }
 
     if ($('#_arsol_wordpress_server').is(':checked')) {
