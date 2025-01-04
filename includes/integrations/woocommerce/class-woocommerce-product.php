@@ -181,37 +181,36 @@ class Product {
             return;
         }
 
-        // Save provider, group, and plan data
+        // Validate and sanitize input
         $provider = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
         $group_slug = isset($_POST['_arsol_server_group_slug']) ? sanitize_text_field($_POST['_arsol_server_group_slug']) : '';
         $plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
 
         // Perform validation
         if (empty($provider) || empty($group_slug) || empty($plan_slug)) {
+            // Add error message
             wc_add_notice(__('Please fill in all required fields: Server provider, Server group, and Server plan.', 'siya'), 'error');
             return;
         }
 
-        // Save the basic fields
+        // Save validated data
         update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
         update_post_meta($post_id, '_arsol_server_group_slug', $group_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
 
-        // Save WordPress server status
+        // Check if WordPress server is enabled
         $is_wordpress_server = isset($_POST['_arsol_wordpress_server']) && $_POST['_arsol_wordpress_server'] === 'yes';
-        update_post_meta($post_id, '_arsol_wordpress_server', $is_wordpress_server ? 'yes' : 'no');
 
-        // Get the existing values for region and image
-        $region = get_post_meta($post_id, '_arsol_server_region', true);
-        $server_image = get_post_meta($post_id, '_arsol_server_image', true);
+        // Save region and image as null if WordPress server is enabled, otherwise save normally
+        if ($is_wordpress_server) {
+            update_post_meta($post_id, '_arsol_server_region', '');
+            update_post_meta($post_id, '_arsol_server_image', '');
+        } else {
+            $region = isset($_POST['_arsol_server_region']) ? sanitize_text_field($_POST['_arsol_server_region']) : '';
+            update_post_meta($post_id, '_arsol_server_region', $region);
 
-        // Only update region and image if WordPress server is not enabled
-        if (!$is_wordpress_server) {
-            $region = isset($_POST['_arsol_server_region']) ? sanitize_text_field($_POST['_arsol_server_region']) : $region;
-            $server_image = isset($_POST['_arsol_server_image']) ? sanitize_text_field($_POST['_arsol_server_image']) : $server_image;
+            $server_image = isset($_POST['_arsol_server_image']) ? sanitize_text_field($_POST['_arsol_server_image']) : '';
+            update_post_meta($post_id, '_arsol_server_image', $server_image);
         }
-
-        update_post_meta($post_id, '_arsol_server_region', $region);
-        update_post_meta($post_id, '_arsol_server_image', $server_image);
     }
 }

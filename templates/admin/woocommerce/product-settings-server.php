@@ -267,6 +267,7 @@ jQuery(document).ready(function($) {
     function toggleWordPressFields() {
         if ($('#_arsol_wordpress_server').is(':checked')) {
             $('.arsol_non_wordpress_fields').addClass('hidden');
+            $('#_arsol_server_region, #_arsol_server_image').val('');
         } else {
             $('.arsol_non_wordpress_fields').removeClass('hidden');
         }
