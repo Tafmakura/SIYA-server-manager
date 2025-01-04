@@ -109,7 +109,8 @@
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => $plan_options,
-            'value'       => $selected_plan
+            'value'       => $selected_plan,
+            'custom_attributes' => empty($selected_group) ? array('disabled' => 'disabled') : array()
         ));
         ?>
     </div>
@@ -158,6 +159,11 @@ jQuery(document).ready(function($) {
     }
 
     function updatePlans(provider, group) {
+        var $planSelect = $('#_arsol_server_plan_slug');
+        if (!group) {
+            $planSelect.prop('disabled', true);
+            return;
+        }
         $.ajax({
             url: ajaxurl,
             data: {
@@ -180,7 +186,6 @@ jQuery(document).ready(function($) {
                     console.error('Failed to parse plans:', e);
                     plans = [];
                 }
-                var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
                 if (plans.length === 0) {
