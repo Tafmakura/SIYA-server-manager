@@ -4,7 +4,7 @@ namespace Siya\AdminSettings;
 
 class Slugs {
     private const MENU_SLUG = 'siya-slugs-settings';
-    private const OPTION_GROUP = 'siya_settings';
+    private const OPTION_GROUP = 'siya_settings_slugs';
     private const PROVIDERS = [
         'digitalocean' => 'DigitalOcean',
         'hetzner' => 'Hetzner',
@@ -77,7 +77,7 @@ class Slugs {
      * Add allowed options.
      */
     public function add_allowed_options($allowed_options) {
-        $allowed_options['siya_settings'] = [
+        $allowed_options[self::OPTION_GROUP] = [
             'siya_wp_server_provider',
             'siya_digitalocean_plans',
             'siya_hetzner_plans',
