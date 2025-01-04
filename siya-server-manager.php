@@ -7,6 +7,11 @@
  * Text Domain: arsol
  */
 
+// Define plugin directory constant if not already defined
+if (!defined('SIYA_PLUGIN_DIR')) {
+    define('SIYA_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+
 // Include the Setup class
 require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
