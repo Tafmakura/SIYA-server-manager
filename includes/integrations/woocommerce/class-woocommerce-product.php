@@ -114,7 +114,6 @@ class Product {
                 } else {
                     $('.arsol_ecommerce_field').hide();
                     $('.arsol_server_group_slug_field').show();
-                    $('#_arsol_ecommerce').prop('checked', false);
                 }
             }
 
@@ -127,6 +126,13 @@ class Product {
 
             $('#_arsol_wordpress_server').on('change', function() {
                 toggle_ecommerce_and_server_group_fields();
+            });
+
+            // Ensure WordPress Ecommerce maintains its state when hidden before saving
+            $('#post').on('submit', function() {
+                if (!$('#_arsol_wordpress_server').is(':checked')) {
+                    $('#_arsol_ecommerce').prop('checked', false);
+                }
             });
         });
         </script>
