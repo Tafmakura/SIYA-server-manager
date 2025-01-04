@@ -2,12 +2,16 @@
 
 namespace Siya\Integrations\WooCommerce;
 
+use Siya\AdminSettings\Slugs;
+
 defined('ABSPATH') || exit;
 
 class Product {
    
     public function __construct() {
         add_action('init', [$this, 'init']);
+        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
     }
 
     public function init() {
@@ -137,5 +141,15 @@ class Product {
         });
         </script>
         <?php
+    }
+
+    public function add_custom_fields() {
+        global $post;
+        $slugs = new Slugs();
+        // Add your custom fields here
+    }
+
+    public function save_custom_fields($post_id) {
+        // Save your custom fields here
     }
 }

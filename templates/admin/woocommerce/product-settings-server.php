@@ -1,12 +1,3 @@
-<?php 
-
-use Siya\AdminSettings\Slugs;
-
-global $post;
-$slugs = new Slugs();
-
-?>
-
 <div id="arsol_server_settings_data" class="panel woocommerce_options_panel">
     <div class="options_group">
         <div id="arsol_server_settings" style="padding: 9px 12px;">
