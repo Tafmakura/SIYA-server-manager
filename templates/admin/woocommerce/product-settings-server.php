@@ -45,7 +45,7 @@ $slugs = new Slugs();
                 'max' => '999',
                 'step' => '1',
                 'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
+                'oninput' => 'this.value = this.value.replace(/[^-9]/g, \'\')'  // Only accept numbers
             ),
         ));
         woocommerce_wp_checkbox(array(
@@ -187,16 +187,7 @@ jQuery(document).ready(function($) {
                 group: group
             },
             success: function(response) {
-                var plans = [];
-                try {
-                    plans = JSON.parse(response);  // Parse the response as JSON
-                    if (!Array.isArray(plans)) {
-                        throw new Error('Parsed response is not an array');
-                    }
-                } catch (e) {
-                    console.error('Failed to parse plans:', e);
-                    plans = [];
-                }
+                var plans = JSON.parse(response);  // Parse the response as JSON
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
