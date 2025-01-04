@@ -114,32 +114,6 @@
         ?>
     </div>
 
-
-<?php
-// Debug variable dump
-echo '<pre>';
-
-echo 'Providers: ';
-print_r($slugs->get_provider_slugs());
-
-echo "\nProvider Groups:\n";
-foreach ($slugs->get_provider_slugs() as $provider) {
-    echo "\n$provider Groups: ";
-    print_r($slugs->get_provider_group_slugs($provider));
-}
-
-echo "\nPlans for each Provider/Group:\n";
-foreach ($slugs->get_provider_slugs() as $provider) {
-    $groups = $slugs->get_provider_group_slugs($provider);
-    foreach ($groups as $group) {
-        echo "\n$provider - $group Plans: ";
-        print_r($slugs->get_filtered_plans($provider, $group));
-    }
-}
-echo '</pre>';
-?>
-
-
 </div>
 
 <style>
