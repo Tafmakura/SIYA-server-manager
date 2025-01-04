@@ -266,23 +266,6 @@ jQuery(document).ready(function($) {
     if ($('#_arsol_wordpress_server').is(':checked')) {
         setWordPressProvider();
     }
-
-    // Ensure required fields are filled before saving
-    $('#post').on('submit', function(e) {
-        var provider = $('#_arsol_server_provider_slug').val();
-        var group = $('#_arsol_server_group_slug').val();
-        var plan = $('#_arsol_server_plan_slug').val();
-        
-        // Ensure checkbox values are properly set
-        $('#_arsol_wordpress_server').val($('#_arsol_wordpress_server').is(':checked') ? 'yes' : 'no');
-        $('#_arsol_ecommerce').val($('#_arsol_ecommerce').is(':checked') ? 'yes' : 'no');
-
-        if (!provider || !group || !plan) {
-            alert('Please select a Server Provider, Server Group, and Server Plan.');
-            e.preventDefault();
-            return false;
-        }
-    });
 });
 </script>
 
