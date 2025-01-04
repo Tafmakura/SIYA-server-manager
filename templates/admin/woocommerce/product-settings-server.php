@@ -60,7 +60,8 @@ $slugs = new Slugs();
             'label'       => __('WordPress Server', 'woocommerce'),
             'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
             'desc_tip'    => 'true',
-            'value'       => $is_wordpress_server ? 'yes' : 'no'
+            'value'       => 'yes',
+            'default'     => $is_wordpress_server ? 'yes' : 'no'
         ));
         ?>
         <div class="arsol_ecommerce_field">
@@ -70,7 +71,8 @@ $slugs = new Slugs();
                 'label'       => __('WordPress Ecommerce', 'woocommerce'),
                 'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
-                'value'       => $is_ecommerce ? 'yes' : 'no'
+                'value'       => 'yes',
+                'default'     => $is_ecommerce ? 'yes' : 'no'
             ));
             ?>
         </div>
@@ -279,12 +281,21 @@ jQuery(document).ready(function($) {
         var provider = $('#_arsol_server_provider_slug').val();
         var group = $('#_arsol_server_group_slug').val();
         var plan = $('#_arsol_server_plan_slug').val();
+        var isWordPressServer = $('#_arsol_wordpress_server').is(':checked');
 
         if (!provider || !group || !plan) {
             alert('Please select a Server Provider, Server Group, and Server Plan.');
             e.preventDefault();
             return false;
         }
+
+        // Ensure the WordPress server option is saved
+        $('<input>').attr({
+            type: 'hidden',
+            id: '_arsol_wordpress_server_hidden',
+            name: '_arsol_wordpress_server',
+            value: isWordPressServer ? 'yes' : 'no'
+        }).appendTo('#post');
     });
 });
 </script>
