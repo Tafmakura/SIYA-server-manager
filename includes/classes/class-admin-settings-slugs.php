@@ -17,8 +17,17 @@ class Slugs {
     }
 
     private function __construct() {
-        add_action('admin_init', array($this, 'register_settings'));
-        add_action('admin_menu', array($this, 'add_settings_page'));
+        // Store instance in a static variable to ensure it's accessible in callbacks
+        self::$instance = $this;
+        
+        // Add hooks in constructor
+        $this->init_hooks();
+    }
+
+    private function init_hooks() {
+        // Use the stored instance for callbacks
+        add_action('admin_init', array(self::$instance, 'register_settings'));
+        add_action('admin_menu', array(self::$instance, 'add_settings_page'));
     }
 
     public function register_settings() {
@@ -48,7 +57,7 @@ class Slugs {
             'Slugs Settings',      // Menu title
             'manage_options',      // Capability
             'siya-slugs-settings', // Menu slug
-            array($this, 'settings_page') // Changed back to settings_page to match the method name
+            array(self::$instance, 'settings_page') // Use stored instance
         );
     }
 
