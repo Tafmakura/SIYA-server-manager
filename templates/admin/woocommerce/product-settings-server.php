@@ -18,7 +18,7 @@
 
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
-            'label'       => __('Maximum Applications', 'woocommerce'),
+            'label'       => __('Maximum applications', 'woocommerce'),
             'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
             'desc_tip'    => 'true',
             'type'        => 'number',
@@ -33,7 +33,7 @@
         ));
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_staging_sites',
-            'label'       => __('Maximum Staging Sites', 'woocommerce'),
+            'label'       => __('Maximum staging sites', 'woocommerce'),
             'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
             'desc_tip'    => 'true',
             'type'        => 'number',
@@ -48,7 +48,7 @@
         ));
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
-            'label'       => __('WordPress Server', 'woocommerce'),
+            'label'       => __('WordPress server', 'woocommerce'),
             'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
             'desc_tip'    => 'true',
             'cbvalue'     => 'yes',
@@ -59,7 +59,7 @@
             <?php
             woocommerce_wp_checkbox(array(
                 'id'          => '_arsol_ecommerce',
-                'label'       => __('WordPress Ecommerce', 'woocommerce'),
+                'label'       => __('E-commerce', 'woocommerce'),
                 'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
                 'cbvalue'     => 'yes',
@@ -74,7 +74,7 @@
 
         woocommerce_wp_select(array(
             'id'          => '_arsol_server_provider_slug',
-            'label'       => __('Server Provider', 'woocommerce'),
+            'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($providers, array_map([$slugs, 'get_provider_name'], $providers)),
@@ -87,7 +87,7 @@
 
         woocommerce_wp_select(array(
             'id'          => '_arsol_server_group_slug',
-            'label'       => __('Server Group', 'woocommerce'),
+            'label'       => __('Server group', 'woocommerce'),
             'description' => __('Select the server group.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
@@ -105,7 +105,7 @@
 
         woocommerce_wp_select(array(
             'id'          => '_arsol_server_plan_slug',
-            'label'       => __('Server Plan', 'woocommerce'),
+            'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => $plan_options,
