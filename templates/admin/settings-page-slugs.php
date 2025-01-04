@@ -43,7 +43,7 @@ if (!defined('ABSPATH')) {
         <h2>Server Provider Plan Slugs</h2>
         
         <!-- DigitalOcean Subsection -->
-        <h3>DigitalOcean</h3>
+        <h4>DigitalOcean</h4>
         <table class="form-table">
             <tr>
                 <th scope="row">Provider Name Slug</th>
@@ -99,7 +99,7 @@ if (!defined('ABSPATH')) {
         </table>
 
         <!-- Hetzner Subsection -->
-        <h3>Hetzner</h3>
+        <h4>Hetzner</h4>
         <table class="form-table">
             <tr>
                 <th scope="row">Provider Name Slug</th>
@@ -155,7 +155,7 @@ if (!defined('ABSPATH')) {
         </table>
 
         <!-- Vultr Subsection -->
-        <h3>Vultr</h3>
+        <h4>Vultr</h4>
         <table class="form-table">
             <tr>
                 <th scope="row">Provider Name Slug</th>
@@ -230,7 +230,8 @@ if (!defined('ABSPATH')) {
 .plan-field label {
     display: block;
     margin-bottom: 5px;
-    font-weight: 600;
+    font-weight: normal;
+    font-size: 14px;
 }
 
 .plan-field input[type="text"] {
