@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
         <h2>DigitalOcean</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Provider Name Slug</th>
+                <th scope="row">Server Provider Slug</th>
                 <td>
                     <input type="text" value="digitalocean" disabled />
                 </td>
@@ -83,7 +83,7 @@ if (!defined('ABSPATH')) {
         <h2>Hetzner</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Provider Name Slug</th>
+                <th scope="row">Server Provider Slug</th>
                 <td>
                     <input type="text" value="hetzner" disabled />
                 </td>
@@ -139,7 +139,7 @@ if (!defined('ABSPATH')) {
         <h2>Vultr</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Provider Name Slug</th>
+                <th scope="row">Server Provider Slug</th>
                 <td>
                     <input type="text" value="vultr" disabled />
                 </td>
