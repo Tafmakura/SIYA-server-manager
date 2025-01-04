@@ -11,52 +11,34 @@ $settings = Slugs::get_instance();
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     <form method="post" action="options.php">
         <?php settings_fields('siya_slugs_settings'); ?>
-        
-        <!-- Server Manager Section -->
-        <h2>Server Manager Slugs</h2>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Dashboard Slug</th>
-                <td>
-                    <input type="text" name="siya_server_dashboard_slug" 
-                           value="<?php echo esc_attr(get_option('siya_server_dashboard_slug', 'server-dashboard')); ?>" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Servers List Slug</th>
-                <td>
-                    <input type="text" name="siya_servers_list_slug" 
-                           value="<?php echo esc_attr(get_option('siya_servers_list_slug', 'servers')); ?>" />
-                </td>
-            </tr>
-        </table>
 
         <!-- WordPress Plan Section -->
-        <h2>WordPress Plan Slugs</h2>
+        <h2>WordPress managed hosting</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Plans List Slug</th>
+                <th scope="row">Server provider</th>
                 <td>
-                    <input type="text" name="siya_wp_plans_slug" 
-                           value="<?php echo esc_attr(get_option('siya_wp_plans_slug', 'wordpress-plans')); ?>" />
+                    <select name="siya_wp_server_provider">
+                        <option value="digitalocean" <?php selected(get_option('siya_wp_server_provider'), 'digitalocean'); ?>>DigitalOcean</option>
+                        <option value="hetzner" <?php selected(get_option('siya_wp_server_provider'), 'hetzner'); ?>>Hetzner</option>
+                        <option value="vultr" <?php selected(get_option('siya_wp_server_provider'), 'vultr'); ?>>Vultr</option>
+                    </select>
+                    <p class="arsol-description">Select the cloud provider for WordPress hosting</p>
                 </td>
             </tr>
         </table>
 
-        <!-- Server Provider Plans Section -->
-        <h2>Server Provider Plan Slugs</h2>
-        
-        <!-- DigitalOcean Subsection -->
-        <h3>DigitalOcean</h3>
+        <!-- DigitalOcean Section -->
+        <h2>DigitalOcean</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Provider Name Slug</th>
+                <th scope="row">Server provider slug</th>
                 <td>
                     <input type="text" value="digitalocean" disabled />
                 </td>
             </tr>
             <tr>
-                <th scope="row">Plans</th>
+                <th scope="row">Available plans</th>
                 <td>
                     <div class="plan-repeater" data-provider="digitalocean">
                         <?php
@@ -66,17 +48,19 @@ $settings = Slugs::get_instance();
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Plan Slug</label>
+                                        <label>Plan slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                        <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                                     </div>
                                     <div class="plan-field">
-                                        <label>Plan Description</label>
+                                        <label>Plan description</label>
                                         <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                        <p class="arsol-description">Brief description of what this plan offers</p>
                                     </div>
                                     <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                        <button type="button" class="button remove-plan">Remove plan</button>
                                     </div>
                                 </div>
                                 <?php
@@ -85,34 +69,36 @@ $settings = Slugs::get_instance();
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Plan Slug</label>
+                                <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                                <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                             </div>
                             <div class="plan-field">
-                                <label>Plan Description</label>
+                                <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                                <p class="arsol-description">Brief description of what this plan offers</p>
                             </div>
                             <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove Plan</button>
+                                <button type="button" class="button remove-plan">Remove plan</button>
                             </div>
                         </div>
-                        <button type="button" class="button add-plan">Add Plan</button>
+                        <button type="button" class="button add-plan">Add plan</button>
                     </div>
                 </td>
             </tr>
         </table>
 
-        <!-- Hetzner Subsection -->
-        <h3>Hetzner</h3>
+        <!-- Hetzner Section -->
+        <h2>Hetzner</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Provider Name Slug</th>
+                <th scope="row">Server provider slug</th>
                 <td>
                     <input type="text" value="hetzner" disabled />
                 </td>
             </tr>
             <tr>
-                <th scope="row">Plans</th>
+                <th scope="row">Available plans</th>
                 <td>
                     <div class="plan-repeater" data-provider="hetzner">
                         <?php
@@ -122,17 +108,19 @@ $settings = Slugs::get_instance();
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Plan Slug</label>
+                                        <label>Plan slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                        <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                                     </div>
                                     <div class="plan-field">
-                                        <label>Plan Description</label>
+                                        <label>Plan description</label>
                                         <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                        <p class="arsol-description">Brief description of what this plan offers</p>
                                     </div>
                                     <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                        <button type="button" class="button remove-plan">Remove plan</button>
                                     </div>
                                 </div>
                                 <?php
@@ -141,34 +129,36 @@ $settings = Slugs::get_instance();
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Plan Slug</label>
+                                <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                                <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                             </div>
                             <div class="plan-field">
-                                <label>Plan Description</label>
+                                <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                                <p class="arsol-description">Brief description of what this plan offers</p>
                             </div>
                             <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove Plan</button>
+                                <button type="button" class="button remove-plan">Remove plan</button>
                             </div>
                         </div>
-                        <button type="button" class="button add-plan">Add Plan</button>
+                        <button type="button" class="button add-plan">Add plan</button>
                     </div>
                 </td>
             </tr>
         </table>
 
-        <!-- Vultr Subsection -->
-        <h3>Vultr</h3>
+        <!-- Vultr Section -->
+        <h2>Vultr</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Provider Name Slug</th>
+                <th scope="row">Server provider slug</th>
                 <td>
                     <input type="text" value="vultr" disabled />
                 </td>
             </tr>
             <tr>
-                <th scope="row">Plans</th>
+                <th scope="row">Available plans</th>
                 <td>
                     <div class="plan-repeater" data-provider="vultr">
                         <?php
@@ -178,17 +168,19 @@ $settings = Slugs::get_instance();
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Plan Slug</label>
+                                        <label>Plan slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                        <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                                     </div>
                                     <div class="plan-field">
-                                        <label>Plan Description</label>
+                                        <label>Plan description</label>
                                         <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                        <p class="arsol-description">Brief description of what this plan offers</p>
                                     </div>
                                     <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                        <button type="button" class="button remove-plan">Remove plan</button>
                                     </div>
                                 </div>
                                 <?php
@@ -197,18 +189,20 @@ $settings = Slugs::get_instance();
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Plan Slug</label>
+                                <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                                <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                             </div>
                             <div class="plan-field">
-                                <label>Plan Description</label>
+                                <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                                <p class="arsol-description">Brief description of what this plan offers</p>
                             </div>
                             <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove Plan</button>
+                                <button type="button" class="button remove-plan">Remove plan</button>
                             </div>
                         </div>
-                        <button type="button" class="button add-plan">Add Plan</button>
+                        <button type="button" class="button add-plan">Add plan</button>
                     </div>
                 </td>
             </tr>
@@ -260,6 +254,13 @@ $settings = Slugs::get_instance();
 .remove-plan:hover {
     background: #dc3545;
     color: #fff;
+}
+
+.arsol-description {
+    margin-top: 4px;
+    margin-bottom: 0;
+    color: #666;
+    font-size: 13px;
 }
 </style>
 
