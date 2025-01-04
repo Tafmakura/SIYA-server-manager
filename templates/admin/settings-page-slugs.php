@@ -9,10 +9,10 @@ if (!defined('ABSPATH')) {
         <?php settings_fields('siya_slugs_settings'); ?>
 
         <!-- WordPress Plan Section -->
-        <h2>WordPress Managed Hosting</h2>
+        <h2>WordPress managed hosting</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Server Provider</th>
+                <th scope="row">Server provider</th>
                 <td>
                     <select name="siya_wp_server_provider">
                         <option value="digitalocean" <?php selected(get_option('siya_wp_server_provider'), 'digitalocean'); ?>>DigitalOcean</option>
@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
         <h2>DigitalOcean</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Server Provider Slug</th>
+                <th scope="row">Server provider slug</th>
                 <td>
                     <input type="text" value="digitalocean" disabled />
                 </td>
@@ -43,12 +43,12 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Plan Slug</label>
+                                        <label>Plan slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
                                     </div>
                                     <div class="plan-field">
-                                        <label>Plan Description</label>
+                                        <label>Plan description</label>
                                         <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
                                     </div>
@@ -62,11 +62,11 @@ if (!defined('ABSPATH')) {
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Plan Slug</label>
+                                <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
                             </div>
                             <div class="plan-field">
-                                <label>Plan Description</label>
+                                <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
                             </div>
                             <div class="plan-field">
@@ -83,7 +83,7 @@ if (!defined('ABSPATH')) {
         <h2>Hetzner</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Server Provider Slug</th>
+                <th scope="row">Server provider slug</th>
                 <td>
                     <input type="text" value="hetzner" disabled />
                 </td>
@@ -99,12 +99,12 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Plan Slug</label>
+                                        <label>Plan slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
                                     </div>
                                     <div class="plan-field">
-                                        <label>Plan Description</label>
+                                        <label>Plan description</label>
                                         <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
                                     </div>
@@ -118,11 +118,11 @@ if (!defined('ABSPATH')) {
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Plan Slug</label>
+                                <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
                             </div>
                             <div class="plan-field">
-                                <label>Plan Description</label>
+                                <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
                             </div>
                             <div class="plan-field">
@@ -139,7 +139,7 @@ if (!defined('ABSPATH')) {
         <h2>Vultr</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Server Provider Slug</th>
+                <th scope="row">Server provider slug</th>
                 <td>
                     <input type="text" value="vultr" disabled />
                 </td>
@@ -155,12 +155,12 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Plan Slug</label>
+                                        <label>Plan slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
                                     </div>
                                     <div class="plan-field">
-                                        <label>Plan Description</label>
+                                        <label>Plan description</label>
                                         <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
                                     </div>
@@ -174,11 +174,11 @@ if (!defined('ABSPATH')) {
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Plan Slug</label>
+                                <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
                             </div>
                             <div class="plan-field">
-                                <label>Plan Description</label>
+                                <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
                             </div>
                             <div class="plan-field">
