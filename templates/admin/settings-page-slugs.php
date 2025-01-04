@@ -21,13 +21,6 @@ if (!defined('ABSPATH')) {
                     </select>
                 </td>
             </tr>
-            <tr>
-                <th scope="row">Plans List Slug</th>
-                <td>
-                    <input type="text" name="siya_wp_plans_slug" 
-                           value="<?php echo esc_attr(get_option('siya_wp_plans_slug', 'wordpress-plans')); ?>" />
-                </td>
-            </tr>
         </table>
 
         <!-- DigitalOcean Section -->
