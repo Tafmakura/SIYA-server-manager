@@ -121,7 +121,7 @@ select {
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    function updateGroups(provider) {
+    function updateGroups(provider, callback) {
         $.ajax({
             url: ajaxurl,
             data: {
@@ -142,6 +142,7 @@ jQuery(document).ready(function($) {
                 }
                 
                 $groupSelect.trigger('change');
+                if (callback) callback(groups);
             }
         });
     }
@@ -172,8 +173,14 @@ jQuery(document).ready(function($) {
 
     function setWordPressProvider() {
         var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+        var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
         $('#_arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
-        updateGroups(wpProvider);
+        updateGroups(wpProvider, function(groups) {
+            if (groups.includes(wpGroup)) {
+                $('#_arsol_server_group_slug').val(wpGroup).prop('disabled', true);
+                updatePlans(wpProvider, wpGroup);
+            }
+        });
     }
 
     $('#_arsol_server_provider_slug').on('change', function() {
@@ -192,6 +199,7 @@ jQuery(document).ready(function($) {
             setWordPressProvider();
         } else {
             $('#_arsol_server_provider_slug').prop('disabled', false);
+            $('#_arsol_server_group_slug').prop('disabled', false);
         }
     });
 
