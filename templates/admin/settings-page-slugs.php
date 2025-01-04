@@ -19,6 +19,7 @@ if (!defined('ABSPATH')) {
                         <option value="hetzner" <?php selected(get_option('siya_wp_server_provider'), 'hetzner'); ?>>Hetzner</option>
                         <option value="vultr" <?php selected(get_option('siya_wp_server_provider'), 'vultr'); ?>>Vultr</option>
                     </select>
+                    <span class="description">Select the cloud provider for WordPress hosting</span>
                 </td>
             </tr>
         </table>
@@ -46,11 +47,13 @@ if (!defined('ABSPATH')) {
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                        <span class="description">A unique identifier for this plan (e.g., basic-droplet)</span>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
                                         <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                        <span class="description">Brief description of what this plan offers</span>
                                     </div>
                                     <div class="plan-field">
                                         <button type="button" class="button remove-plan">Remove plan</button>
@@ -64,10 +67,12 @@ if (!defined('ABSPATH')) {
                             <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                                <span class="description">A unique identifier for this plan (e.g., basic-droplet)</span>
                             </div>
                             <div class="plan-field">
                                 <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                                <span class="description">Brief description of what this plan offers</span>
                             </div>
                             <div class="plan-field">
                                 <button type="button" class="button remove-plan">Remove plan</button>
@@ -102,11 +107,13 @@ if (!defined('ABSPATH')) {
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                        <span class="description">A unique identifier for this plan (e.g., basic-droplet)</span>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
                                         <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                        <span class="description">Brief description of what this plan offers</span>
                                     </div>
                                     <div class="plan-field">
                                         <button type="button" class="button remove-plan">Remove plan</button>
@@ -120,10 +127,12 @@ if (!defined('ABSPATH')) {
                             <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                                <span class="description">A unique identifier for this plan (e.g., basic-droplet)</span>
                             </div>
                             <div class="plan-field">
                                 <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                                <span class="description">Brief description of what this plan offers</span>
                             </div>
                             <div class="plan-field">
                                 <button type="button" class="button remove-plan">Remove plan</button>
@@ -158,11 +167,13 @@ if (!defined('ABSPATH')) {
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                        <span class="description">A unique identifier for this plan (e.g., basic-droplet)</span>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
                                         <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                        <span class="description">Brief description of what this plan offers</span>
                                     </div>
                                     <div class="plan-field">
                                         <button type="button" class="button remove-plan">Remove plan</button>
@@ -176,10 +187,12 @@ if (!defined('ABSPATH')) {
                             <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
+                                <span class="description">A unique identifier for this plan (e.g., basic-droplet)</span>
                             </div>
                             <div class="plan-field">
                                 <label>Plan description</label>
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
+                                <span class="description">Brief description of what this plan offers</span>
                             </div>
                             <div class="plan-field">
                                 <button type="button" class="button remove-plan">Remove plan</button>
@@ -238,6 +251,14 @@ if (!defined('ABSPATH')) {
 .remove-plan:hover {
     background: #dc3545;
     color: #fff;
+}
+
+.description {
+    display: block;
+    margin-top: 4px;
+    color: #666;
+    font-style: italic;
+    font-size: 13px;
 }
 </style>
 
