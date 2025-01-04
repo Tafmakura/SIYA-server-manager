@@ -115,6 +115,9 @@ class Slugs {
             return [];
         }
         $plans = get_option("siya_{$provider_slug}_plans", []);
+        if (!is_array($plans)) {
+            return [];
+        }
         return array_unique(array_column($plans, 'group_slug'));
     }
 

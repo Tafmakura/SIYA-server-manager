@@ -115,11 +115,7 @@ $slugs = new Slugs();
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Provider change handler
-    $('#_arsol_server_provider_slug').on('change', function() {
-        var provider = $(this).val();
-        
-        // AJAX call to get groups
+    function updateGroups(provider) {
         $.ajax({
             url: ajaxurl,
             data: {
@@ -137,14 +133,9 @@ jQuery(document).ready(function($) {
                 $groupSelect.trigger('change');
             }
         });
-    });
+    }
 
-    // Group change handler
-    $('#_arsol_server_group_slug').on('change', function() {
-        var provider = $('#_arsol_server_provider_slug').val();
-        var group = $(this).val();
-        
-        // AJAX call to get plans
+    function updatePlans(provider, group) {
         $.ajax({
             url: ajaxurl,
             data: {
@@ -161,6 +152,23 @@ jQuery(document).ready(function($) {
                 });
             }
         });
+    }
+
+    $('#_arsol_server_provider_slug').on('change', function() {
+        var provider = $(this).val();
+        updateGroups(provider);
     });
+
+    $('#_arsol_server_group_slug').on('change', function() {
+        var provider = $('#_arsol_server_provider_slug').val();
+        var group = $(this).val();
+        updatePlans(provider, group);
+    });
+
+    // Initial load
+    var initialProvider = $('#_arsol_server_provider_slug').val();
+    if (initialProvider) {
+        updateGroups(initialProvider);
+    }
 });
 </script>
