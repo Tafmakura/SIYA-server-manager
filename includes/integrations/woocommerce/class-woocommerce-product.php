@@ -197,5 +197,20 @@ class Product {
         update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
         update_post_meta($post_id, '_arsol_server_group_slug', $group_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
+
+        // Check if WordPress server is enabled
+        $is_wordpress_server = isset($_POST['_arsol_wordpress_server']) && $_POST['_arsol_wordpress_server'] === 'yes';
+
+        // Save region and image as null if WordPress server is enabled, otherwise save normally
+        if ($is_wordpress_server) {
+            update_post_meta($post_id, '_arsol_server_region', '');
+            update_post_meta($post_id, '_arsol_server_image', '');
+        } else {
+            $region = isset($_POST['_arsol_server_region']) ? sanitize_text_field($_POST['_arsol_server_region']) : '';
+            update_post_meta($post_id, '_arsol_server_region', $region);
+
+            $server_image = isset($_POST['_arsol_server_image']) ? sanitize_text_field($_POST['_arsol_server_image']) : '';
+            update_post_meta($post_id, '_arsol_server_image', $server_image);
+        }
     }
 }

@@ -165,7 +165,8 @@ class ServerOrchestrator {
     // Step 2: Provision Hetzner server and update server post metadata
     private function provision_hetzner_server($server_post_instance, $subscription) {
         $server_name = 'ARSOL' . $this->subscription_id;
-        $server_data = $this->hetzner->provision_server($server_name);
+        $server_plan = 'cx22';
+        $server_data = $this->hetzner->provision_server($server_name, $server_plan);
 
         if (!$server_data) {
             $error_response = $this->hetzner->get_last_response();
