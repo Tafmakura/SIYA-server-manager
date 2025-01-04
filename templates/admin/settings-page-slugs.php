@@ -47,19 +47,19 @@ if (!defined('ABSPATH')) {
                                     <div class="plan-field">
                                         <label>Group slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][group_slug]" 
-                                               value="<?php echo esc_attr($plan['group_slug']); ?>" placeholder="Enter group slug" />
+                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
                                         <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
-                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                               value="<?php echo esc_attr($plan['slug'] ?? ''); ?>" placeholder="Enter plan slug" />
                                         <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
                                         <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
-                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description'] ?? ''); ?></textarea>
                                         <p class="arsol-description">Brief description of what this plan offers</p>
                                     </div>
                                     <div class="plan-field">
@@ -118,19 +118,19 @@ if (!defined('ABSPATH')) {
                                     <div class="plan-field">
                                         <label>Group slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][group_slug]" 
-                                               value="<?php echo esc_attr($plan['group_slug']); ?>" placeholder="Enter group slug" />
+                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
                                         <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
-                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                               value="<?php echo esc_attr($plan['slug'] ?? ''); ?>" placeholder="Enter plan slug" />
                                         <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
                                         <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
-                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description'] ?? ''); ?></textarea>
                                         <p class="arsol-description">Brief description of what this plan offers</p>
                                     </div>
                                     <div class="plan-field">
@@ -189,19 +189,19 @@ if (!defined('ABSPATH')) {
                                     <div class="plan-field">
                                         <label>Group slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][group_slug]" 
-                                               value="<?php echo esc_attr($plan['group_slug']); ?>" placeholder="Enter group slug" />
+                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
                                         <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
-                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
+                                               value="<?php echo esc_attr($plan['slug'] ?? ''); ?>" placeholder="Enter plan slug" />
                                         <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
                                         <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
-                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
+                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description'] ?? ''); ?></textarea>
                                         <p class="arsol-description">Brief description of what this plan offers</p>
                                     </div>
                                     <div class="plan-field">
@@ -270,11 +270,44 @@ if (!defined('ABSPATH')) {
 .plan-field textarea {
     width: 100%;
     max-width: 400px;
+    height: 100px;
+}
+
+.add-plan {
+    margin-top: 10px !important;
+}
+
+.remove-plan {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.remove-plan:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+.arsol-description {
+    margin-top: 4px;
+    margin-bottom: 0;
+    color: #666;
+    font-size: 13px;
+}
+</style>
+
+<script>
+jQuery(document).ready(function($) {
+    $('.add-plan').on('click', function() {
+        var $repeater = $(this).closest('.plan-repeater');
+        var $template = $repeater.find('.template').clone();
+        var provider = $repeater.data('provider');
+        var index = $repeater.find('.plan-row').length - 1;
+
         $template.removeClass('template').show()
             .find('input, textarea').each(function() {
                 var name = $(this).attr('name');
                 $(this).attr('name', 'siya_' + provider + '_plans[' + index + '][' + 
-                    (name.includes('slug') ? 'slug' : 'description') + ']');
+                    (name.includes('group_slug') ? 'group_slug' : name.includes('slug') ? 'slug' : 'description') + ']');
             });
 
         $(this).before($template);
