@@ -117,7 +117,7 @@
         $region = get_post_meta($post->ID, 'arsol_server_region', true);
         woocommerce_wp_text_input(array(
             'id'          => 'arsol_server_region',
-            'label'       => __('Region (Optional)', 'woocommerce'),
+            'label'       => __('Region (optional)', 'woocommerce'),
             'description' => __('Enter the server region. Only alphanumeric characters allowed.', 'woocommerce'),
             'desc_tip'    => true,
             'value'       => $region,
