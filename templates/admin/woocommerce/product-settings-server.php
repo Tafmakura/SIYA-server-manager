@@ -283,12 +283,8 @@ jQuery(document).ready(function($) {
         var plan = $('#_arsol_server_plan_slug').val();
         
         // Ensure checkbox values are properly set
-        if (!$('#_arsol_wordpress_server').is(':checked')) {
-            $('#_arsol_wordpress_server').val('no');
-        }
-        if (!$('#_arsol_ecommerce').is(':checked')) {
-            $('#_arsol_ecommerce').val('no');
-        }
+        $('#_arsol_wordpress_server').val($('#_arsol_wordpress_server').is(':checked') ? 'yes' : 'no');
+        $('#_arsol_ecommerce').val($('#_arsol_ecommerce').is(':checked') ? 'yes' : 'no');
 
         if (!provider || !group || !plan) {
             alert('Please select a Server Provider, Server Group, and Server Plan.');
