@@ -143,6 +143,9 @@ class Slugs {
         $plans = [];
         if ($provider_slug) {
             $plans = get_option("siya_{$provider_slug}_plans", []);
+            if (!is_array($plans)) {
+                return [];
+            }
             if ($group_slug) {
                 $plans = array_filter($plans, function($plan) use ($group_slug) {
                     return $plan['group_slug'] === $group_slug;
