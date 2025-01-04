@@ -78,23 +78,7 @@ class Product {
             return;
         }
 
-        // Sanitize and validate region field specifically
-        $region = isset($_POST['arsol_server_region']) ? $_POST['arsol_server_region'] : '';
-        if (!empty($region)) {
-            // Check if region contains only allowed characters
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                // Add error message for invalid characters
-                wc_add_notice(__('Region field can only contain letters, numbers, and hyphens.', 'woocommerce'), 'error');
-                return;
-            }
-            // Additional length validation
-            if (strlen($region) > 50) {
-                wc_add_notice(__('Region field cannot exceed 50 characters.', 'woocommerce'), 'error');
-                return;
-            }
-        }
-
-        // Define and sanitize fields
+        // Define and sanitize basic fields
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
             '_arsol_server_group_slug'    => sanitize_text_field($_POST['_arsol_server_group_slug'] ?? ''),
@@ -103,10 +87,33 @@ class Product {
             '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
             '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
             '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
-            'arsol_server_region'         => sanitize_text_field($region),
         ];
 
-        // Save all fields, even if empty
+        // Check if WordPress server is enabled
+        $is_wordpress_server = isset($_POST['_arsol_wordpress_server']);
+
+        // Handle region field
+        $region = isset($_POST['_arsol_server_region']) ? sanitize_text_field($_POST['_arsol_server_region']) : '';
+        if (!empty($region) && !$is_wordpress_server) {
+            // Validate region format
+            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
+                wc_add_notice(__('Region field can only contain letters, numbers, and hyphens.', 'woocommerce'), 'error');
+                return;
+            }
+            if (strlen($region) > 50) {
+                wc_add_notice(__('Region field cannot exceed 50 characters.', 'woocommerce'), 'error');
+                return;
+            }
+        }
+        
+        // Handle server image field
+        $server_image = isset($_POST['_arsol_server_image']) ? sanitize_text_field($_POST['_arsol_server_image']) : '';
+        
+        // Set region and image values based on WordPress server status
+        $fields['_arsol_server_region'] = $is_wordpress_server ? '' : $region;
+        $fields['_arsol_server_image'] = $is_wordpress_server ? '' : $server_image;
+
+        // Save all fields
         foreach ($fields as $meta_key => $value) {
             update_post_meta($post_id, $meta_key, $value);
         }
@@ -188,7 +195,6 @@ class Product {
 
         // Perform validation
         if (empty($provider) || empty($group_slug) || empty($plan_slug)) {
-            // Add error message
             wc_add_notice(__('Please fill in all required fields: Server provider, Server group, and Server plan.', 'siya'), 'error');
             return;
         }
@@ -197,20 +203,5 @@ class Product {
         update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
         update_post_meta($post_id, '_arsol_server_group_slug', $group_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
-
-        // Check if WordPress server is enabled
-        $is_wordpress_server = isset($_POST['_arsol_wordpress_server']) && $_POST['_arsol_wordpress_server'] === 'yes';
-
-        // Save region and image as null if WordPress server is enabled, otherwise save normally
-        if ($is_wordpress_server) {
-            update_post_meta($post_id, '_arsol_server_region', '');
-            update_post_meta($post_id, '_arsol_server_image', '');
-        } else {
-            $region = isset($_POST['_arsol_server_region']) ? sanitize_text_field($_POST['_arsol_server_region']) : '';
-            update_post_meta($post_id, '_arsol_server_region', $region);
-
-            $server_image = isset($_POST['_arsol_server_image']) ? sanitize_text_field($_POST['_arsol_server_image']) : '';
-            update_post_meta($post_id, '_arsol_server_image', $server_image);
-        }
     }
 }
