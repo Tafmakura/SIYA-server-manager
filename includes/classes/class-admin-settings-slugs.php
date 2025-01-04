@@ -91,6 +91,7 @@ class Slugs {
     public function add_allowed_options($allowed_options) {
         $allowed_options[self::OPTION_GROUP] = [
             'siya_wp_server_provider',
+            'siya_wp_server_group', // Add this line
             'siya_digitalocean_plans',
             'siya_hetzner_plans',
             'siya_vultr_plans'
