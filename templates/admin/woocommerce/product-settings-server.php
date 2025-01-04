@@ -119,7 +119,7 @@
 
 <style>
 select {
-    width: 300px; /* Fixed width for dropdowns */
+    min-width: 120px; /* Fixed width for dropdowns */
 }
 .hidden {
     display: none;
