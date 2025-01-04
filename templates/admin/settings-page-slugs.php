@@ -323,6 +323,21 @@ select {
 
 <script>
 jQuery(document).ready(function($) {
+    // Function to validate slug fields
+    function validateSlugField($field) {
+        var value = $field.val();
+        var sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+        if (value !== sanitizedValue) {
+            $field.val(sanitizedValue);
+        }
+    }
+
+    // Attach validation to slug fields
+    $(document).on('input', 'input[name*="slug"], input[name*="group_slug"]', function() {
+        validateSlugField($(this));
+    });
+
+    // Existing code for updating groups and adding/removing plans
     function updateGroups(provider) {
         $.ajax({
             url: ajaxurl,
