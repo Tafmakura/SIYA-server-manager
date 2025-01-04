@@ -15,8 +15,24 @@ class Slugs {
     }
 
     public function register_settings(): void {
-        // Base settings
-        register_setting('siya_slugs_settings', 'siya_wp_server_provider');
+        // Register the settings group first
+        add_settings_section(
+            'siya_slugs_main_section',
+            __('SIYA Server Manager Settings', 'siya'),
+            [$this, 'section_callback'],
+            'siya_slugs_settings'
+        );
+
+        // Base settings registration with proper args
+        register_setting(
+            'siya_slugs_settings',
+            'siya_wp_server_provider',
+            [
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default' => ''
+            ]
+        );
 
         // Register plan settings for each provider
         foreach (array_keys(self::PROVIDERS) as $provider) {
@@ -26,10 +42,49 @@ class Slugs {
                 [
                     'type' => 'array',
                     'sanitize_callback' => [$this, 'sanitize_plans'],
-                    'default' => []
+                    'default' => [],
+                    'show_in_rest' => false
                 ]
             );
+
+            // Add settings field for each provider
+            add_settings_field(
+                "siya_{$provider}_plans",
+                sprintf(__('%s Plans', 'siya'), self::PROVIDERS[$provider]),
+                [$this, 'render_provider_plans_field'],
+                'siya_slugs_settings',
+                'siya_slugs_main_section',
+                ['provider' => $provider]
+            );
         }
+    }
+
+    public function section_callback(): void {
+        echo '<p>' . esc_html__('Configure your server provider settings here.', 'siya') . '</p>';
+    }
+
+    public function render_provider_plans_field(array $args): void {
+        $provider = $args['provider'];
+        $plans = $this->get_plans($provider);
+        
+        echo '<div class="provider-plans">';
+        foreach ($plans as $index => $plan) {
+            echo '<div class="plan-item">';
+            printf(
+                '<input type="text" name="siya_%s_plans[%d][slug]" value="%s" />',
+                esc_attr($provider),
+                esc_attr($index),
+                esc_attr($plan['slug'])
+            );
+            printf(
+                '<textarea name="siya_%s_plans[%d][description]">%s</textarea>',
+                esc_attr($provider),
+                esc_attr($index),
+                esc_textarea($plan['description'])
+            );
+            echo '</div>';
+        }
+        echo '</div>';
     }
 
     public function initialize_default_settings(): void {
