@@ -19,13 +19,12 @@ $slugs = new Slugs();
             </div>
         </div>
         <?php
-        // Fetching metadata for form fields
+
         $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
         $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
         $is_wordpress_server = get_post_meta($post->ID, '_arsol_wordpress_server', true) === 'yes';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce', true) === 'yes';
 
-        // Maximum Applications Field
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
             'label'       => __('Maximum Applications', 'woocommerce'),
@@ -41,8 +40,6 @@ $slugs = new Slugs();
             ),
             'value'       => empty($max_applications) ? '0' : $max_applications
         ));
-
-        // Maximum Staging Sites Field
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_staging_sites',
             'label'       => __('Maximum Staging Sites', 'woocommerce'),
@@ -58,8 +55,6 @@ $slugs = new Slugs();
             ),
             'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
         ));
-
-        // WordPress Server Checkbox with Hidden Field
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
             'label'       => __('WordPress Server', 'woocommerce'),
@@ -68,20 +63,21 @@ $slugs = new Slugs();
             'cbvalue'     => 'yes',
             'value'       => $is_wordpress_server ? 'yes' : 'no'
         ));
-        echo '<input type="hidden" name="_arsol_wordpress_server" value="no">';
-
-        // Ecommerce Checkbox with Hidden Field
-        woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_ecommerce',
-            'label'       => __('WordPress Ecommerce', 'woocommerce'),
-            'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'cbvalue'     => 'yes',
-            'value'       => $is_ecommerce ? 'yes' : 'no'
-        ));
-        echo '<input type="hidden" name="_arsol_ecommerce" value="no">';
-
-        // Server Provider Dropdown
+        ?>
+        <div class="arsol_ecommerce_field">
+            <?php
+            woocommerce_wp_checkbox(array(
+                'id'          => '_arsol_ecommerce',
+                'label'       => __('WordPress Ecommerce', 'woocommerce'),
+                'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
+                'desc_tip'    => 'true',
+                'cbvalue'     => 'yes',
+                'value'       => $is_ecommerce ? 'yes' : 'no'
+            ));
+            ?>
+        </div>
+        <?php
+        // Provider Dropdown
         $providers = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
@@ -94,7 +90,7 @@ $slugs = new Slugs();
             'value'       => $selected_provider
         ));
 
-        // Server Group Dropdown
+        // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_group_slug', true);
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
@@ -107,9 +103,10 @@ $slugs = new Slugs();
             'value'       => $selected_group
         ));
 
-        // Server Plan Dropdown
+        // Plan Dropdown
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = $selected_provider && $selected_group ? $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
+        $plans = $selected_provider && $selected_group ? 
+            $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
         $plan_options = [];
         foreach ($plans as $plan) {
             $plan_options[$plan['slug']] = $plan['slug'];
@@ -125,10 +122,36 @@ $slugs = new Slugs();
         ));
         ?>
     </div>
+
+
+<?php
+// Debug variable dump
+echo '<pre>';
+
+echo 'Providers: ';
+print_r($slugs->get_provider_slugs());
+
+echo "\nProvider Groups:\n";
+foreach ($slugs->get_provider_slugs() as $provider) {
+    echo "\n$provider Groups: ";
+    print_r($slugs->get_provider_group_slugs($provider));
+}
+
+echo "\nPlans for each Provider/Group:\n";
+foreach ($slugs->get_provider_slugs() as $provider) {
+    $groups = $slugs->get_provider_group_slugs($provider);
+    foreach ($groups as $group) {
+        echo "\n$provider - $group Plans: ";
+        print_r($slugs->get_filtered_plans($provider, $group));
+    }
+}
+echo '</pre>';
+?>
+
+
 </div>
 
 <style>
-/* Custom styles for select fields */
 select {
     width: 300px; /* Fixed width for dropdowns */
 }
@@ -136,7 +159,6 @@ select {
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Update Groups based on selected Provider
     function updateGroups(provider, callback) {
         $.ajax({
             url: ajaxurl,
@@ -156,7 +178,8 @@ jQuery(document).ready(function($) {
                         $groupSelect.append(new Option(group, group));
                     });
 
-                    var selectedGroup = '<?php echo esc_js($selected_group); ?>';
+                    // Set the selected group
+                    var selectedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_group_slug', true)); ?>';
                     $groupSelect.val(selectedGroup);
                 }
                 
@@ -166,7 +189,6 @@ jQuery(document).ready(function($) {
         });
     }
 
-    // Update Plans based on selected Group
     function updatePlans(provider, group) {
         $.ajax({
             url: ajaxurl,
@@ -175,10 +197,24 @@ jQuery(document).ready(function($) {
                 provider: provider,
                 group: group
             },
-            success: function(plans) {
+            success: function(response) {
+                var plans = [];
+                try {
+                    if (typeof response === 'string') {
+                        plans = JSON.parse(response);  // Parse the response as JSON
+                    } else if (typeof response === 'object') {
+                        plans = response;  // Response is already an object
+                    }
+                    if (!Array.isArray(plans)) {
+                        plans = Object.values(plans);  // Convert object to array if necessary
+                    }
+                } catch (e) {
+                    console.error('Failed to parse plans:', e);
+                    plans = [];
+                }
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
-
+                
                 if (plans.length === 0) {
                     $planSelect.prop('disabled', true);
                 } else {
@@ -187,14 +223,29 @@ jQuery(document).ready(function($) {
                         $planSelect.append(new Option(plan.slug, plan.slug));
                     });
 
-                    var selectedPlan = '<?php echo esc_js($selected_plan); ?>';
+                    // Set the selected plan
+                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
                     $planSelect.val(selectedPlan);
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to fetch plans:', error);
             }
         });
     }
 
-    // Event handlers
+    function setWordPressProvider() {
+        var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+        var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+        $('#_arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
+        updateGroups(wpProvider, function(groups) {
+            if (groups.includes(wpGroup)) {
+                $('#_arsol_server_group_slug').val(wpGroup).prop('disabled', true);
+                updatePlans(wpProvider, wpGroup);
+            }
+        });
+    }
+
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
         updateGroups(provider);
@@ -206,30 +257,44 @@ jQuery(document).ready(function($) {
         updatePlans(provider, group);
     });
 
-    // Form submission validation
+    $('#_arsol_wordpress_server').on('change', function() {
+        if ($(this).is(':checked')) {
+            setWordPressProvider();
+        } else {
+            $('#_arsol_server_provider_slug').prop('disabled', false);
+            $('#_arsol_server_group_slug').prop('disabled', false);
+        }
+    });
+
+    // Initial load
+    var initialProvider = $('#_arsol_server_provider_slug').val();
+    if (initialProvider) {
+        updateGroups(initialProvider);
+    }
+
+    if ($('#_arsol_wordpress_server').is(':checked')) {
+        setWordPressProvider();
+    }
+
+    // Ensure required fields are filled before saving
     $('#post').on('submit', function(e) {
         var provider = $('#_arsol_server_provider_slug').val();
         var group = $('#_arsol_server_group_slug').val();
         var plan = $('#_arsol_server_plan_slug').val();
+        
+        // Ensure checkbox values are properly set
+        $('#_arsol_wordpress_server').val($('#_arsol_wordpress_server').is(':checked') ? 'yes' : 'no');
+        $('#_arsol_ecommerce').val($('#_arsol_ecommerce').is(':checked') ? 'yes' : 'no');
 
         if (!provider || !group || !plan) {
             alert('Please select a Server Provider, Server Group, and Server Plan.');
             e.preventDefault();
+            return false;
         }
     });
 });
 </script>
 
-<?php
-// Save meta fields
-function save_arsol_meta_data($post_id) {
-    $fields = ['_arsol_wordpress_server', '_arsol_ecommerce', '_arsol_max_applications', '_arsol_max_staging_sites', '_arsol_server_provider_slug', '_arsol_server_group_slug', '_arsol_server_plan_slug'];
 
-    foreach ($fields as $field) {
-        if (isset($_POST[$field])) {
-            update_post_meta($post_id, $field, sanitize_text_field($_POST[$field]));
-        }
-    }
-}
-add_action('save_post', 'save_arsol_meta_data');
-?>
+
+
