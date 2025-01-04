@@ -112,9 +112,22 @@
             'value'       => $selected_plan,
             'custom_attributes' => empty($selected_group) ? array('disabled' => 'disabled') : array()
         ));
+
+        // Region Text Field
+        $region = get_post_meta($post->ID, 'arsol_server_region', true);
+        woocommerce_wp_text_input(array(
+            'id'          => 'arsol_server_region',
+            'label'       => __('Region (Optional)', 'woocommerce'),
+            'description' => __('Enter the server region. Only alphanumeric characters allowed.', 'woocommerce'),
+            'desc_tip'    => true,
+            'value'       => $region,
+            'custom_attributes' => array(
+                'pattern' => '^[a-zA-Z0-9]+$',
+                'title' => 'Only letters and numbers allowed'
+            )
+        ));
         ?>
     </div>
-
 </div>
 
 <style>
@@ -266,6 +279,11 @@ jQuery(document).ready(function($) {
     if ($('#_arsol_wordpress_server').is(':checked')) {
         setWordPressProvider();
     }
+
+    // Add validation for region field
+    $('#arsol_server_region').on('input', function() {
+        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+    });
 });
 </script>
 

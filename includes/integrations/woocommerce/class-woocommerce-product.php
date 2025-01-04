@@ -87,6 +87,7 @@ class Product {
         '_arsol_max_staging_sites'    => intval($_POST['_arsol_max_staging_sites'] ?? 0),
         '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
         '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
+        'arsol_server_region'         => preg_replace('/[^a-zA-Z0-9]/', '', sanitize_text_field($_POST['arsol_server_region'] ?? '')),
     ];
 
     // Save all fields, even if empty
