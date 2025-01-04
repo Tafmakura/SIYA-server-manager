@@ -220,5 +220,18 @@ jQuery(document).ready(function($) {
     if ($('#_arsol_wordpress_server').is(':checked')) {
         setWordPressProvider();
     }
+
+    // Ensure required fields are filled before saving
+    $('#post').on('submit', function(e) {
+        var provider = $('#_arsol_server_provider_slug').val();
+        var group = $('#_arsol_server_group_slug').val();
+        var plan = $('#_arsol_server_plan_slug').val();
+
+        if (!provider || !group || !plan) {
+            alert('Please select a Server Provider, Server Group, and Server Plan.');
+            e.preventDefault();
+            return false;
+        }
+    });
 });
 </script>

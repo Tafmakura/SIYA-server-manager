@@ -73,7 +73,12 @@ class Product {
         $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
         $arsol_wordpress_server = isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no';
         $arsol_ecommerce = (isset($_POST['_arsol_ecommerce']) && $arsol_wordpress_server === 'yes') ? 'yes' : 'no';
-    
+
+        // Ensure required fields are filled
+        if (!$arsol_server_provider_slug || !$arsol_server_group_slug || !$arsol_server_plan_slug) {
+            return;
+        }
+
         update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
         update_post_meta($post_id, '_arsol_server_group_slug', $arsol_server_group_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
