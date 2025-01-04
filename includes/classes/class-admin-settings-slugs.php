@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Admin_Settings_Slugs {
+class Slugs {
     private static $instance = null;
 
     public static function get_instance() {
