@@ -129,7 +129,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Created server post with ID: ' . $this->server_post_id);
 
             // Get server product metadata
-            $server_product = wc_get_product($server_product_id);
+            $server_product = wc_get_product($this->server_product_id);
 
             // Update server post metadata
             $metadata = [
@@ -137,13 +137,23 @@ class ServerOrchestrator {
                 'arsol_server_post_name' => 'ARSOL' . $this->subscription_id,
                 'arsol_server_post_creation_date' => current_time('mysql'),
                 'arsol_server_post_status' => 1,
+                'arsol_server_product_id' => $this->server_product_id,
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
                 'arsol_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
-                'arsol_server_type_slug' => $server_product->get_meta('_arsol_server_type_slug', true),
+              // Product meta data
                 'arsol_max_applications' => $server_product->get_meta('_arsol_max_applications', true),
-                'arsol_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true)
+                'arsol_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true),
+                'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
+                'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
+                'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
+                'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
+                'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
+                'arsol_server_region_slug' => $server_product->get_meta('_arsol_server_region', true),
+                'arsol_server_image_slug' => $server_product->get_meta('_arsol_server_image', true),
+                'arsol_server_max_applications' => $server_product->get_meta('_arsol_max_applications', true),
+                'arsol_server_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true)
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
