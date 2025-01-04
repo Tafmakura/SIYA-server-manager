@@ -62,7 +62,7 @@ $slugs = new Slugs();
             'desc_tip'    => 'true',
             'cbvalue'     => 'yes',
             'value'       => $is_wordpress_server ? 'yes' : 'no'
-        ));
+        ));    
         ?>
         <div class="arsol_ecommerce_field">
             <?php
