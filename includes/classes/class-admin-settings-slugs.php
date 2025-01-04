@@ -132,6 +132,7 @@ class Slugs {
         ];
         return $allowed_options;
     }
+    
 
     public static function settings_page(): void {
         include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-slugs.php';
