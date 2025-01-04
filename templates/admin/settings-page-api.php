@@ -3,7 +3,7 @@
     <p><?php _e('Configure your API settings below. Ensure all fields are filled correctly.', 'arsol_siya'); ?></p>
     
     <form method="post" action="options.php">
-        <?php settings_fields('api-settings-group'); ?>
+        <?php settings_fields('siya_settings_api'); ?>
 
         <h2><?php _e('Server Managers', 'arsol_siya'); ?></h2>
         <table class="form-table">

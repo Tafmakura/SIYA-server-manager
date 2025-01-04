@@ -13,10 +13,10 @@ class API  {
      */
     public function register_api_settings() {
         // Register settings
-        register_setting('api-settings-group', 'runcloud_api_key');
-        register_setting('api-settings-group', 'hetzner_api_key');
-        register_setting('api-settings-group', 'digitalocean_api_key');
-        register_setting('api-settings-group', 'vultr_api_key');
+        register_setting('siya_settings_api', 'runcloud_api_key');
+        register_setting('siya_settings_api', 'hetzner_api_key');
+        register_setting('siya_settings_api', 'digitalocean_api_key');
+        register_setting('siya_settings_api', 'vultr_api_key');
 
         // Add hooks for field data
         add_action('siya_server_managers_fields', array($this, 'get_server_managers_data'));
