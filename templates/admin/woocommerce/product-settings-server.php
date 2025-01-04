@@ -38,7 +38,7 @@ $slugs = new Slugs();
                 'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
                 'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
             ),
-            'value'       => $max_applications
+            'value'       => empty($max_applications) ? '0' : $max_applications
         ));
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_staging_sites',
@@ -51,17 +51,17 @@ $slugs = new Slugs();
                 'max' => '999',
                 'step' => '1',
                 'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                'oninput' => 'this.value = this.value.replace(/[^-9]/g, \'\')'  // Only accept numbers
+                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
             ),
-            'value'       => $max_staging_sites
+            'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
         ));
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
             'label'       => __('WordPress Server', 'woocommerce'),
             'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
             'desc_tip'    => 'true',
-            'value'       => 'yes',
-            'default'     => $is_wordpress_server ? 'yes' : 'no'
+            'cbvalue'     => 'yes',
+            'value'       => $is_wordpress_server ? 'yes' : 'no'
         ));
         ?>
         <div class="arsol_ecommerce_field">
@@ -71,8 +71,8 @@ $slugs = new Slugs();
                 'label'       => __('WordPress Ecommerce', 'woocommerce'),
                 'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
-                'value'       => 'yes',
-                'default'     => $is_ecommerce ? 'yes' : 'no'
+                'cbvalue'     => 'yes',
+                'value'       => $is_ecommerce ? 'yes' : 'no'
             ));
             ?>
         </div>
@@ -281,12 +281,20 @@ jQuery(document).ready(function($) {
         var provider = $('#_arsol_server_provider_slug').val();
         var group = $('#_arsol_server_group_slug').val();
         var plan = $('#_arsol_server_plan_slug').val();
+        
+        // Ensure checkbox values are properly set
+        if (!$('#_arsol_wordpress_server').is(':checked')) {
+            $('#_arsol_wordpress_server').val('no');
+        }
+        if (!$('#_arsol_ecommerce').is(':checked')) {
+            $('#_arsol_ecommerce').val('no');
+        }
+
         if (!provider || !group || !plan) {
             alert('Please select a Server Provider, Server Group, and Server Plan.');
             e.preventDefault();
             return false;
         }
-
     });
 });
 </script>
