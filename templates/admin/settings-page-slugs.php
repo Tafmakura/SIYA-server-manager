@@ -45,16 +45,16 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Group slug</label>
-                                        <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][group_slug]" 
-                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
-                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
-                                    </div>
-                                    <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug'] ?? ''); ?>" placeholder="Enter plan slug" />
                                         <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
+                                    </div>
+                                    <div class="plan-field">
+                                        <label>Group slug</label>
+                                        <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][group_slug]" 
+                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
+                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
@@ -72,14 +72,14 @@ if (!defined('ABSPATH')) {
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Group slug</label>
-                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
-                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
-                            </div>
-                            <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
                                 <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
+                            </div>
+                            <div class="plan-field">
+                                <label>Group slug</label>
+                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
+                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                             </div>
                             <div class="plan-field">
                                 <label>Plan description</label>
@@ -116,16 +116,16 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Group slug</label>
-                                        <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][group_slug]" 
-                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
-                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
-                                    </div>
-                                    <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug'] ?? ''); ?>" placeholder="Enter plan slug" />
                                         <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
+                                    </div>
+                                    <div class="plan-field">
+                                        <label>Group slug</label>
+                                        <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][group_slug]" 
+                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
+                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
@@ -143,14 +143,14 @@ if (!defined('ABSPATH')) {
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Group slug</label>
-                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
-                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
-                            </div>
-                            <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
                                 <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
+                            </div>
+                            <div class="plan-field">
+                                <label>Group slug</label>
+                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
+                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                             </div>
                             <div class="plan-field">
                                 <label>Plan description</label>
@@ -187,16 +187,16 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
-                                        <label>Group slug</label>
-                                        <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][group_slug]" 
-                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
-                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
-                                    </div>
-                                    <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug'] ?? ''); ?>" placeholder="Enter plan slug" />
                                         <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
+                                    </div>
+                                    <div class="plan-field">
+                                        <label>Group slug</label>
+                                        <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][group_slug]" 
+                                               value="<?php echo esc_attr($plan['group_slug'] ?? ''); ?>" placeholder="Enter group slug" />
+                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                                     </div>
                                     <div class="plan-field">
                                         <label>Plan description</label>
@@ -214,14 +214,14 @@ if (!defined('ABSPATH')) {
                         ?>
                         <div class="plan-row template" style="display: none;">
                             <div class="plan-field">
-                                <label>Group slug</label>
-                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
-                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
-                            </div>
-                            <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
                                 <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
+                            </div>
+                            <div class="plan-field">
+                                <label>Group slug</label>
+                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
+                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
                             </div>
                             <div class="plan-field">
                                 <label>Plan description</label>
@@ -258,7 +258,7 @@ if (!defined('ABSPATH')) {
 .plan-field label {
     display: block;
     margin-bottom: 5px;
-    font-weight: normal;
+    font-weight: 600;
     font-size: 14px;
 }
 
