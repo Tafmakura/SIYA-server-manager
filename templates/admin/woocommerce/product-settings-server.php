@@ -281,21 +281,12 @@ jQuery(document).ready(function($) {
         var provider = $('#_arsol_server_provider_slug').val();
         var group = $('#_arsol_server_group_slug').val();
         var plan = $('#_arsol_server_plan_slug').val();
-        var isWordPressServer = $('#_arsol_wordpress_server').is(':checked');
-
         if (!provider || !group || !plan) {
             alert('Please select a Server Provider, Server Group, and Server Plan.');
             e.preventDefault();
             return false;
         }
 
-        // Ensure the WordPress server option is saved
-        $('<input>').attr({
-            type: 'hidden',
-            id: '_arsol_wordpress_server_hidden',
-            name: '_arsol_wordpress_server',
-            value: isWordPressServer ? 'yes' : 'no'
-        }).appendTo('#post');
     });
 });
 </script>
