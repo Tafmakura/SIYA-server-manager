@@ -341,6 +341,10 @@ jQuery(document).ready(function($) {
                     groups.forEach(function(group) {
                         $groupSelect.append(new Option(group, group));
                     });
+
+                    // Set the selected group
+                    var selectedGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+                    $groupSelect.val(selectedGroup);
                 }
             }
         });
