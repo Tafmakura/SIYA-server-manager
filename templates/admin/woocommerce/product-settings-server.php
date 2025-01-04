@@ -118,12 +118,12 @@
         woocommerce_wp_text_input(array(
             'id'          => 'arsol_server_region',
             'label'       => __('Region (optional)', 'woocommerce'),
-            'description' => __('Enter the server region. Only alphanumeric characters allowed.', 'woocommerce'),
+            'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'desc_tip'    => true,
             'value'       => $region,
             'custom_attributes' => array(
-                'pattern' => '^[a-zA-Z0-9]+$',
-                'title' => 'Only letters and numbers allowed'
+                'pattern' => '^[a-zA-Z0-9-]+$',
+                'title' => 'Only letters, numbers and hyphens allowed'
             )
         ));
         ?>
@@ -282,7 +282,7 @@ jQuery(document).ready(function($) {
 
     // Add validation for region field
     $('#arsol_server_region').on('input', function() {
-        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
     });
 });
 </script>
