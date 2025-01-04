@@ -7,29 +7,20 @@ if (!defined('ABSPATH')) {
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     <form method="post" action="options.php">
         <?php settings_fields('siya_slugs_settings'); ?>
-        
-        <!-- Server Manager Section -->
-        <h2>Server Manager Slugs</h2>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Dashboard Slug</th>
-                <td>
-                    <input type="text" name="siya_server_dashboard_slug" 
-                           value="<?php echo esc_attr(get_option('siya_server_dashboard_slug', 'server-dashboard')); ?>" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Servers List Slug</th>
-                <td>
-                    <input type="text" name="siya_servers_list_slug" 
-                           value="<?php echo esc_attr(get_option('siya_servers_list_slug', 'servers')); ?>" />
-                </td>
-            </tr>
-        </table>
 
         <!-- WordPress Plan Section -->
         <h2>WordPress Managed Hosting</h2>
         <table class="form-table">
+            <tr>
+                <th scope="row">Server Provider</th>
+                <td>
+                    <select name="siya_wp_server_provider">
+                        <option value="digitalocean" <?php selected(get_option('siya_wp_server_provider'), 'digitalocean'); ?>>DigitalOcean</option>
+                        <option value="hetzner" <?php selected(get_option('siya_wp_server_provider'), 'hetzner'); ?>>Hetzner</option>
+                        <option value="vultr" <?php selected(get_option('siya_wp_server_provider'), 'vultr'); ?>>Vultr</option>
+                    </select>
+                </td>
+            </tr>
             <tr>
                 <th scope="row">Plans List Slug</th>
                 <td>
