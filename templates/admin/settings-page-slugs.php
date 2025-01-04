@@ -243,6 +243,12 @@ if (!defined('ABSPATH')) {
 </div>
 
 <style>
+
+.wp-core-ui .button {
+    margin-left: 0;
+    margin-right: 1em;
+}
+
 .plan-row {
     margin-bottom: 20px;
     padding: 15px;
