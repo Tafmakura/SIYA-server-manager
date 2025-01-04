@@ -48,6 +48,16 @@ class Slugs {
             ]
         );
 
+        // Register WordPress group setting
+        register_setting(
+            self::OPTION_GROUP,
+            'siya_wp_server_group',
+            [
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_text_field'
+            ]
+        );
+
         // Register provider plan settings
         foreach (self::PROVIDERS as $slug => $name) {
             register_setting(
