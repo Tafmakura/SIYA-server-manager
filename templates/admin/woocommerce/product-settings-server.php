@@ -11,36 +11,6 @@
         </div>
         <?php
         woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_provider_slug',
-            'label'       => __('Server Provider Slug', 'woocommerce'),
-            'description' => __('Enter the server provider slug.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'custom_attributes' => array(
-                'required' => 'required'
-            ),
-        ));
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_plan_slug',
-            'label'       => __('Server Plan Slug', 'woocommerce'),
-            'description' => __('Enter the server plan slug.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'custom_attributes' => array(
-                'required' => 'required'
-            ),
-        ));
-        ?>
-        <div class="arsol_server_type_slug_field">
-            <?php
-            woocommerce_wp_text_input(array(
-                'id'          => '_arsol_server_type_slug',
-                'label'       => __('Server Type Slug', 'woocommerce'),
-                'description' => __('Enter the server type slug.', 'woocommerce'),
-                'desc_tip'    => 'true',
-            ));
-            ?>
-        </div>
-        <?php
-        woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
             'label'       => __('Maximum Applications', 'woocommerce'),
             'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
@@ -85,5 +55,35 @@
             ));
             ?>
         </div>
+        <div class="arsol_server_type_slug_field">
+            <?php
+            woocommerce_wp_text_input(array(
+                'id'          => '_arsol_server_type_slug',
+                'label'       => __('Server Type Slug', 'woocommerce'),
+                'description' => __('Enter the server type slug.', 'woocommerce'),
+                'desc_tip'    => 'true',
+            ));
+            ?>
+        </div>
+        <?php
+        woocommerce_wp_text_input(array(
+            'id'          => '_arsol_server_provider_slug',
+            'label'       => __('Server Provider Slug', 'woocommerce'),
+            'description' => __('Enter the server provider slug.', 'woocommerce'),
+            'desc_tip'    => 'true',
+            'custom_attributes' => array(
+                'required' => 'required'
+            ),
+        ));
+        woocommerce_wp_text_input(array(
+            'id'          => '_arsol_server_plan_slug',
+            'label'       => __('Server Plan Slug', 'woocommerce'),
+            'description' => __('Enter the server plan slug.', 'woocommerce'),
+            'desc_tip'    => 'true',
+            'custom_attributes' => array(
+                'required' => 'required'
+            ),
+        ));
+        ?>
     </div>
 </div>
