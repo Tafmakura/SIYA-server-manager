@@ -120,11 +120,32 @@
 select {
     width: 300px; /* Fixed width for dropdowns */
 }
+.loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    background: url('<?php echo esc_url(admin_url('images/spinner.gif')); ?>') no-repeat center center;
+    background-size: contain;
+}
+.hidden {
+    display: none;
+}
 </style>
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    function showLoadingSpinner() {
+        $('.loading-spinner').show();
+        $('select').addClass('hidden');
+    }
+
+    function hideLoadingSpinner() {
+        $('.loading-spinner').hide();
+        $('select').removeClass('hidden');
+    }
+
     function updateGroups(provider, callback) {
+        showLoadingSpinner();
         $.ajax({
             url: ajaxurl,
             data: {
@@ -150,11 +171,16 @@ jQuery(document).ready(function($) {
                 
                 $groupSelect.trigger('change');
                 if (callback) callback(groups);
+                hideLoadingSpinner();
+            },
+            error: function() {
+                hideLoadingSpinner();
             }
         });
     }
 
     function updatePlans(provider, group) {
+        showLoadingSpinner();
         $.ajax({
             url: ajaxurl,
             data: {
@@ -192,9 +218,11 @@ jQuery(document).ready(function($) {
                     var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
                     $planSelect.val(selectedPlan);
                 }
+                hideLoadingSpinner();
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
+                hideLoadingSpinner();
             }
         });
     }
