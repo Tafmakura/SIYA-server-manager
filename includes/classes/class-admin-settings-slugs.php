@@ -76,13 +76,27 @@ class Slugs {
     }
 
     public function sanitize_plans(array $plans): array {
-        return array_map(function($plan) {
-            return [
-                'group_slug' => sanitize_text_field($plan['group_slug']),
-                'slug' => sanitize_text_field($plan['slug']),
-                'description' => sanitize_textarea_field($plan['description'])
+        $grouped_plans = [];
+
+        foreach ($plans as $plan) {
+            $group_slug = sanitize_text_field($plan['group_slug']);
+            $slug = sanitize_text_field($plan['slug']);
+            $description = sanitize_textarea_field($plan['description']);
+
+            if (!isset($grouped_plans[$group_slug])) {
+                $grouped_plans[$group_slug] = [
+                    'group_slug' => $group_slug,
+                    'plans' => []
+                ];
+            }
+
+            $grouped_plans[$group_slug]['plans'][] = [
+                'slug' => $slug,
+                'description' => $description
             ];
-        }, $plans);
+        }
+
+        return array_values($grouped_plans);
     }
 
     /**
