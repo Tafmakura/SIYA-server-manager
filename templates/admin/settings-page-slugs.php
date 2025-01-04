@@ -3,6 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use Siya\AdminSettings\Slugs;
+
 $settings = Slugs::get_instance();
 ?>
 <div class="wrap">

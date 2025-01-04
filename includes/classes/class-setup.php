@@ -2,11 +2,16 @@
 
 namespace Siya;
 
+use Siya\AdminSettings\Slugs;
+
 class Setup {
     public function __construct() {
         $this->include_files();
         $this->initialize_hooks();
         $this->initialize_classes_on_startup();
+        
+        // Initialize Admin Settings
+        $this->init_admin_settings();
     }
 
     /**
@@ -64,7 +69,13 @@ class Setup {
 
     }
 
-
+    private function init_admin_settings() {
+        // Load the Slugs class
+        require_once SIYA_PLUGIN_DIR . 'includes/classes/class-admin-settings-slugs.php';
+        
+        // Initialize Slugs settings
+        Slugs::get_instance();
+    }
 
     /**
      * Initialize custom post types.
