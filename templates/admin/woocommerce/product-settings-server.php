@@ -111,6 +111,19 @@ $slugs = new Slugs();
         ));
         ?>
     </div>
+
+
+<?php
+// Debug variable dump
+echo '<pre>';
+echo 'Plans: ';
+print_r($slugs->get_filtered_plans());
+echo 'Groups: ';
+print_r($slugs->get_provider_group_slugs($selected_provider));
+echo '</pre>';
+?>
+
+
 </div>
 
 <style>
@@ -236,12 +249,4 @@ jQuery(document).ready(function($) {
 });
 </script>
 
-<?php
-// Debug variable dump
-echo '<pre>';
-echo 'Plans: ';
-print_r($slugs->get_filtered_plans());
-echo 'Groups: ';
-print_r($slugs->get_provider_group_slugs($selected_provider));
-echo '</pre>';
-?>
+
