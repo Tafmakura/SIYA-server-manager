@@ -216,6 +216,9 @@ jQuery(document).ready(function($) {
                     var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
                     $planSelect.val(selectedPlan);
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to fetch plans:', error);
             }
         });
     }
