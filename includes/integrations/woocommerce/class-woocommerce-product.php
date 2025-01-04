@@ -2,12 +2,17 @@
 
 namespace Siya\Integrations\WooCommerce;
 
+use Siya\AdminSettings\Slugs;
+
 defined('ABSPATH') || exit;
 
 class Product {
    
     public function __construct() {
         add_action('init', [$this, 'init']);
+        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
     }
 
     public function init() {
@@ -62,112 +67,39 @@ class Product {
     }
 
     public function add_arsol_server_settings_tab_content() {
-        echo '<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">';
-        echo '<div class="options_group">';
-        echo '<div id="arsol_server_settings" style="padding: 9px 12px;">';
-        echo '<div class="toolbar toolbar-top">';
-        echo '<div class="inline notice woocommerce-message">';
-        echo '<p class="help arsol">';
-        echo __('Note: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce');
-        echo '</p>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_provider_slug',
-            'label'       => __('Server Provider Slug', 'woocommerce'),
-            'description' => __('Enter the server provider slug.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'custom_attributes' => array(
-                'required' => 'required'
-            ),
-        ));
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_plan_slug',
-            'label'       => __('Server Plan Slug', 'woocommerce'),
-            'description' => __('Enter the server plan slug.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'custom_attributes' => array(
-                'required' => 'required'
-            ),
-        ));
-        echo '<div class="arsol_server_type_slug_field">';
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_server_type_slug',
-            'label'       => __('Server Type Slug', 'woocommerce'),
-            'description' => __('Enter the server type slug.', 'woocommerce'),
-            'desc_tip'    => 'true',
-        ));
-        echo '</div>';
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_max_applications',
-            'label'       => __('Maximum Applications', 'woocommerce'),
-            'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'type'        => 'number',
-            'custom_attributes' => array(
-                'min' => '0',
-                'max' => '999',
-                'step' => '1',
-                'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
-            ),
-        ));
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_max_staging_sites',
-            'label'       => __('Maximum Staging Sites', 'woocommerce'),
-            'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'type'        => 'number',
-            'custom_attributes' => array(
-                'min' => '0',
-                'max' => '999',
-                'step' => '1',
-                'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
-            ),
-        ));
-        woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_wordpress_server',
-            'label'       => __('WordPress Server', 'woocommerce'),
-            'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
-            'desc_tip'    => 'true',
-        ));
-        echo '<div class="arsol_ecommerce_field">';
-        woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_ecommerce',
-            'label'       => __('WordPress Ecommerce', 'woocommerce'),
-            'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
-            'desc_tip'    => 'true',
-        ));
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
+        global $post;
+        $slugs = new Slugs();
+        include plugin_dir_path(__FILE__) . '../../../templates/admin/woocommerce/product-settings-server.php';
     }
 
     public function save_arsol_server_settings_tab_content($post_id) {
-        $arsol_server_provider_slug = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
-        $arsol_server_plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
-        $arsol_max_applications = isset($_POST['_arsol_max_applications']) ? intval($_POST['_arsol_max_applications']) : '';
-        $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
-        $arsol_wordpress_server = isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no';
-        $arsol_ecommerce = (isset($_POST['_arsol_ecommerce']) && $arsol_wordpress_server === 'yes') ? 'yes' : 'no';
-        $arsol_server_type_slug = isset($_POST['_arsol_server_type_slug']) ? sanitize_text_field($_POST['_arsol_server_type_slug']) : '';
-    
-        update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
-        update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
-        update_post_meta($post_id, '_arsol_max_applications', $arsol_max_applications);
-        update_post_meta($post_id, '_arsol_max_staging_sites', $arsol_max_staging_sites);
-        update_post_meta($post_id, '_arsol_wordpress_server', $arsol_wordpress_server);
-        update_post_meta($post_id, '_arsol_ecommerce', $arsol_ecommerce);
-        update_post_meta($post_id, '_arsol_server_type_slug', $arsol_server_type_slug);
+    // Check if WooCommerce is saving the product meta
+    if (!isset($_POST['woocommerce_meta_nonce']) || !wp_verify_nonce($_POST['woocommerce_meta_nonce'], 'woocommerce_save_data')) {
+        return;
     }
-    
+
+    // Define and sanitize fields
+    $fields = [
+        '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
+        '_arsol_server_group_slug'    => sanitize_text_field($_POST['_arsol_server_group_slug'] ?? ''),
+        '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
+        '_arsol_max_applications'     => intval($_POST['_arsol_max_applications'] ?? 0),
+        '_arsol_max_staging_sites'    => intval($_POST['_arsol_max_staging_sites'] ?? 0),
+        '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
+        '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
+    ];
+
+    // Save all fields, even if empty
+    foreach ($fields as $meta_key => $value) {
+        update_post_meta($post_id, $meta_key, $value);
+    }
+}
+
 
     public function add_admin_footer_script() {
         ?>
         <style>
-        .arsol_ecommerce_field, .arsol_server_type_slug_field {
+        .arsol_ecommerce_field, .arsol_server_group_slug_field {
             display: none;
         }
         </style>
@@ -182,29 +114,72 @@ class Product {
                 }
             }
 
-            function toggle_ecommerce_and_server_type_fields() {
+            function toggle_ecommerce_and_server_group_fields() {
                 if ($('#_arsol_wordpress_server').is(':checked')) {
                     $('.arsol_ecommerce_field').show();
-                    $('.arsol_server_type_slug_field').hide();
+                    $('.arsol_server_group_slug_field').hide();
                 } else {
                     $('.arsol_ecommerce_field').hide();
-                    $('.arsol_server_type_slug_field').show();
-                    $('#_arsol_ecommerce').prop('checked', false);
+                    $('.arsol_server_group_slug_field').show();
                 }
             }
 
             toggle_arsol_server_settings_tab();
-            toggle_ecommerce_and_server_type_fields();
+            toggle_ecommerce_and_server_group_fields();
 
             $('#_arsol_server').on('change', function() {
                 toggle_arsol_server_settings_tab();
             });
 
             $('#_arsol_wordpress_server').on('change', function() {
-                toggle_ecommerce_and_server_type_fields();
+                toggle_ecommerce_and_server_group_fields();
+            });
+
+            // Ensure WordPress Ecommerce maintains its state when hidden before saving
+            $('#post').on('submit', function() {
+                if (!$('#_arsol_wordpress_server').is(':checked')) {
+                    $('#_arsol_ecommerce').prop('checked', false);
+                }
             });
         });
         </script>
         <?php
+    }
+
+    public function add_custom_fields() {
+        global $post;
+        $slugs = new Slugs();
+        // Add your custom fields here
+    }
+
+    public function save_custom_fields($post_id) {
+        // Save your custom fields here
+    }
+
+    /**
+     * Save product meta data
+     */
+    public function save_product_meta($post_id) {
+        // Check nonce for security
+        if (!isset($_POST['siya_product_nonce']) || !wp_verify_nonce($_POST['siya_product_nonce'], 'save_siya_product')) {
+            return;
+        }
+
+        // Validate and sanitize input
+        $provider = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
+        $group_slug = isset($_POST['_arsol_server_group_slug']) ? sanitize_text_field($_POST['_arsol_server_group_slug']) : '';
+        $plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
+
+        // Perform validation
+        if (empty($provider) || empty($group_slug) || empty($plan_slug)) {
+            // Add error message
+            wc_add_notice(__('Please fill in all required fields: Server provider, Server group, and Server plan.', 'siya'), 'error');
+            return;
+        }
+
+        // Save validated data
+        update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
+        update_post_meta($post_id, '_arsol_server_group_slug', $group_slug);
+        update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
     }
 }

@@ -80,6 +80,9 @@ class Setup {
         if (class_exists('Siya\AdminSettings\API')) {
             new \Siya\AdminSettings\API();
         }
+        if (class_exists('Siya\AdminSettings\Slugs')) {
+            new \Siya\AdminSettings\Slugs();
+        }
     }
 
     /**
