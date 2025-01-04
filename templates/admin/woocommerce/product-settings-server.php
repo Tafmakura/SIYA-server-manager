@@ -113,6 +113,12 @@ $slugs = new Slugs();
     </div>
 </div>
 
+<style>
+select {
+    width: 300px; /* Fixed width for dropdowns */
+}
+</style>
+
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     function updateGroups(provider) {

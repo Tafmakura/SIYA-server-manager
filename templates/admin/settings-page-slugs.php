@@ -308,6 +308,10 @@ if (!defined('ABSPATH')) {
     color: #666;
     font-size: 13px;
 }
+
+select {
+    width: 300px; /* Fixed width for dropdowns */
+}
 </style>
 
 <script>
