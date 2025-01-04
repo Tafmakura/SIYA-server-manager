@@ -2,6 +2,7 @@
 
 use Siya\AdminSettings\Slugs;
 
+global $post;
 $slugs = new Slugs();
 
 ?>
