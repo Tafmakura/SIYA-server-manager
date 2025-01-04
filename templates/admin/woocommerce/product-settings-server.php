@@ -168,7 +168,7 @@ jQuery(document).ready(function($) {
                 } else {
                     $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
-                        $planSelect.append(new Option(plan.description, plan.slug));
+                        $planSelect.append(new Option(plan.slug, plan.slug));
                     });
 
                     // Set the selected plan
