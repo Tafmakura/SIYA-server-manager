@@ -17,12 +17,6 @@ class Slugs {
     }
 
     private function __construct() {
-        // Initialize in constructor
-        $this->init();
-    }
-
-    private function init() {
-        // Use instance methods for hooks
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_menu', array($this, 'add_settings_page'));
     }
@@ -54,12 +48,12 @@ class Slugs {
             'Slugs Settings',      // Menu title
             'manage_options',      // Capability
             'siya-slugs-settings', // Menu slug
-            array($this, 'render_settings_page') // Changed callback name for clarity
+            array($this, 'settings_page') // Changed back to settings_page to match the method name
         );
     }
 
-    // Renamed from settings_page to render_settings_page
-    public function render_settings_page() {
+    // Keep the method name as settings_page since it's referenced in add_submenu_page
+    public function settings_page() {
         if (!current_user_can('manage_options')) {
             return;
         }
