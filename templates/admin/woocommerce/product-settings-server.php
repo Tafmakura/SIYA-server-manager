@@ -189,7 +189,11 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 var plans = [];
                 try {
-                    plans = JSON.parse(response);  // Parse the response as JSON
+                    if (typeof response === 'string') {
+                        plans = JSON.parse(response);  // Parse the response as JSON
+                    } else if (typeof response === 'object') {
+                        plans = response;  // Response is already an object
+                    }
                     if (!Array.isArray(plans)) {
                         throw new Error('Parsed response is not an array');
                     }
