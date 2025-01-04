@@ -3,7 +3,7 @@
 namespace Siya\AdminSettings;
 
 class Slugs {
-    private const MENU_SLUG = 'siya-settings';
+    private const MENU_SLUG = 'siya-slugs-settings';
     private const OPTION_GROUP = 'siya_settings';
     private const PROVIDERS = [
         'digitalocean' => 'DigitalOcean',

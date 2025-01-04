@@ -43,7 +43,7 @@ class AdminMenus {
             'Slugs',                           // Page title
             'Slugs',                           // Menu title
             'manage_options',                  // Capability
-            'siya-settings',                   // Menu slug
+            'siya-slugs-settings',             // Menu slug
             array('Siya\AdminSettings\Slugs', 'settings_page') // Callback function
         );
     }
