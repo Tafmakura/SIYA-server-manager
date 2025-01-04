@@ -195,7 +195,21 @@ jQuery(document).ready(function($) {
                 provider: provider,
                 group: group
             },
-            success: function(plans) {
+            success: function(response) {
+                var plans = [];
+                try {
+                    if (typeof response === 'string') {
+                        plans = JSON.parse(response);  // Parse the response as JSON
+                    } else if (typeof response === 'object') {
+                        plans = response;  // Response is already an object
+                    }
+                    if (!Array.isArray(plans)) {
+                        plans = Object.values(plans);  // Convert object to array if necessary
+                    }
+                } catch (e) {
+                    console.error('Failed to parse plans:', e);
+                    plans = [];
+                }
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
@@ -211,6 +225,9 @@ jQuery(document).ready(function($) {
                     var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
                     $planSelect.val(selectedPlan);
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to fetch plans:', error);
             }
         });
     }
