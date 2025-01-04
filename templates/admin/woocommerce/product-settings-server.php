@@ -161,7 +161,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var $planSelect = $('#_arsol_server_plan_slug');
         if (!group) {
-            $planSelect.prop('disabled', true);
+            $planSelect.prop('disabled', true).val(''); // Clear value when disabled
             return;
         }
         $.ajax({
@@ -189,7 +189,7 @@ jQuery(document).ready(function($) {
                 $planSelect.empty();
                 
                 if (plans.length === 0) {
-                    $planSelect.prop('disabled', true);
+                    $planSelect.prop('disabled', true).val(''); // Clear value when disabled
                 } else {
                     $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
