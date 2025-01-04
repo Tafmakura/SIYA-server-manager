@@ -173,14 +173,8 @@ jQuery(document).ready(function($) {
 
     function setWordPressProvider() {
         var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-        var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
         $('#_arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
-        updateGroups(wpProvider, function(groups) {
-            if (groups.includes(wpGroup)) {
-                $('#_arsol_server_group_slug').val(wpGroup).prop('disabled', true);
-                updatePlans(wpProvider, wpGroup);
-            }
-        });
+        updateGroups(wpProvider);
     }
 
     $('#_arsol_server_provider_slug').on('change', function() {
