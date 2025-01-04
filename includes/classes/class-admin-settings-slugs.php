@@ -79,8 +79,8 @@ class Slugs {
         $grouped_plans = [];
 
         foreach ($plans as $plan) {
-            $group_slug = sanitize_text_field($plan['group_slug']);
-            $slug = sanitize_text_field($plan['slug']);
+            $group_slug = preg_replace('/[^a-zA-Z0-9-]/', '', sanitize_text_field($plan['group_slug']));
+            $slug = preg_replace('/[^a-zA-Z0-9-]/', '', sanitize_text_field($plan['slug']));
             $description = sanitize_textarea_field($plan['description']);
 
             if (!isset($grouped_plans[$group_slug])) {
