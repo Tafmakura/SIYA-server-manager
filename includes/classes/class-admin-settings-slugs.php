@@ -151,8 +151,11 @@ class Slugs {
         }, $plans);
     }
 
+    /**
+     * Add allowed options.
+     */
     public function add_allowed_options($allowed_options) {
-        $allowed_options[self::OPTION_GROUP] = [
+        $allowed_options['siya_settings'] = [
             'siya_wp_server_provider',
             'siya_digitalocean_plans',
             'siya_hetzner_plans',

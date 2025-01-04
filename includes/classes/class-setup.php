@@ -48,7 +48,6 @@ class Setup {
         add_action('init', array($this, 'initialize_custom_post_types'));
         add_action('admin_init', array($this, 'initialize_admin_settings'));
         add_action('admin_menu', array($this, 'initialize_admin_menus'));
-        add_filter('allowed_options', array($this, 'add_allowed_options'));
     }
 
     /**
@@ -81,7 +80,9 @@ class Setup {
         if (class_exists('Siya\AdminSettings\API')) {
             new \Siya\AdminSettings\API();
         }
-
+        if (class_exists('Siya\AdminSettings\Slugs')) {
+            new \Siya\AdminSettings\Slugs();
+        }
     }
 
     /**
@@ -91,19 +92,6 @@ class Setup {
         if (class_exists('Siya\AdminMenus')) {
             new \Siya\AdminMenus();
         }
-    }
-
-    /**
-     * Add allowed options.
-     */
-    public function add_allowed_options($allowed_options) {
-        $allowed_options['siya_settings'] = [
-            'siya_wp_server_provider',
-            'siya_digitalocean_plans',
-            'siya_hetzner_plans',
-            'siya_vultr_plans'
-        ];
-        return $allowed_options;
     }
 
 }
