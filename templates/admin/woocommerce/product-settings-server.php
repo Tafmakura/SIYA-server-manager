@@ -98,7 +98,7 @@ $slugs = new Slugs();
             $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
         $plan_options = [];
         foreach ($plans as $plan) {
-            $plan_options[$plan['slug']] = $plan['description'];
+            $plan_options[$plan['slug']] = $plan['slug'];
         }
 
         woocommerce_wp_select(array(
