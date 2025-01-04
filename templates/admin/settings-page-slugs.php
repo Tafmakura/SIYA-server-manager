@@ -33,7 +33,7 @@ if (!defined('ABSPATH')) {
                 </td>
             </tr>
             <tr>
-                <th scope="row">Plans</th>
+                <th scope="row">Available plans</th>
                 <td>
                     <div class="plan-repeater" data-provider="digitalocean">
                         <?php
@@ -53,7 +53,7 @@ if (!defined('ABSPATH')) {
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
                                     </div>
                                     <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                        <button type="button" class="button remove-plan">Remove plan</button>
                                     </div>
                                 </div>
                                 <?php
@@ -70,10 +70,10 @@ if (!defined('ABSPATH')) {
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
                             </div>
                             <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove Plan</button>
+                                <button type="button" class="button remove-plan">Remove plan</button>
                             </div>
                         </div>
-                        <button type="button" class="button add-plan">Add Plan</button>
+                        <button type="button" class="button add-plan">Add plan</button>
                     </div>
                 </td>
             </tr>
@@ -89,7 +89,7 @@ if (!defined('ABSPATH')) {
                 </td>
             </tr>
             <tr>
-                <th scope="row">Plans</th>
+                <th scope="row">Available plans</th>
                 <td>
                     <div class="plan-repeater" data-provider="hetzner">
                         <?php
@@ -109,7 +109,7 @@ if (!defined('ABSPATH')) {
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
                                     </div>
                                     <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                        <button type="button" class="button remove-plan">Remove plan</button>
                                     </div>
                                 </div>
                                 <?php
@@ -126,10 +126,10 @@ if (!defined('ABSPATH')) {
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
                             </div>
                             <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove Plan</button>
+                                <button type="button" class="button remove-plan">Remove plan</button>
                             </div>
                         </div>
-                        <button type="button" class="button add-plan">Add Plan</button>
+                        <button type="button" class="button add-plan">Add plan</button>
                     </div>
                 </td>
             </tr>
@@ -145,7 +145,7 @@ if (!defined('ABSPATH')) {
                 </td>
             </tr>
             <tr>
-                <th scope="row">Plans</th>
+                <th scope="row">Available plans</th>
                 <td>
                     <div class="plan-repeater" data-provider="vultr">
                         <?php
@@ -165,7 +165,7 @@ if (!defined('ABSPATH')) {
                                                   maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
                                     </div>
                                     <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove Plan</button>
+                                        <button type="button" class="button remove-plan">Remove plan</button>
                                     </div>
                                 </div>
                                 <?php
@@ -182,10 +182,10 @@ if (!defined('ABSPATH')) {
                                 <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
                             </div>
                             <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove Plan</button>
+                                <button type="button" class="button remove-plan">Remove plan</button>
                             </div>
                         </div>
-                        <button type="button" class="button add-plan">Add Plan</button>
+                        <button type="button" class="button add-plan">Add plan</button>
                     </div>
                 </td>
             </tr>
