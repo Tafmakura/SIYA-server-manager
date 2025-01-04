@@ -46,15 +46,6 @@ class Slugs {
             ]
         );
 
-        // Add WordPress provider field
-        add_settings_field(
-            'siya_wp_server_provider',
-            __('WordPress Server Provider', 'siya'),
-            [$this, 'render_provider_select'],
-            self::MENU_SLUG,
-            'siya_providers_section'
-        );
-
         // Register provider plan settings
         foreach (self::PROVIDERS as $slug => $name) {
             register_setting(
@@ -65,81 +56,11 @@ class Slugs {
                     'sanitize_callback' => [$this, 'sanitize_plans']
                 ]
             );
-
-            add_settings_field(
-                "siya_{$slug}_plans",
-                sprintf(__('%s Plans', 'siya'), $name),
-                [$this, 'render_provider_plans'],
-                self::MENU_SLUG,
-                'siya_providers_section',
-                ['provider' => $slug]
-            );
         }
     }
 
     public function section_callback(): void {
         echo '<p>' . esc_html__('Configure your server provider settings here.', 'siya') . '</p>';
-    }
-
-    public function render_provider_select(): void {
-        $selected = get_option('siya_wp_server_provider');
-        ?>
-        <select name="siya_wp_server_provider">
-            <?php foreach (self::PROVIDERS as $slug => $name): ?>
-                <option value="<?php echo esc_attr($slug); ?>" 
-                    <?php selected($selected, $slug); ?>>
-                    <?php echo esc_html($name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <p class="description">
-            <?php _e('Select the cloud provider for WordPress hosting', 'siya'); ?>
-        </p>
-        <?php
-    }
-
-    public function render_provider_plans(array $args): void {
-        $provider = $args['provider'];
-        $plans = get_option("siya_{$provider}_plans", []);
-        ?>
-        <div class="plan-repeater" data-provider="<?php echo esc_attr($provider); ?>">
-            <?php foreach ($plans as $index => $plan): ?>
-                <div class="plan-row">
-                    <div class="plan-field">
-                        <label><?php _e('Plan slug', 'siya'); ?></label>
-                        <input type="text" 
-                               name="siya_<?php echo esc_attr($provider); ?>_plans[<?php echo $index; ?>][slug]"
-                               value="<?php echo esc_attr($plan['slug']); ?>" />
-                    </div>
-                    <div class="plan-field">
-                        <label><?php _e('Description', 'siya'); ?></label>
-                        <textarea name="siya_<?php echo esc_attr($provider); ?>_plans[<?php echo $index; ?>][description]"><?php 
-                            echo esc_textarea($plan['description']); 
-                        ?></textarea>
-                    </div>
-                    <button type="button" class="button remove-plan">
-                        <?php _e('Remove', 'siya'); ?>
-                    </button>
-                </div>
-            <?php endforeach; ?>
-            
-            <div class="plan-row template" style="display:none">
-                <div class="plan-field">
-                    <label><?php _e('Plan slug', 'siya'); ?></label>
-                    <input type="text" name="plan_slug[]" placeholder="<?php _e('Enter plan slug', 'siya'); ?>" />
-                </div>
-                <div class="plan-field">
-                    <label><?php _e('Description', 'siya'); ?></label>
-                    <textarea name="plan_description[]" placeholder="<?php _e('Enter plan description', 'siya'); ?>"></textarea>
-                </div>
-                <button type="button" class="button remove-plan"><?php _e('Remove', 'siya'); ?></button>
-            </div>
-            
-            <button type="button" class="button add-plan">
-                <?php _e('Add Plan', 'siya'); ?>
-            </button>
-        </div>
-        <?php
     }
 
     public function sanitize_plans(array $plans): array {
