@@ -14,6 +14,7 @@ class Slugs {
     public function __construct() {
         add_action('admin_menu', [$this, 'add_menu_page']);
         add_action('admin_init', [$this, 'register_settings']);
+        add_filter('allowed_options', [$this, 'add_allowed_options']);
     }
 
     public function add_menu_page(): void {
@@ -148,6 +149,16 @@ class Slugs {
                 'description' => sanitize_textarea_field($plan['description'])
             ];
         }, $plans);
+    }
+
+    public function add_allowed_options($allowed_options) {
+        $allowed_options[self::OPTION_GROUP] = [
+            'siya_wp_server_provider',
+            'siya_digitalocean_plans',
+            'siya_hetzner_plans',
+            'siya_vultr_plans'
+        ];
+        return $allowed_options;
     }
 
     public static function settings_page(): void {
