@@ -310,7 +310,7 @@ if (!defined('ABSPATH')) {
 }
 
 select {
-    width: 300px; /* Fixed width for dropdowns */
+    min-width: 120px; /* Minimum width for dropdowns */
 }
 </style>
 
