@@ -60,7 +60,8 @@ $slugs = new Slugs();
             'label'       => __('WordPress Server', 'woocommerce'),
             'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
             'desc_tip'    => 'true',
-            'value'       => $is_wordpress_server ? 'yes' : 'no'
+            'value'       => 'yes',
+            'default'     => $is_wordpress_server ? 'yes' : 'no'
         ));
         ?>
         <div class="arsol_ecommerce_field">
@@ -70,7 +71,8 @@ $slugs = new Slugs();
                 'label'       => __('WordPress Ecommerce', 'woocommerce'),
                 'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
-                'value'       => $is_ecommerce ? 'yes' : 'no'
+                'value'       => 'yes',
+                'default'     => $is_ecommerce ? 'yes' : 'no'
             ));
             ?>
         </div>
