@@ -39,11 +39,8 @@ if (!defined('ABSPATH')) {
             </tr>
         </table>
 
-        <!-- Server Provider Plans Section -->
-        <h2>Server Provider Plan Slugs</h2>
-        
-        <!-- DigitalOcean Subsection -->
-        <h4>DigitalOcean</h4>
+        <!-- DigitalOcean Section -->
+        <h2>DigitalOcean</h2>
         <table class="form-table">
             <tr>
                 <th scope="row">Provider Name Slug</th>
@@ -98,8 +95,8 @@ if (!defined('ABSPATH')) {
             </tr>
         </table>
 
-        <!-- Hetzner Subsection -->
-        <h4>Hetzner</h4>
+        <!-- Hetzner Section -->
+        <h2>Hetzner</h2>
         <table class="form-table">
             <tr>
                 <th scope="row">Provider Name Slug</th>
@@ -154,8 +151,8 @@ if (!defined('ABSPATH')) {
             </tr>
         </table>
 
-        <!-- Vultr Subsection -->
-        <h4>Vultr</h4>
+        <!-- Vultr Section -->
+        <h2>Vultr</h2>
         <table class="form-table">
             <tr>
                 <th scope="row">Provider Name Slug</th>
