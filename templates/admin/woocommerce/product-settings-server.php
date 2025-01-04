@@ -139,6 +139,10 @@ jQuery(document).ready(function($) {
                     groups.forEach(function(group) {
                         $groupSelect.append(new Option(group, group));
                     });
+
+                    // Set the selected group
+                    var selectedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_group_slug', true)); ?>';
+                    $groupSelect.val(selectedGroup);
                 }
                 
                 $groupSelect.trigger('change');
@@ -166,6 +170,10 @@ jQuery(document).ready(function($) {
                     plans.forEach(function(plan) {
                         $planSelect.append(new Option(plan.description, plan.slug));
                     });
+
+                    // Set the selected plan
+                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
+                    $planSelect.val(selectedPlan);
                 }
             }
         });
