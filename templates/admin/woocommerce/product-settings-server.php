@@ -128,6 +128,17 @@ select {
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    $('#post').on('submit', function(e) {
+        var provider = $('#_arsol_server_provider_slug').val();
+        var group = $('#_arsol_server_group_slug').val();
+        var plan = $('#_arsol_server_plan_slug').val();
+
+        if (!provider || !group || !plan) {
+            e.preventDefault();
+            alert('Please fill in all required fields: Server provider, Server group, and Server plan.');
+        }
+    });
+
     function updateGroups(provider, callback) {
         $.ajax({
             url: ajaxurl,

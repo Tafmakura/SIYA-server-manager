@@ -12,6 +12,7 @@ class Product {
         add_action('init', [$this, 'init']);
         add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
     }
 
     public function init() {
@@ -153,5 +154,32 @@ class Product {
 
     public function save_custom_fields($post_id) {
         // Save your custom fields here
+    }
+
+    /**
+     * Save product meta data
+     */
+    public function save_product_meta($post_id) {
+        // Check nonce for security
+        if (!isset($_POST['siya_product_nonce']) || !wp_verify_nonce($_POST['siya_product_nonce'], 'save_siya_product')) {
+            return;
+        }
+
+        // Validate and sanitize input
+        $provider = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
+        $group_slug = isset($_POST['_arsol_server_group_slug']) ? sanitize_text_field($_POST['_arsol_server_group_slug']) : '';
+        $plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
+
+        // Perform validation
+        if (empty($provider) || empty($group_slug) || empty($plan_slug)) {
+            // Add error message
+            wc_add_notice(__('Please fill in all required fields: Server provider, Server group, and Server plan.', 'siya'), 'error');
+            return;
+        }
+
+        // Save validated data
+        update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
+        update_post_meta($post_id, '_arsol_server_group_slug', $group_slug);
+        update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
     }
 }
