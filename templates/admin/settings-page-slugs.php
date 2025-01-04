@@ -45,6 +45,12 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
+                                        <label>Group slug</label>
+                                        <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][group_slug]" 
+                                               value="<?php echo esc_attr($plan['group_slug']); ?>" placeholder="Enter group slug" />
+                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
+                                    </div>
+                                    <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
@@ -65,6 +71,11 @@ if (!defined('ABSPATH')) {
                         }
                         ?>
                         <div class="plan-row template" style="display: none;">
+                            <div class="plan-field">
+                                <label>Group slug</label>
+                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
+                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
+                            </div>
                             <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
@@ -105,6 +116,12 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
+                                        <label>Group slug</label>
+                                        <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][group_slug]" 
+                                               value="<?php echo esc_attr($plan['group_slug']); ?>" placeholder="Enter group slug" />
+                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
+                                    </div>
+                                    <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
@@ -125,6 +142,11 @@ if (!defined('ABSPATH')) {
                         }
                         ?>
                         <div class="plan-row template" style="display: none;">
+                            <div class="plan-field">
+                                <label>Group slug</label>
+                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
+                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
+                            </div>
                             <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
@@ -165,6 +187,12 @@ if (!defined('ABSPATH')) {
                                 ?>
                                 <div class="plan-row">
                                     <div class="plan-field">
+                                        <label>Group slug</label>
+                                        <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][group_slug]" 
+                                               value="<?php echo esc_attr($plan['group_slug']); ?>" placeholder="Enter group slug" />
+                                        <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
+                                    </div>
+                                    <div class="plan-field">
                                         <label>Plan slug</label>
                                         <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
                                                value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
@@ -185,6 +213,11 @@ if (!defined('ABSPATH')) {
                         }
                         ?>
                         <div class="plan-row template" style="display: none;">
+                            <div class="plan-field">
+                                <label>Group slug</label>
+                                <input type="text" name="group_slug[]" placeholder="Enter group slug" />
+                                <p class="arsol-description">A unique identifier for this group (e.g., basic-group)</p>
+                            </div>
                             <div class="plan-field">
                                 <label>Plan slug</label>
                                 <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
@@ -237,39 +270,6 @@ if (!defined('ABSPATH')) {
 .plan-field textarea {
     width: 100%;
     max-width: 400px;
-    height: 100px;
-}
-
-.add-plan {
-    margin-top: 10px !important;
-}
-
-.remove-plan {
-    color: #dc3545;
-    border-color: #dc3545;
-}
-
-.remove-plan:hover {
-    background: #dc3545;
-    color: #fff;
-}
-
-.arsol-description {
-    margin-top: 4px;
-    margin-bottom: 0;
-    color: #666;
-    font-size: 13px;
-}
-</style>
-
-<script>
-jQuery(document).ready(function($) {
-    $('.add-plan').on('click', function() {
-        var $repeater = $(this).closest('.plan-repeater');
-        var $template = $repeater.find('.template').clone();
-        var provider = $repeater.data('provider');
-        var index = $repeater.find('.plan-row').length - 1;
-
         $template.removeClass('template').show()
             .find('input, textarea').each(function() {
                 var name = $(this).attr('name');

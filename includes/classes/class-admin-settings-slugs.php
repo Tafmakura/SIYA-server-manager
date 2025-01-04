@@ -66,6 +66,7 @@ class Slugs {
     public function sanitize_plans(array $plans): array {
         return array_map(function($plan) {
             return [
+                'group_slug' => sanitize_text_field($plan['group_slug']),
                 'slug' => sanitize_text_field($plan['slug']),
                 'description' => sanitize_textarea_field($plan['description'])
             ];
