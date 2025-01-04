@@ -6,7 +6,11 @@ if (!defined('ABSPATH')) {
 <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     <form method="post" action="options.php">
-        <?php settings_fields('siya_slugs_settings'); ?>
+        <?php 
+        settings_fields('siya_settings'); // Updated to match OPTION_GROUP
+        do_settings_sections('siya-settings'); // Updated to match MENU_SLUG
+        submit_button(); 
+        ?>
 
         <!-- WordPress Plan Section -->
         <h2>WordPress managed hosting</h2>

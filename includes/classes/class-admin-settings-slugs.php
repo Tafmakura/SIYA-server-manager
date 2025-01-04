@@ -3,6 +3,8 @@
 namespace Siya\AdminSettings;
 
 class Slugs {
+    private const MENU_SLUG = 'siya-settings';
+    private const OPTION_GROUP = 'siya_settings';
     private const PROVIDERS = [
         'digitalocean' => 'DigitalOcean',
         'hetzner' => 'Hetzner',
@@ -10,22 +12,33 @@ class Slugs {
     ];
 
     public function __construct() {
+        add_action('admin_menu', [$this, 'add_menu_page']);
         add_action('admin_init', [$this, 'register_settings']);
         add_action('admin_init', [$this, 'initialize_default_settings']);
+    }
+
+    public function add_menu_page(): void {
+        add_options_page(
+            __('SIYA Server Manager', 'siya'),
+            __('SIYA Settings', 'siya'),
+            'manage_options',
+            self::MENU_SLUG,
+            [$this, 'settings_page']
+        );
     }
 
     public function register_settings(): void {
         // Register the settings group first
         add_settings_section(
-            'siya_slugs_main_section',
-            __('SIYA Server Manager Settings', 'siya'),
+            'siya_main_section',
+            __('Server Provider Settings', 'siya'),
             [$this, 'section_callback'],
-            'siya_slugs_settings'
+            self::MENU_SLUG
         );
 
         // Base settings registration with proper args
         register_setting(
-            'siya_slugs_settings',
+            self::OPTION_GROUP,
             'siya_wp_server_provider',
             [
                 'type' => 'string',
@@ -37,7 +50,7 @@ class Slugs {
         // Register plan settings for each provider
         foreach (array_keys(self::PROVIDERS) as $provider) {
             register_setting(
-                'siya_slugs_settings',
+                self::OPTION_GROUP,
                 "siya_{$provider}_plans",
                 [
                     'type' => 'array',
@@ -52,8 +65,8 @@ class Slugs {
                 "siya_{$provider}_plans",
                 sprintf(__('%s Plans', 'siya'), self::PROVIDERS[$provider]),
                 [$this, 'render_provider_plans_field'],
-                'siya_slugs_settings',
-                'siya_slugs_main_section',
+                self::MENU_SLUG,
+                'siya_main_section',
                 ['provider' => $provider]
             );
         }
