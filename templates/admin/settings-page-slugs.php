@@ -257,7 +257,6 @@ if (!defined('ABSPATH')) {
     margin-top: 4px;
     margin-bottom: 0;
     color: #666;
-    font-style: italic;
     font-size: 13px;
 }
 </style>
