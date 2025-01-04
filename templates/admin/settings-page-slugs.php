@@ -6,220 +6,54 @@ if (!defined('ABSPATH')) {
 <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     <form method="post" action="options.php">
-        <?php settings_fields('siya_settings'); ?>
-        <?php do_settings_sections('siya-settings'); ?>
-
-        <!-- WordPress Plan Section -->
-        <h2>WordPress managed hosting</h2>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Server provider</th>
-                <td>
-                    <select name="siya_wp_server_provider">
-                        <option value="digitalocean" <?php selected(get_option('siya_wp_server_provider'), 'digitalocean'); ?>>DigitalOcean</option>
-                        <option value="hetzner" <?php selected(get_option('siya_wp_server_provider'), 'hetzner'); ?>>Hetzner</option>
-                        <option value="vultr" <?php selected(get_option('siya_wp_server_provider'), 'vultr'); ?>>Vultr</option>
-                    </select>
-                    <p class="arsol-description">Select the cloud provider for WordPress hosting</p>
-                </td>
-            </tr>
-        </table>
-
-        <!-- DigitalOcean Section -->
-        <h2>DigitalOcean</h2>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Server provider slug</th>
-                <td>
-                    <input type="text" value="digitalocean" disabled />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Available plans</th>
-                <td>
-                    <div class="plan-repeater" data-provider="digitalocean">
-                        <?php
-                        $digitalocean_plans = get_option('siya_digitalocean_plans', array());
-                        if (!empty($digitalocean_plans)) {
-                            foreach ($digitalocean_plans as $index => $plan) {
-                                ?>
-                                <div class="plan-row">
-                                    <div class="plan-field">
-                                        <label>Plan slug</label>
-                                        <input type="text" name="siya_digitalocean_plans[<?php echo $index; ?>][slug]" 
-                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
-                                        <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
-                                    </div>
-                                    <div class="plan-field">
-                                        <label>Plan description</label>
-                                        <textarea name="siya_digitalocean_plans[<?php echo $index; ?>][description]" 
-                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
-                                        <p class="arsol-description">Brief description of what this plan offers</p>
-                                    </div>
-                                    <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove plan</button>
-                                    </div>
-                                </div>
-                                <?php
-                            }
-                        }
-                        ?>
-                        <div class="plan-row template" style="display: none;">
-                            <div class="plan-field">
-                                <label>Plan slug</label>
-                                <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
-                                <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
-                            </div>
-                            <div class="plan-field">
-                                <label>Plan description</label>
-                                <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
-                                <p class="arsol-description">Brief description of what this plan offers</p>
-                            </div>
-                            <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove plan</button>
-                            </div>
-                        </div>
-                        <button type="button" class="button add-plan">Add plan</button>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <!-- Hetzner Section -->
-        <h2>Hetzner</h2>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Server provider slug</th>
-                <td>
-                    <input type="text" value="hetzner" disabled />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Available plans</th>
-                <td>
-                    <div class="plan-repeater" data-provider="hetzner">
-                        <?php
-                        $hetzner_plans = get_option('siya_hetzner_plans', array());
-                        if (!empty($hetzner_plans)) {
-                            foreach ($hetzner_plans as $index => $plan) {
-                                ?>
-                                <div class="plan-row">
-                                    <div class="plan-field">
-                                        <label>Plan slug</label>
-                                        <input type="text" name="siya_hetzner_plans[<?php echo $index; ?>][slug]" 
-                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
-                                        <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
-                                    </div>
-                                    <div class="plan-field">
-                                        <label>Plan description</label>
-                                        <textarea name="siya_hetzner_plans[<?php echo $index; ?>][description]" 
-                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
-                                        <p class="arsol-description">Brief description of what this plan offers</p>
-                                    </div>
-                                    <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove plan</button>
-                                    </div>
-                                </div>
-                                <?php
-                            }
-                        }
-                        ?>
-                        <div class="plan-row template" style="display: none;">
-                            <div class="plan-field">
-                                <label>Plan slug</label>
-                                <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
-                                <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
-                            </div>
-                            <div class="plan-field">
-                                <label>Plan description</label>
-                                <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
-                                <p class="arsol-description">Brief description of what this plan offers</p>
-                            </div>
-                            <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove plan</button>
-                            </div>
-                        </div>
-                        <button type="button" class="button add-plan">Add plan</button>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <!-- Vultr Section -->
-        <h2>Vultr</h2>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Server provider slug</th>
-                <td>
-                    <input type="text" value="vultr" disabled />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Available plans</th>
-                <td>
-                    <div class="plan-repeater" data-provider="vultr">
-                        <?php
-                        $vultr_plans = get_option('siya_vultr_plans', array());
-                        if (!empty($vultr_plans)) {
-                            foreach ($vultr_plans as $index => $plan) {
-                                ?>
-                                <div class="plan-row">
-                                    <div class="plan-field">
-                                        <label>Plan slug</label>
-                                        <input type="text" name="siya_vultr_plans[<?php echo $index; ?>][slug]" 
-                                               value="<?php echo esc_attr($plan['slug']); ?>" placeholder="Enter plan slug" />
-                                        <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
-                                    </div>
-                                    <div class="plan-field">
-                                        <label>Plan description</label>
-                                        <textarea name="siya_vultr_plans[<?php echo $index; ?>][description]" 
-                                                  maxlength="250" placeholder="Enter plan description"><?php echo esc_textarea($plan['description']); ?></textarea>
-                                        <p class="arsol-description">Brief description of what this plan offers</p>
-                                    </div>
-                                    <div class="plan-field">
-                                        <button type="button" class="button remove-plan">Remove plan</button>
-                                    </div>
-                                </div>
-                                <?php
-                            }
-                        }
-                        ?>
-                        <div class="plan-row template" style="display: none;">
-                            <div class="plan-field">
-                                <label>Plan slug</label>
-                                <input type="text" name="plan_slug[]" placeholder="Enter plan slug" />
-                                <p class="arsol-description">A unique identifier for this plan (e.g., basic-droplet)</p>
-                            </div>
-                            <div class="plan-field">
-                                <label>Plan description</label>
-                                <textarea name="plan_description[]" maxlength="250" placeholder="Enter plan description"></textarea>
-                                <p class="arsol-description">Brief description of what this plan offers</p>
-                            </div>
-                            <div class="plan-field">
-                                <button type="button" class="button remove-plan">Remove plan</button>
-                            </div>
-                        </div>
-                        <button type="button" class="button add-plan">Add plan</button>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <?php submit_button(); ?>
+        <?php
+        settings_fields('siya_settings');
+        do_settings_sections('siya-settings'); 
+        submit_button();
+        ?>
     </form>
 </div>
 
+<script>
+jQuery(document).ready(function($) {
+    $('.add-plan').on('click', function() {
+        const container = $(this).closest('.plan-repeater');
+        const provider = container.data('provider');
+        const index = container.find('.plan-row').length;
+        
+        const newRow = $(`
+            <div class="plan-row">
+                <div class="plan-field">
+                    <label><?php _e('Plan slug', 'siya'); ?></label>
+                    <input type="text" name="siya_${provider}_plans[${index}][slug]" placeholder="<?php _e('Enter plan slug', 'siya'); ?>" />
+                </div>
+                <div class="plan-field">
+                    <label><?php _e('Description', 'siya'); ?></label>
+                    <textarea name="siya_${provider}_plans[${index}][description]" placeholder="<?php _e('Enter plan description', 'siya'); ?>"></textarea>
+                </div>
+                <button type="button" class="button remove-plan"><?php _e('Remove', 'siya'); ?></button>
+            </div>
+        `);
+        
+        $(this).before(newRow);
+    });
+
+    $(document).on('click', '.remove-plan', function() {
+        $(this).closest('.plan-row').remove();
+    });
+});
+</script>
+
 <style>
 .plan-row {
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 10px;
+    padding: 10px;
     background: #f9f9f9;
     border: 1px solid #ddd;
-    border-radius: 4px;
 }
 
 .plan-field {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .plan-field label {
@@ -229,59 +63,18 @@ if (!defined('ABSPATH')) {
     font-size: 14px;
 }
 
-.plan-field input[type="text"] {
+.plan-field input[type="text"],
+.plan-field textarea {
     width: 100%;
-    max-width: 400px;
+    max-width: 300px;
+    margin-bottom: 5px;
 }
 
 .plan-field textarea {
-    width: 100%;
-    max-width: 400px;
-    height: 100px;
-}
-
-.add-plan {
-    margin-top: 10px !important;
+    height: 60px;
 }
 
 .remove-plan {
     color: #dc3545;
-    border-color: #dc3545;
-}
-
-.remove-plan:hover {
-    background: #dc3545;
-    color: #fff;
-}
-
-.arsol-description {
-    margin-top: 4px;
-    margin-bottom: 0;
-    color: #666;
-    font-size: 13px;
 }
 </style>
-
-<script>
-jQuery(document).ready(function($) {
-    $('.add-plan').on('click', function() {
-        var $repeater = $(this).closest('.plan-repeater');
-        var $template = $repeater.find('.template').clone();
-        var provider = $repeater.data('provider');
-        var index = $repeater.find('.plan-row').length - 1;
-
-        $template.removeClass('template').show()
-            .find('input, textarea').each(function() {
-                var name = $(this).attr('name');
-                $(this).attr('name', 'siya_' + provider + '_plans[' + index + '][' + 
-                    (name.includes('slug') ? 'slug' : 'description') + ']');
-            });
-
-        $(this).before($template);
-    });
-
-    $(document).on('click', '.remove-plan', function() {
-        $(this).closest('.plan-row').remove();
-    });
-});
-</script>
