@@ -1,4 +1,10 @@
+<?php 
+
 use Siya\AdminSettings\Slugs;
+
+$slugs = new Slugs();
+
+?>
 
 <div id="arsol_server_settings_data" class="panel woocommerce_options_panel">
     <div class="options_group">
@@ -12,7 +18,6 @@ use Siya\AdminSettings\Slugs;
             </div>
         </div>
         <?php
-        $slugs = new Slugs();
 
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
