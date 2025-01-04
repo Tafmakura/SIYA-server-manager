@@ -27,7 +27,14 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Server group</th>
                 <td>
                     <select name="siya_wp_server_group" id="siya_wp_server_group">
-                        <!-- Options will be populated by JavaScript -->
+                        <?php
+                        $provider = get_option('siya_wp_server_provider');
+                        $groups = (new Siya\AdminSettings\Slugs())->get_provider_group_slugs($provider);
+                        $selected_group = get_option('siya_wp_server_group');
+                        foreach ($groups as $group) {
+                            echo '<option value="' . esc_attr($group) . '" ' . selected($selected_group, $group, false) . '>' . esc_html($group) . '</option>';
+                        }
+                        ?>
                     </select>
                     <p class="arsol-description">Select the server group for WordPress hosting</p>
                 </td>
