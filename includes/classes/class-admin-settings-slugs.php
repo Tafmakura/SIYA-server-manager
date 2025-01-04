@@ -54,9 +54,20 @@ class Slugs {
                 "siya_{$provider}_plans",
                 [
                     'type' => 'array',
-                    'sanitize_callback' => [$this, 'sanitize_provider_plans'],
-                    'default' => []
+                    'sanitize_callback' => [$this, 'sanitize_plans'],
+                    'default' => [],
+                    'show_in_rest' => false
                 ]
+            );
+
+            // Add settings field for each provider
+            add_settings_field(
+                "siya_{$provider}_plans",
+                sprintf(__('%s Plans', 'siya'), self::PROVIDERS[$provider]),
+                [$this, 'render_provider_plans_field'],
+                self::MENU_SLUG,
+                'siya_main_section',
+                ['provider' => $provider]
             );
         }
     }
@@ -98,17 +109,16 @@ class Slugs {
         }
     }
 
-    public function sanitize_provider_plans($plans) {
-        if (!is_array($plans)) {
-            return [];
-        }
-
-        return array_map(function($plan) {
+    public function sanitize_plans(array $plans): array {
+        return array_filter(array_map(function($plan) {
+            if (empty($plan['slug']) || empty($plan['description'])) {
+                return null;
+            }
             return [
-                'slug' => sanitize_key($plan['slug'] ?? ''),
-                'description' => sanitize_textarea_field($plan['description'] ?? '')
+                'slug' => sanitize_key($plan['slug']),
+                'description' => sanitize_textarea_field($plan['description'])
             ];
-        }, $plans);
+        }, $plans));
     }
 
     public function get_plans(string $provider): array {

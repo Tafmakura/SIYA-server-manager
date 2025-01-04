@@ -4,7 +4,9 @@ namespace Siya;
 
 class AdminMenus {
     public function __construct() {
-        add_action('admin_menu', [$this, 'add_siya_menu']);
+        $this->add_siya_menu();
+        $this->add_slugs_submenu();
+        $this->add_api_submenu();
     }
 
     /**
@@ -30,8 +32,12 @@ class AdminMenus {
             'siya',                          // Menu slug (same as parent to make it first item)
             array('Siya\AdminSettings\General', 'settings_page') // Callback function
         );
+    }
 
-        // Add Slugs submenu page
+    /**
+     * Add Slugs submenu page
+     */
+    public function add_slugs_submenu() {
         add_submenu_page(
             'siya',                            // Parent slug
             'Slugs',                           // Page title
@@ -40,8 +46,12 @@ class AdminMenus {
             'siya-slugs-settings',             // Menu slug
             array('Siya\AdminSettings\Slugs', 'settings_page') // Callback function
         );
-
-        // Add API Settings submenu page
+    }
+    
+    /**
+     * Add API Settings submenu page
+     */
+    public function add_api_submenu() {
         add_submenu_page(
             'siya',                            // Parent slug
             'API Keys',                         // Page title
@@ -51,4 +61,6 @@ class AdminMenus {
             array('Siya\AdminSettings\API', 'runcloud_settings_page') // Callback function
         );
     }
+
+
 }
