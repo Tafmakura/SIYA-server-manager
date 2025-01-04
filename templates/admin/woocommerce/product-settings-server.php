@@ -295,4 +295,15 @@ jQuery(document).ready(function($) {
 });
 </script>
 
+<?php
+// Save the custom fields
+add_action('woocommerce_process_product_meta', function($post_id) {
+    $checkbox_fields = ['_arsol_wordpress_server', '_arsol_ecommerce'];
+    foreach ($checkbox_fields as $field) {
+        update_post_meta($post_id, $field, isset($_POST[$field]) && $_POST[$field] === 'yes' ? 'yes' : 'no');
+    }
+    // ...existing code for saving other fields...
+});
+?>
+
 
