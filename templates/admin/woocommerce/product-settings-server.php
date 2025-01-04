@@ -118,9 +118,6 @@
 </div>
 
 <style>
-select {
-    min-width: 120px; /* Fixed width for dropdowns */
-}
 .hidden {
     display: none;
 }
