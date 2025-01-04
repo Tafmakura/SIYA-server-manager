@@ -58,7 +58,7 @@ class AdminMenus {
             'API Keys',                         // Menu title
             'manage_options',                   // Capability
             'siya-api-settings',                // Menu slug
-            array('Siya\AdminSettings\API', 'runcloud_settings_page') // Callback function
+            array('Siya\AdminSettings\API', 'settings_page') // Callback function
         );
     }
 
