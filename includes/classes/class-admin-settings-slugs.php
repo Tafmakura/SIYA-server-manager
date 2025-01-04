@@ -18,6 +18,7 @@ class Slugs {
 
     private function __construct() {
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_menu', array($this, 'add_settings_page'));
     }
 
     public function register_settings() {
@@ -38,6 +39,26 @@ class Slugs {
         register_setting('siya_slugs_settings', 'siya_vultr_plans', array(
             'sanitize_callback' => array($this, 'sanitize_provider_plans')
         ));
+    }
+
+    public function add_settings_page() {
+        add_submenu_page(
+            'siya-server-manager', // Parent slug
+            'Slugs Settings',      // Page title
+            'Slugs Settings',      // Menu title
+            'manage_options',      // Capability
+            'siya-slugs-settings', // Menu slug
+            array($this, 'settings_page') // Callback function
+        );
+    }
+
+    public function settings_page() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        // Include the settings page template
+        require_once SIYA_PLUGIN_DIR . 'templates/admin/settings-page-slugs.php';
     }
 
     public function sanitize_provider_plans($plans) {
