@@ -23,6 +23,22 @@ if (!defined('ABSPATH')) {
                     <p class="arsol-description">Select the cloud provider for WordPress hosting</p>
                 </td>
             </tr>
+            <tr>
+                <th scope="row">Server group</th>
+                <td>
+                    <select name="siya_wp_server_group" id="siya_wp_server_group">
+                        <?php
+                        $provider = get_option('siya_wp_server_provider');
+                        $groups = (new Siya\AdminSettings\Slugs())->get_provider_group_slugs($provider);
+                        $selected_group = get_option('siya_wp_server_group');
+                        foreach ($groups as $group) {
+                            echo '<option value="' . esc_attr($group) . '" ' . selected($selected_group, $group, false) . '>' . esc_html($group) . '</option>';
+                        }
+                        ?>
+                    </select>
+                    <p class="arsol-description">Select the server group for WordPress hosting</p>
+                </td>
+            </tr>
         </table>
 
         <!-- DigitalOcean Section -->
@@ -307,6 +323,40 @@ select {
 
 <script>
 jQuery(document).ready(function($) {
+    function updateGroups(provider) {
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_provider_groups',
+                provider: provider
+            },
+            success: function(groups) {
+                var $groupSelect = $('#siya_wp_server_group');
+                $groupSelect.empty();
+                
+                if (groups.length === 0) {
+                    $groupSelect.prop('disabled', true);
+                } else {
+                    $groupSelect.prop('disabled', false);
+                    groups.forEach(function(group) {
+                        $groupSelect.append(new Option(group, group));
+                    });
+                }
+            }
+        });
+    }
+
+    $('#siya_wp_server_provider').on('change', function() {
+        var provider = $(this).val();
+        updateGroups(provider);
+    });
+
+    // Initial load
+    var initialProvider = $('#siya_wp_server_provider').val();
+    if (initialProvider) {
+        updateGroups(initialProvider);
+    }
+
     $('.add-plan').on('click', function() {
         var $repeater = $(this).closest('.plan-repeater');
         var $template = $repeater.find('.template').clone();

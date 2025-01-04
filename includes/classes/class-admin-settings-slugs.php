@@ -48,6 +48,16 @@ class Slugs {
             ]
         );
 
+        // Register WordPress group setting
+        register_setting(
+            self::OPTION_GROUP,
+            'siya_wp_server_group',
+            [
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_text_field'
+            ]
+        );
+
         // Register provider plan settings
         foreach (self::PROVIDERS as $slug => $name) {
             register_setting(
@@ -81,6 +91,7 @@ class Slugs {
     public function add_allowed_options($allowed_options) {
         $allowed_options[self::OPTION_GROUP] = [
             'siya_wp_server_provider',
+            'siya_wp_server_group', // Ensure this line is included
             'siya_digitalocean_plans',
             'siya_hetzner_plans',
             'siya_vultr_plans'
