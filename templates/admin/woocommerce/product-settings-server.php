@@ -120,30 +120,10 @@
 select {
     width: 300px; /* Fixed width for dropdowns */
 }
-.loading-spinner {
-    display: none;
-    width: 20px;
-    height: 20px;
-    background: url('<?php echo esc_url(admin_url('images/spinner.gif')); ?>') no-repeat center center;
-    background-size: contain;
-}
-.hidden {
-    display: none;
-}
 </style>
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    function showLoadingSpinner() {
-        $('.loading-spinner').show();
-        $('select').addClass('hidden');
-    }
-
-    function hideLoadingSpinner() {
-        $('.loading-spinner').hide();
-        $('select').removeClass('hidden');
-    }
-
     function updateGroups(provider, callback) {
         showLoadingSpinner();
         $.ajax({
@@ -206,7 +186,7 @@ jQuery(document).ready(function($) {
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
-                if (plans.length === 0) {
+                if (plans.length === 0 || !group) {
                     $planSelect.prop('disabled', true);
                 } else {
                     $planSelect.prop('disabled', false);
@@ -245,6 +225,8 @@ jQuery(document).ready(function($) {
             var selectedGroup = $('#_arsol_server_group_slug').val();
             if (selectedGroup) {
                 updatePlans(provider, selectedGroup);
+            } else {
+                $('#_arsol_server_plan_slug').prop('disabled', true);
             }
         });
     });
@@ -271,6 +253,8 @@ jQuery(document).ready(function($) {
             var selectedGroup = $('#_arsol_server_group_slug').val();
             if (selectedGroup) {
                 updatePlans(initialProvider, selectedGroup);
+            } else {
+                $('#_arsol_server_plan_slug').prop('disabled', true);
             }
         });
     }
