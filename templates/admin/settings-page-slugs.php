@@ -326,7 +326,7 @@ jQuery(document).ready(function($) {
     // Function to validate slug fields
     function validateSlugField($field) {
         var value = $field.val();
-        var sanitizedValue = value.replace(/[^a-zA-Z0-9-,]/g, '');
+        var sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
         if (value !== sanitizedValue) {
             $field.val(sanitizedValue);
         }
