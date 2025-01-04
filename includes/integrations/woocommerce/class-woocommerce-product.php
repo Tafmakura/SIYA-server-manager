@@ -72,27 +72,28 @@ class Product {
     }
 
     public function save_arsol_server_settings_tab_content($post_id) {
-        $arsol_server_provider_slug = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
-        $arsol_server_group_slug = isset($_POST['_arsol_server_group_slug']) ? sanitize_text_field($_POST['_arsol_server_group_slug']) : '';
-        $arsol_server_plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
-        $arsol_max_applications = isset($_POST['_arsol_max_applications']) ? intval($_POST['_arsol_max_applications']) : '';
-        $arsol_max_staging_sites = isset($_POST['_arsol_max_staging_sites']) ? intval($_POST['_arsol_max_staging_sites']) : '';
-        $arsol_wordpress_server = isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no';
-        $arsol_ecommerce = isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no';
-
-        // Ensure required fields are filled
-        if (!$arsol_server_provider_slug || !$arsol_server_group_slug || !$arsol_server_plan_slug) {
+        // Check if WooCommerce is saving the product meta
+        if (!isset($_POST['woocommerce_meta_nonce']) || !wp_verify_nonce($_POST['woocommerce_meta_nonce'], 'woocommerce_save_data')) {
             return;
         }
-
-        update_post_meta($post_id, '_arsol_server_provider_slug', $arsol_server_provider_slug);
-        update_post_meta($post_id, '_arsol_server_group_slug', $arsol_server_group_slug);
-        update_post_meta($post_id, '_arsol_server_plan_slug', $arsol_server_plan_slug);
-        update_post_meta($post_id, '_arsol_max_applications', $arsol_max_applications);
-        update_post_meta($post_id, '_arsol_max_staging_sites', $arsol_max_staging_sites);
-        update_post_meta($post_id, '_arsol_wordpress_server', $arsol_wordpress_server);
-        update_post_meta($post_id, '_arsol_ecommerce', $arsol_ecommerce);
+    
+        // Define and sanitize fields
+        $fields = [
+            '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
+            '_arsol_server_group_slug'    => sanitize_text_field($_POST['_arsol_server_group_slug'] ?? ''),
+            '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
+            '_arsol_max_applications'     => intval($_POST['_arsol_max_applications'] ?? 0),
+            '_arsol_max_staging_sites'    => intval($_POST['_arsol_max_staging_sites'] ?? 0),
+            '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
+            '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
+        ];
+    
+        // Save all fields, even if empty
+        foreach ($fields as $meta_key => $value) {
+            update_post_meta($post_id, $meta_key, $value);
+        }
     }
+    
 
     public function add_admin_footer_script() {
         ?>
