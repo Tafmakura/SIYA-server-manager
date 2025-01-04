@@ -327,9 +327,14 @@ jQuery(document).ready(function($) {
                 var $groupSelect = $('#siya_wp_server_group');
                 $groupSelect.empty();
                 
-                groups.forEach(function(group) {
-                    $groupSelect.append(new Option(group, group));
-                });
+                if (groups.length === 0) {
+                    $groupSelect.prop('disabled', true);
+                } else {
+                    $groupSelect.prop('disabled', false);
+                    groups.forEach(function(group) {
+                        $groupSelect.append(new Option(group, group));
+                    });
+                }
             }
         });
     }

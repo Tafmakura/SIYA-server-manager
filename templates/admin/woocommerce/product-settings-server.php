@@ -132,9 +132,14 @@ jQuery(document).ready(function($) {
                 var $groupSelect = $('#_arsol_server_group_slug');
                 $groupSelect.empty();
                 
-                groups.forEach(function(group) {
-                    $groupSelect.append(new Option(group, group));
-                });
+                if (groups.length === 0) {
+                    $groupSelect.prop('disabled', true);
+                } else {
+                    $groupSelect.prop('disabled', false);
+                    groups.forEach(function(group) {
+                        $groupSelect.append(new Option(group, group));
+                    });
+                }
                 
                 $groupSelect.trigger('change');
             }
@@ -153,9 +158,14 @@ jQuery(document).ready(function($) {
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
-                plans.forEach(function(plan) {
-                    $planSelect.append(new Option(plan.description, plan.slug));
-                });
+                if (plans.length === 0) {
+                    $planSelect.prop('disabled', true);
+                } else {
+                    $planSelect.prop('disabled', false);
+                    plans.forEach(function(plan) {
+                        $planSelect.append(new Option(plan.description, plan.slug));
+                    });
+                }
             }
         });
     }
