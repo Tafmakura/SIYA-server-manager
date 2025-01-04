@@ -186,7 +186,17 @@ jQuery(document).ready(function($) {
                 provider: provider,
                 group: group
             },
-            success: function(plans) {
+            success: function(response) {
+                var plans = [];
+                try {
+                    plans = JSON.parse(response);  // Parse the response as JSON
+                    if (!Array.isArray(plans)) {
+                        throw new Error('Parsed response is not an array');
+                    }
+                } catch (e) {
+                    console.error('Failed to parse plans:', e);
+                    plans = [];
+                }
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
