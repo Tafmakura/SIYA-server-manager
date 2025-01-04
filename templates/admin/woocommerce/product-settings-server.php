@@ -195,7 +195,7 @@ jQuery(document).ready(function($) {
                         plans = response;  // Response is already an object
                     }
                     if (!Array.isArray(plans)) {
-                        throw new Error('Parsed response is not an array');
+                        plans = Object.values(plans);  // Convert object to array if necessary
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
