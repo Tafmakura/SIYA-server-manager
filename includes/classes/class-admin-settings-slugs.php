@@ -186,6 +186,7 @@ class Slugs {
     public function ajax_get_group_plans(): void {
         $provider = sanitize_text_field($_GET['provider']);
         $group = sanitize_text_field($_GET['group']);
-        wp_send_json($this->get_filtered_plans($provider, $group));
+        $plans = $this->get_filtered_plans($provider, $group);
+        wp_send_json($plans);
     }
 }
