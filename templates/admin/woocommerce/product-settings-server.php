@@ -20,6 +20,11 @@ $slugs = new Slugs();
         </div>
         <?php
 
+        $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
+        $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
+        $is_wordpress_server = get_post_meta($post->ID, '_arsol_wordpress_server', true) === 'yes';
+        $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce', true) === 'yes';
+
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
             'label'       => __('Maximum Applications', 'woocommerce'),
@@ -33,6 +38,7 @@ $slugs = new Slugs();
                 'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
                 'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
             ),
+            'value'       => $max_applications
         ));
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_staging_sites',
@@ -47,12 +53,14 @@ $slugs = new Slugs();
                 'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
                 'oninput' => 'this.value = this.value.replace(/[^-9]/g, \'\')'  // Only accept numbers
             ),
+            'value'       => $max_staging_sites
         ));
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
             'label'       => __('WordPress Server', 'woocommerce'),
             'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
             'desc_tip'    => 'true',
+            'value'       => $is_wordpress_server ? 'yes' : 'no'
         ));
         ?>
         <div class="arsol_ecommerce_field">
@@ -62,6 +70,7 @@ $slugs = new Slugs();
                 'label'       => __('WordPress Ecommerce', 'woocommerce'),
                 'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
+                'value'       => $is_ecommerce ? 'yes' : 'no'
             ));
             ?>
         </div>
