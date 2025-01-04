@@ -186,8 +186,7 @@ jQuery(document).ready(function($) {
                 provider: provider,
                 group: group
             },
-            success: function(response) {
-                var plans = JSON.parse(response);  // Parse the response as JSON
+            success: function(plans) {
                 var $planSelect = $('#_arsol_server_plan_slug');
                 $planSelect.empty();
                 
