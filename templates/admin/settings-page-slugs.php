@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
         </table>
 
         <!-- WordPress Plan Section -->
-        <h2>WordPress Plan Slugs</h2>
+        <h2>WordPress Managed Hosting</h2>
         <table class="form-table">
             <tr>
                 <th scope="row">Plans List Slug</th>
