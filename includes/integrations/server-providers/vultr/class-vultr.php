@@ -34,7 +34,6 @@ class Vultr /*implements ServerProvider*/ {
                 'label' => $server_name,
                 'plan' => $server_plan,
                 'region' => $server_region,
-                'os_id' => $server_image
             ])
         ]);
 
