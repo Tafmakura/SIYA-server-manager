@@ -209,7 +209,7 @@ class ServerOrchestrator {
 
         // Update server post metadata
         $metadata = [
-            'arsol_server_provider' => 'hetzner',
+            'arsol_server_provider' => $server_post_instance->server_provider_slug,
             'arsol_server_manager' => 'runcloud',
             'arsol_server_plan_identifier' => $this->server_plan_identifier,
             'arsol_provisioned_server_id' => $server['id'],
