@@ -73,28 +73,60 @@ class Product {
     }
 
     public function save_arsol_server_settings_tab_content($post_id) {
-    // Check if WooCommerce is saving the product meta
-    if (!isset($_POST['woocommerce_meta_nonce']) || !wp_verify_nonce($_POST['woocommerce_meta_nonce'], 'woocommerce_save_data')) {
-        return;
+        if (!isset($_POST['woocommerce_meta_nonce']) || !wp_verify_nonce($_POST['woocommerce_meta_nonce'], 'woocommerce_save_data')) {
+            return;
+        }
+
+        // Define and sanitize basic fields
+        $fields = [
+            '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
+            '_arsol_server_group_slug'    => sanitize_text_field($_POST['_arsol_server_group_slug'] ?? ''),
+            '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
+            '_arsol_max_applications'     => absint($_POST['_arsol_max_applications'] ?? 0),
+            '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
+            '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
+            '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
+        ];
+
+        // Get existing values for region and image
+        $existing_region = get_post_meta($post_id, '_arsol_server_region', true);
+        $existing_image = get_post_meta($post_id, '_arsol_server_image', true);
+        
+        // Handle region and image fields
+        $region = isset($_POST['_arsol_server_region']) ? sanitize_text_field($_POST['_arsol_server_region']) : $existing_region;
+        $server_image = isset($_POST['_arsol_server_image']) ? sanitize_text_field($_POST['_arsol_server_image']) : $existing_image;
+
+        // Only validate if fields are not empty and were modified
+        if (!empty($region) && $region !== $existing_region) {
+            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
+                wc_add_notice(__('Region field can only contain letters, numbers, and hyphens.', 'woocommerce'), 'error');
+                return;
+            }
+            if (strlen($region) > 50) {
+                wc_add_notice(__('Region field cannot exceed 50 characters.', 'woocommerce'), 'error');
+                return;
+            }
+        }
+
+        // Set region and image values - only clear if WordPress server is being enabled
+        $is_wordpress_server = isset($_POST['_arsol_wordpress_server']);
+        $was_wordpress_server = get_post_meta($post_id, '_arsol_wordpress_server', true) === 'yes';
+
+        if ($is_wordpress_server && !$was_wordpress_server) {
+            // Only clear values when transitioning to WordPress server
+            $fields['_arsol_server_region'] = '';
+            $fields['_arsol_server_image'] = '';
+        } else {
+            // Keep existing or updated values
+            $fields['_arsol_server_region'] = $region;
+            $fields['_arsol_server_image'] = $server_image;
+        }
+
+        // Save all fields
+        foreach ($fields as $meta_key => $value) {
+            update_post_meta($post_id, $meta_key, $value);
+        }
     }
-
-    // Define and sanitize fields
-    $fields = [
-        '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
-        '_arsol_server_group_slug'    => sanitize_text_field($_POST['_arsol_server_group_slug'] ?? ''),
-        '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
-        '_arsol_max_applications'     => intval($_POST['_arsol_max_applications'] ?? 0),
-        '_arsol_max_staging_sites'    => intval($_POST['_arsol_max_staging_sites'] ?? 0),
-        '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
-        '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
-    ];
-
-    // Save all fields, even if empty
-    foreach ($fields as $meta_key => $value) {
-        update_post_meta($post_id, $meta_key, $value);
-    }
-}
-
 
     public function add_admin_footer_script() {
         ?>
@@ -172,7 +204,6 @@ class Product {
 
         // Perform validation
         if (empty($provider) || empty($group_slug) || empty($plan_slug)) {
-            // Add error message
             wc_add_notice(__('Please fill in all required fields: Server provider, Server group, and Server plan.', 'siya'), 'error');
             return;
         }

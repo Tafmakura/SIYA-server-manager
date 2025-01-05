@@ -16,10 +16,13 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    public function provision_server($server_name) {
-     
+    public function provision_server($server_name, $server_plan, $server_region = 'nbg1', $server_image = 'ubuntu-20.04') {
         if (empty($server_name)) {
             throw new \Exception('Server name required');
+        }
+
+        if (empty($server_plan)) {
+            throw new \Exception('Server plan required');
         }
 
         $response = wp_remote_post($this->api_endpoint . '/servers', [
@@ -29,9 +32,9 @@ class Hetzner /*implements ServerProvider*/ {
             ],
             'body' => json_encode([
                 'name' => $server_name,
-                'server_type' => 'cx22',
-                'location' => 'nbg1',
-                'image' => 'ubuntu-20.04'
+                'server_type' => $server_plan,
+                'location' => $server_region,
+                'image' => $server_image
             ])
         ]);
 

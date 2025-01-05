@@ -32,6 +32,14 @@ class ServerPost {
     public $server_provisioned_ipv6;
     public $server_provisioned_root_password;
     public $server_connection_status;
+    public $server_product_id;
+    public $wordpress_server;
+    public $wordpress_ecommerce;
+    public $server_provider_slug;
+    public $server_group_slug;
+    public $server_plan_slug;
+    public $server_region_slug;
+    public $server_image_slug;
 
     public function __construct($post_id = null) {
         if (is_int($post_id) && $post_id > 0) {
@@ -66,7 +74,15 @@ class ServerPost {
         $this->server_provisioned_ipv4 = get_post_meta($this->post_id, 'arsol_server_ipv4', true);
         $this->server_provisioned_ipv6 = get_post_meta($this->post_id, 'arsol_server_ipv6', true);
         $this->server_provisioned_root_password = get_post_meta($this->post_id, 'arsol_server_root_password', true);
+        $this->server_product_id = get_post_meta($this->post_id, 'arsol_server_product_id', true);
         $this->server_connection_status = get_post_meta($this->post_id, 'arsol_server_connection_status', true);
+        $this->wordpress_server = get_post_meta($this->post_id, 'arsol_wordpress_server', true);
+        $this->wordpress_ecommerce = get_post_meta($this->post_id, 'arsol_wordpress_ecommerce', true);
+        $this->server_provider_slug = get_post_meta($this->post_id, 'arsol_server_provider_slug', true);
+        $this->server_group_slug = get_post_meta($this->post_id, 'arsol_server_group_slug', true);
+        $this->server_plan_slug = get_post_meta($this->post_id, 'arsol_server_plan_slug', true);
+        $this->server_region_slug = get_post_meta($this->post_id, 'arsol_server_region_slug', true);
+        $this->server_image_slug = get_post_meta($this->post_id, 'arsol_server_image_slug', true);
     }
     
     public function create_server_post($subscription_id) {
@@ -151,6 +167,13 @@ class ServerPost {
             'arsol_server_type' => get_post_meta($post_id, 'arsol_server_type', true),
             'arsol_server_manager' => get_post_meta($post_id, 'arsol_server_manager', true),
             'arsol_server_status_date' => get_post_meta($post_id, 'arsol_server_status_date', true),
+            'arsol_wordpress_server' => get_post_meta($post_id, 'arsol_wordpress_server', true),
+            'arsol_wordpress_ecommerce' => get_post_meta($post_id, 'arsol_wordpress_ecommerce', true),
+            'arsol_server_provider_slug' => get_post_meta($post_id, 'arsol_server_provider_slug', true),
+            'arsol_server_group_slug' => get_post_meta($post_id, 'arsol_server_group_slug', true),
+            'arsol_server_plan_slug' => get_post_meta($post_id, 'arsol_server_plan_slug', true),
+            'arsol_server_region_slug' => get_post_meta($post_id, 'arsol_server_region_slug', true),
+            'arsol_server_image_slug' => get_post_meta($post_id, 'arsol_server_image_slug', true),
             'arsol_server_connection_status' => get_post_meta($post_id, 'arsol_server_connection_status', true),
         );
         
