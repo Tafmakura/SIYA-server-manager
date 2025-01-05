@@ -151,7 +151,6 @@ class ServerPost {
         
         return true;
     }
-    
 
     public function get_meta_data($post_id) {
         $this->post_id = $post_id;
@@ -202,4 +201,5 @@ class ServerPost {
         
         return array_filter($meta_data);
     }
+    
 }

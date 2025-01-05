@@ -35,42 +35,8 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
 
     }
-    /*
-    private function update_server_meta($server_id, $data) {
-        $meta_data = array(
-            'arsol_server_provisioned_id' => $data['id'],
-            'arsol_server_provisioned_name' => $data['name'],
-            'arsol_server_provisioned_status' => $data['status'],
-            'arsol_server_provisioned_os' => $data['os'],
-            'arsol_server_provisioned_ipv4' => $data['ipv4'],
-            'arsol_server_provisioned_ipv6' => $data['ipv6'],
-            'arsol_server_provisioning_provider' => $data['provider'],
-            'arsol_server_provisioned_root_password' => $data['root_password'],
-            'arsol_server_deployment_manager' => $data['manager'],
-            'arsol_server_provisioned_date' => current_time('mysql'),
-            'arsol_server_status_date' => current_time('mysql')
-        );
 
-        foreach ($meta_data as $key => $value) {
-            update_post_meta($server_id, $key, sanitize_text_field($value));
-        }
-    }
     
-    private function get_server_meta($server_id) {
-        return array(
-            'id' => get_post_meta($server_id, 'arsol_server_provisioned_id', true),
-            'name' => get_post_meta($server_id, 'arsol_server_provisioned_name', true),
-            'status' => get_post_meta($server_id, 'arsol_server_provisioned_status', true),
-            'os' => get_post_meta($server_id, 'arsol_server_provisioned_os', true),
-            'ipv4' => get_post_meta($server_id, 'arsol_server_provisioned_ipv4', true),
-            'ipv6' => get_post_meta($server_id, 'arsol_server_provisioned_ipv6', true),
-            'provider' => get_post_meta($server_id, 'arsol_server_provisioning_provider', true),
-            'root_password' => get_post_meta($server_id, 'arsol_server_provisioned_root_password', true),
-            'manager' => get_post_meta($server_id, 'arsol_server_deployment_manager', true)
-        );
-    }
-        */
-
     public function provision_and_deploy_server($subscription) {
         try {
 
@@ -158,12 +124,10 @@ class ServerOrchestrator {
 
     // Step 1: Create server post and update server metadata
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
-
         $post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
         if ($post_id) {
-
             $this->server_post_id = $post_id;
             $subscription->add_order_note(
                 'Server post created successfully with ID: ' . $this->server_post_id
@@ -195,7 +159,6 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
             return true;
-
         } elseif ($post_id instanceof \WP_Error) {
             $subscription->add_order_note(
                 'Failed to create server post. Error: ' . $post_id->get_error_message()
@@ -203,8 +166,6 @@ class ServerOrchestrator {
             $subscription->update_status('on-hold'); // Switch subscription status to on hold
             throw new \Exception('Failed to create server post');
         }
-
-        
     }
 
     // Step 2: Provision server and update server post metadata
@@ -266,26 +227,39 @@ class ServerOrchestrator {
         );
         $subscription->add_order_note($success_message);
 
-        // Update server post metadata
-        $metadata = [
-            'arsol_server_manager' => 'runcloud',
-            'arsol_server_plan_identifier' => $this->server_plan_identifier,
-            'arsol_provisioned_server_id' => $server['id'],
+        // Update server post metadata using the generic update_meta_data method
+        $server_post_instance->update_meta_data($this->server_post_id, [
+            'arsol_server_provisioned_id' => $server['id'],
+            'arsol_server_provisioned_name' => $server_name,
+            'arsol_server_provisioned_status' => 1,
+            'arsol_server_provisioned_os' => $server['os'] ?? '',
             'arsol_server_provisioned_ipv4' => $server['public_net']['ipv4']['ip'],
             'arsol_server_provisioned_ipv6' => $server['public_net']['ipv6']['ip'],
-            'arsol_server_location' => $server['datacenter']['location']['name'],
-            'arsol_server_server_type' => $server['server_type']['name'],
-            'arsol_server_created_date' => $server['created'],
-            'arsol_server_provisioned_status' => 1,
-            'arsol_server_connection_status' => 'provisioning'
-        ];
-        error_log('[SIYA Server Manager] Server already deployed, skipping Step 3'.$this->server_post_id);
-        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+            'arsol_server_provisioning_provider' => $this->server_provider_slug,
+            'arsol_server_provisioned_root_password' => $server['root_password'] ?? '',
+            'arsol_server_deployment_manager' => 'runcloud',
+            'arsol_server_provisioned_date' => current_time('mysql'),
+            'arsol_server_status_date' => current_time('mysql')
+        ]);
+
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
             PHP_EOL,
             print_r($metadata, true)
         ));
+
+        // Use ServerPost methods instead
+        $server_post_instance->update_server_meta([
+            'id' => $server['id'],
+            'name' => $server_name,
+            'status' => 1,
+            'os' => $server['os'] ?? '',
+            'ipv4' => $server['public_net']['ipv4']['ip'],
+            'ipv6' => $server['public_net']['ipv6']['ip'],
+            'provider' => $this->server_provider_slug,
+            'root_password' => $server['root_password'] ?? '',
+            'manager' => 'runcloud'
+        ]);
 
         return $server_data;
     }
@@ -357,16 +331,6 @@ class ServerOrchestrator {
         $subscription->update_status('active');
 
         error_log(sprintf('[SIYA Server Manager] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
-
-        /* DELETE 
-        // Refresh the page after processing
-        if (is_admin()) {
-            echo "<script type='text/javascript'>
-                    setTimeout(function(){
-                        location.reload();
-                    }, 1000);
-                </script>";
-        */
     
     }
 
