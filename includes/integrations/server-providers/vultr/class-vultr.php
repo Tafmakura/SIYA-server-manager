@@ -58,11 +58,8 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     public function compile_server_return_data($api_response) {
-        error_log(sprintf(
-            '[SIYA Server Manager] Vultr API Response:%s%s',
-            PHP_EOL,
-            json_encode($api_response, JSON_PRETTY_PRINT)
-        ));
+        
+        error_log(var_export($api_response, true)); // DELETE THIS IN PRODUCTION
 
         return [
             'provisioned_name' => $api_response['instance']['label'] ?? '',

@@ -58,15 +58,9 @@ class DigitalOcean /*implements ServerProvider*/ {
     }
 
     public function compile_server_return_data($api_response) {
-        error_log(sprintf(
-            '[SIYA Server Manager] DigitalOcean API Response:%s%s',
-            PHP_EOL,
-            json_encode($api_response, JSON_PRETTY_PRINT)
-        ));
-
-        error_log(var_export($api_response, true));
-
-
+        // Log the API response for debugging purposes (remove or adjust for production)
+        error_log(var_export($api_response, true)); 
+    
         $droplet = $api_response['droplet'] ?? [];
         $networks = $droplet['networks'] ?? [];
         $v4_networks = $networks['v4'] ?? [];
@@ -74,21 +68,43 @@ class DigitalOcean /*implements ServerProvider*/ {
         $image = $droplet['image'] ?? [];
         $region = $droplet['region'] ?? [];
         
+        // Fetch the first IPv4 address, if available
+        $ipv4 = '';
+        if (!empty($v4_networks)) {
+            foreach ($v4_networks as $network) {
+                if (isset($network['ip_address'])) {
+                    $ipv4 = $network['ip_address'];
+                    break;
+                }
+            }
+        }
+    
+        // Fetch the first IPv6 address, if available
+        $ipv6 = '';
+        if (!empty($v6_networks)) {
+            foreach ($v6_networks as $network) {
+                if (isset($network['ip_address'])) {
+                    $ipv6 = $network['ip_address'];
+                    break;
+                }
+            }
+        }
+        
         return [
             'provisioned_name' => $droplet['name'] ?? '',
             'provisioned_vcpu_count' => $droplet['vcpus'] ?? '',
             'provisioned_memory' => $droplet['memory'] ?? '',
             'provisioned_disk_size' => $droplet['disk'] ?? '',
-            'provisioned_ipv4' => $v4_networks[0]['ip_address'] ?? '',
-            'provisioned_ipv6' => $v6_networks[0]['ip_address'] ?? '',
+            'provisioned_ipv4' => $ipv4,
+            'provisioned_ipv6' => $ipv6,
             'provisioned_os' => $image['distribution'] ?? '',
             'provisioned_image_slug' => $image['slug'] ?? '',
             'provisioned_region_slug' => $region['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
-            'provisioned_root_password' => ''
+            'provisioned_root_password' => '' // Placeholder
         ];
-        
     }
+    
 
     public function ping_server() {
         $server_id = get_option('server_id');
