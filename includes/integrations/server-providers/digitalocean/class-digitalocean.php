@@ -64,6 +64,9 @@ class DigitalOcean /*implements ServerProvider*/ {
             json_encode($api_response, JSON_PRETTY_PRINT)
         ));
 
+        error_log(var_export($api_response, true));
+
+
         $droplet = $api_response['droplet'] ?? [];
         $networks = $droplet['networks'] ?? [];
         $v4_networks = $networks['v4'] ?? [];
@@ -82,6 +85,7 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_image_slug' => $image['slug'] ?? '',
             'provisioned_region_slug' => $region['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
+            'provisioned_root_password' => ''
         ];
         
     }
