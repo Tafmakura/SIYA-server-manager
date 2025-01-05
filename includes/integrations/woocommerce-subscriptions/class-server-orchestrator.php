@@ -246,7 +246,7 @@ class ServerOrchestrator {
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
             PHP_EOL,
-           // print_r($server_data, true)
+            print_r($server_data, true)
         ));
 
         // Use ServerPost methods instead
