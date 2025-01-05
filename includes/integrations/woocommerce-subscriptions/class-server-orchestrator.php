@@ -4,7 +4,10 @@ namespace Siya\Integrations\WoocommerceSubscriptions;
 
 use SIYA\CustomPostTypes\ServerPost;
 use Siya\Integrations\ServerManagers\Runcloud\Runcloud;
-use Siya\Integrations\ServerProviders\Hetzner\Hetzner;
+
+use Siya\Integrations\ServerProviders\DigitalOcean;
+use Siya\Integrations\ServerProviders\Hetzner;
+use Siya\Integrations\ServerProviders\Vultr;
 
 class ServerOrchestrator {
    
@@ -18,7 +21,10 @@ class ServerOrchestrator {
     public $server_manager;
     public $server_plan_identifier;
     private $runcloud;
+    private $digitalocean;
     private $hetzner;
+    private $vultr;
+
 
     public function __construct() {
       
@@ -66,12 +72,11 @@ class ServerOrchestrator {
             $is_deployed ? 'true' : 'false'
         ));
 
-        // Step 2: Provision Hetzner server if not already provisioned
+        // Step 2: Provision server if not already provisioned
         $server_data = null;
         if (!$is_provisioned) {
-            // Instantiate Hetzner only if needed
-            $this->hetzner = new Hetzner();  
-            $server_data = $this->provision_hetzner_server($server_post_instance, $subscription);
+            // Provision server only if needed
+            $server_data = $this->provision_server($server_post_instance, $subscription,$server_provider_slug);
         } else {
             error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
             // Get existing server data for Step 3
@@ -170,20 +175,37 @@ class ServerOrchestrator {
         
     }
 
-    // Step 2: Provision Hetzner server and update server post metadata
-    private function provision_hetzner_server($server_post_instance, $subscription) {
+    // Step 2: Provision server and update server post metadata
+    private function provision_server($server_post_instance, $subscription, $server_provider_slug) {
     // Get server post ID early since we need it for subsequent operations
  
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
         error_log('[SIYA Server Manager] Server plan: ' . print_r($server_plan, true));
-        $server_data = $this->hetzner->provision_server($server_name, $server_plan);
+        
+        // Determine the provider and instantiate relevant class
+        switch ($server_provider_slug) {
+            case 'digitalocean':
+                $this->digitalocean = new DigitalOcean();
+                $server_data = $this->digitalocean->provision_server($server_name, $server_plan);
+                break;
+            case 'hetzner':
+                $this->hetzner = new Hetzner();
+                $server_data = $this->hetzner->provision_server($server_name, $server_plan);
+                break;
+            case 'vultr':
+                $this->vultr = new Vultr();
+                $server_data = $this->vultr->provision_server($server_name, $server_plan);
+                break;
+            default:
+                throw new \Exception('Unknown server provider: ' . $server_provider_slug);
+        }
 
         if (!$server_data) {
             $error_response = $this->hetzner->get_last_response();
             $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
             $error_message = sprintf(
-                "Failed to provision Hetzner server%s%sAPI Response:%s%s",
+                "Failed to provision server%s%sAPI Response:%s%s",
                 PHP_EOL, PHP_EOL, PHP_EOL, $error_body
             );
             $subscription->add_order_note($error_message);
@@ -193,7 +215,7 @@ class ServerOrchestrator {
 
         $server = $server_data['server'];
         $success_message = sprintf(
-            "Hetzner server provisioned successfully! %s" .
+            "Server provisioned successfully! %s" .
             "Server Name: %s%s" .
             "IP: %s%s" .
             "Created: %s%s" .
@@ -221,7 +243,7 @@ class ServerOrchestrator {
             'arsol_server_provisioned_status' => 1,
             'arsol_server_connection_status' => 'provisioning'
         ];
-        error_log('[SIYA Server Manager] Server already deployed, skipping Step 3>>>>>>>>>>>>>>>>>>>'.$this->server_post_id);
+        error_log('[SIYA Server Manager] Server already deployed, skipping Step 3'.$this->server_post_id);
         $server_post_instance->update_meta_data($this->server_post_id, $metadata);
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
