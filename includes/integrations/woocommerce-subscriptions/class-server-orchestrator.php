@@ -263,10 +263,18 @@ class ServerOrchestrator {
         $installation_type = 'native';
         $provider = $this->server_provider;
 
+        // Ensure IPv4 address is available
+        $ipv4 = $server['public_net']['ipv4']['ip'] ?? null;
+        if (is_null($ipv4)) {
+            error_log('[SIYA Server Manager] Error: IPv4 address is null.');
+            $subscription->add_order_note('RunCloud deployment failed: IPv4 address is null.');
+            return;
+        }
+
         // Deploy to RunCloud
         $runcloud_response = $this->runcloud->create_server_in_server_manager(
             $server_name,
-            $server['public_net']['ipv4']['ip'],
+            $ipv4,
             $web_server_type,
             $installation_type,
             $provider
