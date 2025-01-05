@@ -16,7 +16,7 @@ class Vultr /*implements ServerProvider*/ {
         return new VultrSetup();
     }
 
-    public function provision_server($server_name, $server_plan, $server_region = 'ewr', $server_image = 245) {
+    public function provision_server($server_name, $server_plan, $server_region = 'ewr', $server_image = 244) {
         if (empty($server_name)) {
             throw new \Exception('Server name required');
         }
