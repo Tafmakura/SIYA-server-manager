@@ -249,20 +249,6 @@ class ServerOrchestrator {
             print_r($server_data, true)
         ));
 
-        // Use ServerPost methods instead
-        $server_post_instance->update_meta_data([
-            'id' => $server['id'],
-            'name' => $server_name,
-            'status' => 1,
-            'os' => $server['os'] ?? '',
-            'ipv4' => $server['public_net']['ipv4']['ip'],
-            'ipv6' => $server['public_net']['ipv6']['ip'],
-            'provider' => $this->server_provider_slug,
-            'root_password' => $server['root_password'] ?? '',
-            'manager' => 'runcloud'
-        ]);
-
-        return $server_data;
     }
 
     // Step 3: Deploy to RunCloud and update server metadata
