@@ -176,6 +176,7 @@ class ServerOrchestrator {
  
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = $server_post_instance->get_meta_data($this->server_post_id, 'arsol_server_plan_slug');
+        error_log('[SIYA Server Manager] Server plan: ' . print_r($server_plan, true));
         $server_data = $this->hetzner->provision_server($server_name, $server_plan);
 
         if (!$server_data) {
