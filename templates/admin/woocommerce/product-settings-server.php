@@ -112,13 +112,50 @@
             'value'       => $selected_plan,
             'custom_attributes' => empty($selected_group) ? array('disabled' => 'disabled') : array()
         ));
+
+        // Add wrapper div for region and image fields
+        ?>
+        <div class="arsol_non_wordpress_fields">
+            <?php
+            // Region Text Field
+            $region = get_post_meta($post->ID, '_arsol_server_region', true);
+            woocommerce_wp_text_input(array(
+                'id'          => '_arsol_server_region',
+                'label'       => __('Server region (optional)', 'woocommerce'),
+                'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+                'desc_tip'    => true,
+                'value'       => $region,
+                'custom_attributes' => array(
+                    'pattern' => '^[a-zA-Z0-9-]+$',
+                    'title' => 'Only letters, numbers and hyphens allowed'
+                )
+            ));
+
+            // Server Image Text Field
+            $server_image = get_post_meta($post->ID, '_arsol_server_image', true);
+            woocommerce_wp_text_input(array(
+                'id'          => '_arsol_server_image',
+                'label'       => __('Server image (optional)', 'woocommerce'),
+                'description' => __('Enter the server image identifier. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+                'desc_tip'    => true,
+                'value'       => $server_image,
+                'custom_attributes' => array(
+                    'pattern' => '^[a-zA-Z0-9-]+$',
+                    'title' => 'Only letters, numbers and hyphens allowed'
+                )
+            ));
+            ?>
+        </div>
+        <?php
         ?>
     </div>
-
 </div>
 
 <style>
 .hidden {
+    display: none;
+}
+.arsol_non_wordpress_fields.hidden {
     display: none;
 }
 </style>
@@ -227,6 +264,14 @@ jQuery(document).ready(function($) {
         });
     }
 
+    function toggleWordPressFields() {
+        if ($('#_arsol_wordpress_server').is(':checked')) {
+            $('.arsol_non_wordpress_fields').addClass('hidden');
+        } else {
+            $('.arsol_non_wordpress_fields').removeClass('hidden');
+        }
+    }
+
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
         updateGroups(provider, function(groups) {
@@ -246,9 +291,11 @@ jQuery(document).ready(function($) {
     $('#_arsol_wordpress_server').on('change', function() {
         if ($(this).is(':checked')) {
             setWordPressProvider();
+            toggleWordPressFields();
         } else {
             $('#_arsol_server_provider_slug').prop('disabled', false);
             $('#_arsol_server_group_slug').prop('disabled', false);
+            toggleWordPressFields();
         }
     });
 
@@ -266,6 +313,14 @@ jQuery(document).ready(function($) {
     if ($('#_arsol_wordpress_server').is(':checked')) {
         setWordPressProvider();
     }
+
+    // Initial state
+    toggleWordPressFields();
+
+    // Add validation for region and server image fields
+    $('#arsol_server_region, #_arsol_server_image').on('input', function() {
+        this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
+    });
 });
 </script>
 
