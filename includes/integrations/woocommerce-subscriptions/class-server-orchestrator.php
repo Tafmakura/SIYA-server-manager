@@ -143,11 +143,9 @@ class ServerOrchestrator {
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
               // Product meta data
-                'arsol_max_applications' => $server_product->get_meta('_arsol_max_applications', true),
-                'arsol_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true),
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
-               // 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
+                'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
                 'arsol_server_region_slug' => $server_product->get_meta('_arsol_server_region', true),
@@ -175,7 +173,7 @@ class ServerOrchestrator {
     // Step 2: Provision Hetzner server and update server post metadata
     private function provision_hetzner_server($server_post_instance, $subscription) {
         $server_name = 'ARSOL' . $this->subscription_id;
-        $server_plan = 'cx22';
+        $server_plan = $server_post_instance->server_plan_slug;
         $server_data = $this->hetzner->provision_server($server_name, $server_plan);
 
         if (!$server_data) {
@@ -209,7 +207,6 @@ class ServerOrchestrator {
 
         // Update server post metadata
         $metadata = [
-            'arsol_server_provider_slug' => $server_post_instance->get_server_provider_slug($this->server_product_id),
             'arsol_server_manager' => 'runcloud',
             'arsol_server_plan_identifier' => $this->server_plan_identifier,
             'arsol_provisioned_server_id' => $server['id'],
