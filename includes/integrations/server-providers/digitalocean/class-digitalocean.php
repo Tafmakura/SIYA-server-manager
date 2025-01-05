@@ -66,6 +66,8 @@ class DigitalOcean /*implements ServerProvider*/ {
 
         $droplet = $api_response['droplet'] ?? [];
         $networks = $droplet['networks'] ?? [];
+        $v4_networks = $networks['v4'] ?? [];
+        $v6_networks = $networks['v6'] ?? [];
         $image = $droplet['image'] ?? [];
         $region = $droplet['region'] ?? [];
         
@@ -74,13 +76,14 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_vcpu_count' => $droplet['vcpus'] ?? '',
             'provisioned_memory' => $droplet['memory'] ?? '',
             'provisioned_disk_size' => $droplet['disk'] ?? '',
-            'provisioned_ipv4' => $networks['v4'][0]['ip_address'] ?? '',
-            'provisioned_ipv6' => $networks['v6'][0]['ip_address'] ?? '',
+            'provisioned_ipv4' => $v4_networks[0]['ip_address'] ?? '',
+            'provisioned_ipv6' => $v6_networks[0]['ip_address'] ?? '',
             'provisioned_os' => $image['distribution'] ?? '',
             'provisioned_image_slug' => $image['slug'] ?? '',
             'provisioned_region_slug' => $region['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
         ];
+        
     }
 
     public function ping_server() {
