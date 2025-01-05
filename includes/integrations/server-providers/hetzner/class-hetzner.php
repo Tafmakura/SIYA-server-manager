@@ -58,6 +58,12 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function compile_server_return_data($api_response) {
+        error_log(sprintf(
+            '[SIYA Server Manager] Hetzner API Response:%s%s',
+            PHP_EOL,
+            json_encode($api_response, JSON_PRETTY_PRINT)
+        ));
+
         return [
             'provisioned_name' => $api_response['server']['name'] ?? '',
             'provisioned_vcpu_count' => $api_response['server']['server_type']['cores'] ?? '',

@@ -58,6 +58,12 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     public function compile_server_return_data($api_response) {
+        error_log(sprintf(
+            '[SIYA Server Manager] Vultr API Response:%s%s',
+            PHP_EOL,
+            json_encode($api_response, JSON_PRETTY_PRINT)
+        ));
+
         return [
             'provisioned_name' => $api_response['instance']['label'] ?? '',
             'provisioned_vcpu_count' => $api_response['instance']['vcpu_count'] ?? '',

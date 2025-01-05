@@ -58,19 +58,28 @@ class DigitalOcean /*implements ServerProvider*/ {
     }
 
     public function compile_server_return_data($api_response) {
+        error_log(sprintf(
+            '[SIYA Server Manager] DigitalOcean API Response:%s%s',
+            PHP_EOL,
+            json_encode($api_response, JSON_PRETTY_PRINT)
+        ));
+
+        $droplet = $api_response['droplet'] ?? [];
+        $networks = $droplet['networks'] ?? [];
+        $image = $droplet['image'] ?? [];
+        $region = $droplet['region'] ?? [];
+        
         return [
-            'provisioned_name' => $api_response['droplet']['name'] ?? '',
-            'provisioned_vcpu_count' => $api_response['droplet']['vcpus'] ?? '',
-            'provisioned_memory' => $api_response['droplet']['memory'] ?? '',
-            'provisioned_disk_size' => $api_response['droplet']['disk'] ?? '',
-            'provisioned_ipv4' => !empty($api_response['droplet']['networks']['v4']) ? $api_response['droplet']['networks']['v4'][0]['ip_address'] : '',
-            'provisioned_ipv6' => !empty($api_response['droplet']['networks']['v6']) ? $api_response['droplet']['networks']['v6'][0]['ip_address'] : '',
-            'provisioned_os' => $api_response['droplet']['image']['distribution'] ?? '',
-            'provisioned_image_slug' => $api_response['droplet']['image']['slug'] ?? '',
-            'provisioned_region_slug' => $api_response['droplet']['region']['slug'] ?? '',
-            'provisioned_date' => $api_response['droplet']['created_at'] ?? '',
-            'provisioned_add_ons' => '',
-            'provisioned_root_password' => '', // DigitalOcean provides SSH key access instead
+            'provisioned_name' => $droplet['name'] ?? '',
+            'provisioned_vcpu_count' => $droplet['vcpus'] ?? '',
+            'provisioned_memory' => $droplet['memory'] ?? '',
+            'provisioned_disk_size' => $droplet['disk'] ?? '',
+            'provisioned_ipv4' => $networks['v4'][0]['ip_address'] ?? '',
+            'provisioned_ipv6' => $networks['v6'][0]['ip_address'] ?? '',
+            'provisioned_os' => $image['distribution'] ?? '',
+            'provisioned_image_slug' => $image['slug'] ?? '',
+            'provisioned_region_slug' => $region['slug'] ?? '',
+            'provisioned_date' => $droplet['created_at'] ?? '',
         ];
     }
 
