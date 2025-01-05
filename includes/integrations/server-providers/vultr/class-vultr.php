@@ -48,7 +48,30 @@ class Vultr /*implements ServerProvider*/ {
             throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . $response_body);
         }
 
-        return json_decode($response_body, true);
+        $api_response = json_decode($response_body, true);
+        
+        // Compile server return data
+        $server_data = $this->compile_server_return_data($api_response);
+
+        // Return the compiled data
+        return $server_data;
+    }
+
+    public function compile_server_return_data($api_response) {
+        return [
+            'provisioned_name' => $api_response['instance']['label'] ?? '',
+            'provisioned_vcpu_count' => $api_response['instance']['vcpu_count'] ?? '',
+            'provisioned_memory' => $api_response['instance']['ram'] ?? '',
+            'provisioned_disk_size' => $api_response['instance']['disk'] ?? '',
+            'provisioned_ipv4' => $api_response['instance']['main_ip'] ?? '',
+            'provisioned_ipv6' => $api_response['instance']['v6_main_ip'] ?? '',
+            'provisioned_os' => $api_response['instance']['os'] ?? '',
+            'provisioned_image_slug' => $api_response['instance']['os_id'] ?? '',
+            'provisioned_region_slug' => $api_response['instance']['region'] ?? '',
+            'provisioned_date' => $api_response['instance']['date_created'] ?? '',
+            'provisioned_add_ons' => '',
+            'provisioned_root_password' => $api_response['instance']['default_password'] ?? '',
+        ];
     }
 
     public function ping_server() {

@@ -170,8 +170,6 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     private function provision_server($server_post_instance, $subscription) {
-    // Get server post ID early since we need it for subsequent operations
-        
         $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         $this->server_provider_slug = $server_provider_slug;
         error_log('[SIYA Server Manager] Server provider: ' . print_r($server_provider_slug, true));
@@ -198,48 +196,41 @@ class ServerOrchestrator {
         }
 
         if (!$server_data) {
-            $error_response = $this->hetzner->get_last_response();
-            $error_body = json_encode($error_response, JSON_PRETTY_PRINT);
-            $error_message = sprintf(
-                "Failed to provision server%s%sAPI Response:%s%s",
-                PHP_EOL, PHP_EOL, PHP_EOL, $error_body
-            );
+            $error_message = "Failed to provision server";
             $subscription->add_order_note($error_message);
-            $subscription->update_status('on-hold'); // Switch subscription status to on hold
+            $subscription->update_status('on-hold');
             throw new \Exception($error_message);
         }
 
-        $server = $server_data['server'];
         $success_message = sprintf(
             "Server provisioned successfully! %s" .
             "Server Provider: %s%s" .
             "Server Name: %s%s" .
             "IP: %s%s" .
-            "Created: %s%s" .
-            "Server Plan: %s%s" .
-            "Location: %s",
+            "Memory: %s%s" .
+            "CPU Cores: %s%s" .
+            "Region: %s",
             PHP_EOL,
             $server_provider_slug, PHP_EOL,
-            $server_name, PHP_EOL,
-            $server['public_net']['ipv4']['ip'], PHP_EOL,
-            $server['created'], PHP_EOL,
-            $server['server_type']['name'], PHP_EOL,
-            $server['datacenter']['location']['name']
+            $server_data['provisioned_name'], PHP_EOL,
+            $server_data['provisioned_ipv4'], PHP_EOL,
+            $server_data['provisioned_memory'], PHP_EOL,
+            $server_data['provisioned_vcpu_count'], PHP_EOL,
+            $server_data['provisioned_region_slug']
         );
         $subscription->add_order_note($success_message);
 
-        // Update server post metadata using the generic update_meta_data method
+        // Update server post metadata using the standardized data
         $metadata = [
-            'arsol_server_provisioned_id' => $server['id'],
-            'arsol_server_provisioned_name' => $server_name,
             'arsol_server_provisioned_status' => 1,
-            'arsol_server_provisioned_os' => $server['os'] ?? '',
-            'arsol_server_provisioned_ipv4' => $server['public_net']['ipv4']['ip'], 
-            'arsol_server_provisioned_ipv6' => $server['public_net']['ipv6']['ip'],
+            'arsol_server_provisioned_name' => $server_data['provisioned_name'],
+            'arsol_server_provisioned_os' => $server_data['provisioned_os'],
+            'arsol_server_provisioned_ipv4' => $server_data['provisioned_ipv4'],
+            'arsol_server_provisioned_ipv6' => $server_data['provisioned_ipv6'],
             'arsol_server_provisioning_provider' => $this->server_provider_slug,
-            'arsol_server_provisioned_root_password' => $server['root_password'] ?? '',
+            'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
             'arsol_server_deployment_manager' => 'runcloud',
-            'arsol_server_provisioned_date' => current_time('mysql'),
+            'arsol_server_provisioned_date' => $server_data['provisioned_date'],
             'arsol_server_status_date' => current_time('mysql')
         ];
 
@@ -251,23 +242,22 @@ class ServerOrchestrator {
             print_r($metadata, true)
         ));
 
+        return $server_data;
     }
 
-    // Step 3: Deploy to RunCloud and update server metadata
     private function deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription) {
-        error_log(sprintf('[SIYA Server Manager] Step 5: Starting deployment to RunCloud for subscription %d', $this->subscription_id));
+        error_log(sprintf('[SIYA Server Manager] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
-        $server = $server_data['server'];
         $server_name = 'ARSOL' . $this->subscription_id;
         $web_server_type = 'nginx';
         $installation_type = 'native';
         $provider = $this->server_provider;
 
-        // Ensure IPv4 address is available
-        $ipv4 = get_post_meta($this->server_post_id, 'arsol_server_provisioned_ipv4', true);
-        if (is_null($ipv4)) {
-            error_log('[SIYA Server Manager] Error: IPv4 address is null.');
-            $subscription->add_order_note('RunCloud deployment failed: IPv4 address is null.');
+        // Use the standardized IPv4 address
+        $ipv4 = $server_data['provisioned_ipv4'];
+        if (empty($ipv4)) {
+            error_log('[SIYA Server Manager] Error: IPv4 address is empty.');
+            $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
             return;
         }
 

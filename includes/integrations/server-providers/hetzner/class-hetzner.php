@@ -48,7 +48,30 @@ class Hetzner /*implements ServerProvider*/ {
             throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . $response_body);
         }
 
-        return json_decode($response_body, true);
+        $api_response = json_decode($response_body, true);
+
+        // Compile server return data
+        $server_data = $this->compile_server_return_data($api_response);
+
+        // Return the compiled data
+        return $server_data;
+    }
+
+    public function compile_server_return_data($api_response) {
+        return [
+            'provisioned_name' => $api_response['server']['name'] ?? '',
+            'provisioned_vcpu_count' => $api_response['server']['server_type']['cores'] ?? '',
+            'provisioned_memory' => $api_response['server']['server_type']['memory'] ?? '',
+            'provisioned_disk_size' => $api_response['server']['server_type']['disk'] ?? '',
+            'provisioned_ipv4' => $api_response['server']['public_net']['ipv4']['ip'] ?? '',
+            'provisioned_ipv6' => $api_response['server']['public_net']['ipv6']['ip'] ?? '',
+            'provisioned_os' => $api_response['server']['image']['os_flavor'] ?? '',
+            'provisioned_image_slug' => $api_response['server']['image']['name'] ?? '',
+            'provisioned_region_slug' => $api_response['server']['datacenter']['location']['name'] ?? '',
+            'provisioned_date' => $api_response['server']['created'] ?? '',
+            'provisioned_add_ons' => '',
+            'provisioned_root_password' => $api_response['root_password'] ?? '',
+        ];
     }
 
     public function ping_server() {

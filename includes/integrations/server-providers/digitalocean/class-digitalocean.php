@@ -48,7 +48,30 @@ class DigitalOcean /*implements ServerProvider*/ {
             throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . $response_body);
         }
 
-        return json_decode($response_body, true);
+        $api_response = json_decode($response_body, true);
+        
+        // Compile server return data
+        $server_data = $this->compile_server_return_data($api_response);
+
+        // Return the compiled data
+        return $server_data;
+    }
+
+    public function compile_server_return_data($api_response) {
+        return [
+            'provisioned_name' => $api_response['droplet']['name'] ?? '',
+            'provisioned_vcpu_count' => $api_response['droplet']['vcpus'] ?? '',
+            'provisioned_memory' => $api_response['droplet']['memory'] ?? '',
+            'provisioned_disk_size' => $api_response['droplet']['disk'] ?? '',
+            'provisioned_ipv4' => $api_response['droplet']['networks']['v4'][0]['ip_address'] ?? '',
+            'provisioned_ipv6' => $api_response['droplet']['networks']['v6'][0]['ip_address'] ?? '',
+            'provisioned_os' => $api_response['droplet']['image']['distribution'] ?? '',
+            'provisioned_image_slug' => $api_response['droplet']['image']['slug'] ?? '',
+            'provisioned_region_slug' => $api_response['droplet']['region']['slug'] ?? '',
+            'provisioned_date' => $api_response['droplet']['created_at'] ?? '',
+            'provisioned_add_ons' => '',
+            'provisioned_root_password' => '', // DigitalOcean provides SSH key access instead
+        ];
     }
 
     public function ping_server() {
