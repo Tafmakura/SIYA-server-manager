@@ -16,37 +16,14 @@ class DigitalOcean /*implements ServerProvider*/ {
         return new DigitalOceanSetup();
     }
 
-    private function reserve_ip($region) {
-        $response = wp_remote_post($this->api_endpoint . '/reserved_ips', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->api_key,
-                'Content-Type' => 'application/json'
-            ],
-            'body' => json_encode([
-                'region' => $region
-            ])
-        ]);
-
-        if (is_wp_error($response)) {
-            throw new \Exception('Failed to reserve IP: ' . $response->get_error_message());
-        }
-
-        $response_code = wp_remote_retrieve_response_code($response);
-        if ($response_code !== 202) {
-            throw new \Exception('Failed to reserve IP. Response code: ' . $response_code);
-        }
-
-        $response_data = json_decode(wp_remote_retrieve_body($response), true);
-        return $response_data['reserved_ip']['ip'];
-    }
-
     public function provision_server($server_name, $server_plan, $server_region = 'nyc1', $server_image = 'ubuntu-20-04-x64') {
-        if (empty($server_name) || empty($server_plan)) {
-            throw new \Exception('Server name and plan required');
+        if (empty($server_name)) {
+            throw new \Exception('Server name required');
         }
 
-        // First reserve an IP address
-        $reserved_ip = $this->reserve_ip($server_region);
+        if (empty($server_plan)) {
+            throw new \Exception('Server plan required');
+        }
 
         $response = wp_remote_post($this->api_endpoint . '/droplets', [
             'headers' => [
@@ -57,8 +34,7 @@ class DigitalOcean /*implements ServerProvider*/ {
                 'name' => $server_name,
                 'size' => $server_plan,
                 'region' => $server_region,
-                'image' => $server_image,
-                'ipv4_address' => $reserved_ip
+                'image' => $server_image
             ])
         ]);
 

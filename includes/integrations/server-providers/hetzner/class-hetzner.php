@@ -16,39 +16,14 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    private function reserve_ip($network_zone = 'eu-central') {
-        $response = wp_remote_post($this->api_endpoint . '/floating_ips', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->api_key,
-                'Content-Type' => 'application/json'
-            ],
-            'body' => json_encode([
-                'type' => 'ipv4',
-                'home_location' => $network_zone,
-                'name' => 'reserved-ip-' . time()
-            ])
-        ]);
-
-        if (is_wp_error($response)) {
-            throw new \Exception('Failed to reserve IP: ' . $response->get_error_message());
-        }
-
-        $response_code = wp_remote_retrieve_response_code($response);
-        if ($response_code !== 201) {
-            throw new \Exception('Failed to reserve IP. Response code: ' . $response_code);
-        }
-
-        $response_data = json_decode(wp_remote_retrieve_body($response), true);
-        return $response_data['floating_ip']['ip'];
-    }
-
     public function provision_server($server_name, $server_plan, $server_region = 'nbg1', $server_image = 'ubuntu-20.04') {
-        if (empty($server_name) || empty($server_plan)) {
-            throw new \Exception('Server name and plan required');
+        if (empty($server_name)) {
+            throw new \Exception('Server name required');
         }
 
-        // First reserve an IP address
-        $reserved_ip = $this->reserve_ip($server_region);
+        if (empty($server_plan)) {
+            throw new \Exception('Server plan required');
+        }
 
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
@@ -59,11 +34,7 @@ class Hetzner /*implements ServerProvider*/ {
                 'name' => $server_name,
                 'server_type' => $server_plan,
                 'location' => $server_region,
-                'image' => $server_image,
-                'public_net' => [
-                    'ipv4_enabled' => true,
-                    'ipv4' => $reserved_ip
-                ]
+                'image' => $server_image
             ])
         ]);
 
