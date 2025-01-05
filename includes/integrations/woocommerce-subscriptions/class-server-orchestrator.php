@@ -250,7 +250,7 @@ class ServerOrchestrator {
         ));
 
         // Use ServerPost methods instead
-        $server_post_instance->update_server_meta([
+        $server_post_instance->update_meta_data([
             'id' => $server['id'],
             'name' => $server_name,
             'status' => 1,
