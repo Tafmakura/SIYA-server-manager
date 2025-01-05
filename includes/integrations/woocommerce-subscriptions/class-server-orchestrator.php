@@ -147,7 +147,7 @@ class ServerOrchestrator {
                 'arsol_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true),
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
-                'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
+               // 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
                 'arsol_server_region_slug' => $server_product->get_meta('_arsol_server_region', true),
@@ -209,7 +209,7 @@ class ServerOrchestrator {
 
         // Update server post metadata
         $metadata = [
-            'arsol_server_provider' => $server_post_instance->server_provider_slug,
+            'arsol_server_provider_slug' => $server_post_instance->server_provider_slug,
             'arsol_server_manager' => 'runcloud',
             'arsol_server_plan_identifier' => $this->server_plan_identifier,
             'arsol_provisioned_server_id' => $server['id'],
