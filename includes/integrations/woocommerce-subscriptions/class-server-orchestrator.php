@@ -229,24 +229,26 @@ class ServerOrchestrator {
         $subscription->add_order_note($success_message);
 
         // Update server post metadata using the generic update_meta_data method
-        $server_post_instance->update_meta_data($this->server_post_id, [
+        $metadata = [
             'arsol_server_provisioned_id' => $server['id'],
             'arsol_server_provisioned_name' => $server_name,
             'arsol_server_provisioned_status' => 1,
             'arsol_server_provisioned_os' => $server['os'] ?? '',
-            'arsol_server_provisioned_ipv4' => $server['public_net']['ipv4']['ip'],
+            'arsol_server_provisioned_ipv4' => $server['public_net']['ipv4']['ip'], 
             'arsol_server_provisioned_ipv6' => $server['public_net']['ipv6']['ip'],
             'arsol_server_provisioning_provider' => $this->server_provider_slug,
             'arsol_server_provisioned_root_password' => $server['root_password'] ?? '',
             'arsol_server_deployment_manager' => 'runcloud',
             'arsol_server_provisioned_date' => current_time('mysql'),
             'arsol_server_status_date' => current_time('mysql')
-        ]);
+        ];
+
+        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
             PHP_EOL,
-            print_r($server_data, true)
+            print_r($metadata, true)
         ));
 
     }
