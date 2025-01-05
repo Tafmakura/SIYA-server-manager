@@ -85,7 +85,7 @@ class Product {
             '_arsol_max_applications'     => absint($_POST['_arsol_max_applications'] ?? 0),
             '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
             '_arsol_wordpress_server'     => isset($_POST['_arsol_wordpress_server']) ? 'yes' : 'no',
-            '_arsol_ecommerce'            => isset($_POST['_arsol_ecommerce']) ? 'yes' : 'no',
+            '_arsol_wordpress_ecommerce'  => isset($_POST['_arsol_wordpress_ecommerce']) ? 'yes' : 'no',
         ];
 
         // Get existing values for region and image
@@ -131,7 +131,7 @@ class Product {
     public function add_admin_footer_script() {
         ?>
         <style>
-        .arsol_ecommerce_field, .arsol_server_group_slug_field {
+        .arsol_wordpress_ecommerce_field, .arsol_server_group_slug_field {
             display: none;
         }
         </style>
@@ -148,10 +148,10 @@ class Product {
 
             function toggle_ecommerce_and_server_group_fields() {
                 if ($('#_arsol_wordpress_server').is(':checked')) {
-                    $('.arsol_ecommerce_field').show();
+                    $('.arsol_wordpress_ecommerce_field').show();
                     $('.arsol_server_group_slug_field').hide();
                 } else {
-                    $('.arsol_ecommerce_field').hide();
+                    $('.arsol_wordpress_ecommerce_field').hide();
                     $('.arsol_server_group_slug_field').show();
                 }
             }
@@ -170,7 +170,7 @@ class Product {
             // Ensure WordPress Ecommerce maintains its state when hidden before saving
             $('#post').on('submit', function() {
                 if (!$('#_arsol_wordpress_server').is(':checked')) {
-                    $('#_arsol_ecommerce').prop('checked', false);
+                    $('#_arsol_wordpress_ecommerce').prop('checked', false);
                 }
             });
         });

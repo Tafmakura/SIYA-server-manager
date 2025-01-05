@@ -16,7 +16,7 @@ class ServerPost {
     public $server_connection_status;
     public $server_product_id;
     public $wordpress_server;
-    public $wordpress_ecommerce;
+    public $wordpress_ecommerce;  // Updated property name
     public $server_provider_slug;
     public $server_group_slug;
     public $server_plan_slug;
