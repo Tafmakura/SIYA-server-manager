@@ -17,6 +17,7 @@ class ServerOrchestrator {
     private $subscription_id;
     public $server_post_id;
     public $server_provider;
+    public $server_provider_slug;
     public $server_product_id;
     public $server_manager;
     public $server_plan_identifier;
@@ -24,6 +25,7 @@ class ServerOrchestrator {
     private $digitalocean;
     private $hetzner;
     private $vultr;
+    
 
 
     public function __construct() {
@@ -33,6 +35,41 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
 
     }
+    /*
+    private function update_server_meta($server_id, $data) {
+        $meta_data = array(
+            'arsol_server_provisioned_id' => $data['id'],
+            'arsol_server_provisioned_name' => $data['name'],
+            'arsol_server_provisioned_status' => $data['status'],
+            'arsol_server_provisioned_os' => $data['os'],
+            'arsol_server_provisioned_ipv4' => $data['ipv4'],
+            'arsol_server_provisioned_ipv6' => $data['ipv6'],
+            'arsol_server_provisioning_provider' => $data['provider'],
+            'arsol_server_provisioned_root_password' => $data['root_password'],
+            'arsol_server_deployment_manager' => $data['manager'],
+            'arsol_server_provisioned_date' => current_time('mysql'),
+            'arsol_server_status_date' => current_time('mysql')
+        );
+
+        foreach ($meta_data as $key => $value) {
+            update_post_meta($server_id, $key, sanitize_text_field($value));
+        }
+    }
+    
+    private function get_server_meta($server_id) {
+        return array(
+            'id' => get_post_meta($server_id, 'arsol_server_provisioned_id', true),
+            'name' => get_post_meta($server_id, 'arsol_server_provisioned_name', true),
+            'status' => get_post_meta($server_id, 'arsol_server_provisioned_status', true),
+            'os' => get_post_meta($server_id, 'arsol_server_provisioned_os', true),
+            'ipv4' => get_post_meta($server_id, 'arsol_server_provisioned_ipv4', true),
+            'ipv6' => get_post_meta($server_id, 'arsol_server_provisioned_ipv6', true),
+            'provider' => get_post_meta($server_id, 'arsol_server_provisioning_provider', true),
+            'root_password' => get_post_meta($server_id, 'arsol_server_provisioned_root_password', true),
+            'manager' => get_post_meta($server_id, 'arsol_server_deployment_manager', true)
+        );
+    }
+        */
 
     public function provision_and_deploy_server($subscription) {
         try {
@@ -83,7 +120,7 @@ class ServerOrchestrator {
             $server_data = [
                 'server' => [
                     'public_net' => [
-                        'ipv4' => ['ip' => get_post_meta($this->server_post_id, 'arsol_server_ipv4', true)]
+                        'ipv4' => ['ip' => get_post_meta($this->server_post_id, 'arsol_server_provisioned_ipv4', true)]
                     ]
                 ]
             ];
@@ -136,7 +173,7 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
-            // Update server post metadata
+            // Update server post metadata with correct meta keys
             $metadata = [
                 'arsol_server_subscription_id' => $this->subscription_id,
                 'arsol_server_post_name' => 'ARSOL' . $this->subscription_id,
@@ -144,12 +181,7 @@ class ServerOrchestrator {
                 'arsol_server_post_status' => 1,
                 'arsol_server_product_id' => $this->server_product_id,
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
-                'arsol_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
-                'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
-                'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
-              // Product meta data
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_ecommerce', true),
-                'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
@@ -179,7 +211,7 @@ class ServerOrchestrator {
     private function provision_server($server_post_instance, $subscription) {
     // Get server post ID early since we need it for subsequent operations
         
-        $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
+        $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         error_log('[SIYA Server Manager] Server provider: ' . print_r($server_provider_slug, true));
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
@@ -218,12 +250,14 @@ class ServerOrchestrator {
         $server = $server_data['server'];
         $success_message = sprintf(
             "Server provisioned successfully! %s" .
+            "Server Provider: %s%s" .
             "Server Name: %s%s" .
             "IP: %s%s" .
             "Created: %s%s" .
-            "Server Type: %s%s" .
+            "Server Plan: %s%s" .
             "Location: %s",
             PHP_EOL,
+            $server_provider_slug, PHP_EOL,
             $server_name, PHP_EOL,
             $server['public_net']['ipv4']['ip'], PHP_EOL,
             $server['created'], PHP_EOL,
@@ -237,8 +271,8 @@ class ServerOrchestrator {
             'arsol_server_manager' => 'runcloud',
             'arsol_server_plan_identifier' => $this->server_plan_identifier,
             'arsol_provisioned_server_id' => $server['id'],
-            'arsol_server_ipv4' => $server['public_net']['ipv4']['ip'],
-            'arsol_server_ipv6' => $server['public_net']['ipv6']['ip'],
+            'arsol_server_provisioned_ipv4' => $server['public_net']['ipv4']['ip'],
+            'arsol_server_provisioned_ipv6' => $server['public_net']['ipv6']['ip'],
             'arsol_server_location' => $server['datacenter']['location']['name'],
             'arsol_server_server_type' => $server['server_type']['name'],
             'arsol_server_created_date' => $server['created'],
@@ -264,7 +298,7 @@ class ServerOrchestrator {
         $server_name = 'ARSOL' . $this->subscription_id;
         $web_server_type = 'nginx';
         $installation_type = 'native';
-        $provider = 'hetzner';
+        $provider = $this->server_provider;
 
         // Deploy to RunCloud
         $runcloud_response = $this->runcloud->create_server_in_server_manager(
@@ -332,7 +366,6 @@ class ServerOrchestrator {
                         location.reload();
                     }, 1000);
                 </script>";
-        }
         */
     
     }
