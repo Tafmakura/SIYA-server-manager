@@ -74,6 +74,7 @@ class Hetzner /*implements ServerProvider*/ {
             'provisioned_date' => $api_response['server']['created'] ?? '',
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['root_password'] ?? '',
+            'provisioned_remote_status' => $api_response['server']['status'] ?? ''
         ];
     }
 

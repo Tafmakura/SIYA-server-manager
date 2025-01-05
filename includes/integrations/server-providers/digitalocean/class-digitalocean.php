@@ -101,7 +101,8 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_image_slug' => $image['slug'] ?? '',
             'provisioned_region_slug' => $region['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
-            'provisioned_root_password' => '' // Placeholder
+            'provisioned_root_password' => '', // Placeholder
+            'provisioned_remote_status' => $droplet['status'] ?? ''
         ];
     }
     

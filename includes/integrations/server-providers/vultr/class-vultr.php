@@ -74,6 +74,7 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_date' => $api_response['instance']['date_created'] ?? '',
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['instance']['default_password'] ?? '',
+            'provisioned_remote_status' => $api_response['instance']['status'] ?? ''
         ];
     }
 

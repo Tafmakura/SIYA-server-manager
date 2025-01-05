@@ -27,6 +27,7 @@ class ServerPost {
     public $server_provisioned_id;
     public $server_provisioned_name;
     public $server_provisioned_status;
+    public $server_provisioned_remote_status; 
     public $server_provisioned_date;
     public $server_provisioned_os;
     public $server_provisioned_os_version;
@@ -44,6 +45,7 @@ class ServerPost {
     public $server_deployed_id;
     public $server_deployed_name;
     public $server_deployed_status;
+    public $server_deployed_remote_status;
     public $server_deployed_date;
     public $server_deployed_applications;
     public $server_deployed_staging_sites;
@@ -78,6 +80,7 @@ class ServerPost {
         // Provisioned/Provisioning data
         $this->server_provisioned_id = get_post_meta($this->post_id, 'arsol_server_provisioned_id', true);
         $this->server_provisioned_name = get_post_meta($this->post_id, 'arsol_server_provisioned_name', true);
+        $this->server_provisioned_remote_status = get_post_meta($this->post_id, 'arsol_server_provisioned_remote_status', true);
         $this->server_provisioned_status = get_post_meta($this->post_id, 'arsol_server_provisioned_status', true);
         $this->server_provisioned_date = get_post_meta($this->post_id, 'arsol_server_provisioned_date', true);
         $this->server_provisioned_os = get_post_meta($this->post_id, 'arsol_server_provisioned_os', true);
@@ -95,6 +98,7 @@ class ServerPost {
         // Deployed/Deploying data
         $this->server_deployed_id = get_post_meta($this->post_id, 'arsol_server_deployed_id', true);
         $this->server_deployed_name = get_post_meta($this->post_id, 'arsol_server_deployed_name', true);
+        $this->server_deployed_remote_status = get_post_meta($this->post_id, 'arsol_server_deployed_remote_status', true);
         $this->server_deployed_status = get_post_meta($this->post_id, 'arsol_server_deployed_status', true);
         $this->server_deployed_date = get_post_meta($this->post_id, 'arsol_server_deployed_date', true);
         $this->server_deployed_applications = get_post_meta($this->post_id, 'arsol_server_deployed_applications', true);
@@ -175,6 +179,7 @@ class ServerPost {
             // Provisioned/Provisioning data
             'arsol_server_provisioned_id' => get_post_meta($post_id, 'arsol_server_provisioned_id', true),
             'arsol_server_provisioned_name' => get_post_meta($post_id, 'arsol_server_provisioned_name', true),
+            'arsol_server_provisioned_remote_status' => get_post_meta($post_id, 'arsol_server_provisioned_remote_status', true),
             'arsol_server_provisioned_status' => get_post_meta($post_id, 'arsol_server_provisioned_status', true),
             'arsol_server_provisioned_date' => get_post_meta($post_id, 'arsol_server_provisioned_date', true),
             'arsol_server_provisioned_os' => get_post_meta($post_id, 'arsol_server_provisioned_os', true),
@@ -192,6 +197,7 @@ class ServerPost {
             // Deployed/Deploying data
             'arsol_server_deployed_id' => get_post_meta($post_id, 'arsol_server_deployed_id', true),
             'arsol_server_deployed_name' => get_post_meta($post_id, 'arsol_server_deployed_name', true),
+            'arsol_server_deployed_remote_status' => get_post_meta($post_id, 'arsol_server_deployed_remote_status', true),
             'arsol_server_deployed_status' => get_post_meta($post_id, 'arsol_server_deployed_status', true),
             'arsol_server_deployed_date' => get_post_meta($post_id, 'arsol_server_deployed_date', true),
             'arsol_server_deployed_applications' => get_post_meta($post_id, 'arsol_server_deployed_applications', true),

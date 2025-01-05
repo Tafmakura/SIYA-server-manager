@@ -92,6 +92,16 @@ class ServerOrchestrator {
             ];
         }
 
+
+
+
+
+        // Runcloud deployment switch
+
+
+
+
+
         // Step 3: Deploy to RunCloud if not already deployed
         if (!$is_deployed) {
             error_log('[SIYA Server Manager] Not deployed, deploying to RunCloud');
@@ -231,8 +241,10 @@ class ServerOrchestrator {
             'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
             'arsol_server_deployment_manager' => 'runcloud',
             'arsol_server_provisioned_date' => $server_data['provisioned_date'],
-            'arsol_server_status_date' => current_time('mysql')
+            'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status']
         ];
+
+        error_log('[SIYA Server Manager] Provisioned remote status: ' . $server_data['provisioned_remote_status']);
 
         $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
