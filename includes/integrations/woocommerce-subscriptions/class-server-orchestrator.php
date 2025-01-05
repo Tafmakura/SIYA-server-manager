@@ -172,7 +172,7 @@ class ServerOrchestrator {
     private function provision_server($server_post_instance, $subscription) {
     // Get server post ID early since we need it for subsequent operations
         
-        $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
+        $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         error_log('[SIYA Server Manager] Server provider: ' . print_r($server_provider_slug, true));
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
