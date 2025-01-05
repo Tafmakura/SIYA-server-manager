@@ -175,7 +175,7 @@ class ServerOrchestrator {
     // Get server post ID early since we need it for subsequent operations
  
         $server_name = 'ARSOL' . $this->subscription_id;
-        $server_plan = $server_post_instance->get_meta_data($this->server_post_id, 'arsol_server_plan_slug');
+        $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
         error_log('[SIYA Server Manager] Server plan: ' . print_r($server_plan, true));
         $server_data = $this->hetzner->provision_server($server_name, $server_plan);
 
