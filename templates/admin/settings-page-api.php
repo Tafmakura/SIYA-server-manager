@@ -19,6 +19,7 @@
                         name="<?php echo esc_attr($key . '_api_key'); ?>"
                         value="<?php echo esc_attr($field['value']); ?>"
                         class="regular-text"
+                        style="width: 400px;"
                     />
                 </td>
             </tr>
@@ -39,6 +40,7 @@
                         name="<?php echo esc_attr($key . '_api_key'); ?>"
                         value="<?php echo esc_attr($field['value']); ?>"
                         class="regular-text"
+                        style="width: 400px;"
                     />
                 </td>
             </tr>
