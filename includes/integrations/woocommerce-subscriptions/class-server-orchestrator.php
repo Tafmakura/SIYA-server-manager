@@ -76,7 +76,7 @@ class ServerOrchestrator {
         $server_data = null;
         if (!$is_provisioned) {
             // Provision server only if needed
-            $server_data = $this->provision_server($server_post_instance, $subscription,$server_provider_slug);
+            $server_data = $this->provision_server($server_post_instance, $subscription);
         } else {
             error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
             // Get existing server data for Step 3
@@ -176,9 +176,11 @@ class ServerOrchestrator {
     }
 
     // Step 2: Provision server and update server post metadata
-    private function provision_server($server_post_instance, $subscription, $server_provider_slug) {
+    private function provision_server($server_post_instance, $subscription) {
     // Get server post ID early since we need it for subsequent operations
- 
+        
+        $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
+        error_log('[SIYA Server Manager] Server provider: ' . print_r($server_provider_slug, true));
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
         error_log('[SIYA Server Manager] Server plan: ' . print_r($server_plan, true));
