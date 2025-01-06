@@ -192,7 +192,7 @@ class ServerOrchestrator {
             $requires_server_manager = $this->connect_server_manager;
 
 
-            error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s Requires Server Manager: %s', 
+            error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s, Requires Server Manager: %s', 
                 $this->subscription_id,
                 $is_provisioned ? 'true' : 'false',
                 $is_deployed ? 'true' : 'false',
@@ -210,6 +210,12 @@ class ServerOrchestrator {
                     json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                 ));
 
+
+                // WE MAY HAVE TO DELETE THIS LINE BECAUSE WE DON'T WANT TO OVERIDE SUBSCRIPTION STATUS
+                if ( $requires_server_manager){
+                    $this->subscription->update_status('on-hold');
+                }
+
             } else {
                 error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
                 $server_data = [
@@ -221,8 +227,7 @@ class ServerOrchestrator {
                 ];
             }
                 
-            $this->subscription->update_status('on-hold');
-
+        
 
 
 
