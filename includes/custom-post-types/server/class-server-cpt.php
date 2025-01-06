@@ -16,19 +16,20 @@ class ServerPost {
     public $server_connection_status;
     public $server_product_id;
     public $wordpress_server;
-    public $wordpress_ecommerce;  // Updated property name
+    public $wordpress_ecommerce;
+    public $connect_server_manager;  // Added missing property
     public $server_provider_slug;
     public $server_group_slug;
     public $server_plan_slug;
     public $server_region_slug;
     public $server_image_slug;
-    
+
     // Provisioned/Provisioning properties
     public $server_provisioned_id;
     public $server_provisioned_name;
     public $server_provisioned_status;
-    public $server_provisioned_remote_status; 
-    public $server_provisioned_remote_raw_status;  // Add new property
+    public $server_provisioned_remote_status;
+    public $server_provisioned_remote_raw_status;
     public $server_provisioned_date;
     public $server_provisioned_os;
     public $server_provisioned_os_version;
@@ -41,16 +42,18 @@ class ServerPost {
     public $server_provisioned_disk_size;
     public $server_provisioned_add_ons;
     public $server_provisioning_provider;
-    
+
     // Deployed/Deploying properties
     public $server_deployed_id;
     public $server_deployed_name;
     public $server_deployed_status;
     public $server_deployed_remote_status;
     public $server_deployed_date;
+    public $server_deployed_server_id;  // Added missing property
     public $server_deployed_applications;
     public $server_deployed_staging_sites;
-    public $server_manager;  // Changed from server_deployment_manager
+    public $server_deployment_date;  // Added missing property
+    public $server_manager;
 
     public function __construct($post_id = null) {
         if (is_int($post_id) && $post_id > 0) {
@@ -77,6 +80,7 @@ class ServerPost {
         $this->server_plan_slug = get_post_meta($this->post_id, 'arsol_server_plan_slug', true);
         $this->server_region_slug = get_post_meta($this->post_id, 'arsol_server_region_slug', true);
         $this->server_image_slug = get_post_meta($this->post_id, 'arsol_server_image_slug', true);
+        $this->connect_server_manager = get_post_meta($this->post_id, 'arsol_connect_server_manager', true);  // Add missing load
         
         // Provisioned/Provisioning data
         $this->server_provisioned_id = get_post_meta($this->post_id, 'arsol_server_provisioned_id', true);
@@ -105,6 +109,8 @@ class ServerPost {
         $this->server_deployed_date = get_post_meta($this->post_id, 'arsol_server_deployed_date', true);
         $this->server_deployed_applications = get_post_meta($this->post_id, 'arsol_server_deployed_applications', true);
         $this->server_deployed_staging_sites = get_post_meta($this->post_id, 'arsol_server_deployed_staging_sites', true);
+        $this->server_deployed_server_id = get_post_meta($this->post_id, 'arsol_server_deployed_server_id', true);  // Add missing load
+        $this->server_deployment_date = get_post_meta($this->post_id, 'arsol_server_deployment_date', true);  // Add missing load
         $this->server_manager = get_post_meta($this->post_id, 'arsol_server_manager', true);  // Changed from arsol_server_deployment_manager
     }
     
@@ -177,6 +183,9 @@ class ServerPost {
             'arsol_server_region_slug' => get_post_meta($post_id, 'arsol_server_region_slug', true),
             'arsol_server_image_slug' => get_post_meta($post_id, 'arsol_server_image_slug', true),
             'arsol_server_connection_status' => get_post_meta($post_id, 'arsol_server_connection_status', true),
+            'arsol_connect_server_manager' => get_post_meta($post_id, 'arsol_connect_server_manager', true),  // Added missing field
+            'arsol_server_post_creation_date' => get_post_meta($post_id, 'arsol_server_post_creation_date', true),  // Added missing field
+            'arsol_server_post_name' => get_post_meta($post_id, 'arsol_server_post_name', true),  // Added missing field
             
             // Provisioned/Provisioning data
             'arsol_server_provisioned_id' => get_post_meta($post_id, 'arsol_server_provisioned_id', true),
@@ -206,6 +215,8 @@ class ServerPost {
             'arsol_server_deployed_applications' => get_post_meta($post_id, 'arsol_server_deployed_applications', true),
             'arsol_server_deployed_staging_sites' => get_post_meta($post_id, 'arsol_server_deployed_staging_sites', true),
             'arsol_server_manager' => get_post_meta($post_id, 'arsol_server_manager', true),  // Changed from arsol_server_deployment_manager
+            'arsol_server_deployed_server_id' => get_post_meta($post_id, 'arsol_server_deployed_server_id', true),  // Added missing field
+            'arsol_server_deployment_date' => get_post_meta($post_id, 'arsol_server_deployment_date', true),  // Added missing field
         );
         
         return array_filter($meta_data);
