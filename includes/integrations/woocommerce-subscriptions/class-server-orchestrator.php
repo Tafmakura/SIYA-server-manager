@@ -67,11 +67,9 @@ class ServerOrchestrator {
             $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id();
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
-
-            // Fetch the product meta to get the provider slug
-            $server_product = wc_get_product($this->server_product_id);
-            $this->server_provider_slug = $server_product
-                ? $server_product->get_meta('_arsol_server_provider_slug', true)
+            $this->server_product = wc_get_product($this->server_product_id); 
+            $this->server_provider_slug = $this->server_product
+                ? $this->server_product->get_meta('_arsol_server_provider_slug', true)
                 : null;
 
             if (!$this->server_product_id) {
@@ -131,7 +129,7 @@ class ServerOrchestrator {
             // Initialize required instances
             $server_post_instance = new ServerPost();
         
-            // Extract the arguments
+            // Extract the arguments from action scheduler
             $this->subscription_id = $args['subscription_id'];
             $this->subscription = wcs_get_subscription($this->subscription_id);
             $this->server_post_id = $args['server_post_id'];
@@ -203,7 +201,7 @@ class ServerOrchestrator {
             $server_data = null;
             if (!$is_provisioned) {
                 $server_data = $this->provision_server($server_post_instance, $this->subscription);
-                
+
                 error_log(sprintf('[SIYA Server Manager] Provisioned server data:%s%s', 
                     PHP_EOL,
                     json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
