@@ -144,7 +144,6 @@ class ServerOrchestrator {
                 throw new \Exception('Subscription not found: ' . $this->subscription_id);
             }
 
-            // Continue with the rest of your existing complete_server_provision logic
             // Load all parameters from the server post metadata
             $metadata = $server_post_instance->get_meta_data($this->server_post_id);
             
@@ -163,29 +162,31 @@ class ServerOrchestrator {
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
             
-            // Load provisioning related parameters
+            // Load provisioning related parameters if server has been provisioned
             $this->server_provisioned_status = $metadata['arsol_server_provisioned_status'] ?? null;
-            $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
-            $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
-            $this->server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
-            $this->server_provisioned_ipv6 = $metadata['arsol_server_provisioned_ipv6'] ?? null;
-            $this->server_provisioned_root_password = $metadata['arsol_server_provisioned_root_password'] ?? null;
-            $this->server_provisioned_date = $metadata['arsol_server_provisioned_date'] ?? null;
-            $this->server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
-            $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
-            
-            // Load deployment related parameters
+            if ($this->server_provisioned_status === 1) {
+                $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
+                $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
+                $this->server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
+                $this->server_provisioned_ipv6 = $metadata['arsol_server_provisioned_ipv6'] ?? null;
+                $this->server_provisioned_root_password = $metadata['arsol_server_provisioned_root_password'] ?? null;
+                $this->server_provisioned_date = $metadata['arsol_server_provisioned_date'] ?? null;
+                $this->server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
+                $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
+            }
+            // Load deployment related parameters if server has been deployed
             $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
-            $this->server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
-            $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
-            $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
+            if ($this->server_deployed_status === 1) {
+                $this->server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
+                $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
+                $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
+            }
             
             error_log(sprintf('[SIYA Server Manager] Loaded parameters for server post %d: %s', 
                 $this->server_post_id,
                 print_r($metadata, true)
             ));
 
-            // Continue with existing provisioning logic
             // Check server status flags
             $is_provisioned = $this->server_provisioned_status;
             $is_deployed = $this->server_deployed_status;
@@ -200,7 +201,7 @@ class ServerOrchestrator {
             // Step 2: Provision server if not already provisioned
             $server_data = null;
             if (!$is_provisioned) {
-                $server_data = $this->provision_server($server_post_instance, $subscription);
+                $server_data = $this->provision_server($server_post_instance, $this->subscription);
             } else {
                 error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
                 $server_data = [
@@ -213,6 +214,14 @@ class ServerOrchestrator {
             }
                 
             $this->subscription->update_status('on-hold');
+
+
+
+
+
+
+
+
 
 
             // Runcloud deployment switch
@@ -231,6 +240,18 @@ class ServerOrchestrator {
             } else {
                 error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
             }
+       
+
+
+
+
+
+
+
+
+
+
+       
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager] Error in server completion: %s', $e->getMessage()));
             
