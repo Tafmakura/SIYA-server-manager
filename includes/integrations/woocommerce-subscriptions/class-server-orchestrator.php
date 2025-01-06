@@ -104,17 +104,27 @@ class ServerOrchestrator {
                 time(), // Run immediately, but in the background
                 'arsol_complete_server_provision',
                 array(
-                    array(
-                        'subscription_id' => $this->subscription_id,
-                        'server_post_id' => $this->server_post_id,
-                        'server_product_id' => $this->server_product_id,
-                        'server_provider_slug' => $this->server_provider_slug
-                    )
+                    'subscription_id' => $this->subscription_id,
+                    'server_post_id' => $this->server_post_id,
+                    'server_product_id' => $this->server_product_id,
+                    'server_provider_slug' => $this->server_provider_slug
                 ),
                 'arsol_server_provision'
             );
 
+            error_log(sprintf('[SIYA Server Manager] Background job scheduled with args: %s', 
+                print_r([
+                    'subscription_id' => $this->subscription_id,
+                    'server_post_id' => $this->server_post_id, 
+                    'server_product_id' => $this->server_product_id,
+                    'server_provider_slug' => $this->server_provider_slug
+                ], true)
+            ));
+
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
+
+
+
 
         } catch (\Exception $e) {
             error_log(sprintf(
@@ -135,16 +145,12 @@ class ServerOrchestrator {
     }
 
     public function complete_server_provision($args) {
-
-
-        $args = $args[0];
-
         if (!is_array($args)) {
             $args = ['subscription_id' => (int) $args];
         }
         try {
 
-            error_log(sprintf('[SIYA Server Manager] Starting complete_server_provision with args: %s', 
+            error_log(sprintf('[SIYA Server Manager] Starting complete_server_provision with these passed args: %s', 
                 print_r($args, true)
             ));
 
