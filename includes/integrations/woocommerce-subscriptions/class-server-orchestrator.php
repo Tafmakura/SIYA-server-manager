@@ -2,7 +2,7 @@
 
 namespace Siya\Integrations\WoocommerceSubscriptions;
 
-use SIYA\CustomPostTypes\ServerPost;
+use Siya\CustomPostTypes\ServerPost;
 use Siya\Integrations\ServerManagers\Runcloud\Runcloud;
 
 use Siya\Integrations\ServerProviders\DigitalOcean;
@@ -55,6 +55,7 @@ class ServerOrchestrator {
 
     public function __construct() {
         // Change the action hook to use Action Scheduler
+        // Hook into WooCommerce subscription status change from pending to active to start server provisioning
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
         
         // Add new action hook for the background process
@@ -202,6 +203,7 @@ class ServerOrchestrator {
             $server_data = null;
             if (!$is_provisioned) {
                 $server_data = $this->provision_server($server_post_instance, $this->subscription);
+                error_log('[SIYA Server Manager] Provisioned server data: ' . print_r($server_data, true));
             } else {
                 error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
                 $server_data = [
@@ -214,6 +216,11 @@ class ServerOrchestrator {
             }
                 
             $this->subscription->update_status('on-hold');
+
+
+
+
+
 
 
 
@@ -615,20 +622,26 @@ class ServerOrchestrator {
 
     // Here 
 
+    /**
+     * Waits for the server to reach a specific status within a timeout period.
+     *
+     * @param string $target_status      The desired server status.
+     * @param int    $timeout_seconds    Maximum time to wait (in seconds).
+     * @param int    $check_interval     Time between status checks (in seconds).
+     * @return bool                      True if target status is reached, false otherwise.
+     */
     private function wait_for_server_status($target_status, $timeout_seconds = 300, $check_interval = 10) {
         error_log(sprintf('[SIYA Server Manager] Waiting for server to reach "%s" status (timeout: %d seconds, interval: %d seconds)', 
             $target_status, $timeout_seconds, $check_interval));
 
-        // Initialize provider with current server provider slug
         $server_provider = $this->initialize_server_provider($this->server_provider_slug);
-        
         $start_time = time();
         $attempts = 0;
 
         while (time() - $start_time < $timeout_seconds) {
             $attempts++;
             $status = $server_provider->get_server_status();
-            
+
             if ($status === false) {
                 error_log(sprintf('[SIYA Server Manager] Failed to get server status (attempt %d)', $attempts));
                 return false;
@@ -636,7 +649,7 @@ class ServerOrchestrator {
 
             $current_status = $status['provisioned_remote_status'];
             error_log(sprintf('[SIYA Server Manager] Current server status (attempt %d): %s (raw: %s)', 
-                $attempts,
+                $attempts, 
                 $current_status, 
                 $status['provisioned_remote_raw_status']
             ));
@@ -644,7 +657,7 @@ class ServerOrchestrator {
             if ($current_status === $target_status) {
                 error_log(sprintf('[SIYA Server Manager] Server reached target status "%s" after %d seconds (%d attempts)', 
                     $target_status, 
-                    time() - $start_time,
+                    time() - $start_time, 
                     $attempts
                 ));
                 return true;
@@ -655,18 +668,16 @@ class ServerOrchestrator {
                 return false;
             }
 
-            if (time() - $start_time < $timeout_seconds) {
-                error_log(sprintf('[SIYA Server Manager] Waiting %d seconds before next check (attempt %d)', 
-                    $check_interval, 
-                    $attempts + 1
-                ));
-                sleep($check_interval);
-            }
+            error_log(sprintf('[SIYA Server Manager] Waiting %d seconds before next check (attempt %d)', 
+                $check_interval, 
+                $attempts + 1
+            ));
+            sleep($check_interval);
         }
 
         error_log(sprintf('[SIYA Server Manager] Timeout reached (%d seconds, %d attempts) waiting for status "%s"', 
-            $timeout_seconds,
-            $attempts,
+            $timeout_seconds, 
+            $attempts, 
             $target_status
         ));
         return false;
