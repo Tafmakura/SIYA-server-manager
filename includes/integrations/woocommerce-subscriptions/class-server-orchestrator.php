@@ -117,11 +117,12 @@ class ServerOrchestrator {
             $group = 'arsol_server_provision';
 
             // Log the arguments for debugging
-            error_log('Scheduling server provisioning with args: ' . json_encode($args, JSON_PRETTY_PRINT));
-            error_log('Full args array (deeply nested): ' . var_export($args, true));
+            // error_log('Scheduling server provisioning with args: ' . json_encode($args, JSON_PRETTY_PRINT));
+            // error_log('Full args array (deeply nested): ' . var_export($args, true));
             
             // Schedule the action with predefined parameters
-            as_enqueue_async_action(
+            'arsol_complete_server_provision'(
+                time(),
                 $hook, 
                 [
                     'subscription_id' => $this->subscription_id,
