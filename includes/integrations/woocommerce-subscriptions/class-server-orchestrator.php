@@ -241,7 +241,6 @@ class ServerOrchestrator {
             'arsol_server_provisioned_ipv6' => $server_data['provisioned_ipv6'],
             'arsol_server_provisioning_provider' => $this->server_provider_slug,
             'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
-            'arsol_server_deployment_manager' => 'runcloud',
             'arsol_server_provisioned_date' => $server_data['provisioned_date'],
             'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status'],
             'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status']
@@ -329,7 +328,8 @@ class ServerOrchestrator {
             'arsol_server_deployed_server_id' => $response_body_decoded['id'] ?? null,
             'arsol_server_deployment_date' => current_time('mysql'),
             'arsol_server_deployed_status' => 1,
-            'arsol_server_connection_status' => 0
+            'arsol_server_connection_status' => 0,
+            'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
         ];
         
         $server_post_instance->update_meta_data($this->server_post_id, $metadata);

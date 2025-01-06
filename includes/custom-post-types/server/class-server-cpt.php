@@ -50,7 +50,7 @@ class ServerPost {
     public $server_deployed_date;
     public $server_deployed_applications;
     public $server_deployed_staging_sites;
-    public $server_deployment_manager;
+    public $server_manager;  // Changed from server_deployment_manager
 
     public function __construct($post_id = null) {
         if (is_int($post_id) && $post_id > 0) {
@@ -105,7 +105,7 @@ class ServerPost {
         $this->server_deployed_date = get_post_meta($this->post_id, 'arsol_server_deployed_date', true);
         $this->server_deployed_applications = get_post_meta($this->post_id, 'arsol_server_deployed_applications', true);
         $this->server_deployed_staging_sites = get_post_meta($this->post_id, 'arsol_server_deployed_staging_sites', true);
-        $this->server_deployment_manager = get_post_meta($this->post_id, 'arsol_server_deployment_manager', true);
+        $this->server_manager = get_post_meta($this->post_id, 'arsol_server_manager', true);  // Changed from arsol_server_deployment_manager
     }
     
     public function create_server_post($subscription_id) {
@@ -205,7 +205,7 @@ class ServerPost {
             'arsol_server_deployed_date' => get_post_meta($post_id, 'arsol_server_deployed_date', true),
             'arsol_server_deployed_applications' => get_post_meta($post_id, 'arsol_server_deployed_applications', true),
             'arsol_server_deployed_staging_sites' => get_post_meta($post_id, 'arsol_server_deployed_staging_sites', true),
-            'arsol_server_deployment_manager' => get_post_meta($post_id, 'arsol_server_deployment_manager', true),
+            'arsol_server_manager' => get_post_meta($post_id, 'arsol_server_manager', true),  // Changed from arsol_server_deployment_manager
         );
         
         return array_filter($meta_data);
