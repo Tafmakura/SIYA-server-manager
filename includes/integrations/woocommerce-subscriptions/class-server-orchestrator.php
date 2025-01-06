@@ -133,7 +133,7 @@ class ServerOrchestrator {
             // Extract the arguments
             $this->subscription_id = $args['subscription_id'];
             $this->subscription = wcs_get_subscription($this->subscription);
-            $this->erver_post_id = $args['server_post_id'];
+            $this->server_post_id = $args['server_post_id'];
             $this->server_product_id = $args['server_product_id'];
             $this->server_provider_slug = $args['server_provider_slug'];
             
