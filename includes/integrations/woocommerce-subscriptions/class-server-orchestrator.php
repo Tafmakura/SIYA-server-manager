@@ -92,7 +92,8 @@ class ServerOrchestrator {
                 array(
                     'subscription_id' => $this->subscription_id,
                     'server_post_id' => $this->server_post_id,
-                    'server_product_id' => $this->server_product_id
+                    'server_product_id' => $this->server_product_id,
+                    'server_provider_slug' => $this->server_provider_slug
                 ),
                 'arsol_server_provision'
             );
@@ -119,11 +120,19 @@ class ServerOrchestrator {
 
     public function complete_server_provision($args) {
         try {
+
+            error_log(sprintf('[SIYA Server Manager] Starting complete_server_provision with args: %s', 
+                print_r($args, true)
+            ));
+
             // Initialize required instances
             $server_post_instance = new ServerPost();
             
-            // Initialize the appropriate server provider based on metadata
-            $this->initialize_server_provider();
+            // Get the server provider slug from args
+            $this->server_provider_slug = $args['server_provider_slug'];
+            
+            // Initialize the appropriate server provider with the slug
+            $this->initialize_server_provider($this->server_provider_slug);
             
             // Retrieve the subscription and server post data
             $subscription = wcs_get_subscription($args['subscription_id']);
