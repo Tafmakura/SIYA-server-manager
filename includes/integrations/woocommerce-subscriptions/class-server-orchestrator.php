@@ -120,19 +120,17 @@ class ServerOrchestrator {
             
             // Schedule the action with predefined parameters
 
-            $timestamp = time();
-            $hook = 'arsol_complete_server_provision';
-            $group = 'arsol_server_provision';
             as_schedule_single_action(
-                time(),
-                $hook, 
+                time(), // Run immediately, but in the background
+                'arsol_complete_server_provision',
                 [[
-                    $this->subscription_id,
-                    $this->server_post_id,
-                    $this->server_product_id,
-                    $this->server_provider_slug
-                ]], 
-                $group);
+                    'subscription_id' => $this->subscription_id,
+                    'server_post_id' => $this->server_post_id,
+                    'server_product_id' => $this->server_product_id,
+                    'server_provider_slug' => $this->server_provider_slug
+                ]],
+                'arsol_server_provision'
+            );
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
         } catch (\Exception $e) {
