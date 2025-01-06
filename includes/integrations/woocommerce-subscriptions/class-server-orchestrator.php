@@ -116,6 +116,8 @@ class ServerOrchestrator {
             // Log the arguments for debugging
             error_log('Scheduling server provisioning with args: ' . json_encode($args, JSON_PRETTY_PRINT));
 
+            error_log('Full args array (deeply nested): ' . var_export($args, true));
+
             // Step 2: Schedule server provisioning as a background process
             as_schedule_single_action(
                 time(), // Run immediately, but in the background
