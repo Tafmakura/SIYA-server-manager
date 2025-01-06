@@ -128,6 +128,9 @@ class ServerOrchestrator {
         }
     }
 
+
+    
+
     // Step 1: Create server post and update server metadata
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
         $post_id = $server_post_instance->create_server_post($this->subscription_id);
