@@ -126,12 +126,12 @@ class ServerOrchestrator {
             as_schedule_single_action(
                 time(),
                 $hook, 
-                [
+                [[
                     $this->subscription_id,
                     $this->server_post_id,
                     $this->server_product_id,
                     $this->server_provider_slug
-                ], 
+                ]], 
                 $group);
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
@@ -153,14 +153,19 @@ class ServerOrchestrator {
         }
     }
 
-    public function complete_server_provision(/*$subscription_id, $server_post_id, $server_product_id, $server_provider_slug*/) {
+    public function complete_server_provision($args) {
         try {
 
-             // Log the received parameters
-            error_log("subscription_id: {$subscription_id}");
-            error_log("server_post_id: {$server_post_id}");
-            error_log("server_product_id: {$server_product_id}");
-            error_log("server_provider_slug: {$server_provider_slug}");
+             // Log the received parameter
+
+            // Log the received parameters
+            error_log("subscription_id: " . $args['subscription_id']);
+            error_log("server_post_id: " . $args['server_post_id']);
+            error_log("server_product_id: " . $args['server_product_id']);
+            error_log("server_provider_slug: " . $args['server_provider_slug']);
+
+            // Your provisioning logic here
+        
 
 
             error_log('[SIYA Server Manager] Starting complete_server_provision with these args'. $subscription_id. $server_post_id, $server_product_id, $server_provider_slug );
