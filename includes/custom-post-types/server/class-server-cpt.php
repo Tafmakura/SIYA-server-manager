@@ -28,6 +28,7 @@ class ServerPost {
     public $server_provisioned_name;
     public $server_provisioned_status;
     public $server_provisioned_remote_status; 
+    public $server_provisioned_remote_raw_status;  // Add new property
     public $server_provisioned_date;
     public $server_provisioned_os;
     public $server_provisioned_os_version;
@@ -81,6 +82,7 @@ class ServerPost {
         $this->server_provisioned_id = get_post_meta($this->post_id, 'arsol_server_provisioned_id', true);
         $this->server_provisioned_name = get_post_meta($this->post_id, 'arsol_server_provisioned_name', true);
         $this->server_provisioned_remote_status = get_post_meta($this->post_id, 'arsol_server_provisioned_remote_status', true);
+        $this->server_provisioned_remote_raw_status = get_post_meta($this->post_id, 'arsol_server_provisioned_remote_raw_status', true);
         $this->server_provisioned_status = get_post_meta($this->post_id, 'arsol_server_provisioned_status', true);
         $this->server_provisioned_date = get_post_meta($this->post_id, 'arsol_server_provisioned_date', true);
         $this->server_provisioned_os = get_post_meta($this->post_id, 'arsol_server_provisioned_os', true);
@@ -180,6 +182,7 @@ class ServerPost {
             'arsol_server_provisioned_id' => get_post_meta($post_id, 'arsol_server_provisioned_id', true),
             'arsol_server_provisioned_name' => get_post_meta($post_id, 'arsol_server_provisioned_name', true),
             'arsol_server_provisioned_remote_status' => get_post_meta($post_id, 'arsol_server_provisioned_remote_status', true),
+            'arsol_server_provisioned_remote_raw_status' => get_post_meta($post_id, 'arsol_server_provisioned_remote_raw_status', true),
             'arsol_server_provisioned_status' => get_post_meta($post_id, 'arsol_server_provisioned_status', true),
             'arsol_server_provisioned_date' => get_post_meta($post_id, 'arsol_server_provisioned_date', true),
             'arsol_server_provisioned_os' => get_post_meta($post_id, 'arsol_server_provisioned_os', true),

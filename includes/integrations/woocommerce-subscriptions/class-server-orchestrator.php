@@ -241,10 +241,16 @@ class ServerOrchestrator {
             'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
             'arsol_server_deployment_manager' => 'runcloud',
             'arsol_server_provisioned_date' => $server_data['provisioned_date'],
-            'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status']
+            'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status'],
+            'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status']
         ];
 
-        error_log('[SIYA Server Manager] Provisioned remote status: ' . $server_data['provisioned_remote_status']);
+        error_log(sprintf('[SIYA Server Manager] Provider Status Details:%sRemote Status: %s%sRaw Status: %s', 
+            PHP_EOL,
+            $server_data['provisioned_remote_status'],
+            PHP_EOL,
+            $server_data['provisioned_remote_raw_status']
+        ));
 
         $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
