@@ -125,10 +125,10 @@ class ServerOrchestrator {
                 time(),
                 $hook, 
                 [
-                    'subscription_id' => $this->subscription_id,
-                    'server_post_id' => $this->server_post_id,
-                    'server_product_id' => $this->server_product_id,
-                    'server_provider_slug' => $this->server_provider_slug
+                    $this->subscription_id,
+                    $this->server_post_id,
+                    $this->server_product_id,
+                    $this->server_provider_slug
                 ], 
                 $group);
 
