@@ -189,11 +189,14 @@ class ServerOrchestrator {
             // Check server status flags
             $is_provisioned = $this->server_provisioned_status;
             $is_deployed = $this->server_deployed_status;
+            $requires_server_manager = $this->connect_server_manager;
 
-            error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s', 
+
+            error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s Requires Server Manager: %s', 
                 $this->subscription_id,
                 $is_provisioned ? 'true' : 'false',
-                $is_deployed ? 'true' : 'false'
+                $is_deployed ? 'true' : 'false',
+                $requires_server_manager ? 'true' : 'false',
             ));
 
             
