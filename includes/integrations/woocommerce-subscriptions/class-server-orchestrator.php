@@ -157,16 +157,13 @@ class ServerOrchestrator {
              // Log the received parameter
 
             // Log the received parameters
-            error_log("subscription_id: " . $args['subscription_id']);
-            error_log("server_post_id: " . $args['server_post_id']);
-            error_log("server_product_id: " . $args['server_product_id']);
-            error_log("server_provider_slug: " . $args['server_provider_slug']);
+            error_log("subscription_id: >>" . $args['subscription_id']);
+            error_log("server_post_id: >>" . $args['server_post_id']);
+            error_log("server_product_id: >>" . $args['server_product_id']);
+            error_log("server_provider_slug: >>" . $args['server_provider_slug']);
 
             // Your provisioning logic here
-        
-
-
-            error_log('[SIYA Server Manager] Starting complete_server_provision with these args'. $subscription_id. $server_post_id, $server_product_id, $server_provider_slug );
+    
 
             // Initialize required instances
             $server_post_instance = new ServerPost();
