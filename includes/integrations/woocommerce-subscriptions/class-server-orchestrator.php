@@ -155,9 +155,7 @@ class ServerOrchestrator {
         }
         try {
 
-            error_log(sprintf('[SIYA Server Manager] Starting complete_server_provision with these passed args: %s', 
-                print_r($args, true)
-            ));
+            error_log('[SIYA Server Manager] Starting complete_server_provision with these args'. json_encode($args, JSON_PRETTY_PRINT));
 
             // Initialize required instances
             $server_post_instance = new ServerPost();
