@@ -53,10 +53,10 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         $api_response = json_decode($response_body, true);
-        error_log('[SIYA Server Manager] DigitalOcean: Raw API Response: ' . print_r($api_response, true));
+        error_log('[SIYA Server Manager] DigitalOcean: Raw API Response: ' . json_encode($api_response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         
         $server_data = $this->compile_server_return_data($api_response);
-        error_log('[SIYA Server Manager] DigitalOcean: Compiled server data: ' . print_r($server_data, true));
+        error_log('[SIYA Server Manager] DigitalOcean: Compiled server data: ' . json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $server_data;
     }
@@ -70,6 +70,10 @@ class DigitalOcean /*implements ServerProvider*/ {
         ];
         $mapped_status = $status_map[$raw_status] ?? $raw_status;
         error_log(sprintf('[SIYA Server Manager] DigitalOcean: Mapping status from "%s" to "%s"', $raw_status, $mapped_status));
+        error_log(sprintf('[SIYA Server Manager] DigitalOcean: Full status mapping details:%sFrom: %s%sTo: %s', 
+            PHP_EOL, var_export($raw_status, true), 
+            PHP_EOL, var_export($mapped_status, true)
+        ));
         return $mapped_status;
     }
 

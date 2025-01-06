@@ -53,11 +53,11 @@ class Vultr /*implements ServerProvider*/ {
         }
 
         $api_response = json_decode($response_body, true);
-        error_log('[SIYA Server Manager] Vultr: Raw API Response: ' . print_r($api_response, true));
+        error_log('[SIYA Server Manager] Vultr: Raw API Response: ' . json_encode($api_response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         
         // Compile server return data
         $server_data = $this->compile_server_return_data($api_response);
-        error_log('[SIYA Server Manager] Vultr: Compiled server data: ' . print_r($server_data, true));
+        error_log('[SIYA Server Manager] Vultr: Compiled server data: ' . json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         // Return the compiled data
         return $server_data;
@@ -72,7 +72,10 @@ class Vultr /*implements ServerProvider*/ {
             'rebooting' => 'rebooting'
         ];
         $mapped_status = $status_map[$raw_status] ?? $raw_status;
-        error_log(sprintf('[SIYA Server Manager] Vultr: Mapping status from "%s" to "%s"', $raw_status, $mapped_status));
+        error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sFrom: %s%sTo: %s', 
+            PHP_EOL, var_export($raw_status, true), 
+            PHP_EOL, var_export($mapped_status, true)
+        ));
         return $mapped_status;
     }
 
