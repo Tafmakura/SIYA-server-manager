@@ -620,14 +620,14 @@ class ServerOrchestrator {
             $target_status, $timeout_seconds, $check_interval));
 
         // Initialize provider with current server provider slug
-        $this->initialize_server_provider($this->server_provider_slug);
+        $server_provider = $this->initialize_server_provider($this->server_provider_slug);
         
         $start_time = time();
         $attempts = 0;
 
         while (time() - $start_time < $timeout_seconds) {
             $attempts++;
-            $status = $provider->get_server_status();
+            $status = $server_provider->get_server_status();
             
             if ($status === false) {
                 error_log(sprintf('[SIYA Server Manager] Failed to get server status (attempt %d)', $attempts));
