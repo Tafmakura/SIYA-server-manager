@@ -121,7 +121,7 @@ class ServerOrchestrator {
             // error_log('Full args array (deeply nested): ' . var_export($args, true));
             
             // Schedule the action with predefined parameters
-            'arsol_complete_server_provision'(
+            as_schedule_single_action(
                 time(),
                 $hook, 
                 [
