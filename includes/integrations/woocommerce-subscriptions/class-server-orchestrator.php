@@ -58,7 +58,7 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
         
         // Add new action hook for the background process
-        add_action('arsol_complete_server_provision', array($this, 'complete_server_provision'), 20, array('args'));
+        add_action('arsol_complete_server_provision', array($this, 'complete_server_provision'), 20, 1);
     }
 
     public function start_server_provision($subscription) {
@@ -106,25 +106,28 @@ class ServerOrchestrator {
 
 
             // Step 2: Prepare arguments for server provisioning
+           
+
+        
+
+            // Step 2: Schedule server provisioning as a background process
+            // Predefined parameters for server provisioning
+            $timestamp = time();
+            $hook = 'arsol_complete_server_provision';
             $args = array(
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
                 'server_provider_slug' => $this->server_provider_slug
             );
+            $group = 'arsol_server_provision';
 
             // Log the arguments for debugging
             error_log('Scheduling server provisioning with args: ' . json_encode($args, JSON_PRETTY_PRINT));
-
             error_log('Full args array (deeply nested): ' . var_export($args, true));
-
-            // Step 2: Schedule server provisioning as a background process
-            as_schedule_single_action(
-                time(), // Run immediately, but in the background
-                'arsol_complete_server_provision',
-                $args,
-                'arsol_server_provision'
-            );
+            
+            // Schedule the action with predefined parameters
+            as_enqueue_async_action($hook, $args, $group);
 
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
