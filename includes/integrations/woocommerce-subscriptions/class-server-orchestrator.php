@@ -94,7 +94,7 @@ class ServerOrchestrator {
 
         // Runcloud deployment switch
         if ($server_data) {
-            $server_ready = $this->wait_for_server_status('active', 300); // 5 minutes timeout
+            $server_ready = $this->wait_for_server_status('active', 60); // 5 minutes timeout
             if (!$server_ready) {
                 throw new \Exception('Server failed to become active within the timeout period');
             }
