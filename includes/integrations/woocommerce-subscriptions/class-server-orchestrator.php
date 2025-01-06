@@ -124,7 +124,7 @@ class ServerOrchestrator {
 
     public function complete_server_provision($args) {
         try {
-            error_log(sprintf('[SIYA Server Manager] Starting server completion with args: %s', print_r($args, true)));
+            error_log(sprintf('[SIYA Server Manager] Starting server completion'));
 
             // Initialize required instances
             $server_post_instance = new ServerPost();
@@ -183,7 +183,7 @@ class ServerOrchestrator {
             
             error_log(sprintf('[SIYA Server Manager] Loaded parameters for server post %d: %s', 
                 $this->server_post_id,
-                print_r($metadata, true)
+                json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
             ));
 
             // Check server status flags
