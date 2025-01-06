@@ -135,9 +135,6 @@ class ServerOrchestrator {
                 $group);
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
-
-
-
         } catch (\Exception $e) {
             error_log(sprintf(
                 '[SIYA Server Manager] Error in subscription %d:%s%s',
@@ -156,9 +153,8 @@ class ServerOrchestrator {
         }
     }
 
-    public function complete_server_provision($subscription_id, $server_post_id, $server_product_id, $server_provider_slug) {
+    public function complete_server_provision(/*$subscription_id, $server_post_id, $server_product_id, $server_provider_slug*/) {
         try {
-
 
              // Log the received parameters
             error_log("subscription_id: {$subscription_id}");
