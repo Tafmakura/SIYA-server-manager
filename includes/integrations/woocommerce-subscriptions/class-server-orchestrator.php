@@ -112,15 +112,17 @@ class ServerOrchestrator {
 
             // Step 2: Schedule server provisioning as a background process
             // Predefined parameters for server provisioning
-            $timestamp = time();
-            $hook = 'arsol_complete_server_provision';
-            $group = 'arsol_server_provision';
+           
 
             // Log the arguments for debugging
             // error_log('Scheduling server provisioning with args: ' . json_encode($args, JSON_PRETTY_PRINT));
             // error_log('Full args array (deeply nested): ' . var_export($args, true));
             
             // Schedule the action with predefined parameters
+
+            $timestamp = time();
+            $hook = 'arsol_complete_server_provision';
+            $group = 'arsol_server_provision';
             as_schedule_single_action(
                 time(),
                 $hook, 
@@ -131,7 +133,6 @@ class ServerOrchestrator {
                     $this->server_provider_slug
                 ], 
                 $group);
-
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
 
