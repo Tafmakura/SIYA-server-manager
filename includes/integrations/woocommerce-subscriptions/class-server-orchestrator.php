@@ -104,10 +104,12 @@ class ServerOrchestrator {
                 time(), // Run immediately, but in the background
                 'arsol_complete_server_provision',
                 array(
-                    'subscription_id' => $this->subscription_id,
-                    'server_post_id' => $this->server_post_id,
-                    'server_product_id' => $this->server_product_id,
-                    'server_provider_slug' => $this->server_provider_slug
+                    array(
+                        'subscription_id' => $this->subscription_id,
+                        'server_post_id' => $this->server_post_id,
+                        'server_product_id' => $this->server_product_id,
+                        'server_provider_slug' => $this->server_provider_slug
+                    )
                 ),
                 'arsol_server_provision'
             );
@@ -133,6 +135,13 @@ class ServerOrchestrator {
     }
 
     public function complete_server_provision($args) {
+
+
+        $args = $args[0];
+
+        if (!is_array($args)) {
+            $args = ['subscription_id' => (int) $args];
+        }
         try {
 
             error_log(sprintf('[SIYA Server Manager] Starting complete_server_provision with args: %s', 
