@@ -92,15 +92,13 @@ class ServerOrchestrator {
             ];
         }
 
-
-
-
-
         // Runcloud deployment switch
-
-
-
-
+        if ($server_data) {
+            $server_ready = $this->wait_for_server_status('active', 300); // 5 minutes timeout
+            if (!$server_ready) {
+                throw new \Exception('Server failed to become active within the timeout period');
+            }
+        }
 
         // Step 3: Deploy to RunCloud if not already deployed
         if (!$is_deployed) {
@@ -489,6 +487,65 @@ class ServerOrchestrator {
 
         }
 
+    }
+
+    private function wait_for_server_status($target_status, $timeout_seconds = 300) {
+        error_log(sprintf('[SIYA Server Manager] Waiting for server to reach "%s" status (timeout: %d seconds)', 
+            $target_status, $timeout_seconds));
+
+        $provider = null;
+        switch ($this->server_provider_slug) {
+            case 'digitalocean':
+                $provider = $this->digitalocean;
+                break;
+            case 'hetzner':
+                $provider = $this->hetzner;
+                break;
+            case 'vultr':
+                $provider = $this->vultr;
+                break;
+            default:
+                throw new \Exception('Unknown server provider: ' . $this->server_provider_slug);
+        }
+
+        $start_time = time();
+        $check_interval = 10; // Check every 10 seconds
+
+        while (time() - $start_time < $timeout_seconds) {
+            $status = $provider->get_server_status();
+            
+            if ($status === false) {
+                error_log('[SIYA Server Manager] Failed to get server status');
+                return false;
+            }
+
+            $current_status = $status['provisioned_remote_status'];
+            error_log(sprintf('[SIYA Server Manager] Current server status: %s (raw: %s)', 
+                $current_status, 
+                $status['provisioned_remote_raw_status']
+            ));
+
+            if ($current_status === $target_status) {
+                error_log(sprintf('[SIYA Server Manager] Server reached target status "%s" after %d seconds', 
+                    $target_status, 
+                    time() - $start_time
+                ));
+                return true;
+            }
+
+            if ($current_status === 'error') {
+                error_log('[SIYA Server Manager] Server entered error state');
+                return false;
+            }
+
+            sleep($check_interval);
+        }
+
+        error_log(sprintf('[SIYA Server Manager] Timeout reached (%d seconds) waiting for status "%s"', 
+            $timeout_seconds, 
+            $target_status
+        ));
+        return false;
     }
 
 }

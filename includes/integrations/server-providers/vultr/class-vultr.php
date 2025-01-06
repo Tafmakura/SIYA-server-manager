@@ -286,4 +286,32 @@ class Vultr /*implements ServerProvider*/ {
         $response_code = wp_remote_retrieve_response_code($response);
         return $response_code === 204;
     }
+
+    public function get_server_status() {
+        $server_id = get_option('server_id');
+        $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_id, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key
+            ]
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('Vultr status error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        if ($response_code !== 200) {
+            return false;
+        }
+
+        $api_response = json_decode(wp_remote_retrieve_body($response), true);
+        $raw_status = $api_response['instance']['status'] ?? '';
+        $power_status = $api_response['instance']['power_status'] ?? '';
+
+        return [
+            'provisioned_remote_status' => $this->map_statuses($raw_status),
+            'provisioned_remote_raw_status' => "$raw_status ($power_status)"
+        ];
+    }
 }
