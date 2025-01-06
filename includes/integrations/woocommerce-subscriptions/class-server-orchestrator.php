@@ -150,9 +150,6 @@ class ServerOrchestrator {
     }
 
     public function complete_server_provision($args) {
-        if (!is_array($args)) {
-            $args = ['subscription_id' => (int) $args];
-        }
         try {
 
             error_log('[SIYA Server Manager] Starting complete_server_provision with these args'. json_encode($args, JSON_PRETTY_PRINT));
