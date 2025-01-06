@@ -114,12 +114,6 @@ class ServerOrchestrator {
             // Predefined parameters for server provisioning
             $timestamp = time();
             $hook = 'arsol_complete_server_provision';
-            $args = array(
-                'subscription_id' => $this->subscription_id,
-                'server_post_id' => $this->server_post_id,
-                'server_product_id' => $this->server_product_id,
-                'server_provider_slug' => $this->server_provider_slug
-            );
             $group = 'arsol_server_provision';
 
             // Log the arguments for debugging
@@ -127,7 +121,15 @@ class ServerOrchestrator {
             error_log('Full args array (deeply nested): ' . var_export($args, true));
             
             // Schedule the action with predefined parameters
-            as_enqueue_async_action($hook, $args, $group);
+            as_enqueue_async_action(
+                $hook, 
+                [
+                    'subscription_id' => $this->subscription_id,
+                    'server_post_id' => $this->server_post_id,
+                    'server_product_id' => $this->server_product_id,
+                    'server_provider_slug' => $this->server_provider_slug
+                ], 
+                $group);
 
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
@@ -152,10 +154,10 @@ class ServerOrchestrator {
         }
     }
 
-    public function complete_server_provision($args) {
+    public function complete_server_provision($subscription_id, $server_post_id, $server_product_id, $server_provider_slug) {
         try {
 
-            error_log('[SIYA Server Manager] Starting complete_server_provision with these args'. json_encode($args, JSON_PRETTY_PRINT));
+            error_log('[SIYA Server Manager] Starting complete_server_provision with these args'. $subscription_id. $server_post_id, $server_product_id, $server_provider_slug );
 
             // Initialize required instances
             $server_post_instance = new ServerPost();
@@ -167,13 +169,13 @@ class ServerOrchestrator {
             $this->initialize_server_provider($this->server_provider_slug);
             
             // Retrieve the subscription and server post data
-            $subscription = wcs_get_subscription($args['subscription_id']);
-            $this->subscription_id = $args['subscription_id'];
-            $this->server_post_id = $args['server_post_id'];
-            $this->server_product_id = $args['server_product_id'];
+            $subscription = wcs_get_subscription($subscription_id);
+            $this->subscription_id = $subscription_id;
+            $this->server_post_id = $server_post_id;
+            $this->server_product_id = $server_product_id;
 
             if (!$subscription) {
-                throw new \Exception('Subscription not found: ' . $args['subscription_id']);
+                throw new \Exception('Subscription not found: ' . $this->subscription_id);
             }
 
             // Continue with the rest of your existing complete_server_provision logic
