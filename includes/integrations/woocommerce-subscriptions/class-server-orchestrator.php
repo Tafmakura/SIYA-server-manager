@@ -58,7 +58,7 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
         
         // Add new action hook for the background process
-        add_action('arsol_complete_server_provision', array($this, 'complete_server_provision'), 20, 1);
+        add_action('arsol_complete_server_provision', array($this, 'complete_server_provision'), 20, array('args'));
     }
 
     public function start_server_provision($subscription) {
