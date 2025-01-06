@@ -66,6 +66,7 @@ class ServerOrchestrator {
             $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id();
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+            $this->server_provider_slug = $metadata['arsol_server_provider_slug'] ?? null;
 
             if (!$this->server_product_id) {
                 error_log('[SIYA Server Manager] No server product found in subscription, moving on');
