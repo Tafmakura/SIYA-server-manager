@@ -87,9 +87,17 @@ class ServerOrchestrator {
                 error_log('[SIYA Server Manager] creating new server post');
                 $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
             } else {
-                error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
+                error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
                 $this->server_post_id = $existing_server_post->post_id;
             }
+
+            // Debug statement
+            error_log(sprintf('[SIYA Server Manager] Created server post ID>>>>>>>>>>>>>>>>> %d for subscription %d, product ID %d, provider %s',
+                $this->server_post_id,
+                $this->subscription_id, 
+                $this->server_product_id,
+                $this->server_provider_slug
+            ));
 
             // Step 2: Schedule server provisioning  as a background process
             as_schedule_single_action(
