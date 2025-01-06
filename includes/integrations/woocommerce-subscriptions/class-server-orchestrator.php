@@ -29,89 +29,62 @@ class ServerOrchestrator {
 
 
     public function __construct() {
-      
         // Add hooks for subscription status changes
-        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'provision_and_deploy_server'), 20, 1);
+        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 10, 1);
-
     }
 
-    
-    public function provision_and_deploy_server($subscription) {
+    public function start_server_provision($subscription) {
         try {
+            $this->subscription = $subscription;
+            $this->subscription_id = $subscription->get_id();
+            $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
 
-        $this->subscription = $subscription;
-        $this->subscription_id = $subscription->get_id();
-        $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
-
-        if (!$this->server_product_id) {
-            error_log('[SIYA Server Manager] No server product found in subscription, moving on');
-            return;
-        }
-
-
-        $server_post_instance = new ServerPost();
-       
-        // Step 1: Create server post only if it doesn't exist
-
-        // Check if server post already exists
-        $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
-
-        if (!$existing_server_post) {
-            error_log('[SIYA Server Manager] creating new server post');
-            $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
-        } else {
-            error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
-            $this->server_post_id = $existing_server_post->post_id;
-        }
-
-        // Check server status flags
-        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
-        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
-
-        error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s', 
-            $this->subscription_id,
-            $is_provisioned ? 'true' : 'false',
-            $is_deployed ? 'true' : 'false'
-        ));
-
-        // Step 2: Provision server if not already provisioned
-        $server_data = null;
-        if (!$is_provisioned) {
-            // Provision server only if needed
-            $server_data = $this->provision_server($server_post_instance, $subscription);
-        } else {
-            error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
-            // Get existing server data for Step 3
-            $server_data = [
-                'server' => [
-                    'public_net' => [
-                        'ipv4' => ['ip' => get_post_meta($this->server_post_id, 'arsol_server_provisioned_ipv4', true)]
-                    ]
-                ]
-            ];
-        }
-
-        // Runcloud deployment switch
-        if ($server_data) {
-            $server_ready = $this->wait_for_server_status('active', 60); // 5 minutes timeout
-            if (!$server_ready) {
-                throw new \Exception('Server failed to become active within the timeout period');
+            if (!$this->server_product_id) {
+                error_log('[SIYA Server Manager] No server product found in subscription, moving on');
+                return;
             }
-        }
 
-        // Step 3: Deploy to RunCloud if not already deployed
-        if (!$is_deployed) {
-            error_log('[SIYA Server Manager] Not deployed, deploying to RunCloud');
-            // Instantiate RunCloud only if needed
-            $this->runcloud = new Runcloud();  
-            $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
-        } else {
-            error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
-        }
+            $server_post_instance = new ServerPost();
+           
+            // Step 1: Create server post only if it doesn't exist
+            $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
+
+            if (!$existing_server_post) {
+                error_log('[SIYA Server Manager] creating new server post');
+                $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
+            } else {
+                error_log('[SIYA Server Manager] Server post already exists, skipping Step 1  >>>>>>>');
+                $this->server_post_id = $existing_server_post->post_id;
+            }
+
+            // Check server status flags
+            $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+            $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+
+            error_log(sprintf('[SIYA Server Manager] Subscription %d status flags - Provisioned: %s, Deployed: %s', 
+                $this->subscription_id,
+                $is_provisioned ? 'true' : 'false',
+                $is_deployed ? 'true' : 'false'
+            ));
+
+            // Step 2: Provision server if not already provisioned
+            $server_data = null;
+            if (!$is_provisioned) {
+                $server_data = $this->provision_server($server_post_instance, $subscription);
+            } else {
+                error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
+                $server_data = [
+                    'server' => [
+                        'public_net' => [
+                            'ipv4' => ['ip' => get_post_meta($this->server_post_id, 'arsol_server_provisioned_ipv4', true)]
+                        ]
+                    ]
+                ];
+            }
+
 
         } catch (\Exception $e) {
-            // Log the full error message
             error_log(sprintf(
                 '[SIYA Server Manager] Error in subscription %d:%s%s',
                 $this->subscription_id,
@@ -119,7 +92,6 @@ class ServerOrchestrator {
                 $e->getMessage()
             ));
     
-            // Add detailed note to subscription
             $subscription->add_order_note(sprintf(
                 "Error occurred during server provisioning:%s%s",
                 PHP_EOL,
@@ -127,6 +99,32 @@ class ServerOrchestrator {
             ));
     
             $subscription->update_status('on-hold');
+        }
+    }
+
+    
+
+    public function complete_server_provision($server_post_instance, $subscription, $server_data, $is_deployed) {
+        try {
+            // Runcloud deployment switch
+            if ($server_data) {
+                $server_ready = $this->wait_for_server_status('active', 300, 10); // 5 minutes timeout, check every 10 seconds
+                if (!$server_ready) {
+                    throw new \Exception('Server failed to become active within the timeout period');
+                }
+            }
+    
+            // Step 3: Deploy to RunCloud if not already deployed
+            if (!$is_deployed) {
+                error_log('[SIYA Server Manager] Not deployed, deploying to RunCloud');
+                $this->runcloud = new Runcloud();  
+                $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
+            } else {
+                error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
+            }
+        } catch (\Exception $e) {
+            error_log(sprintf('[SIYA Server Manager] Error in server completion: %s', $e->getMessage()));
+            throw $e;
         }
     }
 
@@ -489,9 +487,15 @@ class ServerOrchestrator {
 
     }
 
-    private function wait_for_server_status($target_status, $timeout_seconds = 300) {
-        error_log(sprintf('[SIYA Server Manager] Waiting for server to reach "%s" status (timeout: %d seconds)', 
-            $target_status, $timeout_seconds));
+
+
+
+
+    // Here 
+
+    private function wait_for_server_status($target_status, $timeout_seconds = 300, $check_interval = 10) {
+        error_log(sprintf('[SIYA Server Manager] Waiting for server to reach "%s" status (timeout: %d seconds, interval: %d seconds)', 
+            $target_status, $timeout_seconds, $check_interval));
 
         $provider = null;
         switch ($this->server_provider_slug) {
@@ -509,40 +513,50 @@ class ServerOrchestrator {
         }
 
         $start_time = time();
-        $check_interval = 10; // Check every 10 seconds
+        $attempts = 0;
 
         while (time() - $start_time < $timeout_seconds) {
+            $attempts++;
             $status = $provider->get_server_status();
             
             if ($status === false) {
-                error_log('[SIYA Server Manager] Failed to get server status');
+                error_log(sprintf('[SIYA Server Manager] Failed to get server status (attempt %d)', $attempts));
                 return false;
             }
 
             $current_status = $status['provisioned_remote_status'];
-            error_log(sprintf('[SIYA Server Manager] Current server status: %s (raw: %s)', 
+            error_log(sprintf('[SIYA Server Manager] Current server status (attempt %d): %s (raw: %s)', 
+                $attempts,
                 $current_status, 
                 $status['provisioned_remote_raw_status']
             ));
 
             if ($current_status === $target_status) {
-                error_log(sprintf('[SIYA Server Manager] Server reached target status "%s" after %d seconds', 
+                error_log(sprintf('[SIYA Server Manager] Server reached target status "%s" after %d seconds (%d attempts)', 
                     $target_status, 
-                    time() - $start_time
+                    time() - $start_time,
+                    $attempts
                 ));
                 return true;
             }
 
             if ($current_status === 'error') {
-                error_log('[SIYA Server Manager] Server entered error state');
+                error_log(sprintf('[SIYA Server Manager] Server entered error state (attempt %d)', $attempts));
                 return false;
             }
 
-            sleep($check_interval);
+            if (time() - $start_time < $timeout_seconds) {
+                error_log(sprintf('[SIYA Server Manager] Waiting %d seconds before next check (attempt %d)', 
+                    $check_interval, 
+                    $attempts + 1
+                ));
+                sleep($check_interval);
+            }
         }
 
-        error_log(sprintf('[SIYA Server Manager] Timeout reached (%d seconds) waiting for status "%s"', 
-            $timeout_seconds, 
+        error_log(sprintf('[SIYA Server Manager] Timeout reached (%d seconds, %d attempts) waiting for status "%s"', 
+            $timeout_seconds,
+            $attempts,
             $target_status
         ));
         return false;
