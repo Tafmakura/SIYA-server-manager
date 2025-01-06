@@ -90,36 +90,8 @@ class ServerOrchestrator {
                 error_log('[SIYA Server Manager] Server post already exists, skipping Step 1');
                 $this->server_post_id = $existing_server_post->post_id;
             }
-
-            // Debug statement
-            error_log(sprintf('[SIYA Server Manager] Created server post ID>>>>>>>>>>>>>>>>> %d for subscription %d, product ID %d, provider %s',
-                $this->server_post_id,
-                $this->subscription_id, 
-                $this->server_product_id,
-                $this->server_provider_slug
-            ));
-
-            error_log('subscription_id: ' . var_export($this->subscription_id, true));
-            error_log('server_post_id: ' . var_export($this->server_post_id, true));
-            error_log('server_product_id: ' . var_export($this->server_product_id, true));
-            error_log('server_provider_slug: ' . var_export($this->server_provider_slug, true));
-
-
-            // Step 2: Prepare arguments for server provisioning
-           
-
-        
-
-            // Step 2: Schedule server provisioning as a background process
-            // Predefined parameters for server provisioning
-           
-
-            // Log the arguments for debugging
-            // error_log('Scheduling server provisioning with args: ' . json_encode($args, JSON_PRETTY_PRINT));
-            // error_log('Full args array (deeply nested): ' . var_export($args, true));
             
-            // Schedule the action with predefined parameters
-
+            // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
             as_schedule_single_action(
                 time(), // Run immediately, but in the background
                 'arsol_complete_server_provision',
@@ -153,34 +125,22 @@ class ServerOrchestrator {
 
     public function complete_server_provision($args) {
         try {
-            
-
             error_log(sprintf('[SIYA Server Manager] Starting server completion with args: %s', print_r($args, true)));
-
-            // Extract the arguments
-            $subscription_id = $args['subscription_id'];
-            $server_post_id = $args['server_post_id'];
-            $server_product_id = $args['server_product_id'];
-            $server_provider_slug = $args['server_provider_slug'];
-            
-    
 
             // Initialize required instances
             $server_post_instance = new ServerPost();
-            
-            // Get the server provider slug from args
+        
+            // Extract the arguments
+            $this->subscription_id = $args['subscription_id'];
+            $this->subscription = wcs_get_subscription($this->subscription);
+            $this->erver_post_id = $args['server_post_id'];
+            $this->server_product_id = $args['server_product_id'];
             $this->server_provider_slug = $args['server_provider_slug'];
             
             // Initialize the appropriate server provider with the slug
             $this->initialize_server_provider($this->server_provider_slug);
             
-            // Retrieve the subscription and server post data
-            $subscription = wcs_get_subscription($subscription_id);
-            $this->subscription_id = $subscription_id;
-            $this->server_post_id = $server_post_id;
-            $this->server_product_id = $server_product_id;
-
-            if (!$subscription) {
+            if (!$this->subscription) {
                 throw new \Exception('Subscription not found: ' . $this->subscription_id);
             }
 
@@ -252,7 +212,7 @@ class ServerOrchestrator {
                 ];
             }
                 
-            $subscription->update_status('on-hold');
+            $this->subscription->update_status('on-hold');
 
 
             // Runcloud deployment switch
@@ -330,14 +290,14 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     private function provision_server($server_post_instance, $subscription) {
-        $provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
-        error_log('[SIYA Server Manager] Server provider: ' . print_r($provider_slug, true));
+        $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
+        error_log('[SIYA Server Manager] Server provider: ' . print_r($server_provider_slug, true));
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
         error_log('[SIYA Server Manager] Server plan: ' . print_r($server_plan, true));
         
-        // Initialize the provider with explicit provider slug
-        $this->initialize_server_provider($provider_slug);
+        // Initialize the provider with explicit server provider slug
+        $this->initialize_server_provider($server_provider_slug);
         
         // Use the initialized provider
         $server_data = $this->server_provider->provision_server($server_name, $server_plan);
@@ -638,7 +598,7 @@ class ServerOrchestrator {
         error_log(sprintf('[SIYA Server Manager] Waiting for server to reach "%s" status (timeout: %d seconds, interval: %d seconds)', 
             $target_status, $timeout_seconds, $check_interval));
 
-        // Initialize provider with current provider slug
+        // Initialize provider with current server provider slug
         $this->initialize_server_provider($this->server_provider_slug);
         
         $start_time = time();
@@ -692,10 +652,10 @@ class ServerOrchestrator {
     }
 
     // Modified helper method to initialize server provider
-    private function initialize_server_provider($provider_slug = null) {
-        // Use passed provider slug or get from metadata if not provided
-        if ($provider_slug) {
-            $this->server_provider_slug = $provider_slug;
+    private function initialize_server_provider($server_provider_slug = null) {
+        // Use passed server provider slug or get from metadata if not provided
+        if ($server_provider_slug) {
+            $this->server_provider_slug = $server_provider_slug;
         } else if (!$this->server_provider_slug) {
             $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         }
