@@ -19,6 +19,7 @@ class ServerOrchestrator {
     public $server_provider;
     public $server_provider_slug;
     public $server_product_id;
+    public $server_product;
     public $server_manager;
     public $server_plan_identifier;
     private $runcloud;
@@ -77,9 +78,8 @@ class ServerOrchestrator {
                 return;
             }
 
-            $server_post_instance = new ServerPost();
-           
             // Step 1: Create server post only if it doesn't exist
+            $server_post_instance = new ServerPost();
             $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
 
             if (!$existing_server_post) {
