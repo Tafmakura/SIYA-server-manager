@@ -203,7 +203,12 @@ class ServerOrchestrator {
             $server_data = null;
             if (!$is_provisioned) {
                 $server_data = $this->provision_server($server_post_instance, $this->subscription);
-                error_log('[SIYA Server Manager] Provisioned server data: ' . print_r($server_data, true));
+                
+                error_log(sprintf('[SIYA Server Manager] Provisioned server data:%s%s', 
+                    PHP_EOL,
+                    json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                ));
+
             } else {
                 error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
                 $server_data = [
