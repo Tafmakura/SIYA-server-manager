@@ -56,10 +56,24 @@ class Hetzner /*implements ServerProvider*/ {
         // Return the compiled data
         return $server_data;
     }
+    
+    private function map_statuses($raw_status) {
+        $status_map = [
+            'initializing' => 'building',
+            'starting' => 'building',
+            'running' => 'active',
+            'stopped' => 'off',
+            'stopping' => 'off',
+            'rebooting' => 'rebooting'
+        ];
+        return $status_map[$raw_status] ?? $raw_status;
+    }
 
     public function compile_server_return_data($api_response) {
         
         error_log(var_export($api_response, true)); // DELETE THIS IN PRODUCTION
+
+        $raw_status = $api_response['server']['status'] ?? '';
 
         return [
             'provisioned_name' => $api_response['server']['name'] ?? '',
@@ -74,7 +88,8 @@ class Hetzner /*implements ServerProvider*/ {
             'provisioned_date' => $api_response['server']['created'] ?? '',
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['root_password'] ?? '',
-            'provisioned_remote_status' => $api_response['server']['status'] ?? ''
+            'provisioned_remote_status' => $this->map_statuses($raw_status),
+            'provisioned_raw_status' => $raw_status
         ];
     }
 

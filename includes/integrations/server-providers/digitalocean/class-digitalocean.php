@@ -57,36 +57,33 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $server_data;
     }
 
+    private function map_statuses($raw_status) {
+        $status_map = [
+            'new' => 'building',
+            'active' => 'active',
+            'off' => 'off',
+            'rebooting' => 'rebooting'
+        ];
+        return $status_map[$raw_status] ?? $raw_status;
+    }
+
     public function compile_server_return_data($api_response) {
-        // Log the API response for debugging purposes (remove or adjust for production)
-        error_log(var_export($api_response, true)); 
-    
         $droplet = $api_response['droplet'] ?? [];
         $networks = $droplet['networks'] ?? [];
-        $v4_networks = $networks['v4'] ?? [];
-        $v6_networks = $networks['v6'] ?? [];
-        $image = $droplet['image'] ?? [];
-        $region = $droplet['region'] ?? [];
         
-        // Fetch the first IPv4 address, if available
+        // Get first available IPv4 and IPv6
         $ipv4 = '';
-        if (!empty($v4_networks)) {
-            foreach ($v4_networks as $network) {
-                if (isset($network['ip_address'])) {
-                    $ipv4 = $network['ip_address'];
-                    break;
-                }
+        $ipv6 = '';
+        foreach (($networks['v4'] ?? []) as $network) {
+            if (!empty($network['ip_address'])) {
+                $ipv4 = $network['ip_address'];
+                break;
             }
         }
-    
-        // Fetch the first IPv6 address, if available
-        $ipv6 = '';
-        if (!empty($v6_networks)) {
-            foreach ($v6_networks as $network) {
-                if (isset($network['ip_address'])) {
-                    $ipv6 = $network['ip_address'];
-                    break;
-                }
+        foreach (($networks['v6'] ?? []) as $network) {
+            if (!empty($network['ip_address'])) {
+                $ipv6 = $network['ip_address'];
+                break;
             }
         }
         
@@ -97,12 +94,13 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_disk_size' => $droplet['disk'] ?? '',
             'provisioned_ipv4' => $ipv4,
             'provisioned_ipv6' => $ipv6,
-            'provisioned_os' => $image['distribution'] ?? '',
-            'provisioned_image_slug' => $image['slug'] ?? '',
-            'provisioned_region_slug' => $region['slug'] ?? '',
+            'provisioned_os' => $droplet['image']['distribution'] ?? '',
+            'provisioned_image_slug' => $droplet['image']['slug'] ?? '',
+            'provisioned_region_slug' => $droplet['region']['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
-            'provisioned_root_password' => '', // Placeholder
-            'provisioned_remote_status' => $droplet['status'] ?? ''
+            'provisioned_root_password' => '',
+            'provisioned_remote_status' => $this->map_statuses($droplet['status'] ?? ''),
+            'provisioned_raw_status' => $droplet['status'] ?? ''
         ];
     }
     

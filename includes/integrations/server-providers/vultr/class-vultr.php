@@ -57,10 +57,24 @@ class Vultr /*implements ServerProvider*/ {
         return $server_data;
     }
 
+    private function map_statuses($raw_status) {
+        $status_map = [
+            'pending' => 'building',
+            'installing' => 'building',
+            'active' => 'active',
+            'stopped' => 'off',
+            'rebooting' => 'rebooting'
+        ];
+        return $status_map[$raw_status] ?? $raw_status;
+    }
+
     public function compile_server_return_data($api_response) {
         
         error_log(var_export($api_response, true)); // DELETE THIS IN PRODUCTION
 
+        $raw_status = $api_response['instance']['status'] ?? '';
+        $power_status = $api_response['instance']['power_status'] ?? '';
+        
         return [
             'provisioned_name' => $api_response['instance']['label'] ?? '',
             'provisioned_vcpu_count' => $api_response['instance']['vcpu_count'] ?? '',
@@ -74,7 +88,8 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_date' => $api_response['instance']['date_created'] ?? '',
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['instance']['default_password'] ?? '',
-            'provisioned_remote_status' => $api_response['instance']['status'] ?? ''
+            'provisioned_remote_status' => $this->map_statuses($raw_status),
+            'provisioned_raw_status' => "$raw_status ($power_status)"
         ];
     }
 
