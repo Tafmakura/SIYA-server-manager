@@ -17,6 +17,10 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function provision_server($server_name, $server_plan, $server_region = 'nbg1', $server_image = 'ubuntu-20.04') {
+        error_log(sprintf('[SIYA Server Manager] Hetzner: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
+            PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
+        ));
+
         if (empty($server_name)) {
             throw new \Exception('Server name required');
         }
@@ -49,9 +53,11 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $api_response = json_decode($response_body, true);
+        error_log('[SIYA Server Manager] Hetzner: Raw API Response: ' . print_r($api_response, true));
 
         // Compile server return data
         $server_data = $this->compile_server_return_data($api_response);
+        error_log('[SIYA Server Manager] Hetzner: Compiled server data: ' . print_r($server_data, true));
 
         // Return the compiled data
         return $server_data;
@@ -66,7 +72,9 @@ class Hetzner /*implements ServerProvider*/ {
             'stopping' => 'off',
             'rebooting' => 'rebooting'
         ];
-        return $status_map[$raw_status] ?? $raw_status;
+        $mapped_status = $status_map[$raw_status] ?? $raw_status;
+        error_log(sprintf('[SIYA Server Manager] Hetzner: Mapping status from "%s" to "%s"', $raw_status, $mapped_status));
+        return $mapped_status;
     }
 
     public function compile_server_return_data($api_response) {
