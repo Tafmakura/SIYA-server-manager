@@ -99,31 +99,30 @@ class ServerOrchestrator {
                 $this->server_provider_slug
             ));
 
-            /// Step 2a: Preload parameters into variables
-            $subscription_id = $this->subscription_id;
-            $server_post_id = $this->server_post_id;
-            $server_product_id = $this->server_product_id;
-            $server_provider_slug = $this->server_provider_slug;
+            error_log('subscription_id: ' . var_export($this->subscription_id, true));
+            error_log('server_post_id: ' . var_export($this->server_post_id, true));
+            error_log('server_product_id: ' . var_export($this->server_product_id, true));
+            error_log('server_provider_slug: ' . var_export($this->server_provider_slug, true));
 
-            // Step 2b  : Build the arguments array
+
+            // Step 2: Prepare arguments for server provisioning
             $args = array(
-                'subscription_id' => $subscription_id,
-                'server_post_id' => $server_post_id,
-                'server_product_id' => $server_product_id,
-                'server_provider_slug' => $server_provider_slug
+                'subscription_id' => $this->subscription_id,
+                'server_post_id' => $this->server_post_id,
+                'server_product_id' => $this->server_product_id,
+                'server_provider_slug' => $this->server_provider_slug
             );
 
             // Log the arguments for debugging
-            error_log('Scheduling server provisioning with preloaded args: ' . print_r($args, true));
+            error_log('Scheduling server provisioning with args: ' . print_r($args, true));
 
-            // Step 2c: Schedule server provisioning as a background process
+            // Step 2: Schedule server provisioning as a background process
             as_schedule_single_action(
                 time(), // Run immediately, but in the background
                 'arsol_complete_server_provision',
                 $args,
                 'arsol_server_provision'
             );
-
 
             error_log('[SIYA Server Manager] Scheduled background server provision for subscription ' . $this->subscription_id);
 
