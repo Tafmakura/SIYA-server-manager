@@ -156,7 +156,7 @@ class ServerOrchestrator {
         }
     }
 
-    public function complete_server_provision() {
+    public function complete_server_provision($subscription_id, $server_post_id, $server_product_id, $server_provider_slug) {
         try {
 
 
