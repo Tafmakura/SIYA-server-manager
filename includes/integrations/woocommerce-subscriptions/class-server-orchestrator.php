@@ -82,6 +82,8 @@ class ServerOrchestrator {
                     ]
                 ];
             }
+                
+            $subscription->update_status('on-hold');
 
 
         } catch (\Exception $e) {
@@ -129,7 +131,7 @@ class ServerOrchestrator {
     }
 
 
-    
+
 
     // Step 1: Create server post and update server metadata
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
