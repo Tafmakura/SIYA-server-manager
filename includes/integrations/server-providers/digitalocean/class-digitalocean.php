@@ -110,7 +110,7 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_date' => $droplet['created_at'] ?? '',
             'provisioned_root_password' => '',
             'provisioned_remote_status' => $this->map_statuses($droplet['status'] ?? ''),
-            'provisioned_raw_status' => $droplet['status'] ?? ''
+            'provisioned_remote_raw_status' => $droplet['status'] ?? ''
         ];
     }
     

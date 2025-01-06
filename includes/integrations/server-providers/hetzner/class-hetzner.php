@@ -100,7 +100,7 @@ class Hetzner /*implements ServerProvider*/ {
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['root_password'] ?? '',
             'provisioned_remote_status' => $this->map_statuses($raw_status),
-            'provisioned_raw_status' => $raw_status
+            'provisioned_remote_raw_status' => $raw_status
         ];
     }
 
