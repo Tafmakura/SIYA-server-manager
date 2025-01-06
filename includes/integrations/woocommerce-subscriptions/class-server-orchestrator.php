@@ -153,16 +153,16 @@ class ServerOrchestrator {
 
     public function complete_server_provision($args) {
         try {
+            
 
-             // Log the received parameter
+            error_log(sprintf('[SIYA Server Manager] Starting server completion with args: %s', print_r($args, true)));
 
-            // Log the received parameters
-            error_log("subscription_id: >>" . $args['subscription_id']);
-            error_log("server_post_id: >>" . $args['server_post_id']);
-            error_log("server_product_id: >>" . $args['server_product_id']);
-            error_log("server_provider_slug: >>" . $args['server_provider_slug']);
-
-            // Your provisioning logic here
+            // Extract the arguments
+            $subscription_id = $args['subscription_id'];
+            $server_post_id = $args['server_post_id'];
+            $server_product_id = $args['server_product_id'];
+            $server_provider_slug = $args['server_provider_slug'];
+            
     
 
             // Initialize required instances
