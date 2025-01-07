@@ -219,6 +219,7 @@ class ServerOrchestrator {
                 'arsol_update_server_status',
                 [[
                     'server_provider' => $this->server_provider_slug,   
+                    'server_manager' => $this->connect_server_manager,
                     'server_provisioned_id' => $this->server_provisioned_id,
                     'server_post_id' => $this->server_post_id,
                     'target_status' => 'active',
@@ -287,6 +288,7 @@ class ServerOrchestrator {
     public function update_server_status($args) {
         error_log('[SIYA Server Manager - ServerOrchestrator] update_server_status called');
         $server_provider_slug = $args['server_provider'];
+        $connect_server_manager = $args['server_manager'];
         $server_provisioned_id = $args['server_provisioned_id'];
         $target_status = $args['target_status'];
         $server_post_id = $args['server_post_id'];
@@ -313,7 +315,16 @@ class ServerOrchestrator {
                 error_log('[SIYA Server Manager - ServerOrchestrator] Checking status: ' . print_r($status, true));
                 if ($provisioned_remote_status === $target_status) {
                     error_log('[SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
-                    return true;
+
+                    $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
+                    if (!$server_deployed_status && $connect_server_manager === 'yes') {
+                        error_log('[SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
+                        $this->runcloud = new Runcloud();  
+                        $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $status, $subscription);
+                    } else {
+                        error_log('[SIYA Server Manager - ServerOrchestrator] Server ready, no Runcloud deployment needed');
+                    }
+
                 }
                 sleep($poll_interval);
             } catch (\Exception $e) {
