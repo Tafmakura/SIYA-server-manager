@@ -137,14 +137,14 @@ class ServerOrchestrator {
             $this->server_post_id = $args['server_post_id'];
             $this->server_product_id = $args['server_product_id'];
             $this->server_provider_slug = $args['server_provider_slug'];
-            
-            if (!$this->subscription) {
-                throw new \Exception('Subscription not found: ' . $this->subscription_id);
-            }
 
+            error_log('Milestone 1');
+            
             // Load all parameters from the server post metadata
             $server_post_instance = new ServerPost($this->server_post_id);
             $metadata = $server_post_instance->get_meta_data();
+
+            error_log('Milestone 2');
 
             // Load parameters into class properties
             $this->server_post_name = $metadata['arsol_server_post_name'] ?? null;
@@ -161,17 +161,21 @@ class ServerOrchestrator {
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
 
+            error_log('Milestone 3');
    
             // Check server status flags
             $is_provisioned = $this->server_provisioned_status;
             $is_deployed = $this->server_deployed_status; //move to deployed
             $requires_server_manager = $this->connect_server_manager; //move to deployed
 
+            error_log('Milestone 4');
 
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Subscription %d status flags - Provisioned: %s, Deployed: %s, Requires Server Manager: %s', 
                 $this->subscription_id,
                 $is_provisioned ? 'true' : 'false',
             ));
+
+            error_log('Milestone 5');
 
             // Step 2: Provision server if not already provisioned
             $server_data = null;
