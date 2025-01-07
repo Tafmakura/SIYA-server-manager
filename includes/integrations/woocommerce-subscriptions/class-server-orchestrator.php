@@ -517,8 +517,9 @@ class ServerOrchestrator {
         }
 
         $response_body_decoded = json_decode($runcloud_response['body'], true);
+        $response_status_decoded = json_decode($runcloud_response['status'], true);
 
-        error_log('Milestone X4: Runcloud Response: ' . print_r($response_body_decoded, true));
+        error_log('Milestone X4: Runcloud Response: ' . print_r($response_status_decoded, true) . print_r($response_body_decoded, true));
 
         if (!isset($runcloud_response['status']) || $runcloud_response['status'] != 200) {
             error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
@@ -536,14 +537,14 @@ class ServerOrchestrator {
 
         // Successful API response
         error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
+
         $subscription->add_order_note(sprintf(
             "RunCloud deployment successful with status: %s\nResponse body: %s",
-            $runcloud_response['status'],
+           // $runcloud_response['status'],
             $runcloud_response['body']
         ));
 
         // Update server metadata
-
         error_log('Milestone X6');
 
         $metadata = [
