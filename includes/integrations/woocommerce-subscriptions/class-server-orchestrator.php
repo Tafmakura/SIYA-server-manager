@@ -427,6 +427,7 @@ class ServerOrchestrator {
         $server_post_id = $server_post->post_id;
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+        update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
 
         as_schedule_single_action(
             time(),
@@ -463,6 +464,7 @@ class ServerOrchestrator {
 
         if ($provisioned_remote_status === 'off') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server successfully shut down.');
+            update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
         } else {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server shutdown verification failed. Current status: ' . $provisioned_remote_status);
 
