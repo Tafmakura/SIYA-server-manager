@@ -165,9 +165,11 @@ class ServerOrchestrator {
    
             // Check server status flags
             $is_provisioned = $this->server_provisioned_status;
+            $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
+            $this->connect_server_manager = $metadata['arsol_connect_server_manager'] ?? null;
             $is_deployed = $this->server_deployed_status; //move to deployed
             $requires_server_manager = $this->connect_server_manager; //move to deployed
-
+              
             error_log('Milestone 4');
 
 
@@ -206,8 +208,8 @@ class ServerOrchestrator {
                 $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
             }
 
-            error_log('[SIYA Server Manager - ServerOrchestrator] HOYO 1 Server provisioned status: ' . print_r($this->server_provisioned_status, true));
-
+            error_log('[SIYA Server Manager - ServerOrchestrator] Metadata: ' . print_r($metadata, true));
+       
             error_log('Milestone 6');
 
             // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
