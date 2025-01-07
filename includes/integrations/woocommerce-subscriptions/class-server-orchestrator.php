@@ -178,6 +178,11 @@ class ServerOrchestrator {
                 $this->server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
                 $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
             }
+
+
+            error_log('[SIYA Server Manager - ServerOrchestrator] HOYO AGAIN Server provisioned ID: ' . $this->server_provisioned_id);
+
+
             // Load deployment related parameters if server has been deployed
             $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
             if ($this->server_deployed_status === 1) {
@@ -635,7 +640,7 @@ class ServerOrchestrator {
             return;
         }
        
-        error_log('[SIYA Server Manager CB - ServerOrchestrator] Starting subscription circuit breaker check');
+        error_log('[SIYA Server Manager - ServerOrchestrator] Starting subscription circuit breaker check');
 
         if (!is_admin()) {
             return;
@@ -648,25 +653,25 @@ class ServerOrchestrator {
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
 
-        error_log(sprintf('[SIYA Server Manager CB - ServerOrchestrator] Status check - Provisioned: %s, Deployed: %s', 
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
             $is_deployed ? 'true' : 'false'
         ));
 
         if($is_provisioned && $is_deployed){
-            error_log('[SIYA Server Manager CB - ServerOrchestrator] Server is provisioned and deployed, no need to disconnect');
+            error_log('[SIYA Server Manager - ServerOrchestrator] Server is provisioned and deployed, no need to disconnect');
             return;
         
         }else{
 
-            error_log('[SIYA Server Manager CB - ServerOrchestrator] Setting subscription to on-hold status');
+            error_log('[SIYA Server Manager - ServerOrchestrator] Setting subscription to on-hold status');
             $subscription->add_order_note(
                 "Subscription status set to on-hold. Server provisioning and deployment in progress."
             );
     
             $subscription->update_status('on-hold');
 
-            error_log('[SIYA Server Manager CB - ServerOrchestrator] Initiating server provision and deploy process');
+            error_log('[SIYA Server Manager - ServerOrchestrator] Initiating server provision and deploy process');
             $this->provision_and_deploy_server($subscription);
 
 
