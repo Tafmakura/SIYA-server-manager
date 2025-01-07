@@ -232,6 +232,11 @@ class ServerOrchestrator {
                     ]
                 ];
             }
+
+
+
+            error_log('[SIYA Server Manager] HOOOOOOOOOYOOOOOOOO'.$this->server_provisioned_id,);
+         
             
             // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
             as_schedule_single_action(
