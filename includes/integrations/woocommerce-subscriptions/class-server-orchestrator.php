@@ -164,6 +164,7 @@ class ServerOrchestrator {
             error_log('Milestone 3');
    
             // Check server status flags
+            $this->server_provisioned_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status', true);
             $is_provisioned = $this->server_provisioned_status;
             $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
             $this->connect_server_manager = $metadata['arsol_connect_server_manager'] ?? null;
