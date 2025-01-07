@@ -25,6 +25,9 @@ class Runcloud /*implements ServerManager*/ {
         string $installationType,
         ?string $provider = null
     ) {
+
+        error_log ('Mileston Y1');
+
         if (empty($ipAddress) || empty($webServerType) || empty($installationType)) {
             throw new \InvalidArgumentException('IP Address, Web Server Type and Installation Type are required');
         }
