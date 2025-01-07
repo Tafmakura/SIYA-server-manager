@@ -505,6 +505,13 @@ class ServerOrchestrator {
 
         error_log('Milestone X3');
 
+        // Debug log the RunCloud response
+        error_log(sprintf(
+            '[SIYA Server Manager - ServerOrchestrator] RunCloud Response:%s%s',
+            PHP_EOL, 
+            print_r($runcloud_response, true)
+        ));
+
         if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
 
             // Successful Log
@@ -522,8 +529,7 @@ class ServerOrchestrator {
 
             // Successful API subscription note
             $subscription->add_order_note(sprintf(
-                "RunCloud deployment successful with status: %s\nResponse body: %s",
-                $runcloud_response['status'],
+                "RunCloud deployment successful with Response body: %s",
                 $runcloud_response['body']
             ));
            
