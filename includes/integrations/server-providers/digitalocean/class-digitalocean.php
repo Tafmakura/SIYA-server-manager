@@ -341,4 +341,44 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_remote_raw_status' => $raw_status
         ];
     }
+
+    public function get_server_ip($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key
+            ]
+        ]);
+
+        if (is_wp_error($response)) {
+            throw new \Exception('Failed to get server IP: ' . $response->get_error_message());
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        if ($response_code !== 200) {
+            throw new \Exception('Failed to get server IP. Response code: ' . $response_code);
+        }
+
+        $api_response = json_decode(wp_remote_retrieve_body($response), true);
+        $networks = $api_response['droplet']['networks'] ?? [];
+        
+        $ipv4 = '';
+        $ipv6 = '';
+        foreach (($networks['v4'] ?? []) as $network) {
+            if (!empty($network['ip_address'])) {
+                $ipv4 = $network['ip_address'];
+                break;
+            }
+        }
+        foreach (($networks['v6'] ?? []) as $network) {
+            if (!empty($network['ip_address'])) {
+                $ipv6 = $network['ip_address'];
+                break;
+            }
+        }
+
+        return [
+            'ipv4' => $ipv4,
+            'ipv6' => $ipv6
+        ];
+    }
 }

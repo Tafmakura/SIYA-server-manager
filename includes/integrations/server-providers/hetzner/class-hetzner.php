@@ -330,4 +330,27 @@ class Hetzner /*implements ServerProvider*/ {
         return true;
     }
 
+    public function get_server_ip($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_provisioned_id, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key
+            ]
+        ]);
+
+        if (is_wp_error($response)) {
+            throw new \Exception('Failed to get server IP: ' . $response->get_error_message());
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        if ($response_code !== 200) {
+            throw new \Exception('Failed to get server IP. Response code: ' . $response_code);
+        }
+
+        $api_response = json_decode(wp_remote_retrieve_body($response), true);
+        return [
+            'ipv4' => $api_response['server']['public_net']['ipv4']['ip'] ?? '',
+            'ipv6' => $api_response['server']['public_net']['ipv6']['ip'] ?? ''
+        ];
+    }
+
 }

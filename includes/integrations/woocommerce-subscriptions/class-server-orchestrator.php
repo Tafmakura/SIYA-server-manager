@@ -322,7 +322,7 @@ class ServerOrchestrator {
                     if (!$server_deployed_status && $connect_server_manager === 'yes') {
                         error_log('[SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
                         $this->runcloud = new Runcloud();  
-                        $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $subscription);
+                        $this->deploy_to_runcloud_and_update_metadata($server_post_id, $subscription);
                     } else {
                         error_log('[SIYA Server Manager - ServerOrchestrator] Server ready, no Runcloud deployment needed');
                     }
@@ -459,16 +459,21 @@ class ServerOrchestrator {
         return $server_data;
     }
 
-    private function deploy_to_runcloud_and_update_metadata($server_post_instance, $subscription) {
+    private function deploy_to_runcloud_and_update_metadata($server_post_id, $subscription) {
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
+        // Get server metadata from post
+        $server_post_instance = new ServerPost($server_post_id);
         $server_name = 'ARSOL' . $this->subscription_id;
         $web_server_type = 'nginx';
         $installation_type = 'native';
         $provider = $this->server_provider;
 
-        // Use the standardized IPv4 address
-        $ipv4 = $server_data['provisioned_ipv4'];
+        // Get server IP addresses
+        $server_ips = $this->get_provisioned_server_ip($this->server_provider_slug, $this->server_provisioned_id);
+        $ipv4 = $server_ips['ipv4'];
+        $ipv6 = $server_ips['ipv6'];
+
         if (empty($ipv4)) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
             $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
@@ -534,6 +539,11 @@ class ServerOrchestrator {
 
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
     
+    }
+
+    private function get_provisioned_server_ip($server_provider_slug, $server_provisioned_id) {
+        $this->initialize_server_provider($server_provider_slug);
+        return $this->server_provider->get_server_ip($server_provisioned_id);
     }
 
 
