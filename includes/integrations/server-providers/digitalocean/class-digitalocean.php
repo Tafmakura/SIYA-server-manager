@@ -98,6 +98,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
         
         return [
+            'provisioned_id' => $droplet['id'] ?? '',
             'provisioned_name' => $droplet['name'] ?? '',
             'provisioned_vcpu_count' => $droplet['vcpus'] ?? '',
             'provisioned_memory' => $droplet['memory'] ?? '',
@@ -115,9 +116,8 @@ class DigitalOcean /*implements ServerProvider*/ {
     }
     
 
-    public function ping_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_id, [
+    public function ping_server($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -132,9 +132,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 200;
     }
 
-    public function protect_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . "/droplets/{$server_id}/actions", [
+    public function protect_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . "/droplets/{$server_provisioned_id}/actions", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -153,9 +152,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 201;
     }
 
-    public function remove_protection_from_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . "/droplets/{$server_id}/actions", [
+    public function remove_protection_from_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . "/droplets/{$server_provisioned_id}/actions", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -174,9 +172,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 201;
     }
 
-    public function shutdown_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_id . '/actions', [
+    public function shutdown_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_provisioned_id . '/actions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -195,9 +192,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 201;
     }
 
-    public function poweroff_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_id . '/actions', [
+    public function poweroff_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_provisioned_id . '/actions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -216,9 +212,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 201;
     }
 
-    public function poweron_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_id . '/actions', [
+    public function poweron_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_provisioned_id . '/actions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -241,9 +236,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         // To be implemented
     }
 
-    public function create_server_snapshot() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_id . '/actions', [
+    public function create_server_snapshot($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_provisioned_id . '/actions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -285,9 +279,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         // To be implemented
     }
 
-    public function destroy_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_request($this->api_endpoint . '/droplets/' . $server_id, [
+    public function destroy_server($server_provisioned_id) {
+        $response = wp_remote_request($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
             'method' => 'DELETE',
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
@@ -303,9 +296,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function reboot_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_id . '/actions', [
+    public function reboot_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/droplets/' . $server_provisioned_id . '/actions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -324,9 +316,8 @@ class DigitalOcean /*implements ServerProvider*/ {
         return $response_code === 201;
     }
 
-    public function get_server_status() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_id, [
+    public function get_server_status($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]

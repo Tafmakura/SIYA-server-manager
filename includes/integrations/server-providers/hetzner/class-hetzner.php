@@ -87,6 +87,7 @@ class Hetzner /*implements ServerProvider*/ {
         $raw_status = $api_response['server']['status'] ?? '';
 
         return [
+            'provisioned_id' => $api_response['server']['id'] ?? '',
             'provisioned_name' => $api_response['server']['name'] ?? '',
             'provisioned_vcpu_count' => $api_response['server']['server_type']['cores'] ?? '',
             'provisioned_memory' => $api_response['server']['server_type']['memory'] ?? '',
@@ -104,9 +105,8 @@ class Hetzner /*implements ServerProvider*/ {
         ];
     }
 
-    public function ping_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_id, [
+    public function ping_server($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -127,9 +127,8 @@ class Hetzner /*implements ServerProvider*/ {
         return true;
     }
 
-    public function protect_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . "/servers/{$server_id}/actions/change_protection", [
+    public function protect_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . "/servers/{$server_provisioned_id}/actions/change_protection", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ],
@@ -154,9 +153,8 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
 
-    public function remove_protection_from_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . "/servers/{$server_id}/actions/change_protection", [
+    public function remove_protection_from_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . "/servers/{$server_provisioned_id}/actions/change_protection", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ],
@@ -180,9 +178,8 @@ class Hetzner /*implements ServerProvider*/ {
         return $response_body;
     }
 
-    public function shutdown_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_id . '/actions/shutdown', [
+    public function shutdown_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_provisioned_id . '/actions/shutdown', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -203,9 +200,8 @@ class Hetzner /*implements ServerProvider*/ {
         return true;
     }
 
-    public function poweroff_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_id . '/actions/poweroff', [
+    public function poweroff_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_provisioned_id . '/actions/poweroff', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -226,9 +222,8 @@ class Hetzner /*implements ServerProvider*/ {
         return true;
     }
 
-    public function poweron_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_id . '/actions/poweron', [
+    public function poweron_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_provisioned_id . '/actions/poweron', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -253,7 +248,7 @@ class Hetzner /*implements ServerProvider*/ {
 
     }
 
-    public function create_server_snapshot(){
+    public function create_server_snapshot($server_provisioned_id){
         
     }
 
@@ -265,9 +260,8 @@ class Hetzner /*implements ServerProvider*/ {
         
     }
 
-    public function get_server_status() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_id, [
+    public function get_server_status($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -292,9 +286,8 @@ class Hetzner /*implements ServerProvider*/ {
         ];
     }
 
-    public function destroy_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_delete($this->api_endpoint . '/servers/' . $server_id, [
+    public function destroy_server($server_provisioned_id) {
+        $response = wp_remote_delete($this->api_endpoint . '/servers/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -315,9 +308,8 @@ class Hetzner /*implements ServerProvider*/ {
         return true;
     }
 
-    public function reboot_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_id . '/actions/reboot', [
+    public function reboot_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/servers/' . $server_provisioned_id . '/actions/reboot', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]

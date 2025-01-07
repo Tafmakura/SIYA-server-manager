@@ -53,6 +53,7 @@ class ServerOrchestrator {
     private $server_deployed_server_id;
     private $server_deployment_date;
     private $server_connection_status;
+    private $server_provisioned_id;
 
     public function __construct() {
         // Change the action hook to use Action Scheduler
@@ -167,6 +168,7 @@ class ServerOrchestrator {
             // Load provisioning related parameters if server has been provisioned
             $this->server_provisioned_status = $metadata['arsol_server_provisioned_status'] ?? null;
             if ($this->server_provisioned_status === 1) {
+                $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
                 $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
                 $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
                 $this->server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
@@ -237,6 +239,7 @@ class ServerOrchestrator {
                 'arsol_update_server_status',
                 [[
                     'server_provider' => $this->server_provider_slug,   
+                    'server_provisioned_id' => $this->server_provisioned_id,
                     'server_post_id' => $this->server_post_id,
                     'target_status' => 'active',
                     'poll_interval' => 3,
@@ -287,8 +290,9 @@ class ServerOrchestrator {
 
 
     public function update_server_status($args) {
-        error_log('[SIYA Server Manager] update_server_status called with args: ' . print_r($args, true));
+        error_log('[SIYA Server Manager] update_server_status called');
         $server_provider_slug = $args['server_provider'];
+        $server_provisioned_id = $args['server_provisioned_id'];
         $target_status = $args['target_status'];
         $server_post_id = $args['server_post_id'];
         $poll_interval = $args['poll_interval'];
@@ -298,7 +302,7 @@ class ServerOrchestrator {
         while ((time() - $start_time) < $time_out) {
             try {
                 $this->initialize_server_provider($server_provider_slug);
-                $status = $this->server_provider->get_server_status();
+                $status = $this->server_provider->get_server_status($server_provisioned_id);
                 $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
                 $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
 
@@ -412,6 +416,7 @@ class ServerOrchestrator {
 
         // Update server post metadata using the standardized data
         $metadata = [
+            'arsol_server_provisioned_id' => $server_data['provisioned_id'],
             'arsol_server_provisioned_status' => 1,
             'arsol_server_provisioned_name' => $server_data['provisioned_name'],
             'arsol_server_provisioned_os' => $server_data['provisioned_os'],

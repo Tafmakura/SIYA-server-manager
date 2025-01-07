@@ -87,6 +87,7 @@ class Vultr /*implements ServerProvider*/ {
         $power_status = $api_response['instance']['power_status'] ?? '';
         
         return [
+            'provisioned_id' => $api_response['instance']['id'] ?? '',
             'provisioned_name' => $api_response['instance']['label'] ?? '',
             'provisioned_vcpu_count' => $api_response['instance']['vcpu_count'] ?? '',
             'provisioned_memory' => $api_response['instance']['ram'] ?? '',
@@ -104,9 +105,8 @@ class Vultr /*implements ServerProvider*/ {
         ];
     }
 
-    public function ping_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_id, [
+    public function ping_server($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -121,9 +121,8 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 200;
     }
 
-    public function protect_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . "/instances/{$server_id}", [
+    public function protect_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . "/instances/{$server_provisioned_id}", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -143,9 +142,8 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 202;
     }
 
-    public function remove_protection_from_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . "/instances/{$server_id}", [
+    public function remove_protection_from_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . "/instances/{$server_provisioned_id}", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
@@ -165,9 +163,8 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 202;
     }
 
-    public function shutdown_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/instances/' . $server_id . '/halt', [
+    public function shutdown_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/instances/' . $server_provisioned_id . '/halt', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -182,14 +179,13 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function poweroff_server() {
+    public function poweroff_server($server_provisioned_id) {
         // Vultr uses the same endpoint for shutdown and poweroff
-        return $this->shutdown_server();
+        return $this->shutdown_server($server_provisioned_id);
     }
 
-    public function poweron_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/instances/' . $server_id . '/start', [
+    public function poweron_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/instances/' . $server_provisioned_id . '/start', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -208,15 +204,14 @@ class Vultr /*implements ServerProvider*/ {
         // To be implemented
     }
 
-    public function create_server_snapshot() {
-        $server_id = get_option('server_id');
+    public function create_server_snapshot($server_provisioned_id) {
         $response = wp_remote_post($this->api_endpoint . '/snapshots', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'instance_id' => $server_id
+                'instance_id' => $server_provisioned_id
             ])
         ]);
 
@@ -252,9 +247,8 @@ class Vultr /*implements ServerProvider*/ {
         // To be implemented
     }
 
-    public function destroy_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_request($this->api_endpoint . '/instances/' . $server_id, [
+    public function destroy_server($server_provisioned_id) {
+        $response = wp_remote_request($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'method' => 'DELETE',
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
@@ -270,9 +264,8 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function reboot_server() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_post($this->api_endpoint . '/instances/' . $server_id . '/reboot', [
+    public function reboot_server($server_provisioned_id) {
+        $response = wp_remote_post($this->api_endpoint . '/instances/' . $server_provisioned_id . '/reboot', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
@@ -287,9 +280,8 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function get_server_status() {
-        $server_id = get_option('server_id');
-        $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_id, [
+    public function get_server_status($server_provisioned_id) {
+        $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
