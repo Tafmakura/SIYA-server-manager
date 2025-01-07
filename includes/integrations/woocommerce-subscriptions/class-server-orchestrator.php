@@ -492,6 +492,7 @@ class ServerOrchestrator {
         
         // Initialize RunCloud & Deploy to RunCloud
         $this->runcloud = new Runcloud();
+        error_log('Milestone X2b');
         $runcloud_response = $this->runcloud->create_server_in_server_manager(
             $server_name,
             $ipv4,
