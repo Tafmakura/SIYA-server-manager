@@ -149,6 +149,8 @@ class ServerOrchestrator {
 
             // Load all parameters from the server post metadata
             $metadata = $server_post_instance->get_meta_data($this->server_post_id);
+
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] HOYO 2 Server post ID: %d', $this->server_post_id));
             
             // Load parameters into class properties
             $this->server_post_name = $metadata['arsol_server_post_name'] ?? null;
