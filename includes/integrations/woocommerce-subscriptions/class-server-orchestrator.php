@@ -221,6 +221,7 @@ class ServerOrchestrator {
                     'server_provider' => $this->server_provider_slug,   
                     'server_manager' => $this->connect_server_manager,
                     'server_provisioned_id' => $this->server_provisioned_id,
+                    'subscription' => $this->subscription,
                     'server_post_id' => $this->server_post_id,
                     'target_status' => 'active',
                     'poll_interval' => 3,
@@ -290,6 +291,7 @@ class ServerOrchestrator {
         $server_provider_slug = $args['server_provider'];
         $connect_server_manager = $args['server_manager'];
         $server_provisioned_id = $args['server_provisioned_id'];
+        $subscription = $args['subscription'];
         $target_status = $args['target_status'];
         $server_post_id = $args['server_post_id'];
         $poll_interval = $args['poll_interval'];
@@ -320,7 +322,7 @@ class ServerOrchestrator {
                     if (!$server_deployed_status && $connect_server_manager === 'yes') {
                         error_log('[SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
                         $this->runcloud = new Runcloud();  
-                        $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $status, $subscription);
+                        $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $subscription);
                     } else {
                         error_log('[SIYA Server Manager - ServerOrchestrator] Server ready, no Runcloud deployment needed');
                     }
@@ -457,7 +459,7 @@ class ServerOrchestrator {
         return $server_data;
     }
 
-    private function deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription) {
+    private function deploy_to_runcloud_and_update_metadata($server_post_instance, $subscription) {
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
         $server_name = 'ARSOL' . $this->subscription_id;
@@ -472,7 +474,7 @@ class ServerOrchestrator {
             $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
             return;
         }
-
+        
         // Deploy to RunCloud
         $runcloud_response = $this->runcloud->create_server_in_server_manager(
             $server_name,
