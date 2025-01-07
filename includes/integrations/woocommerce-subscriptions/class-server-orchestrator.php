@@ -463,7 +463,7 @@ class ServerOrchestrator {
         $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
 
         if ($provisioned_remote_status === 'off') {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Server successfully shut down.');
+            error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully shut down.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
         } else {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server shutdown verification failed. Current status: ' . $provisioned_remote_status);
