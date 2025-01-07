@@ -230,49 +230,8 @@ class ServerOrchestrator {
                 'arsol_server_provision'
             );
 
+            error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
 
-            error_log('Milestone 7 TADA!!!!!!!');
-
-
-            /* MOVE TO DEPLOYED
-
-
-
-
-                     // MUST MOVE TO DAFTER DOPLYMENT
-            // Load deployment related parameters if server has been deployed
-            $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
-            if ($this->server_deployed_status === 1) {
-                $this->server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
-                $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
-                $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
-            }
-
-
-            // Wait until server is ready.
-            if ($server_data) {
-                $server_ready = $this->update_server_status('active', 300, 10); // 5 minutes timeout, check every 10 seconds
-                if (!$server_ready) {
-                    throw new \Exception('Server failed to become active within the timeout period');
-                }
-            }
-    
-
-            // Step 3: Deploy to RunCloud if not already deployed and server manager is required
-
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Not deployed, deploying to RunCloud');
-
-                    $this->runcloud = new Runcloud();  
-                    $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
-                
-            } else {
-                error_log('[SIYA Server Manager - ServerOrchestrator] Server manager already deployed or not required, skipping this step');
-            }
-
-
-            // Step 4: Update server status to active
-       
-            */
 
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error in server completion: %s', $e->getMessage()));
@@ -284,10 +243,8 @@ class ServerOrchestrator {
         }
     }
 
-
-
     public function update_server_status($args) {
-        error_log('[SIYA Server Manager - ServerOrchestrator] update_server_status called');
+        error_log('[SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
         $server_provider_slug = $args['server_provider'];
         $connect_server_manager = $args['server_manager'];
         $server_provisioned_id = $args['server_provisioned_id'];
@@ -384,6 +341,9 @@ class ServerOrchestrator {
             throw new \Exception('Failed to create server post');
         }
     }
+
+
+
 
     // Step 2: Provision server and update server post metadata
     private function provision_server($server_post_instance, $subscription) {
@@ -555,12 +515,17 @@ class ServerOrchestrator {
             ));
             $subscription->update_status('on-hold'); // Switch subscription status to on hold
             return; // Exit the function after logging the error
+        } else {
+
+            error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with unknown error');
+            $subscription->add_order_note(sprintf(
+                "RunCloud deployment failed with unknown error.\nFull response: %s",
+                print_r($runcloud_response, true)
+            ));
+            $subscription->update_status('on-hold'); // Switch subscription status to on hold
+            return; // Exit the function after logging the error
+
         }
-
-        error_log('Milestone X4');
-
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
-
     }
 
     private function get_provisioned_server_ip($server_provider_slug, $server_provisioned_id) {
@@ -658,11 +623,6 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager - ServerOrchestrator] Returning single matching product ID: ' . $matching_product_ids[0]);
         return $matching_product_ids[0];
     }
-    
-    
-    
-
-
 
     public function subscription_circuit_breaker($subscription) {
 
@@ -719,10 +679,6 @@ class ServerOrchestrator {
         }
 
     }
-
-
-
-    
 
     // Modified helper method to initialize server provider
     private function initialize_server_provider($server_provider_slug = null) {
