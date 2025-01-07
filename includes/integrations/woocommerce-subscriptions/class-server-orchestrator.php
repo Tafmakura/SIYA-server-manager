@@ -287,6 +287,7 @@ class ServerOrchestrator {
 
 
     public function update_server_status($args) {
+        error_log('[SIYA Server Manager] update_server_status called with args: ' . print_r($args, true));
 
         // Extract the arguments
         $server_provider_slug = $args['server_provider'];
@@ -302,6 +303,8 @@ class ServerOrchestrator {
                 $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
                 $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
 
+                error_log('[SIYA Server Manager] Checking status: ' . print_r($status, true));
+
                 $server_post_instance = new ServerPost($server_post_id);
                 $server_post_instance->update_meta_data($server_post_id, [
                     'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
@@ -310,6 +313,7 @@ class ServerOrchestrator {
                 ]);
 
                 if ($provisioned_remote_status === $target_status) {
+                    error_log('[SIYA Server Manager] Remote status matched target status: ' . $target_status);
                     // success
                     return true;
                 }
