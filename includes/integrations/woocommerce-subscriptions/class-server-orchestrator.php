@@ -235,7 +235,7 @@ class ServerOrchestrator {
 
 
 
-            error_log('[SIYA Server Manager] HOOOOOOOOOYOOOOOOOO'.$this->server_provisioned_id,);
+            error_log('[SIYA Server Manager] HOOOOOOOOOYOOOOOOOO'.$this->server_provisioned_id);
          
             
             // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
@@ -423,8 +423,8 @@ class ServerOrchestrator {
 
         // Update server post metadata using the standardized data
         $metadata = [
-            'arsol_server_provisioned_id' => $server_data['provisioned_id'],
             'arsol_server_provisioned_status' => 1,
+            'arsol_server_provisioned_id' => $server_data['provisioned_id'],
             'arsol_server_provisioned_name' => $server_data['provisioned_name'],
             'arsol_server_provisioned_os' => $server_data['provisioned_os'],
             'arsol_server_provisioned_ipv4' => $server_data['provisioned_ipv4'],
