@@ -175,7 +175,6 @@ class ServerOrchestrator {
             $server_data = null;
             if (!$is_provisioned) {
 
-
                 error_log('Milestone 5a');
 
                  // Initialize the appropriate server provider with the slug
@@ -189,10 +188,8 @@ class ServerOrchestrator {
 
             } else {
 
-
                 error_log('Milestone 5b');
 
-                error_log('[SIYA Server Manager - ServerOrchestrator] Server already provisioned, skipping Step 2');
                 $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
                 $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
                 $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
