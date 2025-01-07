@@ -212,7 +212,7 @@ class ServerOrchestrator {
        
             error_log('Milestone 6');
 
-            // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
+            // Step 2: Schedule asynchronuss action with predefined parameters to complete server provisioning
             as_schedule_single_action(
                 time(), // Run immediately, but in the background
                 'arsol_update_server_status',
