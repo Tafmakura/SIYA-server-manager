@@ -128,6 +128,7 @@ class ServerOrchestrator {
 
     public function complete_server_provision($args) {
         try {
+            
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Starting server completion'));
         
             // Extract the arguments from action scheduler
@@ -136,9 +137,6 @@ class ServerOrchestrator {
             $this->server_post_id = $args['server_post_id'];
             $this->server_product_id = $args['server_product_id'];
             $this->server_provider_slug = $args['server_provider_slug'];
-            
-            // Initialize the appropriate server provider with the slug
-            $this->initialize_server_provider($this->server_provider_slug);
             
             if (!$this->subscription) {
                 throw new \Exception('Subscription not found: ' . $this->subscription_id);
@@ -163,15 +161,7 @@ class ServerOrchestrator {
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
 
-            // MUST MOVE TO DAFTER DOPLYMENT
-            // Load deployment related parameters if server has been deployed
-            $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
-            if ($this->server_deployed_status === 1) {
-                $this->server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
-                $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
-                $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
-            }
-
+   
             // Check server status flags
             $is_provisioned = $this->server_provisioned_status;
             $is_deployed = $this->server_deployed_status; //move to deployed
@@ -186,6 +176,9 @@ class ServerOrchestrator {
             // Step 2: Provision server if not already provisioned
             $server_data = null;
             if (!$is_provisioned) {
+
+                 // Initialize the appropriate server provider with the slug
+                $this->initialize_server_provider($this->server_provider_slug);
                 $server_data = $this->provision_server($server_post_instance, $this->subscription);
 
                 error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
@@ -225,7 +218,20 @@ class ServerOrchestrator {
             );
 
 
-            /* DELETE 
+            /* MOVE TO DEPLOYED
+
+
+
+
+                     // MUST MOVE TO DAFTER DOPLYMENT
+            // Load deployment related parameters if server has been deployed
+            $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
+            if ($this->server_deployed_status === 1) {
+                $this->server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
+                $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
+                $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
+            }
+
 
             // Wait until server is ready.
             if ($server_data) {
