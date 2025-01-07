@@ -305,6 +305,9 @@ class ServerOrchestrator {
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
             try {
+
+                error_log('[SIYA Server Manager] HOYO');
+
                 $status = $this->get_provider_instance($server_provider_slug)->get_server_status();
                 $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
                 $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
