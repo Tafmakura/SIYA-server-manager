@@ -233,6 +233,47 @@ class ServerOrchestrator {
 
             error_log('Milestone 7 TADA!!!!!!!');
 
+
+            /* MOVE TO DEPLOYED
+
+
+
+
+                     // MUST MOVE TO DAFTER DOPLYMENT
+            // Load deployment related parameters if server has been deployed
+            $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
+            if ($this->server_deployed_status === 1) {
+                $this->server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
+                $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
+                $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
+            }
+
+
+            // Wait until server is ready.
+            if ($server_data) {
+                $server_ready = $this->update_server_status('active', 300, 10); // 5 minutes timeout, check every 10 seconds
+                if (!$server_ready) {
+                    throw new \Exception('Server failed to become active within the timeout period');
+                }
+            }
+    
+
+            // Step 3: Deploy to RunCloud if not already deployed and server manager is required
+
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Not deployed, deploying to RunCloud');
+
+                    $this->runcloud = new Runcloud();  
+                    $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
+                
+            } else {
+                error_log('[SIYA Server Manager - ServerOrchestrator] Server manager already deployed or not required, skipping this step');
+            }
+
+
+            // Step 4: Update server status to active
+       
+            */
+
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error in server completion: %s', $e->getMessage()));
             
@@ -422,6 +463,7 @@ class ServerOrchestrator {
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
         // Get server metadata from post
+        $this->server_post_id = $server_post_id;
         $server_post_instance = new ServerPost($server_post_id);
         $server_name = 'ARSOL' . $this->subscription_id;
         $web_server_type = 'nginx';
@@ -476,7 +518,7 @@ class ServerOrchestrator {
 
         $response_body_decoded = json_decode($runcloud_response['body'], true);
 
-        error_log('Milestone X4');
+        error_log('Milestone X4: Runcloud Response: ' . print_r($response_body_decoded, true));
 
         if (!isset($runcloud_response['status']) || $runcloud_response['status'] != 200) {
             error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
