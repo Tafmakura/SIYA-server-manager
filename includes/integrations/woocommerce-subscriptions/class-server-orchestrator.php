@@ -505,23 +505,31 @@ class ServerOrchestrator {
 
         error_log('Milestone X3');
 
-        if (is_wp_error($runcloud_response)) {
-            error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud API Error: ' . $runcloud_response->get_error_message());
+        if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
+
+            // Successful Log
+            error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
+
+            // Update server metadata
+            $metadata = [
+                'arsol_server_deployed_server_id' => $response_body_decoded['id'] ?? null,
+                'arsol_server_deployment_date' => current_time('mysql'),
+                'arsol_server_deployed_status' => 1,
+                'arsol_server_connection_status' => 0,
+                'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
+            ];
+            $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+
+            // Successful API subscription note
             $subscription->add_order_note(sprintf(
-                "RunCloud deployment failed (WP_Error).\nError message: %s\nFull response: %s",
-                $runcloud_response->get_error_message(),
-                print_r($runcloud_response, true)
+                "RunCloud deployment successful with status: %s\nResponse body: %s",
+                $runcloud_response['status'],
+                $runcloud_response['body']
             ));
-            $subscription->update_status('on-hold'); // Switch subscription status to on hold
-            return; // Exit the function after logging the error
-        }
+           
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
-        $response_body_decoded = json_decode($runcloud_response['body'], true);
-        $response_status_decoded = json_decode($runcloud_response['status'], true);
-
-        error_log('Milestone X4: Runcloud Response: ' . print_r($response_status_decoded, true) . print_r($response_body_decoded, true));
-
-        if (!isset($runcloud_response['status']) || $runcloud_response['status'] != 200) {
+        } elseif (!isset($runcloud_response['status']) || !in_array($runcloud_response['status'], [200, 201])) {
             error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
             $subscription->add_order_note(sprintf(
                 "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
@@ -531,40 +539,21 @@ class ServerOrchestrator {
             ));
             $subscription->update_status('on-hold'); // Switch subscription status to on hold
             return; // Exit the function after logging the error
+        } elseif (is_wp_error($runcloud_response)){
+
+            error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with WP_Error: ' . $runcloud_response->get_error_message());
+            $subscription->add_order_note(sprintf(
+                "RunCloud deployment failed (WP_Error).\nError message: %s\nFull response: %s",
+                $runcloud_response->get_error_message(),
+                print_r($runcloud_response, true)
+            ));
+            $subscription->update_status('on-hold'); // Switch subscription status to on hold
+            return; // Exit the function after logging the error
         }
 
-        error_log('Milestone X5');
-
-        // Successful API response
-        error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
-
-        /*
-        $subscription->add_order_note(sprintf(
-            "RunCloud deployment successful with status: %s\nResponse body: %s",
-           // $runcloud_response['status'],
-            $runcloud_response['body']
-        ));
-        */
-
-        // Update server metadata
-        error_log('Milestone X6');
-
-        $metadata = [
-            'arsol_server_deployed_server_id' => $response_body_decoded['id'] ?? null,
-            'arsol_server_deployment_date' => current_time('mysql'),
-            'arsol_server_deployed_status' => 1,
-            'arsol_server_connection_status' => 0,
-            'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
-        ];
-        
-        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
-   
-       
-        $subscription->update_status('active');
+        error_log('Milestone X4');
 
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
-        
-        error_log('Milestone X7');
 
     }
 
