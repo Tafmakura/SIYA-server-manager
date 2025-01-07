@@ -287,10 +287,12 @@ class ServerOrchestrator {
 
 
     public function update_server_status($args) {
-        error_log(sprintf('[SIYA Server Manager] update_server_status called - Provider: %s, Post ID: %d, Target: %s',
+        error_log(sprintf('[SIYA Server Manager] update_server_status called - Provider: %s, Post ID: %d, Target: %s, Poll Interval: %d, Timeout: %d',
             $args['server_provider'],
-            $args['server_post_id'],
-            $args['target_status']
+            $args['server_post_id'], 
+            $args['target_status'],
+            $args['poll_interval'],
+            $args['time_out']
         ));
 
         // Extract the arguments
