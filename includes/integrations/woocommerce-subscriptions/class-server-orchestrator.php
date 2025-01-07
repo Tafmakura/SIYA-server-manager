@@ -148,12 +148,6 @@ class ServerOrchestrator {
             $server_post_instance = new ServerPost($this->server_post_id);
             $metadata = $server_post_instance->get_meta_data();
 
-            error_log(sprintf(
-                '[SIYA Server Manager - ServerOrchestrator] HOYO 2 Server post %d metadata: %s',
-                $this->server_post_id,
-                var_export($metadata, true)
-            ));
-
             // Load parameters into class properties
             $this->server_post_name = $metadata['arsol_server_post_name'] ?? null;
             $this->server_post_status = $metadata['arsol_server_post_status'] ?? null;
@@ -168,26 +162,8 @@ class ServerOrchestrator {
             $this->server_image_slug = $metadata['arsol_server_image_slug'] ?? null;
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
-            
-            // Load provisioning related parameters if server has been provisioned
-            $this->server_provisioned_status = $metadata['arsol_server_provisioned_status'] ?? null;
-            if ($this->server_provisioned_status === 1) {
-                $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
-                $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
-                $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
-                $this->server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
-                $this->server_provisioned_ipv6 = $metadata['arsol_server_provisioned_ipv6'] ?? null;
-                $this->server_provisioned_root_password = $metadata['arsol_server_provisioned_root_password'] ?? null;
-                $this->server_provisioned_date = $metadata['arsol_server_provisioned_date'] ?? null;
-                $this->server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
-                $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
-            }
 
-
-          error_log('[SIYA Server Manager - ServerOrchestrator] HOYO 1 Server provisioned status: ' . print_r($this->server_provisioned_status, true));
-
-
-
+            // MUST MOVE TO DAFTER DOPLYMENT
             // Load deployment related parameters if server has been deployed
             $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
             if ($this->server_deployed_status === 1) {
@@ -195,23 +171,16 @@ class ServerOrchestrator {
                 $this->server_deployment_date = $metadata['arsol_server_deployment_date'] ?? null;
                 $this->server_connection_status = $metadata['arsol_server_connection_status'] ?? null;
             }
-            
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Loaded parameters for server post %d: %s', 
-                $this->server_post_id,
-                json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-            ));
 
             // Check server status flags
             $is_provisioned = $this->server_provisioned_status;
-            $is_deployed = $this->server_deployed_status;
-            $requires_server_manager = $this->connect_server_manager;
+            $is_deployed = $this->server_deployed_status; //move to deployed
+            $requires_server_manager = $this->connect_server_manager; //move to deployed
 
 
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Subscription %d status flags - Provisioned: %s, Deployed: %s, Requires Server Manager: %s', 
                 $this->subscription_id,
                 $is_provisioned ? 'true' : 'false',
-                $is_deployed ? 'true' : 'false',
-                $requires_server_manager ? 'true' : 'false',
             ));
 
             // Step 2: Provision server if not already provisioned
@@ -224,30 +193,22 @@ class ServerOrchestrator {
                     json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                 ));
 
-                // DELETE
-                // WE MAY HAVE TO DELETE THIS LINE BECAUSE WE DON'T WANT TO OVERIDE SUBSCRIPTION STATUS 
-                /*
-                if ( $requires_server_manager){
-                    $this->subscription->update_status('on-hold');
-                }
-                */
-
             } else {
                 error_log('[SIYA Server Manager - ServerOrchestrator] Server already provisioned, skipping Step 2');
-                $server_data = [
-                    'server' => [
-                        'public_net' => [
-                            'ipv4' => ['ip' => get_post_meta($this->server_post_id, 'arsol_server_provisioned_ipv4', true)]
-                        ]
-                    ]
-                ];
+                $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
+                $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
+                $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
+                $this->server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
+                $this->server_provisioned_ipv6 = $metadata['arsol_server_provisioned_ipv6'] ?? null;
+                $this->server_provisioned_root_password = $metadata['arsol_server_provisioned_root_password'] ?? null;
+                $this->server_provisioned_date = $metadata['arsol_server_provisioned_date'] ?? null;
+                $this->server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
+                $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
+
+                error_log('[SIYA Server Manager - ServerOrchestrator] HOYO 1 Server provisioned status: ' . print_r($this->server_provisioned_status, true));
+
             }
 
-
-
-            error_log('[SIYA Server Manager - ServerOrchestrator] HOOOOOOOOOYOOOOOOOO'.$this->server_provisioned_id);
-         
-            
             // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
             as_schedule_single_action(
                 time(), // Run immediately, but in the background
@@ -393,6 +354,7 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     private function provision_server($server_post_instance, $subscription) {
+        
         $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         error_log('[SIYA Server Manager - ServerOrchestrator] Server provider: ' . print_r($server_provider_slug, true));
         $server_name = 'ARSOL' . $this->subscription_id;
@@ -444,6 +406,7 @@ class ServerOrchestrator {
             'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status'],
             'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status']
         ];
+        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provider Status Details:%sRemote Status: %s%sRaw Status: %s', 
             PHP_EOL,
@@ -452,7 +415,7 @@ class ServerOrchestrator {
             $server_data['provisioned_remote_raw_status']
         ));
 
-        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+      
 
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
