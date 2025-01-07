@@ -145,8 +145,8 @@ class ServerOrchestrator {
             }
 
             // Load all parameters from the server post metadata
-            $server_post_instance = new ServerPost($server_post_id);
-            $metadata = $server_post_instance->get_meta_data($this->server_post_id);
+            $server_post_instance = new ServerPost($this->server_post_id);
+            $metadata = $server_post_instance->get_meta_data();
 
             // Load parameters into class properties
             $this->server_post_name = $metadata['arsol_server_post_name'] ?? null;
