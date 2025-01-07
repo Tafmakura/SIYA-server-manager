@@ -170,16 +170,13 @@ class ServerOrchestrator {
 
             error_log('Milestone 4');
 
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Subscription %d status flags - Provisioned: %s, Deployed: %s, Requires Server Manager: %s', 
-                $this->subscription_id,
-                $is_provisioned ? 'true' : 'false',
-            ));
-
-            error_log('Milestone 5');
 
             // Step 2: Provision server if not already provisioned
             $server_data = null;
             if (!$is_provisioned) {
+
+
+                error_log('Milestone 5a');
 
                  // Initialize the appropriate server provider with the slug
                 $this->initialize_server_provider($this->server_provider_slug);
@@ -191,6 +188,10 @@ class ServerOrchestrator {
                 ));
 
             } else {
+
+
+                error_log('Milestone 5b');
+
                 error_log('[SIYA Server Manager - ServerOrchestrator] Server already provisioned, skipping Step 2');
                 $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
                 $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
