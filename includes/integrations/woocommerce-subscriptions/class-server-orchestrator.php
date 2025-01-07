@@ -287,7 +287,11 @@ class ServerOrchestrator {
 
 
     public function update_server_status($args) {
-        error_log('[SIYA Server Manager] update_server_status called with args: ' . print_r($args, true));
+        error_log(sprintf('[SIYA Server Manager] update_server_status called - Provider: %s, Post ID: %d, Target: %s',
+            $args['server_provider'],
+            $args['server_post_id'],
+            $args['target_status']
+        ));
 
         // Extract the arguments
         $server_provider_slug = $args['server_provider'];
