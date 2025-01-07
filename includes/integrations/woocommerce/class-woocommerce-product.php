@@ -201,6 +201,9 @@ class Product {
                 if (!$('#_arsol_wordpress_server').is(':checked')) {
                     $('#_arsol_wordpress_ecommerce').prop('checked', false);
                 }
+                // Enable provider and group fields before submitting
+                $('#_arsol_server_provider_slug').prop('disabled', false);
+                $('#_arsol_server_group_slug').prop('disabled', false);
             });
         });
         </script>
