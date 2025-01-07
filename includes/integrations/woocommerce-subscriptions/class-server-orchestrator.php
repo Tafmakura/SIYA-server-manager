@@ -61,6 +61,9 @@ class ServerOrchestrator {
         
         // Add new action hook for the background process
         add_action('arsol_complete_server_provision', array($this, 'complete_server_provision'), 20, 1);
+       
+        // Add new action hook for the background process
+        add_action('arsol_update_server_status', array($this, 'update_server_status'), 20, 1);
     }
 
     public function start_server_provision($subscription) {
@@ -199,7 +202,6 @@ class ServerOrchestrator {
                 $requires_server_manager ? 'true' : 'false',
             ));
 
-            
             // Step 2: Provision server if not already provisioned
             $server_data = null;
             if (!$is_provisioned) {
@@ -210,11 +212,13 @@ class ServerOrchestrator {
                     json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                 ));
 
-
-                // WE MAY HAVE TO DELETE THIS LINE BECAUSE WE DON'T WANT TO OVERIDE SUBSCRIPTION STATUS
+                // DELETE
+                // WE MAY HAVE TO DELETE THIS LINE BECAUSE WE DON'T WANT TO OVERIDE SUBSCRIPTION STATUS 
+                /*
                 if ( $requires_server_manager){
                     $this->subscription->update_status('on-hold');
                 }
+                */
 
             } else {
                 error_log('[SIYA Server Manager] Server already provisioned, skipping Step 2');
@@ -226,50 +230,50 @@ class ServerOrchestrator {
                     ]
                 ];
             }
-                
-        
+            
+            // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
+            as_schedule_single_action(
+                time(), // Run immediately, but in the background
+                'arsol_update_server_status',
+                [[
+                    'server_provider' => $this->server_provider_slug,   
+                    'server_post_id' => $this->server_post_id,
+                    'target_status' => 'active',
+                    'poll_interval' => 10,
+                    'time_out' => 300,
+                ]],
+                'arsol_server_provision'
+            );
 
 
+            /* DELETE 
 
-
-
-
-
-
-
-
-
-
-
-
-            // Runcloud deployment switch
+            // Wait until server is ready.
             if ($server_data) {
-                $server_ready = $this->wait_for_server_status('active', 300, 10); // 5 minutes timeout, check every 10 seconds
+                $server_ready = $this->update_server_status('active', 300, 10); // 5 minutes timeout, check every 10 seconds
                 if (!$server_ready) {
                     throw new \Exception('Server failed to become active within the timeout period');
                 }
             }
     
-            // Step 3: Deploy to RunCloud if not already deployed
-            if (!$is_deployed) {
-                error_log('[SIYA Server Manager] Not deployed, deploying to RunCloud');
-                $this->runcloud = new Runcloud();  
-                $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
+
+            // Step 3: Deploy to RunCloud if not already deployed and server manager is required
+            if (!$is_deployed && $requires_server_manager) {
+
+                    error_log('[SIYA Server Manager] Not deployed, deploying to RunCloud');
+
+                    $this->runcloud = new Runcloud();  
+                    $this->deploy_to_runcloud_and_update_metadata($server_post_instance, $server_data, $subscription);
+                
             } else {
-                error_log('[SIYA Server Manager] Server already deployed, skipping Step 3');
+                error_log('[SIYA Server Manager] Server manager already deployed or not required, skipping this step');
             }
+
+
+            // Step 4: Update server status to active
        
+            */
 
-
-
-
-
-
-
-
-
-
-       
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager] Error in server completion: %s', $e->getMessage()));
             
@@ -278,6 +282,48 @@ class ServerOrchestrator {
                 $subscription->update_status('on-hold');
             }
         }
+    }
+
+
+
+    public function update_server_status($args) {
+
+        // Extract the arguments
+        $server_provider_slug = $args['server_provider'];
+        $target_status = $args['target_status'];
+        $server_post_id = $args['server_post_id'];
+        $poll_interval = $args['poll_interval'];
+        $time_out = $args['time_out'];
+
+        $start_time = time();
+        while ((time() - $start_time) < $time_out) {
+            try {
+                $status = $this->get_provider_instance($server_provider_slug)->get_server_status();
+                $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
+                $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
+
+                $server_post_instance = new ServerPost($server_post_id);
+                $server_post_instance->update_meta_data($server_post_id, [
+                    'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
+                    'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_raw_status,
+                    'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
+                ]);
+
+                if ($provisioned_remote_status === $target_status) {
+                    // success
+                    return true;
+                }
+                sleep($poll_interval);
+            } catch (\Exception $e) {
+                // log exception
+                error_log("Error fetching server status: " . $e->getMessage());
+                // failure
+                return false;
+            }
+        }
+        // timed out
+        error_log("Server status update timed out.");
+        return false;
     }
 
     // Step 1: Create server post and update server metadata
@@ -629,70 +675,7 @@ class ServerOrchestrator {
 
 
 
-
-
-    // Here 
-
-    /**
-     * Waits for the server to reach a specific status within a timeout period.
-     *
-     * @param string $target_status      The desired server status.
-     * @param int    $timeout_seconds    Maximum time to wait (in seconds).
-     * @param int    $check_interval     Time between status checks (in seconds).
-     * @return bool                      True if target status is reached, false otherwise.
-     */
-    private function wait_for_server_status($target_status, $timeout_seconds = 300, $check_interval = 10) {
-        error_log(sprintf('[SIYA Server Manager] Waiting for server to reach "%s" status (timeout: %d seconds, interval: %d seconds)', 
-            $target_status, $timeout_seconds, $check_interval));
-
-        $server_provider = $this->initialize_server_provider($this->server_provider_slug);
-        $start_time = time();
-        $attempts = 0;
-
-        while (time() - $start_time < $timeout_seconds) {
-            $attempts++;
-            $status = $server_provider->get_server_status();
-
-            if ($status === false) {
-                error_log(sprintf('[SIYA Server Manager] Failed to get server status (attempt %d)', $attempts));
-                return false;
-            }
-
-            $current_status = $status['provisioned_remote_status'];
-            error_log(sprintf('[SIYA Server Manager] Current server status (attempt %d): %s (raw: %s)', 
-                $attempts, 
-                $current_status, 
-                $status['provisioned_remote_raw_status']
-            ));
-
-            if ($current_status === $target_status) {
-                error_log(sprintf('[SIYA Server Manager] Server reached target status "%s" after %d seconds (%d attempts)', 
-                    $target_status, 
-                    time() - $start_time, 
-                    $attempts
-                ));
-                return true;
-            }
-
-            if ($current_status === 'error') {
-                error_log(sprintf('[SIYA Server Manager] Server entered error state (attempt %d)', $attempts));
-                return false;
-            }
-
-            error_log(sprintf('[SIYA Server Manager] Waiting %d seconds before next check (attempt %d)', 
-                $check_interval, 
-                $attempts + 1
-            ));
-            sleep($check_interval);
-        }
-
-        error_log(sprintf('[SIYA Server Manager] Timeout reached (%d seconds, %d attempts) waiting for status "%s"', 
-            $timeout_seconds, 
-            $attempts, 
-            $target_status
-        ));
-        return false;
-    }
+    
 
     // Modified helper method to initialize server provider
     private function initialize_server_provider($server_provider_slug = null) {
