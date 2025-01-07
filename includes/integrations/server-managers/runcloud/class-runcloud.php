@@ -14,10 +14,6 @@ class Runcloud /*implements ServerManager*/ {
         $this->api_key = get_option('runcloud_api_key');
     }
 
-    public function setup(): RuncloudSetup {
-        return new RuncloudSetup();
-    }
-
     public function create_server_in_server_manager(
         string $server_name,
         string $ipAddress,
@@ -25,6 +21,9 @@ class Runcloud /*implements ServerManager*/ {
         string $installationType,
         ?string $provider = null
     ) {
+
+        error_log ('Mileston Y1');
+
         if (empty($ipAddress) || empty($webServerType) || empty($installationType)) {
             throw new \InvalidArgumentException('IP Address, Web Server Type and Installation Type are required');
         }
@@ -98,7 +97,7 @@ class Runcloud /*implements ServerManager*/ {
         );
 
         if (is_wp_error($script_response)) {
-            error_log('RunCloud Script Fetch Error: ' . $script_response->get_error_message());
+            error_log('[SIYA Server Manager][Runcloud] Script Fetch Error: ' . $script_response->get_error_message());
             return new \WP_Error('script_fetch_failed', 'Failed to get installation script: ' . $script_response->get_error_message());
         }
 
@@ -162,7 +161,7 @@ class Runcloud /*implements ServerManager*/ {
         } catch (\Exception $e) {
             return new \WP_Error(
                 'ssh_connection_failed',
-                'Failed to establish SSH connection: ' . $e->getMessage()
+                '[SIYA Server Manager][Runcloud] Failed to establish SSH connection: ' . $e->getMessage()
             );
         }
     }

@@ -14,10 +14,12 @@
             <tr>
                 <th><?php echo esc_html($field['label']); ?></th>
                 <td>
-                    <textarea 
-                        name="<?php echo esc_attr($key . '_api_key'); ?>" 
-                        style="width: 100%; max-width: 400px; height: 116px; resize: none; overflow: auto;"
-                    ><?php echo esc_textarea($field['value']); ?></textarea>
+                    <input 
+                        type="text"
+                        name="<?php echo esc_attr($key . '_api_key'); ?>"
+                        value="<?php echo esc_attr($field['value']); ?>"
+                        class="regular-text"
+                    />
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -32,10 +34,12 @@
             <tr>
                 <th><?php echo esc_html($field['label']); ?></th>
                 <td>
-                    <textarea 
-                        name="<?php echo esc_attr($key . '_api_key'); ?>" 
-                        style="width: 100%; max-width: 400px; height: 116px; resize: none; overflow: auto;"
-                    ><?php echo esc_textarea($field['value']); ?></textarea>
+                    <input 
+                        type="text"
+                        name="<?php echo esc_attr($key . '_api_key'); ?>"
+                        value="<?php echo esc_attr($field['value']); ?>"
+                        class="regular-text"
+                    />
                 </td>
             </tr>
             <?php endforeach; ?>
