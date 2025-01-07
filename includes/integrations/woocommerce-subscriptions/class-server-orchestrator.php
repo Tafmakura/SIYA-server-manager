@@ -191,6 +191,7 @@ class ServerOrchestrator {
             error_log('Milestone 5b');
 
             if ($is_provisioned) {
+                $this->server_provisioned_status = $metadata['arsol_server_provisioned_status'] ?? null;
                 $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
                 $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
                 $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
@@ -201,7 +202,7 @@ class ServerOrchestrator {
                 $this->server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
                 $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
             }
-            
+
             error_log('[SIYA Server Manager - ServerOrchestrator] HOYO 1 Server provisioned status: ' . print_r($this->server_provisioned_status, true));
 
             error_log('Milestone 6');
