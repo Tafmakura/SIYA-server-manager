@@ -165,18 +165,14 @@ class ServerOrchestrator {
    
             // Check server status flags
             $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
-            $is_provisioned = $this->server_provisioned_status;
-            $this->server_deployed_status = $metadata['arsol_server_deployed_status'] ?? null;
-            $this->connect_server_manager = $metadata['arsol_connect_server_manager'] ?? null;
-            $is_deployed = $this->server_deployed_status; //move to deployed
-            $requires_server_manager = $this->connect_server_manager; //move to deployed
+       
               
-            error_log('Milestone 4');
+            error_log('Milestone 4 Server Status: ' . $this->server_provisioned_status);
 
 
             // Step 2: Provision server if not already provisioned
             $server_data = null;
-            if (!$is_provisioned) {
+            if (!$this->server_provisioned_status) {
 
                 error_log('Milestone 5a');
 
@@ -193,7 +189,7 @@ class ServerOrchestrator {
 
             error_log('Milestone 5b');
 
-            if ($is_provisioned) {
+            if ($this->server_provisioned_status) {
 
                 $metadata = $server_post_instance->get_meta_data();
 
@@ -209,7 +205,10 @@ class ServerOrchestrator {
                 $this->server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
             }
 
-            error_log('[SIYA Server Manager - ServerOrchestrator] Metadata: ' . print_r($metadata, true));
+             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Full Metadata: %s%s',
+                PHP_EOL,
+                json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+            ));
        
             error_log('Milestone 6');
 
