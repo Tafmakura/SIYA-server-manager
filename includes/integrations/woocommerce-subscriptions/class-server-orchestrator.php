@@ -287,15 +287,7 @@ class ServerOrchestrator {
 
 
     public function update_server_status($args) {
-        error_log(sprintf('[SIYA Server Manager] update_server_status called - Provider: %s, Post ID: %d, Target: %s, Poll Interval: %d, Timeout: %d',
-            $args['server_provider'],
-            $args['server_post_id'], 
-            $args['target_status'],
-            $args['poll_interval'],
-            $args['time_out']
-        ));
-
-        // Extract the arguments
+        error_log('[SIYA Server Manager] update_server_status called with args: ' . print_r($args, true));
         $server_provider_slug = $args['server_provider'];
         $target_status = $args['target_status'];
         $server_post_id = $args['server_post_id'];
@@ -305,14 +297,10 @@ class ServerOrchestrator {
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
             try {
-
-                error_log('[SIYA Server Manager] HOYO');
-
-                $status = $this->get_provider_ininitialize_server_provider($server_provider_slug)->get_server_status();
+                $this->initialize_server_provider($server_provider_slug);
+                $status = $this->server_provider->get_server_status();
                 $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
                 $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
-
-                error_log('[SIYA Server Manager] Checking status: ' . print_r($status, true));
 
                 $server_post_instance = new ServerPost($server_post_id);
                 $server_post_instance->update_meta_data($server_post_id, [
@@ -321,21 +309,18 @@ class ServerOrchestrator {
                     'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
                 ]);
 
+                error_log('[SIYA Server Manager] Checking status: ' . print_r($status, true));
                 if ($provisioned_remote_status === $target_status) {
                     error_log('[SIYA Server Manager] Remote status matched target status: ' . $target_status);
-                    // success
                     return true;
                 }
                 sleep($poll_interval);
             } catch (\Exception $e) {
-                // log exception
                 error_log("Error fetching server status: " . $e->getMessage());
-                // failure
                 return false;
             }
         }
-        // timed out
-        error_log("Server status update timed out.");
+        error_log("Server status update timed out for server post ID: " . $server_post_id);
         return false;
     }
 
