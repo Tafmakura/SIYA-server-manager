@@ -298,6 +298,8 @@ class ServerOrchestrator {
         $poll_interval = $args['poll_interval'];
         $time_out = $args['time_out'];
 
+        error_log('[SIYA Server Manager] HOYO >>>>> Provisioned ID ' . server_provisioned_id);
+
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
             try {
