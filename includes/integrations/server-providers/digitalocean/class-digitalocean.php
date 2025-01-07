@@ -63,7 +63,7 @@ class DigitalOcean /*implements ServerProvider*/ {
 
     private function map_statuses($raw_status) {
         $status_map = [
-            'new' => 'building',
+            'new' => 'starting',
             'active' => 'active',
             'off' => 'off',
             'rebooting' => 'rebooting'

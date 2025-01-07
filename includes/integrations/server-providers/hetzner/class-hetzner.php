@@ -65,8 +65,8 @@ class Hetzner /*implements ServerProvider*/ {
     
     private function map_statuses($raw_status) {
         $status_map = [
-            'initializing' => 'building',
-            'starting' => 'building',
+            'initializing' => 'starting',
+            'starting' => 'starting',
             'running' => 'active',
             'stopped' => 'off',
             'stopping' => 'off',

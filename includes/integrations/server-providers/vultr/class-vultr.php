@@ -65,8 +65,8 @@ class Vultr /*implements ServerProvider*/ {
 
     private function map_statuses($raw_status) {
         $status_map = [
-            'pending' => 'building',
-            'installing' => 'building',
+            'pending' => 'starting',
+            'installing' => 'starting',
             'active' => 'active',
             'stopped' => 'off',
             'rebooting' => 'rebooting'
