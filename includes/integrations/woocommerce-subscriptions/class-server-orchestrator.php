@@ -474,11 +474,21 @@ class ServerOrchestrator {
         $ipv4 = $server_ips['ipv4'];
         $ipv6 = $server_ips['ipv6'];
 
+        // Milestone 1: Log IP addresses
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Milestone X1: Server IP Addresses:%sIPv4: %s%sIPv6: %s', 
+            PHP_EOL,
+            $ipv4,
+            PHP_EOL,
+            $ipv6
+        ));
+
         if (empty($ipv4)) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
             $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
             return;
         }
+
+        error_log('Milestone X2');
         
         // Deploy to RunCloud
         $runcloud_response = $this->runcloud->create_server_in_server_manager(
