@@ -538,11 +538,13 @@ class ServerOrchestrator {
         // Successful API response
         error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
 
+        /*
         $subscription->add_order_note(sprintf(
             "RunCloud deployment successful with status: %s\nResponse body: %s",
            // $runcloud_response['status'],
             $runcloud_response['body']
         ));
+        */
 
         // Update server metadata
         error_log('Milestone X6');
