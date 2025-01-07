@@ -14,10 +14,6 @@ class Runcloud /*implements ServerManager*/ {
         $this->api_key = get_option('runcloud_api_key');
     }
 
-    public function setup(): RuncloudSetup {
-        return new RuncloudSetup();
-    }
-
     public function create_server_in_server_manager(
         string $server_name,
         string $ipAddress,
