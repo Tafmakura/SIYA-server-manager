@@ -17,7 +17,7 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function provision_server($server_name, $server_plan, $server_region = 'nbg1', $server_image = 'ubuntu-20.04') {
-        error_log(sprintf('[SIYA Server Manager] Hetzner: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
+        error_log(sprintf('[SIYA Server Manager][Hetzner] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
         ));
 
@@ -73,7 +73,7 @@ class Hetzner /*implements ServerProvider*/ {
             'rebooting' => 'rebooting'
         ];
         $mapped_status = $status_map[$raw_status] ?? $raw_status;
-        error_log(sprintf('[SIYA Server Manager] Hetzner: Full status mapping details:%sFrom: %s%sTo: %s', 
+        error_log(sprintf('[SIYA Server Manager][Hetzner] Full status mapping details:%sFrom: %s%sTo: %s', 
             PHP_EOL, var_export($raw_status, true), 
             PHP_EOL, var_export($mapped_status, true)
         ));
@@ -113,7 +113,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner ping error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] ping error: ' . $response->get_error_message());
             return false;
         }
 
@@ -139,7 +139,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
     
         if (is_wp_error($response)) {
-            error_log('Hetzner protection error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] protection error: ' . $response->get_error_message());
             return $response;
         }
     
@@ -165,7 +165,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner remove protection error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] remove protection error: ' . $response->get_error_message());
             return $response;
         }
 
@@ -186,7 +186,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner shutdown error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] shutdown error: ' . $response->get_error_message());
             return false;
         }
 
@@ -208,7 +208,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner poweroff error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] poweroff error: ' . $response->get_error_message());
             return false;
         }
 
@@ -230,7 +230,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner poweron error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] poweron error: ' . $response->get_error_message());
             return false;
         }
 
@@ -294,7 +294,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner destroy error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] destroy error: ' . $response->get_error_message());
             return false;
         }
 
@@ -316,7 +316,7 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner reboot error: ' . $response->get_error_message());
+            error_log('[SIYA Server Manager][Hetzner] reboot error: ' . $response->get_error_message());
             return false;
         }
 

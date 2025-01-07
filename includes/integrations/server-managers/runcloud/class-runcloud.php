@@ -98,7 +98,7 @@ class Runcloud /*implements ServerManager*/ {
         );
 
         if (is_wp_error($script_response)) {
-            error_log('RunCloud Script Fetch Error: ' . $script_response->get_error_message());
+            error_log('[SIYA Server Manager][Runcloud] Script Fetch Error: ' . $script_response->get_error_message());
             return new \WP_Error('script_fetch_failed', 'Failed to get installation script: ' . $script_response->get_error_message());
         }
 
@@ -162,7 +162,7 @@ class Runcloud /*implements ServerManager*/ {
         } catch (\Exception $e) {
             return new \WP_Error(
                 'ssh_connection_failed',
-                'Failed to establish SSH connection: ' . $e->getMessage()
+                '[SIYA Server Manager][Runcloud] Failed to establish SSH connection: ' . $e->getMessage()
             );
         }
     }
