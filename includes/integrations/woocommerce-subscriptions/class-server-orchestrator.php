@@ -239,8 +239,8 @@ class ServerOrchestrator {
                     'server_provider' => $this->server_provider_slug,   
                     'server_post_id' => $this->server_post_id,
                     'target_status' => 'active',
-                    'poll_interval' => 10,
-                    'time_out' => 300,
+                    'poll_interval' => 3,
+                    'time_out' => 60,
                 ]],
                 'arsol_server_provision'
             );
