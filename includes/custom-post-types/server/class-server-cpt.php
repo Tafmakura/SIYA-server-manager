@@ -165,7 +165,8 @@ class ServerPost {
     }
 
     public function get_meta_data() {
-        $this->post_id = $post_id;
+
+        $post_id = $this->post_id;
         
         $meta_data = array(
             // Base and general data
