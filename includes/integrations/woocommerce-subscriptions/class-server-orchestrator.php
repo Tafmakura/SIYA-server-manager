@@ -191,6 +191,9 @@ class ServerOrchestrator {
             error_log('Milestone 5b');
 
             if ($is_provisioned) {
+
+                $metadata = $server_post_instance->get_meta_data();
+
                 $this->server_provisioned_status = $metadata['arsol_server_provisioned_status'] ?? null;
                 $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
                 $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
