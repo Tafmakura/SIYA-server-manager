@@ -467,7 +467,7 @@ class ServerOrchestrator {
         $server_name = 'ARSOL' . $this->subscription_id;
         $web_server_type = 'nginx';
         $installation_type = 'native';
-        $provider = $this->server_provider;
+        $provider = $this->server_provider_slug;
 
         // Get server IP addresses
         $server_ips = $this->get_provisioned_server_ip($this->server_provider_slug, $this->server_provisioned_id);
@@ -493,29 +493,14 @@ class ServerOrchestrator {
         // Initialize RunCloud & Deploy to RunCloud
         $this->runcloud = new Runcloud();
         error_log('Milestone X2b');
-
-        try {
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Attempting RunCloud server creation with:%sName: %s%sIP: %s%sServer Type: %s%sInstallation: %s%sProvider: %s', 
-                PHP_EOL, $server_name,
-                PHP_EOL, $ipv4,
-                PHP_EOL, $web_server_type,
-                PHP_EOL, $installation_type,
-                PHP_EOL, $provider
-            ));
-
-            $runcloud_response = $this->runcloud->create_server_in_server_manager(
-                $server_name,
-                $ipv4,
-                $web_server_type,
-                $installation_type, 
-                get_class($provider) // Convert provider object to class name string
-            );
-
-            if (empty($runcloud_response)) {
-                throw new \Exception('Empty response from RunCloud API');
-            }
-
-            error_log('[SIYA Server Manager - ServerOrchestrator] RunCloud API Response: ' . print_r($runcloud_response, true));
+        
+        $runcloud_response = $this->runcloud->create_server_in_server_manager(
+            $server_name,
+            $ipv4,
+            $web_server_type,
+            $installation_type, 
+            $provider
+        );
 
         error_log('Milestone X3');
 
