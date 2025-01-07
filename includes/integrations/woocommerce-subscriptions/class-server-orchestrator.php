@@ -308,7 +308,7 @@ class ServerOrchestrator {
 
                 error_log('[SIYA Server Manager] HOYO');
 
-                $status = $this->get_provider_instance($server_provider_slug)->get_server_status();
+                $status = $this->get_provider_ininitialize_server_provider($server_provider_slug)->get_server_status();
                 $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
                 $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
 
