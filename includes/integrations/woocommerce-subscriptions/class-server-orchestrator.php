@@ -369,7 +369,7 @@ class ServerOrchestrator {
 
             // Update server metadata
             $metadata = [
-                'arsol_server_deployed_server_id' => $runcloud_response['id'] ?? null,
+                'arsol_server_deployed_server_id' => $runcloud_response['body']['id'] ?? null,
                 'arsol_server_deployment_date' => current_time('mysql'),
                 'arsol_server_deployed_status' => 1,
                 'arsol_server_connection_status' => 0,
