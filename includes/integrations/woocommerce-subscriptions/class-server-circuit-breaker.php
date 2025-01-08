@@ -5,6 +5,8 @@ namespace Siya\Integrations\WoocommerceSubscriptions;
 use SIYA\CustomPostTypes\ServerPost;
 use SIYA\Orchestrator\ServerOrchestrator;
 
+require_once plugin_dir_path(__FILE__) . '../../orchestrator/class-server-orchestrator.php';
+
 class ServerCircuitBreaker extends ServerOrchestrator {
     private $subscription;
     private $server;
