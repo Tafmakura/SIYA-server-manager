@@ -506,6 +506,8 @@ class ServerOrchestrator {
         // Verify shutdown
         $status = $this->server_provider->get_server_status($server_provisioned_id);
         $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
+        
+        // Update server status metadata
         $server_post_instance = new ServerPost($server_post_id);
         $server_post_instance->update_meta_data($server_post_id, [
             'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
@@ -513,6 +515,9 @@ class ServerOrchestrator {
             'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
         ]);
 
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $provisioned_remote_status));
+
+        // Verify server shutdown
         if ($provisioned_remote_status === 'off') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully shut down.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
@@ -596,9 +601,11 @@ class ServerOrchestrator {
         $this->initialize_server_provider($server_provider_slug);
         $this->server_provider->poweron_server($server_provisioned_id);
 
-        // Verify powerup
+        // Get remote status
         $status = $this->server_provider->get_server_status($server_provisioned_id);
         $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
+        
+        // Update server status metadata
         $server_post_instance = new ServerPost($server_post_id);
         $server_post_instance->update_meta_data($server_post_id, [
             'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
@@ -606,6 +613,9 @@ class ServerOrchestrator {
             'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
         ]);
 
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $provisioned_remote_status));
+
+        // Verify server powered up
         if ($provisioned_remote_status === 'active') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully powered up.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');

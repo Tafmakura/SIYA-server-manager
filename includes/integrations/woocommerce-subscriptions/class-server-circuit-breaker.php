@@ -68,7 +68,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             // Provisioned but not deployed
             if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
                 
-                if ( !$is_deployed && $requires_server_manager === 'no') {
+                if ( $is_provisioned && !$is_deployed && $requires_server_manager === 'no') {
                     update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'okay');
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker status updated to okay.');
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment not required. No action needed.');
