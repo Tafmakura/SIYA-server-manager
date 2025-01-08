@@ -571,7 +571,7 @@ class ServerOrchestrator {
     }
 
     // Start server deletion process
-    public function start_server_deletion($post_id, $post) {
+    public function start_server_deletion($post_id) {
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
         $post = get_post($post_id);
        if (!in_array($post->post_type, array('shop_subscription', 'woocommerce_subscription'))) {
