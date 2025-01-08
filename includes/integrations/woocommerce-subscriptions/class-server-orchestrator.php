@@ -569,6 +569,15 @@ class ServerOrchestrator {
     }
 
     
+
+
+
+
+
+
+
+
+    
     // Helper Methods
 
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
@@ -605,6 +614,9 @@ class ServerOrchestrator {
                 'arsol_server_suspension' => 'no' // Add suspension status
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+
+            $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
+            $subscription->save();
 
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
