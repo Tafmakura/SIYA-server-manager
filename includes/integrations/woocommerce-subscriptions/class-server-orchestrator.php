@@ -578,6 +578,15 @@ class ServerOrchestrator {
         
         error_log('[SIYA Server Manager - ServerOrchestrator] Subscription object: ' . print_r($subscription, true));
         
+        if ($subscription instanceof WC_Subscription) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Subscription found: ' . $subscription->get_id());
+        } else {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Subscription retrieval failed.');
+        }
+       
+       
+       
+       
         if (!$subscription) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
             wp_die('No server post found.');
