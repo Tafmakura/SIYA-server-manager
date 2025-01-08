@@ -523,22 +523,35 @@ class ServerOrchestrator {
             return;
         }
 
-        $server_post_id = $server_post->post_id;
-        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-        update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-reconnection');
+        $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
+        
+        
+        update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
 
-        as_schedule_single_action(
-            time(),
-            'arsol_server_powerup',
-            [[
-                'subscription_id' => $subscription_id,
-                'server_post_id' => $server_post_id,
-                'server_provider_slug' => $server_provider_slug,
-                'server_provisioned_id' => $server_provisioned_id
-            ]],
-            'arsol_server_provision'
-        );
+       
+       if ($this->server_provisioned_remote_status != 'off') {
+        error_log('[SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only shut down servers can be powered on');
+            update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
+            return;
+        } else {
+
+            $server_post_id = $server_post->post_id;
+            $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+            $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+            update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-reconnection');
+
+            as_schedule_single_action(
+                time(),
+                'arsol_server_powerup',
+                [[
+                    'subscription_id' => $subscription_id,
+                    'server_post_id' => $server_post_id,
+                    'server_provider_slug' => $server_provider_slug,
+                    'server_provisioned_id' => $server_provisioned_id
+                ]],
+                'arsol_server_provision'
+            );
+        }
     }
 
     // Step 5: Finish server powerup
