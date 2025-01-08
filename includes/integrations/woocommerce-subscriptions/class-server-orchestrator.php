@@ -189,7 +189,7 @@ class ServerOrchestrator {
 
                  // Initialize the appropriate server provider with the slug
                 $this->initialize_server_provider($this->server_provider_slug);
-                $server_data = $this->provision_server($server_post_instance, $this->subscription);
+                $server_data = $this->provision_server($this->subscription_id);
 
                 error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
                     PHP_EOL,
@@ -751,8 +751,18 @@ class ServerOrchestrator {
     }
 
     // Step 2: Provision server and update server post metadata
-    private function provision_server($server_post_instance, $subscription) {
+    private function provision_server($subscription) {
         
+        // Check if the server post is an arsol_server and the provisioned status is 0
+        $provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+
+        if ($provisioned_status == 1) {
+            $error_message = "Server post already provisioned.";
+            $subscription->add_order_note($error_message);
+            return;
+        }
+
+        // Define variables after the check
         $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         error_log('[SIYA Server Manager - ServerOrchestrator] Server provider: ' . print_r($server_provider_slug, true));
         $server_name = 'ARSOL' . $this->subscription_id;
@@ -791,6 +801,7 @@ class ServerOrchestrator {
         $subscription->add_order_note($success_message);
 
         // Update server post metadata using the standardized data
+        $server_post_instance = new ServerPost;
         $metadata = [
             'arsol_server_provisioned_status' => 1,
             'arsol_server_provisioned_id' => $server_data['provisioned_id'],
