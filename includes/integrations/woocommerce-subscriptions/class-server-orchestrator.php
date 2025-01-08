@@ -752,102 +752,107 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     protected function provision_server($subscription) {
-        // Define variables within the method
-        $this->subscription_id = $subscription->get_id();
-        $this->server_post_id = $subscription->get_meta( 'arsol_linked_server_post_id', true );
-        $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
-        $server_name = 'ARSOL' . $this->subscription_id;
-        $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
+        try {
+            // Define variables within the method
+            $this->subscription_id = $subscription->get_id();
+            $this->server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+            $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
+            $server_name = 'ARSOL' . $this->subscription_id;
+            $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
 
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioning server for subscription ID: %d', $this->subscription_id));
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server post ID: %d', $this->server_post_id));
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server provider slug: %s', $this->server_provider_slug));
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server name: %s', $server_name));
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server plan: %s', $server_plan));
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioning server for subscription ID: %d', $this->subscription_id));
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server post ID: %d', $this->server_post_id));
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server provider slug: %s', $this->server_provider_slug));
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server name: %s', $server_name));
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server plan: %s', $server_plan));
 
-        // Check if the server post is an arsol_server and the provisioned status is 0
-        $provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+            // Check if the server post is an arsol_server and the provisioned status is 0
+            $provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
 
-        if ($provisioned_status == 1) {
-            $error_message = "Server post already provisioned.";
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
-            $subscription->add_order_note($error_message);
-            return;
+            if ($provisioned_status == 1) {
+                $error_message = "Server post already provisioned.";
+                error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
+                $subscription->add_order_note($error_message);
+                return;
+            }
+
+            error_log(sprintf('[ 1 SIYA Server Manager - ServerOrchestrator] Server post not provisioned. Proceeding with provisioning...'));
+
+            // Initialize the provider with explicit server provider slug
+            $this->initialize_server_provider($this->server_provider_slug);
+
+            error_log(sprintf('[2 SIYA Server Manager - ServerOrchestrator] Server provider initialized: %s', $this->server_provider_slug));
+            
+            // Use the initialized provider
+            $server_data = $this->server_provider->provision_server($server_name, $server_plan);
+
+            error_log(sprintf('[3 SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
+                PHP_EOL,
+                json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+            ));
+            
+            if (!$server_data) {
+                $error_message = "Failed to provision server";
+                error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
+                $subscription->add_order_note($error_message);
+                $subscription->update_status('on-hold');
+                throw new \Exception($error_message);
+            }
+
+            $success_message = sprintf(
+                "Server provisioned successfully! %s" .
+                "Server Provider: %s%s" .
+                "Server Name: %s%s" .
+                "IP: %s%s" .
+                "Memory: %s%s" .
+                "CPU Cores: %s%s" .
+                "Region: %s",
+                PHP_EOL,
+                $this->server_provider_slug, PHP_EOL,
+                $server_data['provisioned_name'], PHP_EOL,
+                $server_data['provisioned_ipv4'], PHP_EOL,
+                $server_data['provisioned_memory'], PHP_EOL,
+                $server_data['provisioned_vcpu_count'], PHP_EOL,
+                $server_data['provisioned_region_slug']
+            );
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
+            $subscription->add_order_note($success_message);
+
+            // Update server post metadata using the standardized data
+            $server_post_instance = new ServerPost;
+            $metadata = [
+                'arsol_server_provisioned_status' => 1,
+                'arsol_server_provisioned_id' => $server_data['provisioned_id'],
+                'arsol_server_provisioned_name' => $server_data['provisioned_name'],
+                'arsol_server_provisioned_os' => $server_data['provisioned_os'],
+                'arsol_server_provisioned_ipv4' => $server_data['provisioned_ipv4'],
+                'arsol_server_provisioned_ipv6' => $server_data['provisioned_ipv6'],
+                'arsol_server_provisioning_provider' => $this->server_provider_slug,
+                'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
+                'arsol_server_provisioned_date' => $server_data['provisioned_date'],
+                'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status'],
+                'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status']
+            ];
+            $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provider Status Details:%sRemote Status: %s%sRaw Status: %s', 
+                PHP_EOL,
+                $server_data['provisioned_remote_status'],
+                PHP_EOL,
+                $server_data['provisioned_remote_raw_status']
+            ));
+
+            $subscription->add_order_note(sprintf(
+                "Server metadata updated successfully:%s%s",
+                PHP_EOL,
+                print_r($metadata, true)
+            ));
+
+            return $server_data;
+        } catch (\Exception $e) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Exception caught: %s', $e->getMessage()));
+            throw $e;
         }
-
-        error_log(sprintf('[ 1 SIYA Server Manager - ServerOrchestrator] Server post not provisioned. Proceeding with provisioning...'));
-
-        // Initialize the provider with explicit server provider slug
-        $this->initialize_server_provider($this->server_provider_slug);
-
-        error_log(sprintf('[2 SIYA Server Manager - ServerOrchestrator] Server provider initialized: %s', $this->server_provider_slug));
-        
-        // Use the initialized provider
-        $server_data = $this->server_provider->provision_server($server_name, $server_plan);
-
-        error_log(sprintf('[3 SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
-            PHP_EOL,
-            json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-        ));
-        
-        if (!$server_data) {
-            $error_message = "Failed to provision server";
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
-            $subscription->add_order_note($error_message);
-            $subscription->update_status('on-hold');
-            throw new \Exception($error_message);
-        }
-
-        $success_message = sprintf(
-            "Server provisioned successfully! %s" .
-            "Server Provider: %s%s" .
-            "Server Name: %s%s" .
-            "IP: %s%s" .
-            "Memory: %s%s" .
-            "CPU Cores: %s%s" .
-            "Region: %s",
-            PHP_EOL,
-            $this->server_provider_slug, PHP_EOL,
-            $server_data['provisioned_name'], PHP_EOL,
-            $server_data['provisioned_ipv4'], PHP_EOL,
-            $server_data['provisioned_memory'], PHP_EOL,
-            $server_data['provisioned_vcpu_count'], PHP_EOL,
-            $server_data['provisioned_region_slug']
-        );
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
-        $subscription->add_order_note($success_message);
-
-        // Update server post metadata using the standardized data
-        $server_post_instance = new ServerPost;
-        $metadata = [
-            'arsol_server_provisioned_status' => 1,
-            'arsol_server_provisioned_id' => $server_data['provisioned_id'],
-            'arsol_server_provisioned_name' => $server_data['provisioned_name'],
-            'arsol_server_provisioned_os' => $server_data['provisioned_os'],
-            'arsol_server_provisioned_ipv4' => $server_data['provisioned_ipv4'],
-            'arsol_server_provisioned_ipv6' => $server_data['provisioned_ipv6'],
-            'arsol_server_provisioning_provider' => $this->server_provider_slug,
-            'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
-            'arsol_server_provisioned_date' => $server_data['provisioned_date'],
-            'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status'],
-            'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status']
-        ];
-        $server_post_instance->update_meta_data($this->server_post_id, $metadata);
-
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provider Status Details:%sRemote Status: %s%sRaw Status: %s', 
-            PHP_EOL,
-            $server_data['provisioned_remote_status'],
-            PHP_EOL,
-            $server_data['provisioned_remote_raw_status']
-        ));
-
-        $subscription->add_order_note(sprintf(
-            "Server metadata updated successfully:%s%s",
-            PHP_EOL,
-            print_r($metadata, true)
-        ));
-
-        return $server_data;
     }
 
     private function get_provisioned_server_ip($server_provider_slug, $server_provisioned_id) {
