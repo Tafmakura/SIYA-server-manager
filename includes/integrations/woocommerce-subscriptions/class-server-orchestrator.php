@@ -506,6 +506,12 @@ class ServerOrchestrator {
         // Verify shutdown
         $status = $this->server_provider->get_server_status($server_provisioned_id);
         $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
+        $server_post_instance = new ServerPost($server_post_id);
+        $server_post_instance->update_meta_data($server_post_id, [
+            'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
+            'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_status,
+            'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
+        ]);
 
         if ($provisioned_remote_status === 'off') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully shut down.');
@@ -593,6 +599,12 @@ class ServerOrchestrator {
         // Verify powerup
         $status = $this->server_provider->get_server_status($server_provisioned_id);
         $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
+        $server_post_instance = new ServerPost($server_post_id);
+        $server_post_instance->update_meta_data($server_post_id, [
+            'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
+            'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_status,
+            'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
+        ]);
 
         if ($provisioned_remote_status === 'active') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully powered up.');
