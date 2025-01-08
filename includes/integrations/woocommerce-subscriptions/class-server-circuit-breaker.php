@@ -5,7 +5,7 @@ namespace Siya\Integrations\WoocommerceSubscriptions;
 use SIYA\CustomPostTypes\ServerPost;
 use SIYA\Orchestrator\ServerOrchestrator;
 
-require_once plugin_dir_path(__FILE__) . '../../orchestrator/class-server-orchestrator.php';
+require_once plugin_dir_path(__FILE__) . 'class-server-orchestrator.php'; 
 
 class ServerCircuitBreaker extends ServerOrchestrator {
     private $subscription;
@@ -19,8 +19,6 @@ class ServerCircuitBreaker extends ServerOrchestrator {
     public function __construct($subscription_id) {
         $this->subscription = wcs_get_subscription($subscription_id);
         $this->server = ServerPost::get_server_post_by_subscription($subscription_id);
-
-       
 
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'subscription_circuit_breaker'), 20, 1);
 
