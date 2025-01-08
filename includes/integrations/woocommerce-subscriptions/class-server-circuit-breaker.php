@@ -30,11 +30,11 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         try {
             
             $this->subscription = $subscription;
-            $this->subscription_id = $subscription->get_id();
+            $this->subscription_id = $this->subscription->get_id();
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Starting subscription circuit breaker check'.$this->subscription_id);
     
             // Get server post ID linked to the subscription
-            $server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
+            $server_post_id = $subscription->get_meta( 'arsol_linked_server_post_id', true );
             $this->server_post_id = $server_post_id;
 
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Server post ID: ' . $server_post_id);
