@@ -63,6 +63,9 @@ class Setup {
        // if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
             $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
       //  }
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
+            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
+        }
 
     }
 

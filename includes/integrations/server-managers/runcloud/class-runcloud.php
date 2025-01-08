@@ -187,4 +187,21 @@ class Runcloud /*implements ServerManager*/ {
         // Implement server disconnection logic
         return true;
     }
+
+    public function delete_server($server_id) {
+        $response = wp_remote_request($this->api_endpoint . '/servers/' . $server_id, [
+            'method' => 'DELETE',
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key
+            ]
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('[SIYA Server Manager][RunCloud] delete error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        return $response_code === 204;
+    }
 }
