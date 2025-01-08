@@ -46,14 +46,15 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         $this->server_post_id = $server_post_id;
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+        $has_server_manager = get_post_meta($this->server_post_id, 'arsol_connect_server_manager', true);
 
         error_log(sprintf('[SIYA Server Manager - ServerCircuitBreaker] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
             $is_deployed ? 'true' : 'false'
         ));
 
-        if($is_provisioned && $is_deployed){
-            error_log('[SIYA Server Manager - ServerCircuitBreaker] Server is provisioned and deployed, no need to disconnect');
+        if($is_provisioned && $is_deployed || $is_provisioned && !$is_deployed && $has_server_manager == 'no'){
+            error_log('[SIYA Server Manager - ServerCircuitBreaker] Server setup complete - provisioning and deployment verified');
             return;
         
         }elseif(!$is_provisioned && !$is_deployed){ 
@@ -63,7 +64,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 "Server is not provisioned. Retrying provisioning process and setting status to on-hold."
             );
             return;
-        }elseif($is_provisioned && !$is_deployed){
+        }elseif($is_provisioned && !$is_deployed && $has_server_manager == 'yes'){
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Server is provisioned but not deployed, initiating deployment process');
             $this->deploy_to_runcloud_and_update_metadata($this->server_post_id, $this->subscription);
             $subscription->update_status('on-hold');
