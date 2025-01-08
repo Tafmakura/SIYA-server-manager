@@ -517,13 +517,14 @@ class ServerOrchestrator {
         $subscription_id = $subscription->get_id();
         $server_post_instance = new ServerPost();
         $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
+        $server_post_id = $server_post->post_id;
 
         if (!$server_post) {
             error_log('[SIYA Server Manager - ServerOrchestrator] No server post found for powerup.');
             return;
         }
 
-        $this->server_provisioned_remote_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_remote_status', true);
+        $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
         
         
         update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
