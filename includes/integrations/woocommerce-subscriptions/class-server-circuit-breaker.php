@@ -18,7 +18,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         //$this->subscription = wcs_get_subscription($subscription_id);
        // $this->server = ServerPost::get_server_post_by_subscription($subscription_id);
 
-        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'subscription_circuit_breaker'), 20, 1);
+        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 20, 1);
 
     }
 
@@ -27,11 +27,11 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
 
         if (!$this->server_product_id) {
-            error_log('[SIYA Server Manager - ServerOrchestrator] No server product found in subscription');
+            error_log('[SIYA Server Manager - ServerCircuitBreaker] No server product found in subscription');
             return;
         }
        
-        error_log('[SIYA Server Manager - ServerOrchestrator] Starting subscription circuit breaker check');
+        error_log('[SIYA Server Manager - ServerCircuitBreaker] Starting subscription circuit breaker check');
 
         if (!is_admin()) {
             return;
@@ -44,25 +44,25 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
         $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
 
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Status check - Provisioned: %s, Deployed: %s', 
+        error_log(sprintf('[SIYA Server Manager - ServerCircuitBreaker] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
             $is_deployed ? 'true' : 'false'
         ));
 
         if($is_provisioned && $is_deployed){
-            error_log('[SIYA Server Manager - ServerOrchestrator] Server is provisioned and deployed, no need to disconnect');
+            error_log('[SIYA Server Manager - ServerCircuitBreaker] Server is provisioned and deployed, no need to disconnect');
             return;
         
         }else{
 
-            error_log('[SIYA Server Manager - ServerOrchestrator] Setting subscription to on-hold status');
+            error_log('[SIYA Server Manager - ServerCircuitBreaker] Setting subscription to on-hold status');
             $subscription->add_order_note(
                 "Subscription status set to on-hold. Server provisioning and deployment in progress."
             );
     
             $subscription->update_status('on-hold');
 
-            error_log('[SIYA Server Manager - ServerOrchestrator] Initiating server provision and deploy process');
+            error_log('[SIYA Server Manager - ServerCircuitBreaker] Initiating server provision and deploy process');
             $this->provision_and_deploy_server($subscription);
 
 
