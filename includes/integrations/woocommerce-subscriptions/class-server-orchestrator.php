@@ -575,7 +575,8 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
         $post = get_post($post_id);
         if ($post->post_type !== 'shop_subscription') {
-            return;
+           // return;
+           error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Post type is not shop_subscription');
         }
 
         $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
