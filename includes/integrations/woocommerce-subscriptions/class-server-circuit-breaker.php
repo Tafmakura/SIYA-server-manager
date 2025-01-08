@@ -15,13 +15,14 @@ class ServerCircuitBreaker extends ServerOrchestrator {
     public function __construct() {
         //$this->subscription = wcs_get_subscription($subscription_id);
        // $this->server = ServerPost::get_server_post_by_subscription($subscription_id);
-       add_action('woocommerce_subscription_status_pending_to_active', array($this, 'subscription_circuit_breaker'), 20, 1);
+       add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 20, 1);
 
-        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 20, 1);
-      
     }
 
     public function subscription_circuit_breaker($subscription) {
+
+        $subscription->update_status('on-hold');
+
         if (!is_admin()) {
             return;
         }
@@ -64,7 +65,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 return;
             }
 
-            $subscription->update_status('on-hold');
+        
 
             // Provisioned but not deployed
             if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
