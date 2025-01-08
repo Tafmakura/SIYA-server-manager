@@ -752,7 +752,13 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     protected function provision_server($subscription) {
-        
+        // Define variables within the method
+        $this->subscription_id = $subscription->get_id();
+        $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
+        $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
+        $server_name = 'ARSOL' . $this->subscription_id;
+        $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
+
         // Check if the server post is an arsol_server and the provisioned status is 0
         $provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
 
@@ -762,15 +768,8 @@ class ServerOrchestrator {
             return;
         }
 
-        // Define variables after the check
-        $server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
-        error_log('[SIYA Server Manager - ServerOrchestrator] Server provider: ' . print_r($server_provider_slug, true));
-        $server_name = 'ARSOL' . $this->subscription_id;
-        $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
-        error_log('[SIYA Server Manager - ServerOrchestrator] Server plan: ' . print_r($server_plan, true));
-        
         // Initialize the provider with explicit server provider slug
-        $this->initialize_server_provider($server_provider_slug);
+        $this->initialize_server_provider($this->server_provider_slug);
         
         // Use the initialized provider
         $server_data = $this->server_provider->provision_server($server_name, $server_plan);
@@ -791,7 +790,7 @@ class ServerOrchestrator {
             "CPU Cores: %s%s" .
             "Region: %s",
             PHP_EOL,
-            $server_provider_slug, PHP_EOL,
+            $this->server_provider_slug, PHP_EOL,
             $server_data['provisioned_name'], PHP_EOL,
             $server_data['provisioned_ipv4'], PHP_EOL,
             $server_data['provisioned_memory'], PHP_EOL,
@@ -823,8 +822,6 @@ class ServerOrchestrator {
             PHP_EOL,
             $server_data['provisioned_remote_raw_status']
         ));
-
-      
 
         $subscription->add_order_note(sprintf(
             "Server metadata updated successfully:%s%s",
