@@ -571,13 +571,14 @@ class ServerOrchestrator {
     }
 
     // Start server deletion process
-    public function start_server_deletion($post_id) {
+    public function start_server_deletion($post_id, $post) {
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
         $post = get_post($post_id);
-       // if (!in_array($post->post_type, array('shop_subscription', 'woocommerce_subscription'))) {
-           // return;
-         //  error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Post type is not shop_subscription');
-       // }
+       if (!in_array($post->post_type, array('shop_subscription', 'woocommerce_subscription'))) {
+           
+            error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Post type is not shop_subscription');
+            wp_die('This post cannot be deleted.');
+        }
 
         $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
         if (!$linked_server_post_id) {
