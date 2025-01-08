@@ -76,7 +76,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 } else {
                     update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'tripped');
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker tripped.');    
-                    error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment failed. Attempting deployment.');
+                    error_log('[SIYA Server Manager - ServerCircuitBreaker] Server not provisioned and not deployed. Attempting deployment.');
                     $subscription->update_status('on-hold');
                     $this->start_server_provision($this->subscription);
                     $subscription->add_order_note("Server provisioned but deployment failed. Retrying deployment.");

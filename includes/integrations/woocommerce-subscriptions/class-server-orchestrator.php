@@ -187,18 +187,26 @@ class ServerOrchestrator {
 
                 error_log('Milestone 5a');
 
-                 // Initialize the appropriate server provider with the slug
-                $this->initialize_server_provider($this->server_provider_slug);
-                $server_data = $this->provision_server($this->subscription_id);
+                try {
+                    // Initialize the appropriate server provider with the slug
+                    $this->initialize_server_provider($this->server_provider_slug);
+                    $server_data = $this->provision_server($this->subscription_id);
 
-                error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
-                    PHP_EOL,
-                    json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-                ));
-
-                
-
-            } 
+                    error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
+                        PHP_EOL,
+                        json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                    ));
+                } catch (\Exception $e) {
+                    error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
+                    $this->subscription->add_order_note(sprintf(
+                        "Error occurred during server provisioning:%s%s",
+                        PHP_EOL,
+                        $e->getMessage()
+                    ));
+                    $this->subscription->update_status('on-hold');
+                    return;
+                }
+            }
 
             if ($this->server_provisioned_status) {
 
