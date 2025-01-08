@@ -97,9 +97,13 @@ class ServerOrchestrator {
 
             $qwpost_id = 2885;
             $wesubscription = wcs_get_subscription($qwpost_id);
+
+            if($wesubscription instanceof WC_Subscription) {
+                error_log('[XXXXXXXXXXXXXXXXXXXXXXSIYA Server Manager - ServerOrchestrator] Subscription found: ' . $wesubscription->get_id());
+            } else {
+                error_log('[XXXXXXXXXXXXXXXXXXXXXXSIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
+            }
         
-            error_log('[XXXXXXXXXXXXXXXXXXXXXXSIYA Server Manager - ServerOrchestrator] Subscription object: ' . print_r($wesubscription, true));
-            
 
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
