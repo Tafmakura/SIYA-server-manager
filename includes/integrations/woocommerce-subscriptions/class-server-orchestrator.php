@@ -134,8 +134,7 @@ class ServerOrchestrator {
                 PHP_EOL,
                 $e->getMessage()
             ));
-    
-            $subscription->update_status('on-hold');
+
         }
     }
 
@@ -195,6 +194,8 @@ class ServerOrchestrator {
                     PHP_EOL,
                     json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                 ));
+
+                
 
             } 
 
@@ -378,6 +379,8 @@ class ServerOrchestrator {
                 "RunCloud deployment successful with Response body: %s",
                 $runcloud_response['body']
             ));
+
+            $subscription->update_status('active');
            
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
@@ -419,9 +422,15 @@ class ServerOrchestrator {
         $subscription_id = $subscription->get_id();
         $server_post_instance = new ServerPost();
         $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
-
+        
         if (!$server_post) {
             error_log('[SIYA Server Manager - ServerOrchestrator] No server post found for shutdown.');
+            return;
+        }
+
+        $this->arsol_server_circuit_breaker_position = get_post_meta($server_post->post_id, 'arsol_server_circuit_breaker_status', true);
+        if ($this->arsol_server_circuit_breaker_position == 'tripped') {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' .  $subscription_id . ' is in the tripped position. Skipping shutdown.');
             return;
         }
 
@@ -429,6 +438,8 @@ class ServerOrchestrator {
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
+        
+        
         update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
 
        

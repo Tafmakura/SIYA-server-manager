@@ -58,7 +58,10 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
             // Fully provisioned and deployed
             if ($is_provisioned && $is_deployed) {
-                error_log('[SIYA Server Manager - ServerCircuitBreaker] Server setup complete.');
+                error_log('[SIYA Server Manager - ServerCircuitBreaker] Server setup is fine.');
+                update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'complete');
+                error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker status updated to complete.');
+
                 return;
             }
 
@@ -66,9 +69,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
                 
                 if ( !$is_deployed && $requires_server_manager === 'no') {
+                    update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'okay');
+                    error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker status updated to okay.');
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment not required. No action needed.');
                     return;
                 } else {
+                    update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'tripped');
+                    error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker tripped.');    
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment failed. Attempting deployment.');
                     $subscription->update_status('on-hold');
                     $this->start_server_provision($this->subscription);
@@ -81,6 +88,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             // Deployed but not provisioned
             if (!$is_provisioned && $is_deployed) {
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] Anomaly detected: Server is deployed but not provisioned. Manual intervention required.');
+                update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'tripped');
+                error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker tripped.');  
                 $subscription->update_status('on-hold');
                 $subscription->add_order_note("Anomaly detected: Server is deployed but not provisioned. Manual intervention required.");
                 return;
@@ -88,6 +97,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
     
             // Catch-all case: Unexpected state
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Unexpected state encountered. Manual intervention required.');
+            update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'tripped');
+            error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker tripped.');  
             $subscription->update_status('on-hold');
             $subscription->add_order_note("Unexpected server state encountered. Manual intervention required.");
     
