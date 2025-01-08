@@ -200,7 +200,7 @@ class ServerOrchestrator {
 
                     error_log('Milestone 5b');
 
-                    $server_data = $this->provision_server($this->subscription_id);
+                    $server_data = $this->provision_server($this->subscription);
 
                     error_log('Milestone 5c');
 
@@ -804,6 +804,9 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     protected function provision_server($subscription) {
+
+
+
         try {
             // Define variables within the method
             $this->subscription_id = $subscription->get_id();
