@@ -187,6 +187,13 @@ class ServerOrchestrator {
 
                 error_log('Milestone 5a');
 
+                error_log('Milestone 5b');
+                error_log('Subscription ID: ' . $this->subscription_id);
+                error_log('Server Post ID: ' . $this->server_post_id);
+                error_log('Server Product ID: ' . $this->server_product_id);
+                error_log('Server Provider Slug: ' . $this->server_provider_slug);
+
+
                 try {
                     // Initialize the appropriate server provider with the slug
                     $this->initialize_server_provider($this->server_provider_slug);
