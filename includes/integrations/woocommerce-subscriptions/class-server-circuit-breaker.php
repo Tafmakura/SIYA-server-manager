@@ -38,14 +38,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $this->server_post_id = $server_post_id;
 
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Server post ID: ' . $server_post_id);
-    
+            
+            // Check if server post ID is found
             if (!$server_post_id) {
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] No linked server post ID found for subscription');
                 return;
             }
-    
 
-    
             // Get server metadata
             $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
             $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
@@ -56,41 +55,34 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 $is_deployed ? 'true' : 'false',
                 $requires_server_manager
             ));
-    
-            // Handle anomaly: Deployed but not provisioned
-            if (!$is_provisioned && $is_deployed) {
-                error_log('[SIYA Server Manager - ServerCircuitBreaker] Anomaly detected: Server is deployed but not provisioned. Manual intervention required.');
-                $subscription->update_status('on-hold');
-                $subscription->add_order_note("Anomaly detected: Server is deployed but not provisioned. Manual intervention required.");
-                return;
-            }
-    
+
             // Fully provisioned and deployed
             if ($is_provisioned && $is_deployed) {
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] Server setup complete.');
                 return;
             }
-    
+
             // Provisioned but not deployed
-            if ($is_provisioned && !$is_deployed) {
-                if ($requires_server_manager === 'no') {
+            if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
+                
+                if ( !$is_deployed && $requires_server_manager === 'no') {
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment not required. No action needed.');
                     return;
                 } else {
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment failed. Attempting deployment.');
                     $subscription->update_status('on-hold');
-                    $this->deploy_to_runcloud_and_update_metadata($this->server_post_id, $this->subscription);
+                    $this->start_server_provision($this->subscription);
                     $subscription->add_order_note("Server provisioned but deployment failed. Retrying deployment.");
+                    return;
                 }
-                return;
+                
             }
-    
-            // Not provisioned or deployed
-            if (!$is_provisioned && !$is_deployed) {
-                error_log('[SIYA Server Manager - ServerCircuitBreaker] Server not provisioned. Initiating provisioning process.');
+
+            // Deployed but not provisioned
+            if (!$is_provisioned && $is_deployed) {
+                error_log('[SIYA Server Manager - ServerCircuitBreaker] Anomaly detected: Server is deployed but not provisioned. Manual intervention required.');
                 $subscription->update_status('on-hold');
-                $this->provision_server($this->subscription);
-                $subscription->add_order_note("Server not provisioned. Retrying provisioning process and placing subscription on-hold.");
+                $subscription->add_order_note("Anomaly detected: Server is deployed but not provisioned. Manual intervention required.");
                 return;
             }
     

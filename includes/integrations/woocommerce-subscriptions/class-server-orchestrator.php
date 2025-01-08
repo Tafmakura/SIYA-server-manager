@@ -97,7 +97,7 @@ class ServerOrchestrator {
 
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
-            $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
+            $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
 
             if (!$existing_server_post) {
                 error_log('[SIYA Server Manager - ServerOrchestrator] creating new server post');
@@ -197,12 +197,6 @@ class ServerOrchestrator {
                 ));
 
             } 
-
-            error_log('Milestone 5b');
-    
-            // Check server status flags
-            $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true); 
-            error_log('Milestone 5b Server Status: ' . $this->server_provisioned_status);
 
             if ($this->server_provisioned_status) {
 
@@ -799,7 +793,10 @@ class ServerOrchestrator {
                 throw new \Exception($error_message);
             }
 
+            $subscription->update_status('active');
+
             $success_message = sprintf(
+                
                 "Server provisioned successfully! %s" .
                 "Server Provider: %s%s" .
                 "Server Name: %s%s" .
