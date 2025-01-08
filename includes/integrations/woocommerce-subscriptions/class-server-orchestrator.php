@@ -311,7 +311,7 @@ class ServerOrchestrator {
     }
 
     // Step 4 (Optional): Deploy to RunCloud and update server metadata
-    private function deploy_to_runcloud_and_update_metadata($server_post_id, $subscription) {
+    protected function deploy_to_runcloud_and_update_metadata($server_post_id, $subscription) {
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
 
         // Get server metadata from post
@@ -751,7 +751,7 @@ class ServerOrchestrator {
     }
 
     // Step 2: Provision server and update server post metadata
-    private function provision_server($subscription) {
+    protected function provision_server($subscription) {
         
         // Check if the server post is an arsol_server and the provisioned status is 0
         $provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
