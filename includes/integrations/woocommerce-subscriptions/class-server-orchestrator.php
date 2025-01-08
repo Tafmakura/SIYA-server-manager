@@ -759,23 +759,40 @@ class ServerOrchestrator {
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
 
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioning server for subscription ID: %d', $this->subscription_id));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server post ID: %d', $this->server_post_id));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server provider slug: %s', $this->server_provider_slug));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server name: %s', $server_name));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server plan: %s', $server_plan));
+
         // Check if the server post is an arsol_server and the provisioned status is 0
         $provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
 
         if ($provisioned_status == 1) {
             $error_message = "Server post already provisioned.";
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
             $subscription->add_order_note($error_message);
             return;
         }
 
+        error_log(sprintf('[ 1 SIYA Server Manager - ServerOrchestrator] Server post not provisioned. Proceeding with provisioning...'));
+
         // Initialize the provider with explicit server provider slug
         $this->initialize_server_provider($this->server_provider_slug);
+
+        error_log(sprintf('[2 SIYA Server Manager - ServerOrchestrator] Server provider initialized: %s', $this->server_provider_slug));
         
         // Use the initialized provider
         $server_data = $this->server_provider->provision_server($server_name, $server_plan);
+
+        error_log(sprintf('[3 SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
+            PHP_EOL,
+            json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+        ));
         
         if (!$server_data) {
             $error_message = "Failed to provision server";
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
             $subscription->add_order_note($error_message);
             $subscription->update_status('on-hold');
             throw new \Exception($error_message);
@@ -797,6 +814,7 @@ class ServerOrchestrator {
             $server_data['provisioned_vcpu_count'], PHP_EOL,
             $server_data['provisioned_region_slug']
         );
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
         $subscription->add_order_note($success_message);
 
         // Update server post metadata using the standardized data
