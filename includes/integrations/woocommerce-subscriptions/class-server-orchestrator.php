@@ -54,6 +54,7 @@ class ServerOrchestrator {
     private $server_deployment_date;
     private $server_connection_status;
     private $server_provisioned_id;
+    protected $server_circuit_breaker_position;
 
     public function __construct() {
         // Change the action hook to use Action Scheduler
@@ -428,7 +429,7 @@ class ServerOrchestrator {
             return;
         }
 
-        $this->arsol_server_circuit_breaker_position = get_post_meta($server_post->post_id, 'arsol_server_circuit_breaker_status', true);
+        $this->server_circuit_breaker_position = get_post_meta($server_post->post_id, 'arsol_server_circuit_breaker_status', true);
         if ($this->arsol_server_circuit_breaker_position == 'tripped') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' .  $subscription_id . ' is in the tripped position. Skipping shutdown.');
             return;
