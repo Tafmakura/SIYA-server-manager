@@ -574,24 +574,22 @@ class ServerOrchestrator {
     public function start_server_deletion($post_id) {
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
         $post = get_post($post_id);
-       if (!in_array($post->post_type, array('shop_subscription', 'subscription'))) {
-           
-            error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Post type is not shop_subscription');
-           
-        }
-
-        $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
-        if (!$linked_server_post_id) {
-
-            error_log(' HOYO NO');
+        if ($post->post_type !== 'shop_subscription') {
             return;
         }
 
-        error_log(' HOYO 1');
+        $subscription = wcs_get_subscription($post_id);
+        if (!$subscription) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
+            return;
+        }
+
+        $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+        if (!$linked_server_post_id) {
+            return;
+        }
 
         update_post_meta($linked_server_post_id, 'arsol_server_suspension', 'pending-deletion');
-
-        error_log(' HOYO 3');
 
         as_schedule_single_action(
             time(),
