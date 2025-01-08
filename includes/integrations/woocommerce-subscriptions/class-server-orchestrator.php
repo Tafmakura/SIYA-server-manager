@@ -76,7 +76,7 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_expired_to_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
 
-        add_action('woocommerce_subscription_deleted', array($this, 'start_server_deletion'), 10, 1);
+       // add_action('woocommerce_subscription_deleted', array($this, 'start_server_deletion'), 10, 1);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -94,16 +94,6 @@ class ServerOrchestrator {
                 error_log('[SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
                 return;
             }
-
-            $qwpost_id = 2885;
-            $wesubscription = wcs_get_subscription($qwpost_id);
-
-            if($wesubscription instanceof WC_Subscription) {
-                error_log('[XXXXXXXXXXXXXXXXXXXXXXSIYA Server Manager - ServerOrchestrator] Subscription found: ' . $wesubscription->get_id());
-            } else {
-                error_log('[XXXXXXXXXXXXXXXXXXXXXXSIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
-            }
-        
 
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
