@@ -26,6 +26,9 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         if (!is_admin()) {
             return;
         }
+
+        $this->subscription = $subscription;
+        $this->server_post_id = $server_post_id;
     
         try {
             $this->subscription_id = $subscription->get_id();
@@ -41,8 +44,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 return;
             }
     
-            $this->subscription = $subscription;
-            $this->server_post_id = $server_post_id;
+       
     
             // Get server metadata
             $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
