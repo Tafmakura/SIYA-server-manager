@@ -95,6 +95,12 @@ class ServerOrchestrator {
                 return;
             }
 
+            $qwpost_id = 2885;
+            $wesubscription = wcs_get_subscription($qwpost_id);
+        
+            error_log('[XXXXXXXXXXXXXXXXXXXXXXSIYA Server Manager - ServerOrchestrator] Subscription object: ' . print_r($wesubscription, true));
+            
+
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
             $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
