@@ -490,6 +490,11 @@ class ServerOrchestrator {
             return;
         }
 
+        // Shutdown server
+        $this->initialize_server_provider($server_provider_slug);
+        $this->server_provider->shutdown_server($server_provisioned_id);
+
+        // Update server suspension status
         $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
 
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
@@ -575,6 +580,10 @@ class ServerOrchestrator {
             return;
         }
 
+        // Power up server
+        $this->initialize_server_provider($server_provider_slug);   
+        $this->server_provider->poweron_server($server_provisioned_id);
+        
         // Get remote status and update metadata
         $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
 

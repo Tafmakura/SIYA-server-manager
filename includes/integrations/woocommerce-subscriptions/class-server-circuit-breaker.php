@@ -21,10 +21,6 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
     public function subscription_circuit_breaker($subscription) {
 
-       
-
-     
-
         try {
             
             $this->subscription = $subscription;
@@ -62,8 +58,6 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
                 return;
             }
-
-        
 
             // Provisioned but not deployed
             if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
