@@ -553,7 +553,6 @@ class ServerOrchestrator {
         // Check if server is already powered on
         if ($this->server_provisioned_remote_status != 'off') {
         error_log('[SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only shut down servers can be powered on');
-            update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
             return;
         } else {
 
