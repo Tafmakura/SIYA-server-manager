@@ -34,10 +34,12 @@ class Setup {
         
         // Integrations
         require_once plugin_dir_path(__DIR__) . '/integrations/server-managers/runcloud/class-runcloud.php';
+        require_once plugin_dir_path(__DIR__) . '/integrations/server-providers/digitalocean/class-digitalocean.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/server-providers/hetzner/class-hetzner.php';
+        require_once plugin_dir_path(__DIR__) . '/integrations/server-providers/vultr/class-vultr.php';
  
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
-        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
+      // DELETE  require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
     }
 
@@ -61,6 +63,9 @@ class Setup {
        // if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
             $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
       //  }
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
+            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
+        }
 
     }
 

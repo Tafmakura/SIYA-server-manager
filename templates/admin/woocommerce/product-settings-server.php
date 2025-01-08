@@ -14,7 +14,8 @@
         $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
         $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
         $is_wordpress_server = get_post_meta($post->ID, '_arsol_wordpress_server', true) === 'yes';
-        $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce', true) === 'yes';
+        $is_ecommerce = get_post_meta($post->ID, '_arsol_wordpress_ecommerce', true) === 'yes';
+        $is_server_manager = get_post_meta($post->ID, '_arsol_connect_server_manager', true) === 'yes';
 
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
@@ -47,6 +48,14 @@
             'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
         ));
         woocommerce_wp_checkbox(array(
+            'id'          => '_arsol_connect_server_manager',
+            'label'       => __('Runcloud', 'woocommerce'),
+            'description' => __('Connect this server to Runcloud server manager.', 'woocommerce'),
+            'desc_tip'    => 'true',
+            'cbvalue'     => 'yes',
+            'value'       => $is_server_manager ? 'yes' : 'no'
+        ));
+        woocommerce_wp_checkbox(array(
             'id'          => '_arsol_wordpress_server',
             'label'       => __('WordPress server', 'woocommerce'),
             'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
@@ -55,10 +64,10 @@
             'value'       => $is_wordpress_server ? 'yes' : 'no'
         ));    
         ?>
-        <div class="arsol_ecommerce_field">
+        <div class="arsol_wordpress_ecommerce_field">
             <?php
             woocommerce_wp_checkbox(array(
-                'id'          => '_arsol_ecommerce',
+                'id'          => '_arsol_wordpress_ecommerce',
                 'label'       => __('E-commerce', 'woocommerce'),
                 'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
