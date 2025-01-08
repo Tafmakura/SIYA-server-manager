@@ -64,6 +64,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 return;
             }
 
+            $subscription->update_status('on-hold');
+
             // Provisioned but not deployed
             if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
                 
