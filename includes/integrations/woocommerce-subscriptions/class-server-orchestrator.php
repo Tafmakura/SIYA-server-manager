@@ -754,7 +754,7 @@ class ServerOrchestrator {
     protected function provision_server($subscription) {
         // Define variables within the method
         $this->subscription_id = $subscription->get_id();
-        $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
+        $this->server_post_id = $subscription->get_meta( 'arsol_linked_server_post_id', true );
         $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         $server_name = 'ARSOL' . $this->subscription_id;
         $server_plan = get_post_meta($this->server_post_id, 'arsol_server_plan_slug', true);
