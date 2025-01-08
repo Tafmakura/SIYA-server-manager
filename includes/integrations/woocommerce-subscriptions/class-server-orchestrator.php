@@ -572,6 +572,7 @@ class ServerOrchestrator {
 
     // Start server deletion process
     public function start_server_deletion($post_id) {
+        error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
         $post = get_post($post_id);
         if ($post->post_type !== 'shop_subscription') {
             return;
@@ -593,6 +594,7 @@ class ServerOrchestrator {
             ]],
             'arsol_server_provision'
         );
+        error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for post ID ' . $post_id);
     }
 
     // Finish server deletion process
@@ -602,9 +604,11 @@ class ServerOrchestrator {
         $retry_count = $args['retry_count'] ?? 0;
 
         if (!$subscription_id || !$server_post_id) {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Missing parameters for deletion.');
+            error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 3: Missing parameters for deletion.');
             return;
         }
+
+        error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 4: Starting server deletion for subscription ID ' . $subscription_id);
 
         $server_post_instance = new ServerPost($server_post_id);
         $server_provider_slug = $server_post_instance->server_provider_slug;
@@ -613,12 +617,15 @@ class ServerOrchestrator {
 
         // Delete RunCloud server
         if ($server_deployed_server_id) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 5: Deleting RunCloud server with ID ' . $server_deployed_server_id);
             $this->runcloud = new Runcloud();
             $deleted = $this->runcloud->delete_server($server_deployed_server_id);
 
             if ($deleted) {
                 update_post_meta($server_post_id, 'arsol_server_deployed_status', 0);
+                error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 6: RunCloud server deleted successfully.');
             } else {
+                error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 7: RunCloud server deletion failed.');
                 if ($retry_count < 5) {
                     as_schedule_single_action(
                         time() + 60,
@@ -632,7 +639,7 @@ class ServerOrchestrator {
                     );
                     return;
                 } else {
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. RunCloud server deletion failed.');
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 8: Maximum retry attempts reached. RunCloud server deletion failed.');
                     return;
                 }
             }
@@ -640,12 +647,15 @@ class ServerOrchestrator {
 
         // Delete provisioned server
         if ($server_provisioned_id) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 9: Deleting provisioned server with ID ' . $server_provisioned_id);
             $this->initialize_server_provider($server_provider_slug);
             $deleted = $this->server_provider->destroy_server($server_provisioned_id);
 
             if ($deleted) {
                 update_post_meta($server_post_id, 'arsol_server_provisioned_status', 0);
+                error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 10: Provisioned server deleted successfully.');
             } else {
+                error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 11: Provisioned server deletion failed.');
                 if ($retry_count < 5) {
                     as_schedule_single_action(
                         time() + 60,
@@ -659,7 +669,7 @@ class ServerOrchestrator {
                     );
                     return;
                 } else {
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Provisioned server deletion failed.');
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 12: Maximum retry attempts reached. Provisioned server deletion failed.');
                     return;
                 }
             }
@@ -667,9 +677,11 @@ class ServerOrchestrator {
 
         // Update server suspension status to destroyed
         update_post_meta($server_post_id, 'arsol_server_suspension', 'destroyed');
+        error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 13: Server suspension status updated to destroyed.');
 
         // Delete the linked server post ID from the subscription
         delete_post_meta($subscription_id, 'arsol_linked_server_post_id');
+        error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 14: Deleted linked server post ID from subscription.');
     }
 
     // Helper Methods
