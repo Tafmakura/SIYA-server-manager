@@ -523,7 +523,7 @@ class ServerOrchestrator {
             return;
         }
 
-        $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
+        $this->server_provisioned_remote_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_remote_status', true);
         
         
         update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
