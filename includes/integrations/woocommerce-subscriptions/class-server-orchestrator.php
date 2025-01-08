@@ -575,6 +575,9 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
        
         $subscription = wcs_get_subscription($post_id);
+        
+        error_log('[SIYA Server Manager - ServerOrchestrator] Subscription object: ' . print_r($subscription, true));
+        
         if (!$subscription) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
             return;
