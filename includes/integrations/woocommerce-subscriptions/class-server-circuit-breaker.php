@@ -8,8 +8,6 @@ use Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator;
 class ServerCircuitBreaker extends ServerOrchestrator {
     public $subscription;
     public $server;
-    public $max_attempts = 3;
-    public $check_interval = 300; // 5 minutes
     public $server_product_id;
     public $server_post_id;
     public $subscription_id;
@@ -17,9 +15,10 @@ class ServerCircuitBreaker extends ServerOrchestrator {
     public function __construct() {
         //$this->subscription = wcs_get_subscription($subscription_id);
        // $this->server = ServerPost::get_server_post_by_subscription($subscription_id);
+       add_action('woocommerce_subscription_status_pending_to_active', array($this, 'subscription_circuit_breaker'), 20, 1);
 
         add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 20, 1);
-
+      
     }
 
     public function subscription_circuit_breaker($subscription) {
@@ -84,16 +83,6 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 }
                 
             }
-
-            // Deployed but not provisioned
-            if (!$is_provisioned && $is_deployed) {
-                error_log('[SIYA Server Manager - ServerCircuitBreaker] Anomaly detected: Server is deployed but not provisioned. Manual intervention required.');
-                update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'tripped');
-                error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker tripped.');  
-                $subscription->update_status('on-hold');
-                $subscription->add_order_note("Anomaly detected: Server is deployed but not provisioned. Manual intervention required.");
-                return;
-            }
     
             // Catch-all case: Unexpected state
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Unexpected state encountered. Manual intervention required.');
@@ -109,21 +98,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $subscription->add_order_note("An error occurred: " . $e->getMessage() . ". Manual intervention required.");
         }
     
-    
         /*
-        error_log('[SIYA Server Manager - ServerCircuitBreaker] Setting subscription to on-hold status');
-        $subscription->add_order_note(
-            "Subscription status set to on-hold. Server provisioning and deployment in progress."
-        );
-
-        $subscription->update_status('on-hold');
-
-        error_log('[SIYA Server Manager - ServerCircuitBreaker] Initiating server provision and deploy process');
-        
-        
-        // Provision the server
-        $this->provision_server($this->subscription);
-
         // Refresh the page after processing
         echo "<script type='text/javascript'>
             setTimeout(function(){

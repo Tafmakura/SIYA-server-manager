@@ -69,7 +69,7 @@ class ServerOrchestrator {
 
         // Add new action hook for the scheduled processes
         add_action('arsol_complete_server_provision', array($this, 'finish_server_provision'), 20, 1);
-        add_action('arsol_update_server_status', array($this, 'update_server_status'), 20, 1);
+        add_action('arsol_update_server_status', array($this, 'start_update_server_status'), 20, 1);
 
 
         add_action('woocommerce_subscription_status_on-hold_to_active', array($this, 'start_server_powerup'), 20, 1);
@@ -275,7 +275,7 @@ class ServerOrchestrator {
     }
 
     // Step 3: Update server status 
-    public function update_server_status($args) {
+    public function start_update_server_status($args) {
         error_log('[SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
         $server_provider_slug = $args['server_provider'];
         $connect_server_manager = $args['server_manager'];
@@ -291,20 +291,10 @@ class ServerOrchestrator {
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
             try {
-                $this->initialize_server_provider($server_provider_slug);
-                $status = $this->server_provider->get_server_status($server_provisioned_id);
-                $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
-                $provisioned_remote_raw_status = $status['provisioned_remote_raw_status'] ?? null;
+                $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
 
-                $server_post_instance = new ServerPost($server_post_id);
-                $server_post_instance->update_meta_data($server_post_id, [
-                    'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
-                    'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_raw_status,
-                    'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
-                ]);
-
-                error_log('[SIYA Server Manager - ServerOrchestrator] Checking status: ' . print_r($status, true));
-                if ($provisioned_remote_status === $target_status) {
+                error_log('[SIYA Server Manager - ServerOrchestrator] Checking status: ' . print_r($remote_status, true));
+                if ($remote_status['provisioned_remote_status'] === $target_status) {
                     error_log('[SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
 
                     $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
@@ -500,29 +490,16 @@ class ServerOrchestrator {
             return;
         }
 
-        $this->initialize_server_provider($server_provider_slug);
-        $this->server_provider->shutdown_server($server_provisioned_id);
+        $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
 
-        // Verify shutdown
-        $status = $this->server_provider->get_server_status($server_provisioned_id);
-        $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
-        
-        // Update server status metadata
-        $server_post_instance = new ServerPost($server_post_id);
-        $server_post_instance->update_meta_data($server_post_id, [
-            'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
-            'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_status,
-            'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
-        ]);
-
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $provisioned_remote_status));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
 
         // Verify server shutdown
-        if ($provisioned_remote_status === 'off') {
+        if ($remote_status['provisioned_remote_status'] === 'off') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully shut down.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
         } else {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Server shutdown verification failed. Current status: ' . $provisioned_remote_status);
+            error_log('[SIYA Server Manager - ServerOrchestrator] Server shutdown verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
 
             if ($retry_count < 5) {
                 error_log('[SIYA Server Manager - ServerOrchestrator] Retrying shutdown in 1 minute. Attempt: ' . ($retry_count + 1));
@@ -598,29 +575,17 @@ class ServerOrchestrator {
             return;
         }
 
-        $this->initialize_server_provider($server_provider_slug);
-        $this->server_provider->poweron_server($server_provisioned_id);
+        // Get remote status and update metadata
+        $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
 
-        // Get remote status
-        $status = $this->server_provider->get_server_status($server_provisioned_id);
-        $provisioned_remote_status = $status['provisioned_remote_status'] ?? null;
-        
-        // Update server status metadata
-        $server_post_instance = new ServerPost($server_post_id);
-        $server_post_instance->update_meta_data($server_post_id, [
-            'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
-            'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_status,
-            'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
-        ]);
-
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $provisioned_remote_status));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
 
         // Verify server powered up
-        if ($provisioned_remote_status === 'active') {
+        if ($remote_status['provisioned_remote_status'] === 'active') {
             error_log('[SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully powered up.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');
         } else {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Server powerup verification failed. Current status: ' . $provisioned_remote_status);
+            error_log('[SIYA Server Manager - ServerOrchestrator] Server powerup verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
 
             if ($retry_count < 5) {
                 error_log('[SIYA Server Manager - ServerOrchestrator] Retrying powerup in 1 minute. Attempt: ' . ($retry_count + 1));
@@ -1061,6 +1026,26 @@ class ServerOrchestrator {
             default:
                 throw new \Exception('Unknown server provider: ' . $this->server_provider_slug);
         }
+    }
+
+    private function update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id) {
+        
+        $this->initialize_server_provider($server_provider_slug);
+
+        // Get remote status
+        $remote_status = $this->server_provider->get_server_status($server_provisioned_id);
+        $provisioned_remote_status = $remote_status['provisioned_remote_status'] ?? null;
+        $provisioned_remote_raw_status = $remote_status['provisioned_remote_raw_status'] ?? null;
+
+        // Update server status metadata
+        $server_post_instance = new ServerPost($server_post_id);
+        $server_post_instance->update_meta_data($server_post_id, [
+            'arsol_server_provisioned_remote_status' => $provisioned_remote_status,
+            'arsol_server_provisioned_remote_raw_status' => $provisioned_remote_raw_status,
+            'arsol_server_provisioned_remote_status_time' => current_time('mysql'),
+        ]);
+
+        return $remote_status;
     }
 
 }
