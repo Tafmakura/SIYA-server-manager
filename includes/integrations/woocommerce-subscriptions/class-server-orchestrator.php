@@ -75,6 +75,8 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_cancelled_to_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('woocommerce_subscription_status_expired_to_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
+
+        add_action('before_delete_post', array($this, 'start_server_deletion'), 10, 1);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -568,16 +570,108 @@ class ServerOrchestrator {
         }
     }
 
-    
+    // Start server deletion process
+    public function start_server_deletion($post_id) {
+        $post = get_post($post_id);
+        if ($post->post_type !== 'shop_subscription') {
+            return;
+        }
 
+        $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
+        if (!$linked_server_post_id) {
+            return;
+        }
 
+        update_post_meta($linked_server_post_id, 'arsol_server_suspension', 'pending-deletion');
 
+        as_schedule_single_action(
+            time(),
+            'arsol_finish_server_deletion',
+            [[
+                'subscription_id' => $post_id,
+                'server_post_id' => $linked_server_post_id
+            ]],
+            'arsol_server_provision'
+        );
+    }
 
+    // Finish server deletion process
+    public function finish_server_deletion($args) {
+        $subscription_id = $args['subscription_id'] ?? null;
+        $server_post_id = $args['server_post_id'] ?? null;
+        $retry_count = $args['retry_count'] ?? 0;
 
+        if (!$subscription_id || !$server_post_id) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Missing parameters for deletion.');
+            return;
+        }
 
+        $server_post_instance = new ServerPost($server_post_id);
+        $server_provider_slug = $server_post_instance->server_provider_slug;
+        $server_provisioned_id = $server_post_instance->server_provisioned_id;
+        $server_deployed_server_id = $server_post_instance->server_deployed_server_id;
 
+        // Delete RunCloud server
+        if ($server_deployed_server_id) {
+            $this->runcloud = new Runcloud();
+            $deleted = $this->runcloud->delete_server($server_deployed_server_id);
 
-    
+            if ($deleted) {
+                update_post_meta($server_post_id, 'arsol_server_deployed_status', 0);
+            } else {
+                if ($retry_count < 5) {
+                    as_schedule_single_action(
+                        time() + 60,
+                        'arsol_finish_server_deletion',
+                        [[
+                            'subscription_id' => $subscription_id,
+                            'server_post_id' => $server_post_id,
+                            'retry_count' => $retry_count + 1
+                        ]],
+                        'arsol_server_provision'
+                    );
+                    return;
+                } else {
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. RunCloud server deletion failed.');
+                    return;
+                }
+            }
+        }
+
+        // Delete provisioned server
+        if ($server_provisioned_id) {
+            $this->initialize_server_provider($server_provider_slug);
+            $deleted = $this->server_provider->destroy_server($server_provisioned_id);
+
+            if ($deleted) {
+                update_post_meta($server_post_id, 'arsol_server_provisioned_status', 0);
+            } else {
+                if ($retry_count < 5) {
+                    as_schedule_single_action(
+                        time() + 60,
+                        'arsol_finish_server_deletion',
+                        [[
+                            'subscription_id' => $subscription_id,
+                            'server_post_id' => $server_post_id,
+                            'retry_count' => $retry_count + 1
+                        ]],
+                        'arsol_server_provision'
+                    );
+                    return;
+                } else {
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Provisioned server deletion failed.');
+                    return;
+                }
+            }
+        }
+
+        // Update server suspension status to destroyed
+        update_post_meta($server_post_id, 'arsol_server_suspension', 'destroyed');
+
+        // Delete the linked server post ID from the subscription
+        delete_post_meta($subscription_id, 'arsol_linked_server_post_id');
+    }
+
     // Helper Methods
 
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
