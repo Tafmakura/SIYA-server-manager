@@ -78,9 +78,9 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                     return;
                 } else {
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment failed. Attempting deployment.');
+                    $subscription->update_status('on-hold');
                     $this->deploy_to_runcloud_and_update_metadata($this->server_post_id, $this->subscription);
                     $subscription->add_order_note("Server provisioned but deployment failed. Retrying deployment.");
-                    $subscription->update_status('on-hold');
                 }
                 return;
             }
@@ -88,8 +88,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             // Not provisioned or deployed
             if (!$is_provisioned && !$is_deployed) {
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] Server not provisioned. Initiating provisioning process.');
-                $this->provision_server($this->subscription);
                 $subscription->update_status('on-hold');
+                $this->provision_server($this->subscription);
                 $subscription->add_order_note("Server not provisioned. Retrying provisioning process and placing subscription on-hold.");
                 return;
             }
