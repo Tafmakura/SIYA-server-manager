@@ -187,7 +187,6 @@ class ServerOrchestrator {
 
                 error_log('Milestone 5a');
 
-                error_log('Milestone 5b');
                 error_log('Subscription ID: ' . $this->subscription_id);
                 error_log('Server Post ID: ' . $this->server_post_id);
                 error_log('Server Product ID: ' . $this->server_product_id);
@@ -196,13 +195,20 @@ class ServerOrchestrator {
 
                 try {
                     // Initialize the appropriate server provider with the slug
+                    
                     $this->initialize_server_provider($this->server_provider_slug);
+
+                    error_log('Milestone 5b');
+
                     $server_data = $this->provision_server($this->subscription_id);
+
+                    error_log('Milestone 5c');
 
                     error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
                         PHP_EOL,
                         json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                     ));
+
                 } catch (\Exception $e) {
                     error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
                     $this->subscription->add_order_note(sprintf(
