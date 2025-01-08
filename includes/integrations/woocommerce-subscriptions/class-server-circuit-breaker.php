@@ -21,11 +21,9 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
     public function subscription_circuit_breaker($subscription) {
 
-        $subscription->update_status('on-hold');
+       
 
-        if (!is_admin()) {
-            return;
-        }
+     
 
         try {
             
