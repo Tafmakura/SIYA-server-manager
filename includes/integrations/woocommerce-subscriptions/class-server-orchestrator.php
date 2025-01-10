@@ -291,11 +291,16 @@ class ServerOrchestrator {
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
             try {
+               
                 $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
 
                 error_log('[SIYA Server Manager - ServerOrchestrator] Checking status: ' . print_r($remote_status, true));
                 if ($remote_status['provisioned_remote_status'] === $target_status) {
                     error_log('[SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
+
+
+                    ///Here we adjuts hetzner 
+
 
                     $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
                     if (!$server_deployed_status && $connect_server_manager === 'yes') {
