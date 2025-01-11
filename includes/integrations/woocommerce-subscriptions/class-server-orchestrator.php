@@ -625,7 +625,7 @@ class ServerOrchestrator {
     public function start_server_deletion($post_id) {
        
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
-       
+        
         $subscription = wcs_get_subscription($post_id);
         
         error_log('[SIYA Server Manager - ServerOrchestrator] Subscription object: ' . print_r($subscription, true));
@@ -638,7 +638,7 @@ class ServerOrchestrator {
        
         if (!$subscription) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
-            wp_die('No server post found.');
+          //  wp_die('No server post found.');
         }
 
         $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
