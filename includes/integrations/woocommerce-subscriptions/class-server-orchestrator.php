@@ -639,6 +639,7 @@ class ServerOrchestrator {
         if (!$subscription) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
           //  wp_die('No server post found.');
+          return;
         }
 
         $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
