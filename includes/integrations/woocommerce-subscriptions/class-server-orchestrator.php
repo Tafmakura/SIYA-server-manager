@@ -82,6 +82,10 @@ class ServerOrchestrator {
 
     // Step 1: Start server provisioning process (Create server post)
     public function start_server_provision($subscription) {
+        if (empty($subscription)) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing $subscription in start_server_provision', __LINE__));
+            return;
+        }
         try {
             $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id();
@@ -141,6 +145,15 @@ class ServerOrchestrator {
 
     // Step 2: Finish server provisioning process (Provision server)
     public function finish_server_provision($args) {
+        if (
+            empty($args['subscription_id']) ||
+            empty($args['server_post_id']) ||
+            !isset($args['server_product_id']) ||
+            !isset($args['server_provider_slug'])
+        ) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing arguments in finish_server_provision', __LINE__));
+            return;
+        }
         try {
             
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Starting server completion'));
@@ -276,6 +289,17 @@ class ServerOrchestrator {
 
     // Step 3: Update server status 
     public function start_update_server_status($args) {
+        if (
+            empty($args['server_provider']) ||
+            !isset($args['server_manager']) ||
+            !isset($args['server_provisioned_id']) ||
+            !isset($args['subscription']) ||
+            !isset($args['target_status']) ||
+            !isset($args['server_post_id'])
+        ) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing arguments in start_update_server_status', __LINE__));
+            return false;
+        }
         error_log('[SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
         $server_provider_slug = $args['server_provider'];
         $connect_server_manager = $args['server_manager'];
@@ -436,6 +460,10 @@ class ServerOrchestrator {
 
     // Step 5: Schedule server shutdown
     public function start_server_shutdown($subscription) {
+        if (empty($subscription)) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing $subscription in start_server_shutdown', __LINE__));
+            return;
+        }
         $subscription_id = $subscription->get_id();
         $server_post_instance = new ServerPost();
         $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
@@ -484,6 +512,15 @@ class ServerOrchestrator {
 
     // Step 5: Finish server shutdown
     public function finish_server_shutdown($args) {
+        if (
+            empty($args['subscription_id']) ||
+            empty($args['server_post_id']) ||
+            empty($args['server_provider_slug']) ||
+            empty($args['server_provisioned_id'])
+        ) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing arguments in finish_server_shutdown', __LINE__));
+            return;
+        }
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $server_provider_slug = $args['server_provider_slug'] ?? null;
@@ -533,6 +570,10 @@ class ServerOrchestrator {
 
     // Step 5: Schedule server powerup
     public function start_server_powerup($subscription) {
+        if (empty($subscription)) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing $subscription in start_server_powerup', __LINE__));
+            return;
+        }
         $subscription_id = $subscription->get_id();
         $server_post_instance = new ServerPost();
         $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
@@ -574,6 +615,15 @@ class ServerOrchestrator {
 
     // Step 5: Finish server powerup
     public function finish_server_powerup($args) {
+        if (
+            empty($args['subscription_id']) ||
+            empty($args['server_post_id']) ||
+            empty($args['server_provider_slug']) ||
+            empty($args['server_provisioned_id'])
+        ) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing arguments in finish_server_powerup', __LINE__));
+            return;
+        }
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $server_provider_slug = $args['server_provider_slug'] ?? null;
@@ -623,7 +673,10 @@ class ServerOrchestrator {
 
     // Start server deletion process
     public function start_server_deletion($post_id) {
-
+        if (empty($post_id)) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing $post_id in start_server_deletion', __LINE__));
+            return;
+        }
         if (get_post_type($post_id) === 'shop_subscription') {
             // Optionally add conditions to prevent deletion
 
@@ -679,6 +732,13 @@ class ServerOrchestrator {
 
     // Finish server deletion process
     public function finish_server_deletion($args) {
+        if (
+            empty($args['subscription_id']) ||
+            empty($args['server_post_id'])
+        ) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing arguments in finish_server_deletion', __LINE__));
+            return;
+        }
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
