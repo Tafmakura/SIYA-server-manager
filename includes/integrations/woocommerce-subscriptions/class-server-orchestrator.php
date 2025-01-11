@@ -654,7 +654,7 @@ class ServerOrchestrator {
             return;
         }
 
-        log_error('#052 [SIYA Server Manager - ServerOrchestrator] Linked server post ID found: ' . $linked_server_post_id);
+        error_log('#052 [SIYA Server Manager - ServerOrchestrator] Linked server post ID found: ' . $linked_server_post_id);
 
         update_post_meta($linked_server_post_id, 'arsol_server_suspension', 'pending-deletion');
 
