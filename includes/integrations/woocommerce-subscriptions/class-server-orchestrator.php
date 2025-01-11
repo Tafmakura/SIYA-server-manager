@@ -178,22 +178,28 @@ class ServerOrchestrator {
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
 
-            error_log('Milestone 3');
+
 
             // Step 2: Provision server if not already provisioned
-            
             // Check server status flags
+            error_log('Milestone 3');
             $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true); 
-            error_log('Milestone 3 Server Status: ' . $this->server_provisioned_status);
+            if ($this->server_provisioned_status) {
+                error_log('Milestone 3 Server Status: ' . $this->server_provisioned_status);
+            } else {
+                error_log('Milestone 3 Server Status: Unavailable');
+            }
 
             if (!$this->server_provisioned_status) {
 
                 error_log('Milestone 5a');
-
-                error_log('Subscription ID: ' . $this->subscription_id);
-                error_log('Server Post ID: ' . $this->server_post_id);
-                error_log('Server Product ID: ' . $this->server_product_id);
-                error_log('Server Provider Slug: ' . $this->server_provider_slug);
+                error_log(sprintf(
+                    'Subscription ID: %d, Server Post ID: %d, Server Product ID: %d, Server Provider Slug: %s',
+                    $this->subscription_id,
+                    $this->server_post_id,
+                    $this->server_product_id,
+                    $this->server_provider_slug
+                ));
 
 
                 try {
