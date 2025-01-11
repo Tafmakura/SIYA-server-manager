@@ -231,7 +231,10 @@ class ServerOrchestrator {
             }
 
             // Check latest server status flags
-            $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true); 
+            $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);    
+            
+            error_log(sprintf('#009b [SIYA Server Manager - ServerOrchestrator] Provisioned status: %s', $this->server_provisioned_status));
+            
             if ($this->server_provisioned_status === 1) {
 
                 error_log('Milestone 5d');
