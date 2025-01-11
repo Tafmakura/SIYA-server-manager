@@ -624,7 +624,6 @@ class ServerOrchestrator {
     // Start server deletion process
     public function start_server_deletion($post_id) {
 
-
         if (get_post_type($post_id) === 'shop_subscription') {
             // Optionally add conditions to prevent deletion
 
