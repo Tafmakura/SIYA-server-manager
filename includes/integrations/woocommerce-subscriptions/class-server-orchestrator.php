@@ -161,6 +161,7 @@ class ServerOrchestrator {
             $metadata = $server_post_instance->get_meta_data();
 
             error_log('Milestone 2');
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Loaded metadata: %s', json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
 
             // Load parameters into class properties
             $this->server_post_name = $metadata['arsol_server_post_name'] ?? null;
