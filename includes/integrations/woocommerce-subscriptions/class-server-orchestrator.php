@@ -649,6 +649,8 @@ class ServerOrchestrator {
             return;
         } 
 
+        $subscription_id = $subscription->get_id();
+
         $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         if (!$linked_server_post_id) {
             return;
@@ -662,12 +664,12 @@ class ServerOrchestrator {
             time(),
             'arsol_finish_server_deletion',
             [[
-                'subscription_id' => $post_id,
+                'subscription_id' => $subscription_id,
                 'server_post_id' => $linked_server_post_id
             ]],
             'arsol_server_provision'
         );
-        error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for post ID ' . $post_id);
+        error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for' . $subscription_id . ' Server post ID' . $post_id);
     
     }
 
