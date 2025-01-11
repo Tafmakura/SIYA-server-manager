@@ -623,7 +623,7 @@ class ServerOrchestrator {
 
     // Start server deletion process
 
-    function start_server_delition($post_id) {
+    function start_server_deletion($post_id) {
         // Check if this is a subscription.
         if (get_post_type($post_id) === 'shop_subscription') {
             error_log('[SIYA Server Manager] Handling subscription deletion for post ID: ' . $post_id);
