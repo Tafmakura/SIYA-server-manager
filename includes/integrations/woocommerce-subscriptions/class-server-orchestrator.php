@@ -625,8 +625,22 @@ class ServerOrchestrator {
 
     function start_server_deletion($post_id) {
         // Check if this is a subscription.
+
+
+        error_log('[SIYA Server Manager] Handling subscription deletion for post ID: ' . $post_id);
+
+        $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
+
+        error_log('[SIYA Server Manager] Linked server post ID: ' . $linked_server_post_id);
+
+
+
+
         if (get_post_type($post_id) === 'shop_subscription') {
-            error_log('[SIYA Server Manager] Handling subscription deletion for post ID: ' . $post_id);
+            
+            
+            
+            error_log('[SIYA Server Manager] HOYO: ' . $post_id);
 
             $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
 
