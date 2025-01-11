@@ -692,7 +692,7 @@ class ServerOrchestrator {
 
         $server_post_instance = new ServerPost($server_post_id);
 
-        error_log(print_r('HOYO>>>>>>>>>' . $server_post_instance, true));
+        error_log(sprintf('#058 [SIYA Server Manager - ServerOrchestrator] ServerPost instance details: %s', print_r($server_post_instance, true)));
 
 
         $server_provider_slug = $server_post_instance->server_provider_slug;
