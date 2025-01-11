@@ -77,7 +77,7 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_expired_to_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
 
-      //  add_action('before_delete_post', array($this, 'start_server_deletion'), 10, 1);
+        add_action('before_delete_post', array($this, 'start_server_deletion'), 10, 1);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -623,6 +623,17 @@ class ServerOrchestrator {
 
     // Start server deletion process
     public function start_server_deletion($post_id) {
+
+
+        if (get_post_type($post_id) === 'shop_subscription') {
+            // Optionally add conditions to prevent deletion
+
+            error_log('[SIYA Server Manager - ServerOrchestrator] Subscription found for post ID ' . $post_id);
+
+        }
+
+
+
        
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
         
