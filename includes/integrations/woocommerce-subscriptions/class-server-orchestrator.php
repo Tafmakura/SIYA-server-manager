@@ -222,7 +222,9 @@ class ServerOrchestrator {
                 }
             }
 
-            if ($this->server_provisioned_status) {
+            // Check latest server status flags
+            $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true); 
+            if ($this->server_provisioned_status === 1) {
 
                 $metadata = $server_post_instance->get_meta_data();
 
