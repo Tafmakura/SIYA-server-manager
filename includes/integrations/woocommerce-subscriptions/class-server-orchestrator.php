@@ -675,6 +675,9 @@ class ServerOrchestrator {
 
     // Finish server deletion process
     public function finish_server_deletion($args) {
+
+        error_log('Server deleition');
+
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
