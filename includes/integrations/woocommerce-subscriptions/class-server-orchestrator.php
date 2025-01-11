@@ -628,6 +628,12 @@ class ServerOrchestrator {
         if (get_post_type($post_id) === 'shop_subscription') {
             error_log('[SIYA Server Manager] Handling subscription deletion for post ID: ' . $post_id);
 
+            $linked_server_post_id = get_post_meta($post_id, 'arsol_linked_server_post_id', true);
+
+            error_log('[SIYA Server Manager] Linked server post ID: ' . $linked_server_post_id);
+
+
+
             // Attempt to retrieve the subscription object.
             $subscription = wcs_get_subscription($post_id);
 
