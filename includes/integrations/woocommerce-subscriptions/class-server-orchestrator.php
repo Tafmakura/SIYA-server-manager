@@ -669,7 +669,7 @@ class ServerOrchestrator {
             ]],
             'arsol_server_provision'
         );
-        error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for' . $subscription_id . ' Server post ID' . $post_id);
+        error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for' . $subscription_id . ' Server post ID' . linked_server_post_id);
     
     }
 
