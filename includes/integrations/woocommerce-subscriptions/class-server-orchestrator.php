@@ -77,7 +77,7 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_expired_to_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
 
-       // add_action('woocommerce_subscription_deleted', array($this, 'start_server_deletion'), 10, 1);
+        add_action('woocommerce_subscription_deleted', array($this, 'start_server_deletion'), 10, 1);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -623,6 +623,7 @@ class ServerOrchestrator {
 
     // Start server deletion process
     public function start_server_deletion($post_id) {
+       
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
        
         $subscription = wcs_get_subscription($post_id);
@@ -634,9 +635,6 @@ class ServerOrchestrator {
         } else {
             error_log('[SIYA Server Manager - ServerOrchestrator] Subscription retrieval failed.');
         }
-       
-       
-       
        
         if (!$subscription) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
@@ -660,6 +658,7 @@ class ServerOrchestrator {
             'arsol_server_provision'
         );
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for post ID ' . $post_id);
+    
     }
 
     // Finish server deletion process
@@ -803,8 +802,6 @@ class ServerOrchestrator {
 
     // Step 2: Provision server and update server post metadata
     protected function provision_server($subscription) {
-
-
 
         try {
             // Define variables within the method
