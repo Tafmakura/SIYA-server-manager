@@ -235,7 +235,7 @@ class ServerOrchestrator {
             
             error_log(sprintf('#010b [SIYA Server Manager - ServerOrchestrator] Provisioned status: %s', $this->server_provisioned_status));
             
-            if ($this->server_provisioned_status === 1) {
+            if ($this->server_provisioned_status == 1) {
 
                 error_log('Milestone 5d');
 
