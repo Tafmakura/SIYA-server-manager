@@ -690,7 +690,8 @@ class ServerOrchestrator {
 
         error_log('#058 [SIYA Server Manager - ServerOrchestrator] Milestone 4: Starting server deletion for subscription ID ' . $subscription_id);
 
-        $server_post_instance = new ServerPost($server_post_id);
+        $post_id = $server_post_id;
+        $server_post_instance = new ServerPost($post_id);
 
         error_log(sprintf('#058 [SIYA Server Manager - ServerOrchestrator] ServerPost instance details: %s', json_encode($server_post_instance, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
 
