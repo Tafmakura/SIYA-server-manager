@@ -640,44 +640,21 @@ class ServerOrchestrator {
     }
 
     // Start server deletion process
-    public function start_server_deletion($post_id) {
-        if (get_post_type($post_id) === 'shop_subscription') {
-            // Optionally add conditions to prevent deletion
-
-            error_log('#049 [SIYA Server Manager - ServerOrchestrator] Subscription found for post ID ' . $post_id);
-
-        }
-
-
-
-       
-        error_log('#050 [SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
+    public function start_server_deletion($subscription) {
         
-        $subscription = wcs_get_subscription($post_id);
-
+        error_log('#050 [SIYA Server Manager - ServerOrchestrator] Starting deletion process');
+        
         if (!$subscription) {
             error_log('#051 [SIYA Server Manager - ServerOrchestrator] Subscription not, instatiatinting new sub nstancefound for post ID ' . $post_id);
-            $subscription = new WC_Subscription($post_id); 
-        }
-        
-        error_log('#052 [SIYA Server Manager - ServerOrchestrator] Subscription object: ' . print_r($subscription, true));
-        
-        if ($subscription instanceof WC_Subscription) {
-            error_log('#053 [SIYA Server Manager - ServerOrchestrator] Subscription found: ' . $subscription->get_id());
-        } else {
-            error_log('#054 [SIYA Server Manager - ServerOrchestrator] Subscription retrieval failed.');
-        }
-       
-        if (!$subscription) {
-            error_log('#055 [SIYA Server Manager - ServerOrchestrator] Subscription not found for HPOS.');
-          //  wp_die('No server post found.');
-          return;
-        }
+            return;
+        } 
 
         $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         if (!$linked_server_post_id) {
             return;
         }
+
+        log_error('#052 [SIYA Server Manager - ServerOrchestrator] Linked server post ID found: ' . $linked_server_post_id);
 
         update_post_meta($linked_server_post_id, 'arsol_server_suspension', 'pending-deletion');
 
