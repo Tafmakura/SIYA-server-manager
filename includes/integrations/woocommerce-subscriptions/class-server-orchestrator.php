@@ -262,14 +262,14 @@ class ServerOrchestrator {
                 time(), // Run immediately, but in the background
                 'arsol_update_server_status',
                 [[
-                    'server_provider' => $this->server_provider_slug,   
-                    'server_manager' => $this->connect_server_manager,
+                    'server_provider'       => $this->server_provider_slug,
+                    'server_manager'        => $this->server_manager,
                     'server_provisioned_id' => $this->server_provisioned_id,
-                    'subscription' => $this->subscription,
-                    'server_post_id' => $this->server_post_id,
-                    'target_status' => 'active',
-                    'poll_interval' => 3,
-                    'time_out' => 60,
+                    'subscription'          => $this->subscription,
+                    'target_status'         => 'active',
+                    'server_post_id'        => $this->server_post_id,
+                    'poll_interval'         => 10,
+                    'time_out'              => 120
                 ]],
                 'arsol_server_provision'
             );
@@ -300,6 +300,7 @@ class ServerOrchestrator {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator L:%d] Missing arguments in start_update_server_status', __LINE__));
             return false;
         }
+        
         error_log('[SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
         $server_provider_slug = $args['server_provider'];
         $connect_server_manager = $args['server_manager'];
