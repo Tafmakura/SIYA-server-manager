@@ -289,6 +289,10 @@ class ServerOrchestrator {
 
     // Step 3: Update server status 
     public function start_update_server_status($args) {
+       
+       error_log('Milestone 7');
+       
+       
         if (
             empty($args['server_provider']) ||
             !isset($args['server_manager']) ||
