@@ -622,6 +622,51 @@ class ServerOrchestrator {
     }
 
     // Start server deletion process
+
+    function handle_before_subscription_delete($post_id) {
+        // Check if this is a subscription.
+        if (get_post_type($post_id) === 'shop_subscription') {
+            error_log('[SIYA Server Manager] Handling subscription deletion for post ID: ' . $post_id);
+
+            // Attempt to retrieve the subscription object.
+            $subscription = wcs_get_subscription($post_id);
+
+            if (!$subscription) {
+                error_log('[SIYA Server Manager] Subscription not found. HPOS might be enabled.');
+                return;
+            }
+
+            // Process subscription metadata or linked server logic here.
+            $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+
+            if ($linked_server_post_id) {
+                error_log('[SIYA Server Manager] Linked server post ID: ' . $linked_server_post_id);
+
+                // Update server status.
+                update_post_meta($linked_server_post_id, 'arsol_server_suspension', 'pending-deletion');
+
+                // Schedule deletion action.
+                as_schedule_single_action(
+                    time(),
+                    'arsol_finish_server_deletion',
+                    [
+                        'subscription_id' => $post_id,
+                        'server_post_id' => $linked_server_post_id
+                    ],
+                    'arsol_server_provision'
+                );
+            } else {
+                error_log('[SIYA Server Manager] No linked server post ID found.');
+            }
+        }
+    }
+
+
+
+
+
+
+    /*
     public function start_server_deletion($post_id) {
        
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 1: Starting server deletion for post ID ' . $post_id);
@@ -666,6 +711,7 @@ class ServerOrchestrator {
         error_log('[SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for post ID ' . $post_id);
     
     }
+    */
 
     // Finish server deletion process
     public function finish_server_deletion($args) {
