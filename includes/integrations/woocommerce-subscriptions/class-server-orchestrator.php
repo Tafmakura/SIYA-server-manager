@@ -69,7 +69,7 @@ class ServerOrchestrator {
         add_action('arsol_server_shutdown', array($this, 'finish_server_shutdown'), 20, 1);
 
         // Add new action hook for the scheduled processes
-        add_action('arsol_complete_server_provision', array($this, 'finish_server_provision'), 20, 1);
+        add_action('arsol_finish_server_provision', array($this, 'finish_server_provision'), 20, 1);
         add_action('arsol_update_server_status', array($this, 'start_update_server_status'), 20, 1);
 
 
@@ -113,7 +113,7 @@ class ServerOrchestrator {
             // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
             as_schedule_single_action(
                 time(), // Run immediately, but in the background
-                'arsol_complete_server_provision',
+                'arsol_finish_server_provision',
                 [[
                     'subscription_id' => $this->subscription_id,
                     'server_post_id' => $this->server_post_id,
