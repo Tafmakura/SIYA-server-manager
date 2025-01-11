@@ -154,6 +154,7 @@ class ServerOrchestrator {
             $this->server_provider_slug = $args['server_provider_slug'];
 
             error_log('Milestone 1');
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Received arguments: %s', json_encode($args, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
             
             // Load all parameters from the server post metadata
             $server_post_instance = new ServerPost($this->server_post_id);
