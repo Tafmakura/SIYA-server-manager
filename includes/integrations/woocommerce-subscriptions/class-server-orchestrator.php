@@ -240,14 +240,15 @@ class ServerOrchestrator {
 
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
             $this->schedule_action('arsol_update_server_status', [
-                'server_provider'       => $this->server_provider_slug,
-                'server_manager'        => $this->server_manager,
-                'server_provisioned_id' => $this->server_provisioned_id,
-                'subscription'          => $this->subscription,
-                'target_status'         => 'active',
-                'server_post_id'        => $this->server_post_id,
-                'poll_interval'         => 10,
-                'time_out'              => 120
+                'server_provider'           => $this->server_provider_slug,
+                'connect_server_manager'    => $this->connect_server_manager,
+                'server_manager'            => $this->server_manager,
+                'server_provisioned_id'     => $this->server_provisioned_id,
+                'subscription'              => $this->subscription,
+                'target_status'             => 'active',
+                'server_post_id'            => $this->server_post_id,
+                'poll_interval'             => 10,
+                'time_out'                  => 120
             ]);
 
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -266,7 +267,8 @@ class ServerOrchestrator {
  
         error_log('#015 [SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
         $server_provider_slug = $args['server_provider'];
-        $connect_server_manager = $args['server_manager'];
+        $server_manager = $args['server_manager'];
+        $connect_server_manager = $args['connect_server_manager'];
         $server_provisioned_id = $args['server_provisioned_id'];
         $subscription = $args['subscription'];
         $target_status = $args['target_status'];
@@ -286,11 +288,10 @@ class ServerOrchestrator {
                 if ($remote_status['provisioned_remote_status'] === $target_status) {
                     error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
 
-
-                    ///Here we adjuts hetzner 
-
+                    ///Here we adjutst hetzner 
 
                     $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
+                    
                     if (!$server_deployed_status && $connect_server_manager === 'yes') {
                         error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
                         $this->runcloud = new Runcloud();  
