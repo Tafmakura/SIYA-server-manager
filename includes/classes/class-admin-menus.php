@@ -48,20 +48,6 @@ class AdminMenus {
             array('Siya\AdminSettings\Slugs', 'settings_page') // Callback function
         );
     }
-    
-    /**
-     * Add API Settings submenu page
-     */
-    public function add_api_submenu() {
-        add_submenu_page(
-            'siya',                            // Parent slug
-            'API Keys',                         // Page title
-            'API Keys',                         // Menu title
-            'manage_options',                   // Capability
-            'siya-api-settings',                // Menu slug
-            array('Siya\AdminSettings\API', 'settings_page') // Callback function
-        );
-    }
 
     /**
      * Add SSH Keys submenu page
@@ -74,6 +60,20 @@ class AdminMenus {
             'manage_options',
             'siya-ssh-settings',
             array('Siya\AdminSettings\SSH', 'settings_page')
+        );
+    }
+      
+    /**
+     * Add API Settings submenu page
+     */
+    public function add_api_submenu() {
+        add_submenu_page(
+            'siya',                            // Parent slug
+            'API Keys',                         // Page title
+            'API Keys',                         // Menu title
+            'manage_options',                   // Capability
+            'siya-api-settings',                // Menu slug
+            array('Siya\AdminSettings\API', 'settings_page') // Callback function
         );
     }
 }
