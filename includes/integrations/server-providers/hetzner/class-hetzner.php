@@ -496,6 +496,9 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('Hetzner open ports response: ' . $response_body . ', Status: ' . $response_code);
+
         return $response_code === 200;
     }
 
