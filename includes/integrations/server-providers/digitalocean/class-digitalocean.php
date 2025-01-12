@@ -280,6 +280,8 @@ class DigitalOcean /*implements ServerProvider*/ {
     }
 
     public function destroy_server($server_provisioned_id) {
+        error_log('[SIYA Server Manager][DigitalOcean] Destroying server with ID: ' . $server_provisioned_id);
+
         $response = wp_remote_request($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
             'method' => 'DELETE',
             'headers' => [
@@ -287,13 +289,21 @@ class DigitalOcean /*implements ServerProvider*/ {
             ]
         ]);
 
+        error_log('[SIYA Server Manager][DigitalOcean] Server destroy response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
         if (is_wp_error($response)) {
-            error_log('[SIYA Server Manager][DigitalOcean] destroy error: ' . $response->get_error_message());
-            return false;
+            error_log('[SIYA Server Manager][DigitalOcean] Error destroying server: ' . $response->get_error_message());
+            throw new \Exception('Failed to destroy server: ' . $response->get_error_message());
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
-        return $response_code === 204;
+        if ($response_code !== 204) {
+            error_log('[SIYA Server Manager][DigitalOcean] Error destroying server. Response code: ' . $response_code);
+            throw new \Exception('Failed to destroy server. Response code: ' . $response_code);
+        }
+
+        error_log('[SIYA Server Manager][DigitalOcean] Server destroyed successfully.');
+        return true;
     }
 
     public function reboot_server($server_provisioned_id) {

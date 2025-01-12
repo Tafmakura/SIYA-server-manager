@@ -223,7 +223,7 @@ class ServerPost {
             'arsol_server_deployment_date' => get_post_meta($post_id, 'arsol_server_deployment_date', true),  // Added missing field
         );
         
-        return array_filter($meta_data);
+        return $meta_data;
     }
     
 }

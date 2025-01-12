@@ -287,25 +287,30 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function destroy_server($server_provisioned_id) {
-        $response = wp_remote_delete($this->api_endpoint . '/servers/' . $server_provisioned_id, [
+        error_log('[SIYA Server Manager][Hetzner] Destroying server with ID: ' . $server_provisioned_id);
+
+        $response = wp_remote_request($this->api_endpoint . '/servers/' . $server_provisioned_id, [
+            'method' => 'DELETE',
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->api_key
+            'Authorization' => 'Bearer ' . $this->api_key
             ]
         ]);
 
+        error_log('[SIYA Server Manager][Hetzner] Server destroy response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
         if (is_wp_error($response)) {
-            error_log('[SIYA Server Manager][Hetzner] destroy error: ' . $response->get_error_message());
-            return false;
+            error_log('[SIYA Server Manager][Hetzner] Error destroying server: ' . $response->get_error_message());
+            throw new \Exception('Failed to destroy server: ' . $response->get_error_message());
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
-        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 200) {
-            error_log('Hetzner API Error: Destroy failed with response code ' . $response_code . ', Body: ' . $response_body);
-            return false;
+            error_log('[SIYA Server Manager][Hetzner] Error destroying server. Response code: ' . $response_code);
+            throw new \Exception('Failed to destroy server. Response code: ' . $response_code);
         }
 
-        return true;
+        error_log('[SIYA Server Manager][Hetzner] Server destroyed successfully.');
+        return $response;
     }
 
     public function reboot_server($server_provisioned_id) {
