@@ -700,7 +700,7 @@ class ServerOrchestrator {
             $server_provisioned_id,
             $server_deployed_server_id
         ));
-        
+
         // Delete RunCloud server
         if ($server_deployed_server_id) {
             error_log('#059 [SIYA Server Manager - ServerOrchestrator] Milestone 5: Deleting RunCloud server with ID ' . $server_deployed_server_id);
@@ -734,8 +734,14 @@ class ServerOrchestrator {
         // Delete provisioned server
         if ($server_provisioned_id) {
             error_log('#063 [SIYA Server Manager - ServerOrchestrator] Milestone 9: Deleting provisioned server with ID ' . $server_provisioned_id);
+            
             $this->initialize_server_provider($server_provider_slug);
+
+            error_log('Milestone 9b');
+
             $deleted = $this->server_provider->destroy_server($server_provisioned_id);
+
+            error_log('Milestone 9c');
 
             if ($deleted) {
                 update_post_meta($server_post_id, 'arsol_server_provisioned_status', 0);
