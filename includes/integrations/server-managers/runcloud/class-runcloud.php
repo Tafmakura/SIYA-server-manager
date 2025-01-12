@@ -131,8 +131,8 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ipAddress, 22);
     
-            // Get SSH credentials from WordPress options
-            $ssh_username = get_option('server_ssh_username', 'root');
+            // Use the server name as the SSH username instead of 'root'
+            $ssh_username = $server_name; // This will be in format ARSOLXXXX
             $ssh_private_key = get_option('arsol_ssh_private_key');
     
             if (empty($ssh_private_key)) {
@@ -144,9 +144,9 @@ class Runcloud /*implements ServerManager*/ {
                 }
             } else {
                 $key = PublicKeyLoader::load($ssh_private_key);
-                error_log('[SIYA Server Manager][RunCloud] Using key-based authentication...');
+                error_log('[SIYA Server Manager][RunCloud] Using key-based authentication with username: ' . $ssh_username);
                 if (!$ssh->login($ssh_username, $key)) {
-                    error_log('[SIYA Server Manager][RunCloud] SSH key authentication failed.');
+                    error_log('[SIYA Server Manager][RunCloud] SSH key authentication failed for user: ' . $ssh_username);
                     return new \WP_Error('ssh_key_auth_failed', 'SSH key authentication failed');
                 }
             }
