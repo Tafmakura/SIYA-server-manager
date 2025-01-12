@@ -782,15 +782,9 @@ class ServerOrchestrator {
         
         // Update the server_linked_post_id on the subscription to destroyed
         $subscription = wcs_get_subscription($subscription_id);
+        $subscription->update_meta_data('arsol_linked_server_post_id', 'Server destroyed');
+        $subscription->save(); // Save the subscription to persist changes
         
-        if ($subscription) {
-            // Update the meta key 'arsol_linked_server_post_id' to 'destroyed'
-            $subscription->update_meta_data('arsol_linked_server_post_id', 'destroyed');
-            $subscription->save(); // Save the subscription to persist changes
-        } else {
-            // Log or handle the case where the subscription is not found
-            error_log("#068 [SIYA Server Manager - ServerOrchestrator] Milestone 15: {$subscription_id} not found.");
-        }
     }
 
     // Helper Methods
