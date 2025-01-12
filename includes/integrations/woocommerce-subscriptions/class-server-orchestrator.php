@@ -328,13 +328,14 @@ class ServerOrchestrator {
         $ipv4 = $server_ips['ipv4'];
         $ipv6 = $server_ips['ipv6'];
         // Save IP addresses to post meta so that it is available for RunCloud deployment
+        /*
         if (!empty($ipv4)) {
             update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
         }
         if (!empty($ipv6)) {
             update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
         }
-
+        */
         // Milestone 1: Log IP addresses
         error_log(sprintf('#024 [SIYA Server Manager - ServerOrchestrator] Milestone X1: Server IP Addresses:%sIPv4: %s%sIPv6: %s', 
             PHP_EOL,
