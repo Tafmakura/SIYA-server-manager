@@ -79,11 +79,15 @@ class DigitalOcean /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Setup SSH access
+        $user_script = $this->setup_ssh_access($server_name);
+
         $server_data = [
             'name' => $server_name,
             'size' => $server_plan,
             'region' => $server_region,
-            'image' => $server_image
+            'image' => $server_image,
+            'user_data' => base64_encode($user_script)
         ];
 
         $response = wp_remote_post($this->api_endpoint . '/droplets', [
@@ -112,6 +116,43 @@ class DigitalOcean /*implements ServerProvider*/ {
 
         return $server_data;
     }
+
+    private function setup_ssh_access($server_name) {
+        // Retrieve SSH key and username from server metadata
+        $server_post_id = get_post_meta_by_key('arsol_server_post_id', $server_name);
+        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
+        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+
+        if (empty($ssh_public_key) || empty($ssh_username)) {
+            throw new \Exception('SSH key or username not found in server metadata');
+        }
+
+        return sprintf(
+            "#!/bin/bash\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Creating user: %s'\n" .
+            "useradd -m -s /bin/bash %s\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Creating SSH directory'\n" .
+            "mkdir -p /home/%s/.ssh\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Copying SSH key'\n" .
+            "echo \"%s\" > /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Setting permissions'\n" .
+            "chown -R %s:%s /home/%s/.ssh\n" .
+            "chmod 700 /home/%s/.ssh\n" .
+            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] User setup completed for: %s'\n",
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_public_key,
+            $ssh_username,
+            $ssh_username, $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username
+        );
+    }
+
 
     private function map_statuses($raw_status) {
         $status_map = [
