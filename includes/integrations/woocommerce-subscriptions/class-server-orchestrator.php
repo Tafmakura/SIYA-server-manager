@@ -390,6 +390,9 @@ class ServerOrchestrator {
            
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
+            // Trigger the connection to the provisioned server
+            $this->connect_server_manager($server_post_id, $subscription, $runcloud_response['body']);
+
         } elseif (!isset($runcloud_response['status']) || !in_array($runcloud_response['status'], [200, 201])) {
             error_log('#029 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
             $subscription->add_order_note(sprintf(
@@ -420,6 +423,35 @@ class ServerOrchestrator {
             $subscription->update_status('on-hold'); // Switch subscription status to on hold
             return; // Exit the function after logging the error
 
+        }
+    }
+
+    // New method to connect server manager to provisioned server
+    protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
+        $runcloud_response_data = json_decode($runcloud_response_body, true);
+        $server_id = $runcloud_response_data['id'] ?? null;
+        $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+
+        if ($server_id && $server_ip) {
+            $this->runcloud = new Runcloud();
+            $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server($server_id, $server_ip);
+
+            if (is_wp_error($connection_result)) {
+                error_log(sprintf(
+                    '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
+                    $connection_result->get_error_message()
+                ));
+                $subscription->add_order_note(sprintf(
+                    'Failed to connect server manager to provisioned server: %s',
+                    $connection_result->get_error_message()
+                ));
+            } else {
+                error_log('[SIYA Server Manager - ServerOrchestrator] Successfully connected server manager to provisioned server.');
+                $subscription->add_order_note('Successfully connected server manager to provisioned server.');
+            }
+        } else {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Missing server ID or IP address for connection.');
+            $subscription->add_order_note('Missing server ID or IP address for connection.');
         }
     }
 
