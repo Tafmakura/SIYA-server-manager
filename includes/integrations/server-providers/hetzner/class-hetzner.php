@@ -289,13 +289,13 @@ class Hetzner /*implements ServerProvider*/ {
     public function destroy_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][Hetzner] Destroying server with ID: ' . $server_provisioned_id);
 
-        error_log('[SIYA Server Manager][Hetzner] Sending delete request to API... with URL: ' . $this->api_endpoint . '/servers/' . $server_provisioned_id);
-   
         $response = wp_remote_delete($this->api_endpoint . '/servers/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
         ]);
+
+        error_log('[SIYA Server Manager][Hetzner] Server destroy response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         if (is_wp_error($response)) {
             error_log('[SIYA Server Manager][Hetzner] Error destroying server: ' . $response->get_error_message());
