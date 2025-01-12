@@ -85,6 +85,10 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function connect_server_manager_to_provisioned_server($server_id, $ipAddress) {
+        // Get the server name from the server ID format (ARSOLXXXX)
+        $server_name = 'ARSOL' . $server_id;
+        error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $server_name);
+    
         // Get installation script
         $script_response = wp_remote_get(
             $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
@@ -131,8 +135,8 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ipAddress, 22);
     
-            // Use the server name as the SSH username instead of 'root'
-            $ssh_username = $server_name; // This will be in format ARSOLXXXX
+            // Use the server name as SSH username
+            $ssh_username = $server_name;
             $ssh_private_key = get_option('arsol_ssh_private_key');
     
             if (empty($ssh_private_key)) {
@@ -144,7 +148,7 @@ class Runcloud /*implements ServerManager*/ {
                 }
             } else {
                 $key = PublicKeyLoader::load($ssh_private_key);
-                error_log('[SIYA Server Manager][RunCloud] Using key-based authentication with username: ' . $ssh_username);
+                error_log('[SIYA Server Manager][RunCloud] Using key-based authentication for user: ' . $ssh_username);
                 if (!$ssh->login($ssh_username, $key)) {
                     error_log('[SIYA Server Manager][RunCloud] SSH key authentication failed for user: ' . $ssh_username);
                     return new \WP_Error('ssh_key_auth_failed', 'SSH key authentication failed');

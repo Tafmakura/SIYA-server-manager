@@ -92,7 +92,17 @@ class Vultr /*implements ServerProvider*/ {
                 'plan' => $server_plan,
                 'region' => $server_region,
                 'os_id' => $server_image,
-                'ssh_keys' => [$ssh_key_id] // Add SSH key ID to instance creation
+                'ssh_keys' => [$ssh_key_id], // Add SSH key ID to instance creation
+                'user_data' => base64_encode(sprintf(
+                    "#!/bin/bash\nuseradd -m -s /bin/bash %s\nmkdir -p /home/%s/.ssh\necho \"$(cat /root/.ssh/authorized_keys)\" > /home/%s/.ssh/authorized_keys\nchown -R %s:%s /home/%s/.ssh\nchmod 700 /home/%s/.ssh\nchmod 600 /home/%s/.ssh/authorized_keys",
+                    $server_name, // Create user
+                    $server_name, // Create .ssh directory
+                    $server_name, // Copy SSH key
+                    $server_name, $server_name, // Set ownership
+                    $server_name, // Set directory permissions
+                    $server_name, 
+                    $server_name  // Set file permissions
+                ))
             ])
         ]);
 
