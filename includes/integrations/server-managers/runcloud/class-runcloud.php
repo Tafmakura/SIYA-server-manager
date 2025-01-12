@@ -105,14 +105,13 @@ class Runcloud /*implements ServerManager*/ {
         $script_body = wp_remote_retrieve_body($script_response);
         $script_data = json_decode($script_body, true);
     
-        error_log('RunCloud Installation Script Response Status: ' . $response_code);
-        error_log('RunCloud Installation Script Response: ' . $script_body);
+        error_log('[SIYA Server Manager][RunCloud] Installation Script Response Status: ' . $response_code);
+        error_log('[SIYA Server Manager][RunCloud] Installation Script Response: ' . $script_body);
     
         if ($response_code !== 200) {
             return new \WP_Error('invalid_response', 'Invalid response code from RunCloud: ' . $response_code);
         }
     
-        // Updated: Accessing the script directly
         if (!is_array($script_data) || !isset($script_data['script'])) {
             return new \WP_Error(
                 'invalid_script',
@@ -125,10 +124,11 @@ class Runcloud /*implements ServerManager*/ {
             return new \WP_Error('empty_script', 'Empty installation script received from RunCloud');
         }
     
-        $installation_script = $script_data['script']; // Extract the script directly
+        $installation_script = $script_data['script'];
     
         try {
             // Initialize SSH connection
+            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ipAddress, 22);
     
             // Get SSH credentials from WordPress options
@@ -137,25 +137,41 @@ class Runcloud /*implements ServerManager*/ {
     
             if (empty($ssh_key_path)) {
                 $ssh_password = get_option('server_ssh_password');
+                error_log('[SIYA Server Manager][RunCloud] Using password authentication...');
                 if (!$ssh->login($ssh_username, $ssh_password)) {
+                    error_log('[SIYA Server Manager][RunCloud] SSH password authentication failed.');
                     return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
                 }
-                error_log('[SIYA Server Manager][Runcloud] SSH authentication succeeded for user: ' . $ssh_username);
             } else {
                 $key = PublicKeyLoader::load(file_get_contents($ssh_key_path));
+                error_log('[SIYA Server Manager][RunCloud] Using key-based authentication...');
                 if (!$ssh->login($ssh_username, $key)) {
+                    error_log('[SIYA Server Manager][RunCloud] SSH key authentication failed.');
                     return new \WP_Error('ssh_key_auth_failed', 'SSH key authentication failed');
                 }
-                error_log('[SIYA Server Manager][Runcloud] SSH authentication succeeded for user: ' . $ssh_username);
             }
     
+            error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
+    
+            // Test SSH connection with a simple command
+            $test_command = $ssh->exec('echo "SSH Connection Test Successful"');
+            error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_command);
+    
             // Execute the installation script
+            error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
             $result = $ssh->exec($installation_script);
     
             // Log the execution result
-            error_log('RunCloud Installation Script Result: ' . $result);
+            error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $result);
+    
+            // Check for SSH errors or timeouts
+            if ($ssh->isTimeout()) {
+                error_log('[SIYA Server Manager][RunCloud] SSH connection timed out.');
+                return new \WP_Error('ssh_timeout', 'SSH connection timed out during script execution.');
+            }
     
             if ($ssh->getExitStatus() !== 0) {
+                error_log('[SIYA Server Manager][RunCloud] Installation script execution failed. Exit status: ' . $ssh->getExitStatus());
                 return new \WP_Error(
                     'script_execution_failed',
                     'Installation script execution failed',
@@ -163,12 +179,14 @@ class Runcloud /*implements ServerManager*/ {
                 );
             }
     
+            error_log('[SIYA Server Manager][RunCloud] Installation script executed successfully.');
             return true;
     
         } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][RunCloud] SSH connection failed: ' . $e->getMessage());
             return new \WP_Error(
                 'ssh_connection_failed',
-                '[SIYA Server Manager][Runcloud] Failed to establish SSH connection: ' . $e->getMessage()
+                '[SIYA Server Manager][RunCloud] Failed to establish SSH connection: ' . $e->getMessage()
             );
         }
     }
