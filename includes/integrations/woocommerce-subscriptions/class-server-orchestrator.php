@@ -93,8 +93,7 @@ class ServerOrchestrator {
                 return;
             }
 
-            $subscription->update_status('pending');
-
+           
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
             $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
