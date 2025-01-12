@@ -16,7 +16,13 @@ class Vultr /*implements ServerProvider*/ {
         return new VultrSetup();
     }
 
-    public function provision_server($server_name, $server_plan, $server_region = 'ewr', $server_image = 2465) {
+    public function provision_server($server_post_id) {
+        // Retrieve necessary information from metadata
+        $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
+        $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
+        $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'ewr';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2465;
+
         error_log(sprintf('[SIYA Server Manager] Vultr: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
         ));
@@ -30,7 +36,7 @@ class Vultr /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-        $user_script = $this->setup_ssh_access($server_name);
+        $user_script = $this->setup_ssh_access($server_post_id);
 
         $response = wp_remote_post($this->api_endpoint . '/instances', [
             'headers' => [
@@ -67,9 +73,8 @@ class Vultr /*implements ServerProvider*/ {
         return $server_data;
     }
 
-    private function setup_ssh_access($server_name) {
+    private function setup_ssh_access($server_post_id) {
         // Retrieve SSH key and username from server metadata
-        $server_post_id = get_post_meta_by_key('arsol_server_post_id', $server_name);
         $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
         $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
 

@@ -66,7 +66,13 @@ class Hetzner /*implements ServerProvider*/ {
         return $ssh_key_id;
     }
 
-    public function provision_server($server_name, $server_plan, $server_region = 'nbg1', $server_image = 'ubuntu-20.04') {
+    public function provision_server($server_post_id) {
+        // Retrieve necessary information from metadata
+        $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
+        $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
+        $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nbg1';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20.04';
+
         error_log(sprintf('[SIYA Server Manager][Hetzner] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
         ));
@@ -79,10 +85,9 @@ class Hetzner /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
-
         // Setup SSH access
         try {
-            $user_script = $this->setup_ssh_access($server_name);
+            $user_script = $this->setup_ssh_access($server_post_id);
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][Hetzner] Error setting up SSH access: ' . $e->getMessage());
             throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
@@ -125,20 +130,8 @@ class Hetzner /*implements ServerProvider*/ {
         return $server_data;
     }
 
-    private function setup_ssh_access($server_name) {
+    private function setup_ssh_access($server_post_id) {
         // Retrieve SSH key and username from server metadata
-        $server_post = get_posts([
-            'post_type' => 'server',
-            'meta_key' => 'arsol_server_post_id',
-            'meta_value' => $server_name,
-            'numberposts' => 1
-        ]);
-
-        if (empty($server_post)) {
-            throw new \Exception('Server post not found');
-        }
-
-        $server_post_id = $server_post[0]->ID;
         $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
         $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
 
