@@ -82,6 +82,32 @@ class Vultr /*implements ServerProvider*/ {
         // Add SSH key before creating server
         $ssh_key_id = $this->setup_ssh_key($server_name);
 
+        error_log(sprintf('[SIYA Server Manager][Vultr] Creating user with username: %s', $server_name));
+
+        $user_script = sprintf(
+            "#!/bin/bash\n" .
+            "echo '[SIYA Server Manager][Vultr] Creating user: %s'\n" .
+            "useradd -m -s /bin/bash %s\n" .
+            "echo '[SIYA Server Manager][Vultr] Creating SSH directory'\n" .
+            "mkdir -p /home/%s/.ssh\n" .
+            "echo '[SIYA Server Manager][Vultr] Copying SSH key'\n" .
+            "echo \"$(cat /root/.ssh/authorized_keys)\" > /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][Vultr] Setting permissions'\n" .
+            "chown -R %s:%s /home/%s/.ssh\n" .
+            "chmod 700 /home/%s/.ssh\n" .
+            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][Vultr] User setup completed for: %s'\n",
+            $server_name,
+            $server_name,
+            $server_name,
+            $server_name,
+            $server_name, $server_name,
+            $server_name,
+            $server_name,
+            $server_name,
+            $server_name
+        );
+
         $response = wp_remote_post($this->api_endpoint . '/instances', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
@@ -93,16 +119,7 @@ class Vultr /*implements ServerProvider*/ {
                 'region' => $server_region,
                 'os_id' => $server_image,
                 'ssh_keys' => [$ssh_key_id], // Add SSH key ID to instance creation
-                'user_data' => base64_encode(sprintf(
-                    "#!/bin/bash\nuseradd -m -s /bin/bash %s\nmkdir -p /home/%s/.ssh\necho \"$(cat /root/.ssh/authorized_keys)\" > /home/%s/.ssh/authorized_keys\nchown -R %s:%s /home/%s/.ssh\nchmod 700 /home/%s/.ssh\nchmod 600 /home/%s/.ssh/authorized_keys",
-                    $server_name, // Create user
-                    $server_name, // Create .ssh directory
-                    $server_name, // Copy SSH key
-                    $server_name, $server_name, // Set ownership
-                    $server_name, // Set directory permissions
-                    $server_name, 
-                    $server_name  // Set file permissions
-                ))
+                'user_data' => base64_encode($user_script)
             ])
         ]);
 

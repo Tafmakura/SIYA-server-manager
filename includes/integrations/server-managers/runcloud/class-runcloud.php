@@ -87,7 +87,11 @@ class Runcloud /*implements ServerManager*/ {
     public function connect_server_manager_to_provisioned_server($server_id, $ipAddress) {
         // Get the server name from the server ID format (ARSOLXXXX)
         $server_name = 'ARSOL' . $server_id;
+        error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
+        error_log('[SIYA Server Manager][RunCloud] Server Name: ' . $server_name);
+        error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $ipAddress);
         error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $server_name);
+        error_log('[SIYA Server Manager][RunCloud] ====================================');
     
         // Get installation script
         $script_response = wp_remote_get(
@@ -137,6 +141,7 @@ class Runcloud /*implements ServerManager*/ {
     
             // Use the server name as SSH username
             $ssh_username = $server_name;
+            error_log('[SIYA Server Manager][RunCloud] Attempting SSH connection with username: ' . $ssh_username);
             $ssh_private_key = get_option('arsol_ssh_private_key');
     
             if (empty($ssh_private_key)) {
