@@ -256,12 +256,15 @@ class Vultr /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Vultr destroy error: ' . $response->get_error_message());
-            return false;
+            throw new \Exception('Failed to destroy server: ' . $response->get_error_message());
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
-        return $response_code === 204;
+        if ($response_code !== 204) {
+            throw new \Exception('Failed to destroy server. Response code: ' . $response_code);
+        }
+
+        return true;
     }
 
     public function reboot_server($server_provisioned_id) {

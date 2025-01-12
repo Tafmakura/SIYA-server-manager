@@ -294,15 +294,12 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('[SIYA Server Manager][Hetzner] destroy error: ' . $response->get_error_message());
-            return false;
+            throw new \Exception('Failed to destroy server: ' . $response->get_error_message());
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
-        $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 200) {
-            error_log('Hetzner API Error: Destroy failed with response code ' . $response_code . ', Body: ' . $response_body);
-            return false;
+            throw new \Exception('Failed to destroy server. Response code: ' . $response_code);
         }
 
         return true;
