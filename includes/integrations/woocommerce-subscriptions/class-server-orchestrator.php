@@ -739,7 +739,12 @@ class ServerOrchestrator {
 
             error_log('Milestone 9b');
 
-            $deleted = $this->server_provider->destroy_server($server_provisioned_id);
+            try {
+                $deleted = $this->server_provider->destroy_server($server_provisioned_id);
+            } catch (\Exception $e) {
+                error_log(sprintf('#065a [SIYA Server Manager - ServerOrchestrator] Error during server destruction: %s', $e->getMessage()));
+                $deleted = false;
+            }
 
             error_log('Milestone 9c');
 
