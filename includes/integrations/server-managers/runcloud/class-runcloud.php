@@ -135,11 +135,13 @@ class Runcloud /*implements ServerManager*/ {
                 if (!$ssh->login($ssh_username, $ssh_password)) {
                     return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
                 }
+                error_log('[SIYA Server Manager][Runcloud] SSH authentication succeeded for user: ' . $ssh_username);
             } else {
                 $key = PublicKeyLoader::load(file_get_contents($ssh_key_path));
                 if (!$ssh->login($ssh_username, $key)) {
                     return new \WP_Error('ssh_key_auth_failed', 'SSH key authentication failed');
                 }
+                error_log('[SIYA Server Manager][Runcloud] SSH authentication succeeded for user: ' . $ssh_username);
             }
 
             // Execute the installation script
