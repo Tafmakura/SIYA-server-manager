@@ -380,11 +380,13 @@ class ServerOrchestrator {
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
-            // Successful API subscription note
-            $subscription->add_order_note(sprintf(
+            // Successful API subscription note /*
+           /* $subscription->add_order_note(sprintf(
                 "RunCloud deployment successful with Response body: %s",
                 $runcloud_response['body']
             ));
+
+            */
            
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
