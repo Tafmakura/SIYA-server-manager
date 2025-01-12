@@ -21,7 +21,6 @@ class ServerOrchestrator {
     public $server_product_id;
     public $server_product;
     public $server_manager;
-    public $server_plan_identifier;
     private $runcloud;
     private $digitalocean;
     private $hetzner;
@@ -61,7 +60,7 @@ class ServerOrchestrator {
         // Hook into WooCommerce subscription status change from pending to active to start server provisioning
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
 
-        // Step 1: Register new hooks to trigger shutdown
+        // Register new hooks to trigger shutdown
         add_action('woocommerce_subscription_status_active_to_on-hold', array($this, 'start_server_shutdown'), 20, 1);
         add_action('woocommerce_subscription_status_active_to_expired', array($this, 'start_server_shutdown'), 20, 1);
         add_action('arsol_server_shutdown', array($this, 'finish_server_shutdown'), 20, 1);
@@ -106,34 +105,18 @@ class ServerOrchestrator {
                 $this->server_post_id = $existing_server_post->post_id;
             }
             
-            // Step 2: Schedule asynchronus action with predefined parameters to complete server provisioning
-            as_schedule_single_action(
-                time(), // Run immediately, but in the background
-                'arsol_finish_server_provision',
-                [[
-                    'subscription_id' => $this->subscription_id,
-                    'server_post_id' => $this->server_post_id,
-                    'server_product_id' => $this->server_product_id,
-                    'server_provider_slug' => $this->server_provider_slug
-                ]],
-                'arsol_server_provision'
-            );
+            // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
+            $this->schedule_action('arsol_finish_server_provision', [
+                'subscription_id' => $this->subscription_id,
+                'server_post_id' => $this->server_post_id,
+                'server_product_id' => $this->server_product_id,
+                'server_provider_slug' => $this->server_provider_slug
+            ]);
+
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
 
         } catch (\Exception $e) {
-            error_log(sprintf(
-                '#005 [SIYA Server Manager - ServerOrchestrator] Error in subscription %d:%s%s',
-                $this->subscription_id,
-                PHP_EOL,
-                $e->getMessage()
-            ));
-    
-            $subscription->add_order_note(sprintf(
-                "Error occurred during server provisioning:%s%s",
-                PHP_EOL,
-                $e->getMessage()
-            ));
-
+            $this->handle_exception($e, $subscription, 'Error occurred during server provisioning');
         }
     }
 
@@ -255,34 +238,24 @@ class ServerOrchestrator {
        
             error_log('Milestone 6');
 
-            // Step 2: Schedule asynchronuss action with predefined parameters to complete server provisioning
-            as_schedule_single_action(
-                time(), // Run immediately, but in the background
-                'arsol_update_server_status',
-                [[
-                    'server_provider'       => $this->server_provider_slug,
-                    'server_manager'        => $this->server_manager,
-                    'server_provisioned_id' => $this->server_provisioned_id,
-                    'subscription'          => $this->subscription,
-                    'target_status'         => 'active',
-                    'server_post_id'        => $this->server_post_id,
-                    'poll_interval'         => 10,
-                    'time_out'              => 120
-                ]],
-                'arsol_server_provision'
-            );
+            // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
+            $this->schedule_action('arsol_update_server_status', [
+                'server_provider'       => $this->server_provider_slug,
+                'server_manager'        => $this->server_manager,
+                'server_provisioned_id' => $this->server_provisioned_id,
+                'subscription'          => $this->subscription,
+                'target_status'         => 'active',
+                'server_post_id'        => $this->server_post_id,
+                'poll_interval'         => 10,
+                'time_out'              => 120
+            ]);
 
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
 
             error_log(sprintf('#013 [SIYA Server Manager - ServerOrchestrator] Provisioned server ID: %s', $this->server_provisioned_id));
 
         } catch (\Exception $e) {
-            error_log(sprintf('#014 [SIYA Server Manager - ServerOrchestrator] Error in server completion: %s', $e->getMessage()));
-            
-            if (isset($subscription)) {
-                $subscription->add_order_note('Server provision failed: ' . $e->getMessage());
-                $subscription->update_status('on-hold');
-            }
+            $this->handle_exception($e, $subscription, 'Error in server completion');
         }
     }
 
@@ -1092,6 +1065,18 @@ class ServerOrchestrator {
         ]);
 
         return $remote_status;
+    }
+
+    // New helper method to schedule actions
+    private function schedule_action($hook, $args) {
+        as_schedule_single_action(time(), $hook, [$args], 'arsol_server_provision');
+    }
+
+    // New helper method to handle exceptions
+    private function handle_exception($e, $subscription, $message) {
+        error_log(sprintf('#005 [SIYA Server Manager - ServerOrchestrator] %s: %s', $message, $e->getMessage()));
+        $subscription->add_order_note(sprintf("%s:%s%s", $message, PHP_EOL, $e->getMessage()));
+        $subscription->update_status('on-hold');
     }
 
 }
