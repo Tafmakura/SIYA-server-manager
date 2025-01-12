@@ -190,7 +190,18 @@ class ServerOrchestrator {
 
                     error_log('Milestone 5b');
 
-                    $server_data = $this->provision_server($this->subscription);
+                    try {
+                        $server_data = $this->provision_server($this->subscription);
+                    } catch (\Exception $e) {
+                        error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
+                        $this->subscription->add_order_note(sprintf(
+                            "Error occurred during server provisioning:%s%s",
+                            PHP_EOL,
+                            $e->getMessage()
+                        ));
+                        $this->subscription->update_status('on-hold');
+                        return;
+                    }
 
                     error_log('Milestone 5c');
 
