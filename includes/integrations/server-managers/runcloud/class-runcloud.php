@@ -112,7 +112,7 @@ class Runcloud /*implements ServerManager*/ {
             return new \WP_Error('invalid_response', 'Invalid response code from RunCloud: ' . $response_code);
         }
     
-        // Updated: Validate and extract the script directly
+        // Updated: Accessing the script directly
         if (!is_array($script_data) || !isset($script_data['script'])) {
             return new \WP_Error(
                 'invalid_script',
@@ -172,6 +172,7 @@ class Runcloud /*implements ServerManager*/ {
             );
         }
     }
+    
     
     
 
