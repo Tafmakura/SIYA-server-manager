@@ -95,41 +95,46 @@ class Runcloud /*implements ServerManager*/ {
                 )
             )
         );
-
+    
         if (is_wp_error($script_response)) {
-            error_log('[SIYA Server Manager][Runcloud] Script Fetch Error: ' . $script_response->get_error_message());
+            error_log('[SIYA Server Manager][RunCloud] Script Fetch Error: ' . $script_response->get_error_message());
             return new \WP_Error('script_fetch_failed', 'Failed to get installation script: ' . $script_response->get_error_message());
         }
-
+    
         $response_code = wp_remote_retrieve_response_code($script_response);
         $script_body = wp_remote_retrieve_body($script_response);
         $script_data = json_decode($script_body, true);
-
+    
         error_log('RunCloud Installation Script Response Status: ' . $response_code);
         error_log('RunCloud Installation Script Response: ' . $script_body);
-
+    
         if ($response_code !== 200) {
             return new \WP_Error('invalid_response', 'Invalid response code from RunCloud: ' . $response_code);
         }
-
-        if (!is_array($script_data) || !isset($script_data['data']) || !isset($script_data['data']['script'])) {
-            return new \WP_Error('invalid_script', 'Invalid installation script format received from RunCloud', array(
-                'response' => $script_data
-            ));
+    
+        // Updated: Accessing the script directly
+        if (!is_array($script_data) || !isset($script_data['script'])) {
+            return new \WP_Error(
+                'invalid_script',
+                'Invalid installation script format received from RunCloud',
+                array('response' => $script_data)
+            );
         }
-
-        if (empty($script_data['data']['script'])) {
+    
+        if (empty($script_data['script'])) {
             return new \WP_Error('empty_script', 'Empty installation script received from RunCloud');
         }
-
+    
+        $installation_script = $script_data['script']; // Extract the script directly
+    
         try {
             // Initialize SSH connection
             $ssh = new SSH2($ipAddress, 22);
-            
+    
             // Get SSH credentials from WordPress options
             $ssh_username = get_option('server_ssh_username', 'root');
             $ssh_key_path = get_option('server_ssh_private_key_path');
-            
+    
             if (empty($ssh_key_path)) {
                 $ssh_password = get_option('server_ssh_password');
                 if (!$ssh->login($ssh_username, $ssh_password)) {
@@ -143,13 +148,13 @@ class Runcloud /*implements ServerManager*/ {
                 }
                 error_log('[SIYA Server Manager][Runcloud] SSH authentication succeeded for user: ' . $ssh_username);
             }
-
+    
             // Execute the installation script
-            $result = $ssh->exec($script_data['data']['script']);
-            
+            $result = $ssh->exec($installation_script);
+    
             // Log the execution result
             error_log('RunCloud Installation Script Result: ' . $result);
-            
+    
             if ($ssh->getExitStatus() !== 0) {
                 return new \WP_Error(
                     'script_execution_failed',
@@ -157,9 +162,9 @@ class Runcloud /*implements ServerManager*/ {
                     array('output' => $result)
                 );
             }
-
+    
             return true;
-
+    
         } catch (\Exception $e) {
             return new \WP_Error(
                 'ssh_connection_failed',
@@ -167,6 +172,7 @@ class Runcloud /*implements ServerManager*/ {
             );
         }
     }
+    
 
     public function ping_server() {
         $response = wp_remote_get(
