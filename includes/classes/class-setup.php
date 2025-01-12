@@ -14,6 +14,9 @@ class Setup {
      */
     private function include_files() {
 
+
+
+
         // Core Classes
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup-custom-post-types.php';
