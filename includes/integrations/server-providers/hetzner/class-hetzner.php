@@ -309,7 +309,7 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         error_log('[SIYA Server Manager][Hetzner] Server destroyed successfully.');
-        return true;
+        return $response;
     }
 
     public function reboot_server($server_provisioned_id) {
