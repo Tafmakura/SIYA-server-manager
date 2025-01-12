@@ -646,7 +646,7 @@ class ServerOrchestrator {
         error_log('#050 [SIYA Server Manager - ServerOrchestrator] Starting deletion process');
         
         if (!$subscription) {
-            error_log('#051 [SIYA Server Manager - ServerOrchestrator] Subscription not, instatiatinting new sub nstancefound for post ID ' . $post_id);
+            error_log('#051 [SIYA Server Manager - ServerOrchestrator] Subscription not found');
             return;
         } 
 
@@ -679,25 +679,25 @@ class ServerOrchestrator {
 
         error_log('Server deleition');
 
-        $subscription_id = $args['subscription_id'] ?? null;
-        $server_post_id = $args['server_post_id'] ?? null;
-        $retry_count = $args['retry_count'] ?? 0;
-
         if (!$subscription_id || !$server_post_id) {
             error_log('#057 [SIYA Server Manager - ServerOrchestrator] Milestone 3: Missing parameters for deletion.');
             return;
         }
 
-        error_log('#058 [SIYA Server Manager - ServerOrchestrator] Milestone 4: Starting server deletion for subscription ID ' . $subscription_id);
+        $subscription_id = $args['subscription_id'] ?? null;
+        $server_post_id = $args['server_post_id'] ?? null;
+        $retry_count = $args['retry_count'] ?? 0;
 
-        $post_id = $server_post_id;
-        $server_post_instance = new ServerPost($post_id);
+        error_log(sprintf('#057b [SIYA Server Manager - ServerOrchestrator] Passed arguments: %s', json_encode($args, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
 
-        error_log(sprintf('#058 [SIYA Server Manager - ServerOrchestrator] ServerPost instance details: %s', json_encode($server_post_instance, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
+        $server_post_instance = new ServerPost($server_post_id);
+        $metadata = $server_post_instance->get_meta_data();
 
-        $server_provider_slug = $server_post_instance->server_provider_slug;
-        $server_provisioned_id = $server_post_instance->server_provisioned_id;
-        $server_deployed_server_id = $server_post_instance->server_deployed_server_id;
+        error_log(sprintf('#058 [SIYA Server Manager - ServerOrchestrator] ServerPost instance details: %s', json_encode( $metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
+
+        $server_provider_slug = $metadata['arsol_server_provider_slug'] ?? null;
+        $server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
+        $server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
 
         // Delete RunCloud server
         if ($server_deployed_server_id) {
