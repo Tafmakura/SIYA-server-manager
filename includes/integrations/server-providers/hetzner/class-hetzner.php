@@ -472,25 +472,25 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-
         error_log('[SIYA Server Manager][Hetzner] Opening ports for server: ' . $server_provisioned_id);
 
-        $ports = [22, 80, 443, 34210];
-        $rules = array_map(function($port) {
-            return [
-                'direction' => 'in',
-                'protocol' => 'tcp',
-                'port' => $port,
-                'source_ips' => ['0.0.0.0/0']
-            ];
-        }, $ports);
+        $rules = [
+            ["direction" => "in", "port" => "22", "protocol" => "tcp", "source_ips" => ["0.0.0.0/0"]],
+            ["direction" => "in", "port" => "80", "protocol" => "tcp", "source_ips" => ["0.0.0.0/0"]],
+            ["direction" => "in", "port" => "443", "protocol" => "tcp", "source_ips" => ["0.0.0.0/0"]],
+            ["direction" => "in", "port" => "34210", "protocol" => "tcp", "source_ips" => ["0.0.0.0/0"]]
+        ];
 
-        $response = wp_remote_post($this->api_endpoint . "/firewalls/{$server_provisioned_id}/rules", [
+        $response = wp_remote_post($this->api_endpoint . "/firewalls", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
-            'body' => json_encode(['rules' => $rules])
+            'body' => json_encode([
+                'name' => 'allow-ports',
+                'rules' => $rules,
+                'apply_to' => [['type' => 'server', 'server' => ['id' => $server_provisioned_id]]]
+            ])
         ]);
 
         if (is_wp_error($response)) {
@@ -502,7 +502,7 @@ class Hetzner /*implements ServerProvider*/ {
         $response_body = wp_remote_retrieve_body($response);
         error_log('Hetzner open ports response: ' . $response_body . ', Status: ' . $response_code);
 
-        return $response_code === 200;
+        return $response_code === 201;
     }
 
 }
