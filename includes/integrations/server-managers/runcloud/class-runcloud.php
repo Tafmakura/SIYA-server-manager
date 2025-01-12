@@ -100,7 +100,7 @@ class Runcloud /*implements ServerManager*/ {
 
         // Get installation script
         $script_response = wp_remote_get(
-            $this->api_endpoint . '/servers/' . $server_post_id . '/installationscript',
+            $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
             array(
                 'headers' => array(
                     'Authorization' => 'Bearer ' . $this->api_key,
