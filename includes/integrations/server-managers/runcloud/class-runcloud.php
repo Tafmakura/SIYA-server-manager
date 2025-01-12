@@ -189,19 +189,35 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function delete_server($server_id) {
-        $response = wp_remote_request($this->api_endpoint . '/servers/' . $server_id, [
-            'method' => 'DELETE',
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->api_key
-            ]
+        // Build the full API endpoint URL
+        $url = $this->api_endpoint . '/servers/' . $server_id;
+    
+        // Send the DELETE request to the RunCloud API
+        $response = wp_remote_request($url, [
+            'method'    => 'DELETE',
+            'headers'   => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+            ],
         ]);
-
+    
+        // Check if there was an error in the request
         if (is_wp_error($response)) {
-            error_log('[SIYA Server Manager][RunCloud] delete error: ' . $response->get_error_message());
-            return false;
+            error_log('[SIYA Server Manager][RunCloud] Delete error: ' . $response->get_error_message());
+            return false; // Return false if there was a request error
         }
-
+    
+        // Retrieve the HTTP response code
         $response_code = wp_remote_retrieve_response_code($response);
-        return $response_code === 204;
+    
+        // Return true if the deletion was successful (HTTP 204)
+        if ($response_code === 200) {
+            error_log('[SIYA Server Manager][RunCloud] Server deleted successfully.');
+            return true;
+        }
+    
+        // Log the error if the deletion failed
+        error_log('[SIYA Server Manager][RunCloud] Server deletion failed with response code: ' . $response_code);
+        return false; // Return false if the deletion failed
     }
+    
 }
