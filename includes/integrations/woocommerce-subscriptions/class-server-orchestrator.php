@@ -776,9 +776,13 @@ class ServerOrchestrator {
         update_post_meta($server_post_id, 'arsol_server_suspension', 'destroyed');
         error_log('#067 [SIYA Server Manager - ServerOrchestrator] Milestone 13: Server suspension status updated to destroyed.');
 
-        // Delete the linked server post ID from the subscription
-        delete_post_meta($subscription_id, 'arsol_linked_server_post_id');
-        error_log('#068 [SIYA Server Manager - ServerOrchestrator] Milestone 14: Deleted linked server post ID from subscription.');
+        // Delete the server post
+        wp_delete_post($server_post_id, true);
+        error_log('#067a [SIYA Server Manager - ServerOrchestrator] Milestone 13a: Server post deleted.');
+        
+        // Update the server_linked_post_id on the subscription to destroyed
+        update_post_meta($subscription_id, 'arsol_linked_server_post_id', 'destroyed');
+        error_log('#069 [SIYA Server Manager - ServerOrchestrator] Milestone 15: Updated linked server post ID on subscription to destroyed.');
     }
 
     // Helper Methods
