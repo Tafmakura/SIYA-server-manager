@@ -395,4 +395,31 @@ class Vultr /*implements ServerProvider*/ {
             'ipv6' => $api_response['instance']['v6_main_ip'] ?? ''
         ];
     }
+
+    public function open_server_ports($server_provisioned_id) {
+        $ports = [22, 80, 443, 34210];
+        $rules = array_map(function($port) {
+            return [
+                'protocol' => 'tcp',
+                'port' => $port,
+                'source' => '0.0.0.0/0'
+            ];
+        }, $ports);
+
+        $response = wp_remote_post($this->api_endpoint . "/firewalls/{$server_provisioned_id}/rules", [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode(['rules' => $rules])
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('Vultr open ports error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        return $response_code === 200;
+    }
 }

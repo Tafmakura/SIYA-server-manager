@@ -461,6 +461,14 @@ class ServerOrchestrator {
             $server_ip
         ));
 
+        // Open ports before connecting server manager
+        $open_ports_result = $this->open_ports_at_provider($this->server_provider_slug, $this->server_provisioned_id);
+        if (!$open_ports_result) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Failed to open ports for server.');
+            $subscription->add_order_note('Failed to open ports for server.');
+            return;
+        }
+
         if ($server_id && $server_ip) {
             $this->runcloud = new Runcloud();
             
@@ -1204,6 +1212,12 @@ class ServerOrchestrator {
         error_log(sprintf('#005 [SIYA Server Manager - ServerOrchestrator] %s: %s', $message, $e->getMessage()));
         $subscription->add_order_note(sprintf("%s:%s%s", $message, PHP_EOL, $e->getMessage()));
         $subscription->update_status('on-hold');
+    }
+
+    // New method to open ports at the provider
+    private function open_ports_at_provider($server_provider_slug, $server_provisioned_id) {
+        $this->initialize_server_provider($server_provider_slug);
+        return $this->server_provider->open_server_ports($server_provisioned_id);
     }
 
 }
