@@ -689,15 +689,13 @@ class ServerOrchestrator {
         }
 
         error_log(sprintf('#057b [SIYA Server Manager - ServerOrchestrator] Passed arguments: %s', json_encode($args, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
-
-        $server_post_instance = new ServerPost($server_post_id);
-        $metadata = $server_post_instance->get_meta_data();
-
-        error_log(sprintf('#058 [SIYA Server Manager - ServerOrchestrator] ServerPost instance details: %s', json_encode( $metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
-
-        $server_provider_slug = $metadata['arsol_server_provider_slug'] ?? null;
-        $server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
-        $server_deployed_server_id = $metadata['arsol_server_deployed_server_id'] ?? null;
+     
+        error_log(sprintf(
+            '#058 [SIYA Server Manager - ServerOrchestrator] Server Provider Slug: %s, Server Provisioned ID: %s, Server Deployed Server ID: %s',
+            $server_provider_slug,
+            $server_provisioned_id,
+            $server_deployed_server_id
+        ));
 
         // Delete RunCloud server
         if ($server_deployed_server_id) {
