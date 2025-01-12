@@ -783,7 +783,7 @@ class ServerOrchestrator {
         // Update the server_linked_post_id on the subscription to destroyed
         $subscription = wcs_get_subscription($subscription_id);
         $subscription->update_meta_data('arsol_linked_server_post_id', 'destroyed');
-        error_log('#069 [SIYA Server Manager - ServerOrchestrator] Milestone 15: Updated linked server post ID on subscription to destroyed.');
+        error_log('#068 [SIYA Server Manager - ServerOrchestrator] Milestone 15: Updated linked server post ID on subscription to destroyed.');
     }
 
     // Helper Methods
