@@ -435,6 +435,12 @@ class ServerOrchestrator {
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
+        error_log(sprintf(
+            '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
+            $server_id,
+            $server_ip
+        ));
+
         if ($server_id && $server_ip) {
             $this->runcloud = new Runcloud();
             $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server($server_id, $server_ip);
