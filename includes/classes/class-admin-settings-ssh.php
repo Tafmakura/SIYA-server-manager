@@ -8,8 +8,8 @@ class SSH {
     }
 
     public function register_ssh_settings() {
-        // Register SSH settings here
-        // ...existing code...
+        register_setting('siya_settings_ssh', 'ssh_private_key');
+        register_setting('siya_settings_ssh', 'ssh_public_key');
     }
 
     public static function settings_page() {
