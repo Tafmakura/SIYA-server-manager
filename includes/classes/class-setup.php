@@ -89,6 +89,9 @@ class Setup {
         if (class_exists('Siya\AdminSettings\Slugs')) {
             new \Siya\AdminSettings\Slugs();
         }
+        if (class_exists('Siya\AdminSettings\SSH')) {
+            new \Siya\AdminSettings\SSH();
+        }
     }
 
     /**

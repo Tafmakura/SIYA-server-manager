@@ -6,8 +6,8 @@ class AdminMenus {
     public function __construct() {
         $this->add_siya_menu();
         $this->add_slugs_submenu();
-        $this->add_api_submenu();
         $this->add_ssh_submenu();
+        $this->add_api_submenu();
     }
 
     /**
