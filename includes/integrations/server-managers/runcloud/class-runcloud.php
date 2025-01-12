@@ -139,10 +139,27 @@ class Runcloud /*implements ServerManager*/ {
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
+            
             $ssh = new SSH2($server_ip, 22);
+
+            if(!$ssh->isConnected()) {
+                $error_message = 'Failed to establish SSH connection';
+                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+                throw new \Exception($error_message);
+            } else {
+                error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
+            }
 
             // Load the private key
             $private_key = PublicKeyLoader::load($ssh_private_key);
+
+            if (empty($private_key)) {
+                $error_message = 'Failed to load SSH private key';
+                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+                throw new \Exception($error_message);
+            } else {
+                error_log('[SIYA Server Manager][RunCloud] SSH private key '. $private_key .' loaded successfully.');
+            }
 
             // Use the SSH username and private key for authentication
             if (!$ssh->login($ssh_username, $private_key)) {
