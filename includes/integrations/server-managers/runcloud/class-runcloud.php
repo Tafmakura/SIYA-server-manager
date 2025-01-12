@@ -143,9 +143,9 @@ class Runcloud /*implements ServerManager*/ {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             
-            $ssh = new SSH2($server_ip, 22);
             $ssh->setLogFile($this->ssh_log_file); // Set the log file for SSH operations
-
+            $ssh = new SSH2($server_ip, 22);
+           
             if (!$ssh->isConnected()) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
