@@ -289,6 +289,8 @@ class DigitalOcean /*implements ServerProvider*/ {
             ]
         ]);
 
+        error_log('[SIYA Server Manager][DigitalOcean] Server destroy response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
         if (is_wp_error($response)) {
             error_log('[SIYA Server Manager][DigitalOcean] Error destroying server: ' . $response->get_error_message());
             throw new \Exception('Failed to destroy server: ' . $response->get_error_message());
