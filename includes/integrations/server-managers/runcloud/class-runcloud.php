@@ -139,25 +139,11 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ipAddress, 22);
     
-            // Use the server name as SSH username
-            $ssh_username = $server_name;
-            error_log('[SIYA Server Manager][RunCloud] Attempting SSH connection with username: ' . $ssh_username);
-            $ssh_private_key = get_option('arsol_ssh_private_key');
-    
-            if (empty($ssh_private_key)) {
-                $ssh_password = get_option('server_ssh_password');
-                error_log('[SIYA Server Manager][RunCloud] Using password authentication...');
-                if (!$ssh->login($ssh_username, $ssh_password)) {
-                    error_log('[SIYA Server Manager][RunCloud] SSH password authentication failed.');
-                    return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
-                }
-            } else {
-                $key = PublicKeyLoader::load($ssh_private_key);
-                error_log('[SIYA Server Manager][RunCloud] Using key-based authentication for user: ' . $ssh_username);
-                if (!$ssh->login($ssh_username, $key)) {
-                    error_log('[SIYA Server Manager][RunCloud] SSH key authentication failed for user: ' . $ssh_username);
-                    return new \WP_Error('ssh_key_auth_failed', 'SSH key authentication failed');
-                }
+            // Use root for initial connection
+            $ssh_password = get_option('server_ssh_password');
+            if (!$ssh->login('root', $ssh_password)) {
+                error_log('[SIYA Server Manager][RunCloud] SSH authentication failed.');
+                return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
             }
     
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');

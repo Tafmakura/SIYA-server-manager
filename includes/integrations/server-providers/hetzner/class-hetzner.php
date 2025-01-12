@@ -79,41 +79,11 @@ class Hetzner /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
-        // Add SSH key before creating server
-        $ssh_key_id = $this->setup_ssh_key($server_name);
-
-        $user_script = sprintf(
-            "#!/bin/bash\n" .
-            "echo '[SIYA Server Manager][Hetzner] Creating user: %s'\n" .
-            "useradd -m -s /bin/bash %s\n" .
-            "echo '[SIYA Server Manager][Hetzner] Creating SSH directory'\n" .
-            "mkdir -p /home/%s/.ssh\n" .
-            "echo '[SIYA Server Manager][Hetzner] Copying SSH key'\n" .
-            "echo \"$(cat /root/.ssh/authorized_keys)\" > /home/%s/.ssh/authorized_keys\n" .
-            "echo '[SIYA Server Manager][Hetzner] Setting permissions'\n" .
-            "chown -R %s:%s /home/%s/.ssh\n" .
-            "chmod 700 /home/%s/.ssh\n" .
-            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
-            "echo '[SIYA Server Manager][Hetzner] User setup completed for: %s'\n",
-            $server_name,
-            $server_name,
-            $server_name,
-            $server_name,
-            $server_name, $server_name,
-            $server_name,
-            $server_name,
-            $server_name,
-            $server_name
-        );
-
-        // Add SSH key and user setup script to server creation request
         $server_data = [
             'name' => $server_name,
             'server_type' => $server_plan,
             'location' => $server_region,
-            'image' => $server_image,
-            'ssh_keys' => [$ssh_key_id],
-            'user_data' => base64_encode($user_script)
+            'image' => $server_image
         ];
 
         $response = wp_remote_post($this->api_endpoint . '/servers', [
