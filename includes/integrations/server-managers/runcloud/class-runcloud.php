@@ -5,13 +5,16 @@ namespace Siya\Integrations\ServerManagers\Runcloud;
 use Siya\Interfaces\ServerManager;
 use phpseclib3\Net\SSH2;
 use phpseclib3\Crypt\PublicKeyLoader;
+use phpseclib3\Net\SSH2\LogFile;
 
 class Runcloud /*implements ServerManager*/ {
     private $api_key;
     private $api_endpoint = 'https://manage.runcloud.io/api/v3';
+    private $ssh_log_file;
 
     public function __construct() {
         $this->api_key = get_option('runcloud_api_key');
+        $this->ssh_log_file = plugin_dir_path(__DIR__) . 'logs/ssh_log.txt'; // Set the log file path
     }
 
     public function create_server_in_server_manager(
@@ -141,6 +144,7 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             
             $ssh = new SSH2($server_ip, 22);
+            $ssh->setLogFile($this->ssh_log_file); // Set the log file for SSH operations
 
             if (!$ssh->isConnected()) {
                 $error_message = 'Failed to establish SSH connection';
