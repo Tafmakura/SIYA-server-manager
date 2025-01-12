@@ -1217,7 +1217,7 @@ class ServerOrchestrator {
     // New method to open ports at the provider
     private function open_ports_at_provider($server_provider_slug, $server_provisioned_id) {
         $this->initialize_server_provider($server_provider_slug);
-        $result = $this->server_provider->open_server_ports($server_provisioned_id);
+        $result = $this->server_provider->open_server_ports($server_provisioned_id, 'runcloud');
         if (!$result) {
             error_log('Failed to open ports at provider. Response: ' . json_encode($result));
         }

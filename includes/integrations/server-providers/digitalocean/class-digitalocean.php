@@ -502,21 +502,15 @@ class DigitalOcean /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-        $ports = [22, 80, 443, 34210];
-        $rules = array_map(function($port) {
-            return [
-                'protocol' => 'tcp',
-                'ports' => (string)$port,
-                'sources' => ['addresses' => ['0.0.0.0/0']]
-            ];
-        }, $ports);
-
-        $response = wp_remote_post($this->api_endpoint . "/firewalls/{$server_provisioned_id}/rules", [
+        $response = wp_remote_post($this->api_endpoint . "/firewalls", [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
-            'body' => json_encode(['rules' => $rules])
+            'body' => json_encode([
+                'name' => 'runcloud',
+                'droplet_ids' => [$server_provisioned_id]
+            ])
         ]);
 
         if (is_wp_error($response)) {
@@ -525,6 +519,9 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
-        return $response_code === 200;
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('DigitalOcean open ports response: ' . $response_body . ', Status: ' . $response_code);
+
+        return $response_code === 201;
     }
 }
