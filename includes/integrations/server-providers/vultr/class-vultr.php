@@ -138,7 +138,9 @@ class Vultr /*implements ServerProvider*/ {
 
         $raw_status = $api_response['instance']['status'] ?? '';
         $power_status = $api_response['instance']['power_status'] ?? '';
-        
+        $os_name = $api_response['instance']['os'] ?? '';
+        $os_version = $api_response['instance']['os_version'] ?? '';
+
         return [
             'provisioned_id' => $api_response['instance']['id'] ?? '',
             'provisioned_name' => $api_response['instance']['label'] ?? '',
@@ -147,7 +149,8 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_disk_size' => $api_response['instance']['disk'] ?? '',
             'provisioned_ipv4' => $api_response['instance']['main_ip'] ?? '',
             'provisioned_ipv6' => $api_response['instance']['v6_main_ip'] ?? '',
-            'provisioned_os' => $api_response['instance']['os'] ?? '',
+            'provisioned_os' => $os_name,
+            'provisioned_os_version' => $os_version,
             'provisioned_image_slug' => $api_response['instance']['os_id'] ?? '',
             'provisioned_region_slug' => $api_response['instance']['region'] ?? '',
             'provisioned_date' => $api_response['instance']['date_created'] ?? '',

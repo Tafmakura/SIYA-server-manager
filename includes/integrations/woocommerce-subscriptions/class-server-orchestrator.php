@@ -1013,6 +1013,7 @@ class ServerOrchestrator {
                 'arsol_server_provisioned_id' => $server_data['provisioned_id'],
                 'arsol_server_provisioned_name' => $server_data['provisioned_name'],
                 'arsol_server_provisioned_os' => $server_data['provisioned_os'],
+                'arsol_server_provisioned_os_version' => $server_data['provisioned_os_version'], // Add this line
                 'arsol_server_provisioned_ipv4' => $server_data['provisioned_ipv4'],
                 'arsol_server_provisioned_ipv6' => $server_data['provisioned_ipv6'],
                 'arsol_server_provisioning_provider' => $server_provider_slug,

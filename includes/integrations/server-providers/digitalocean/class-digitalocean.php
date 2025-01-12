@@ -203,6 +203,9 @@ class DigitalOcean /*implements ServerProvider*/ {
             }
         }
         
+        $os_name = $droplet['image']['distribution'] ?? '';
+        $os_version = $droplet['image']['version'] ?? '';
+
         return [
             'provisioned_id' => $droplet['id'] ?? '',
             'provisioned_name' => $droplet['name'] ?? '',
@@ -211,7 +214,8 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_disk_size' => $droplet['disk'] ?? '',
             'provisioned_ipv4' => $ipv4,
             'provisioned_ipv6' => $ipv6,
-            'provisioned_os' => $droplet['image']['distribution'] ?? '',
+            'provisioned_os' => $os_name,
+            'provisioned_os_version' => $os_version,
             'provisioned_image_slug' => $droplet['image']['slug'] ?? '',
             'provisioned_region_slug' => $droplet['region']['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
@@ -220,7 +224,6 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_remote_raw_status' => $droplet['status'] ?? ''
         ];
     }
-    
 
     public function ping_server($server_provisioned_id) {
         $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
