@@ -472,6 +472,9 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
+
+        error_log('[SIYA Server Manager][Hetzner] Opening ports for server: ' . $server_provisioned_id);
+
         $ports = [22, 80, 443, 34210];
         $rules = array_map(function($port) {
             return [
