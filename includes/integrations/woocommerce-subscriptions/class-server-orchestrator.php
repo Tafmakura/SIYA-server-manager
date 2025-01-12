@@ -463,7 +463,20 @@ class ServerOrchestrator {
 
         if ($server_id && $server_ip) {
             $this->runcloud = new Runcloud();
-            $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server($server_id, $server_ip);
+            
+            try {
+                $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server($server_post_id);
+            } catch (\Exception $e) {
+                error_log(sprintf(
+                    '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
+                    $e->getMessage()
+                ));
+                $subscription->add_order_note(sprintf(
+                    'Failed to connect server manager to provisioned server: %s',
+                    $e->getMessage()
+                ));
+                return;
+            }
 
             if (is_wp_error($connection_result)) {
                 error_log(sprintf(
