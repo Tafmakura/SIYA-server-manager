@@ -404,7 +404,8 @@ class Vultr /*implements ServerProvider*/ {
             ],
             'body' => json_encode([
                 'description' => 'runcloud',
-                'instance_ids' => [$server_provisioned_id]
+                'instance_ids' => [$server_provisioned_id],
+                'group_id' => '1d93959e-06c7-43d0-9f87-85e91b6d27ac'
             ])
         ]);
 
@@ -417,6 +418,6 @@ class Vultr /*implements ServerProvider*/ {
         $response_body = wp_remote_retrieve_body($response);
         error_log('Vultr open ports response: ' . $response_body . ', Status: ' . $response_code);
 
-        return $response_code === 200;
+        return $response_code === 201;
     }
 }
