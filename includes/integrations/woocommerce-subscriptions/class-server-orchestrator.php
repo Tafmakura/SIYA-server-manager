@@ -454,6 +454,7 @@ class ServerOrchestrator {
         $runcloud_response_data = json_decode($runcloud_response_body, true);
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+        $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
@@ -1217,7 +1218,7 @@ class ServerOrchestrator {
     // New method to open ports at the provider
     private function open_ports_at_provider($server_provider_slug, $server_provisioned_id) {
         $this->initialize_server_provider($server_provider_slug);
-        $result = $this->server_provider->open_server_ports($server_provisioned_id, 'runcloud');
+        $result = $this->server_provider->open_server_ports($server_provisioned_id);
         if (!$result) {
             error_log('Failed to open ports at provider. Response: ' . json_encode($result));
         }

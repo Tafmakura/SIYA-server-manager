@@ -397,26 +397,43 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-        $response = wp_remote_request($this->api_endpoint . '/instances/' . $server_provisioned_id, [
-            'method' => 'PATCH',
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->api_key,
-                'Content-Type' => 'application/json'
-            ],
-            'body' => json_encode([
-                'firewall_group_id' => '1d93959e-06c7-43d0-9f87-85e91b6d27ac'
-            ])
-        ]);
+    // Prepare the request body
+    $body = json_encode([
+        'firewall_group_id' => '1d93959e-06c7-43d0-9f87-85e91b6d27ac'
+    ]);
 
-        if (is_wp_error($response)) {
-            error_log('Vultr open ports error: ' . $response->get_error_message());
-            return false;
-        }
+    // Send the PATCH request
+    $response = wp_remote_request($this->api_endpoint . '/instances/' . $server_provisioned_id, [
+        'method'    => 'PATCH',
+        'headers'   => [
+            'Authorization' => 'Bearer ' . $this->api_key,
+            'Content-Type'  => 'application/json'
+        ],
+        'body'      => $body
+    ]);
 
-        $response_code = wp_remote_retrieve_response_code($response);
-        $response_body = wp_remote_retrieve_body($response);
-        error_log('Vultr open ports response: ' . $response_body . ', Status: ' . $response_code);
-
-        return $response_code === 200;
+    // Check for request errors
+    if (is_wp_error($response)) {
+        $error_message = $response->get_error_message();
+        error_log('Vultr open ports error: ' . $error_message);
+        return false;
     }
+
+    // Retrieve response details
+    $response_code = wp_remote_retrieve_response_code($response);
+    $response_body = wp_remote_retrieve_body($response);
+
+    // Log the response and check for success
+    error_log('Vultr open ports response: ' . $response_body . ', Status: ' . $response_code);
+
+    // Check if response is 202 and successful
+    if ($response_code === 202) {
+        return true;
+    } else {
+        // Optionally log more details about the failure
+        error_log('Failed to open ports. Server: ' . $server_provisioned_id . ', Response: ' . $response_body);
+        return false;
+    }
+}
+
 }
