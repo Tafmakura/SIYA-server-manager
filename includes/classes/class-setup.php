@@ -21,6 +21,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-general.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-slugs.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-api.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-ssh.php';
 
         
         // Interfaces
