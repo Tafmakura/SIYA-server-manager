@@ -385,8 +385,6 @@ class ServerOrchestrator {
                 "RunCloud deployment successful with Response body: %s",
                 $runcloud_response['body']
             ));
-
-            $subscription->update_status('active');
            
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
@@ -428,6 +426,9 @@ class ServerOrchestrator {
 
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
+       
+       error_log('Milestone X4');
+       
         $runcloud_response_data = json_decode($runcloud_response_body, true);
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
