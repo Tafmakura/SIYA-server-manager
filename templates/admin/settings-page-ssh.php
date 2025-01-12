@@ -9,7 +9,7 @@
         <table class="form-table">
             <tr valign="top">
                 <th scope="row"><?php _e('SSH Username', 'arsol_siya'); ?></th>
-                <td><input type="text" value="ARSOL Servername" disabled /></td>
+                <td><input type="text" value="Server name (e.g. ARSOLXXXX)" disabled /></td>
             </tr>
             <tr valign="top">
                 <th scope="row"><?php _e('SSH Private Key', 'arsol_siya'); ?></th>
