@@ -248,6 +248,8 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     public function destroy_server($server_provisioned_id) {
+        error_log('[SIYA Server Manager][Vultr] Destroying server with ID: ' . $server_provisioned_id);
+
         $response = wp_remote_request($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'method' => 'DELETE',
             'headers' => [
@@ -256,14 +258,17 @@ class Vultr /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
+            error_log('[SIYA Server Manager][Vultr] Error destroying server: ' . $response->get_error_message());
             throw new \Exception('Failed to destroy server: ' . $response->get_error_message());
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
         if ($response_code !== 204) {
+            error_log('[SIYA Server Manager][Vultr] Error destroying server. Response code: ' . $response_code);
             throw new \Exception('Failed to destroy server. Response code: ' . $response_code);
         }
 
+        error_log('[SIYA Server Manager][Vultr] Server destroyed successfully.');
         return true;
     }
 
