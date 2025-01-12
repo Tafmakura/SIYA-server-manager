@@ -74,10 +74,14 @@ class Vultr /*implements ServerProvider*/ {
         $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
 
         if (empty($ssh_public_key) || empty($ssh_username)) {
-            throw new \Exception('SSH key or username not found in server metadata');
+            $error_message = 'SSH key or username not found in server metadata';
+            error_log('[SIYA Server Manager][Vultr] ' . $error_message);
+            throw new \Exception($error_message);
         }
 
-        return sprintf(
+        error_log(sprintf('[SIYA Server Manager][Vultr] Setting up SSH access for user: %s with public key: %s', $ssh_username, $ssh_public_key));
+
+        $user_script = sprintf(
             "#!/bin/bash\n" .
             "echo '[SIYA Server Manager][Vultr] Creating user: %s'\n" .
             "useradd -m -s /bin/bash %s\n" .
@@ -101,6 +105,10 @@ class Vultr /*implements ServerProvider*/ {
             $ssh_username,
             $ssh_username
         );
+
+        error_log('[SIYA Server Manager][Vultr] SSH access setup script generated successfully.');
+
+        return $user_script;
     }
 
     private function map_statuses($raw_status) {
