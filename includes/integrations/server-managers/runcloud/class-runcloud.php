@@ -106,10 +106,6 @@ class Runcloud /*implements ServerManager*/ {
             throw new \Exception('RunCloud can only be installed on a static IP address.');
         }
 
-        if (!$this->is_supported_ubuntu_version($server_post_id)) {
-            throw new \Exception('RunCloud supports only Ubuntu versions 20.04, 22.04, and 24.04 LTS.');
-        }
-
         if (!$this->are_ports_open($server_ip, [22, 80, 443, 34210])) {
             throw new \Exception('Ports 22, 80, 443, and 34210 must be open to install RunCloud.');
         }
@@ -229,11 +225,6 @@ class Runcloud /*implements ServerManager*/ {
         // Implement logic to check if the IP is static
         // For now, assume all IPs are static
         return true;
-    }
-
-    private function is_supported_ubuntu_version($server_post_id) {
-        $server_os = get_post_meta($server_post_id, 'arsol_server_provisioned_os', true);
-        return in_array($server_os, ['ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-24.04']);
     }
 
     private function are_ports_open($ip, $ports) {
