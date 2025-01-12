@@ -101,6 +101,23 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
         error_log('[SIYA Server Manager][RunCloud] ====================================');
 
+        // Check if the server meets the requirements for installing RunCloud
+        if (!$this->is_static_ip($server_ip)) {
+            throw new \Exception('RunCloud can only be installed on a static IP address.');
+        }
+
+        if (!$this->is_supported_ubuntu_version($server_post_id)) {
+            throw new \Exception('RunCloud supports only Ubuntu versions 20.04, 22.04, and 24.04 LTS.');
+        }
+
+        if (!$this->are_ports_open($server_ip, [22, 80, 443, 34210])) {
+            throw new \Exception('Ports 22, 80, 443, and 34210 must be open to install RunCloud.');
+        }
+
+        if ($this->is_openvz_virtualization($server_post_id)) {
+            throw new \Exception('OpenVZ virtualization (Kernel 2.6) is not supported.');
+        }
+
         // Get installation script
         $script_response = wp_remote_get(
             $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
@@ -206,6 +223,34 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
             throw new \Exception($error_message);
         }
+    }
+
+    private function is_static_ip($ip) {
+        // Implement logic to check if the IP is static
+        // For now, assume all IPs are static
+        return true;
+    }
+
+    private function is_supported_ubuntu_version($server_post_id) {
+        $server_os = get_post_meta($server_post_id, 'arsol_server_provisioned_os', true);
+        return in_array($server_os, ['ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-24.04']);
+    }
+
+    private function are_ports_open($ip, $ports) {
+        foreach ($ports as $port) {
+            $connection = @fsockopen($ip, $port);
+            if (is_resource($connection)) {
+                fclose($connection);
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function is_openvz_virtualization($server_post_id) {
+        $server_virtualization = get_post_meta($server_post_id, 'arsol_server_virtualization', true);
+        return $server_virtualization === 'openvz';
     }
 
     public function ping_server() {
