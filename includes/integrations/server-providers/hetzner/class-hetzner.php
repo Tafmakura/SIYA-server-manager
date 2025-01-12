@@ -79,8 +79,9 @@ class Hetzner /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+
         // Setup SSH access
-        $user_script = $this->setup_ssh_access($server_name);
+       // $user_script = $this->setup_ssh_access($server_name);
 
         $server_data = [
             'name' => $server_name,
