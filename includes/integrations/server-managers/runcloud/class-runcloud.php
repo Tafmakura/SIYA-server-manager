@@ -84,18 +84,22 @@ class Runcloud /*implements ServerManager*/ {
         ];
     }
 
-    public function connect_server_manager_to_provisioned_server($server_id, $ipAddress) {
-        // Get the server name from the server ID format (ARSOLXXXX)
-        $server_name = 'ARSOL' . $server_id;
+    public function connect_server_manager_to_provisioned_server($server_post_id) {
+        // Retrieve necessary details from server post metadata
+        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
+        $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
+        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+        $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+
         error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
-        error_log('[SIYA Server Manager][RunCloud] Server Name: ' . $server_name);
-        error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $ipAddress);
-        error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $server_name);
+        error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
+        error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $server_ip);
+        error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
         error_log('[SIYA Server Manager][RunCloud] ====================================');
-    
+
         // Get installation script
         $script_response = wp_remote_get(
-            $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
+            $this->api_endpoint . '/servers/' . $server_post_id . '/installationscript',
             array(
                 'headers' => array(
                     'Authorization' => 'Bearer ' . $this->api_key,
@@ -103,23 +107,23 @@ class Runcloud /*implements ServerManager*/ {
                 )
             )
         );
-    
+
         if (is_wp_error($script_response)) {
             error_log('[SIYA Server Manager][RunCloud] Script Fetch Error: ' . $script_response->get_error_message());
             return new \WP_Error('script_fetch_failed', 'Failed to get installation script: ' . $script_response->get_error_message());
         }
-    
+
         $response_code = wp_remote_retrieve_response_code($script_response);
         $script_body = wp_remote_retrieve_body($script_response);
         $script_data = json_decode($script_body, true);
-    
+
         error_log('[SIYA Server Manager][RunCloud] Installation Script Response Status: ' . $response_code);
         error_log('[SIYA Server Manager][RunCloud] Installation Script Response: ' . $script_body);
-    
+
         if ($response_code !== 200) {
             return new \WP_Error('invalid_response', 'Invalid response code from RunCloud: ' . $response_code);
         }
-    
+
         if (!is_array($script_data) || !isset($script_data['script'])) {
             return new \WP_Error(
                 'invalid_script',
@@ -127,44 +131,46 @@ class Runcloud /*implements ServerManager*/ {
                 array('response' => $script_data)
             );
         }
-    
+
         if (empty($script_data['script'])) {
             return new \WP_Error('empty_script', 'Empty installation script received from RunCloud');
         }
-    
+
         $installation_script = $script_data['script'];
-    
+
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
-            $ssh = new SSH2($ipAddress, 22);
-    
-            // Use root for initial connection
-            $ssh_password = get_option('server_ssh_password');
-            if (!$ssh->login('root', $ssh_password)) {
+            $ssh = new SSH2($server_ip, 22);
+
+            // Load the private key
+            $private_key = PublicKeyLoader::load($ssh_private_key);
+
+            // Use the SSH username and private key for authentication
+            if (!$ssh->login($ssh_username, $private_key)) {
                 error_log('[SIYA Server Manager][RunCloud] SSH authentication failed.');
                 return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
             }
-    
+
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
-    
+
             // Test SSH connection with a simple command
             $test_command = $ssh->exec('echo "SSH Connection Test Successful"');
             error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_command);
-    
+
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
             $result = $ssh->exec($installation_script);
-    
+
             // Log the execution result
             error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $result);
-    
+
             // Check for SSH errors or timeouts
             if ($ssh->isTimeout()) {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection timed out.');
                 return new \WP_Error('ssh_timeout', 'SSH connection timed out during script execution.');
             }
-    
+
             if ($ssh->getExitStatus() !== 0) {
                 error_log('[SIYA Server Manager][RunCloud] Installation script execution failed. Exit status: ' . $ssh->getExitStatus());
                 return new \WP_Error(
@@ -173,10 +179,10 @@ class Runcloud /*implements ServerManager*/ {
                     array('output' => $result)
                 );
             }
-    
+
             error_log('[SIYA Server Manager][RunCloud] Installation script executed successfully.');
             return true;
-    
+
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][RunCloud] SSH connection failed: ' . $e->getMessage());
             return new \WP_Error(
@@ -185,9 +191,6 @@ class Runcloud /*implements ServerManager*/ {
             );
         }
     }
-    
-    
-    
 
     public function ping_server() {
         $response = wp_remote_get(
