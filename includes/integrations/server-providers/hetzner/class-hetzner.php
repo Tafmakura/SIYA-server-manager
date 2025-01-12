@@ -81,7 +81,12 @@ class Hetzner /*implements ServerProvider*/ {
 
 
         // Setup SSH access
-       // $user_script = $this->setup_ssh_access($server_name);
+        try {
+            $user_script = $this->setup_ssh_access($server_name);
+        } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][Hetzner] Error setting up SSH access: ' . $e->getMessage());
+            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
+        }
 
         $server_data = [
             'name' => $server_name,
@@ -122,7 +127,18 @@ class Hetzner /*implements ServerProvider*/ {
 
     private function setup_ssh_access($server_name) {
         // Retrieve SSH key and username from server metadata
-        $server_post_id = get_post_meta_by_key('arsol_server_post_id', $server_name);
+        $server_post = get_posts([
+            'post_type' => 'server',
+            'meta_key' => 'arsol_server_post_id',
+            'meta_value' => $server_name,
+            'numberposts' => 1
+        ]);
+
+        if (empty($server_post)) {
+            throw new \Exception('Server post not found');
+        }
+
+        $server_post_id = $server_post[0]->ID;
         $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
         $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
 
