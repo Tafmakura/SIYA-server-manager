@@ -492,6 +492,21 @@ class ServerOrchestrator {
         $server_post_id = $server_post->post_id;
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+
+        // New check: Ensure server ID exists
+        if (empty($server_provisioned_id)) {
+            error_log('[SIYA Server Manager] Server provisioning ID not found, skipping shutdown.');
+            return;
+        }
+
+        // New check: Ensure remote server exists
+        $this->initialize_server_provider($server_provider_slug);
+        $status = $this->server_provider->get_server_status($server_provisioned_id);
+        if (is_wp_error($status) || !isset($status['provisioned_remote_status'])) {
+            error_log('[SIYA Server Manager] Remote server not found, skipping shutdown.');
+            return;
+        }
+
         $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
         
         
@@ -595,6 +610,20 @@ class ServerOrchestrator {
             $server_post_id = $server_post->post_id;
             $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
             $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+
+            // New check: Ensure server ID exists
+            if (empty($server_provisioned_id)) {
+                error_log('[SIYA Server Manager] Server provisioning ID not found, skipping powerup.');
+                return;
+            }
+
+            // New check: Ensure remote server exists
+            $this->initialize_server_provider($server_provider_slug);
+            $status = $this->server_provider->get_server_status($server_provisioned_id);
+            if (is_wp_error($status) || !isset($status['provisioned_remote_status'])) {
+                error_log('[SIYA Server Manager] Remote server not found, skipping powerup.');
+                return;
+            }
 
             as_schedule_single_action(
                 time(),
