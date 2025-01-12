@@ -397,15 +397,14 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-        $response = wp_remote_post($this->api_endpoint . "/firewalls", [
+        $response = wp_remote_request($this->api_endpoint . "/instances/{$server_provisioned_id}", [
+            'method' => 'PATCH',
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'description' => 'runcloud',
-                'instance_ids' => [$server_provisioned_id],
-                'group_id' => '1d93959e-06c7-43d0-9f87-85e91b6d27ac'
+                'firewall_group_id' => 'runcloud'
             ])
         ]);
 
@@ -416,15 +415,8 @@ class Vultr /*implements ServerProvider*/ {
 
         $response_code = wp_remote_retrieve_response_code($response);
         $response_body = wp_remote_retrieve_body($response);
-        if ($response_code !== 201) {
-            error_log('Vultr open ports error. Response code: ' . $response_code . ', Body: ' . $response_body);
-            return false;
-        }
-
-        $response_code = wp_remote_retrieve_response_code($response);
-        $response_body = wp_remote_retrieve_body($response);
         error_log('Vultr open ports response: ' . $response_body . ', Status: ' . $response_code);
 
-        return $response_code === 201;
+        return $response_code === 200;
     }
 }
