@@ -679,14 +679,14 @@ class ServerOrchestrator {
 
         error_log('Server deleition');
 
+        $subscription_id = $args['subscription_id'] ?? null;
+        $server_post_id = $args['server_post_id'] ?? null;
+        $retry_count = $args['retry_count'] ?? 0;
+
         if (!$subscription_id || !$server_post_id) {
             error_log('#057 [SIYA Server Manager - ServerOrchestrator] Milestone 3: Missing parameters for deletion.');
             return;
         }
-
-        $subscription_id = $args['subscription_id'] ?? null;
-        $server_post_id = $args['server_post_id'] ?? null;
-        $retry_count = $args['retry_count'] ?? 0;
 
         error_log(sprintf('#057b [SIYA Server Manager - ServerOrchestrator] Passed arguments: %s', json_encode($args, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
 
