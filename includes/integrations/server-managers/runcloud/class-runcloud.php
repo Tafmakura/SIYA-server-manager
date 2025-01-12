@@ -133,9 +133,9 @@ class Runcloud /*implements ServerManager*/ {
     
             // Get SSH credentials from WordPress options
             $ssh_username = get_option('server_ssh_username', 'root');
-            $ssh_key_path = get_option('server_ssh_private_key_path');
+            $ssh_private_key = get_option('arsol_ssh_private_key');
     
-            if (empty($ssh_key_path)) {
+            if (empty($ssh_private_key)) {
                 $ssh_password = get_option('server_ssh_password');
                 error_log('[SIYA Server Manager][RunCloud] Using password authentication...');
                 if (!$ssh->login($ssh_username, $ssh_password)) {
@@ -143,7 +143,7 @@ class Runcloud /*implements ServerManager*/ {
                     return new \WP_Error('ssh_auth_failed', 'SSH authentication failed');
                 }
             } else {
-                $key = PublicKeyLoader::load(file_get_contents($ssh_key_path));
+                $key = PublicKeyLoader::load($ssh_private_key);
                 error_log('[SIYA Server Manager][RunCloud] Using key-based authentication...');
                 if (!$ssh->login($ssh_username, $key)) {
                     error_log('[SIYA Server Manager][RunCloud] SSH key authentication failed.');

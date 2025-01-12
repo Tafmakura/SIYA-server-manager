@@ -16,6 +16,56 @@ class Vultr /*implements ServerProvider*/ {
         return new VultrSetup();
     }
 
+    public function setup_ssh_key($server_name) {
+        error_log(sprintf('[SIYA Server Manager][Vultr] Setting up SSH key for server: %s', $server_name));
+        
+        $public_key = get_option('arsol_ssh_public_key');
+        if (empty($public_key)) {
+            error_log('[SIYA Server Manager][Vultr] Error: SSH public key not found in settings');
+            throw new \Exception('SSH public key not found');
+        }
+
+        error_log('[SIYA Server Manager][Vultr] Attempting to add SSH key to Vultr');
+        $response = wp_remote_post($this->api_endpoint . '/ssh-keys', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+                'name' => $server_name,
+                'ssh_key' => $public_key
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            $error_message = $response->get_error_message();
+            error_log(sprintf('[SIYA Server Manager][Vultr] Failed to add SSH key: %s', $error_message));
+            throw new \Exception('Failed to add SSH key: ' . $error_message);
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        
+        if ($response_code !== 201) {
+            error_log(sprintf('[SIYA Server Manager][Vultr] API Error: Failed to add SSH key. Status: %d, Response: %s', 
+                $response_code, 
+                $response_body
+            ));
+            throw new \Exception('Failed to add SSH key. Response code: ' . $response_code);
+        }
+
+        $response_data = json_decode(wp_remote_retrieve_body($response), true);
+        $ssh_key_id = $response_data['ssh_key']['id'] ?? null;
+
+        if ($ssh_key_id) {
+            error_log(sprintf('[SIYA Server Manager][Vultr] Successfully added SSH key with ID: %s', $ssh_key_id));
+        } else {
+            error_log('[SIYA Server Manager][Vultr] Warning: SSH key added but no ID returned');
+        }
+
+        return $ssh_key_id;
+    }
+
     public function provision_server($server_name, $server_plan, $server_region = 'ewr', $server_image = 2465) {
         error_log(sprintf('[SIYA Server Manager] Vultr: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
@@ -29,6 +79,9 @@ class Vultr /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Add SSH key before creating server
+        $ssh_key_id = $this->setup_ssh_key($server_name);
+
         $response = wp_remote_post($this->api_endpoint . '/instances', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
@@ -38,7 +91,8 @@ class Vultr /*implements ServerProvider*/ {
                 'label' => $server_name,
                 'plan' => $server_plan,
                 'region' => $server_region,
-                'os_id' => $server_image
+                'os_id' => $server_image,
+                'ssh_keys' => [$ssh_key_id] // Add SSH key ID to instance creation
             ])
         ]);
 

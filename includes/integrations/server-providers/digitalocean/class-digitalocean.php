@@ -16,6 +16,56 @@ class DigitalOcean /*implements ServerProvider*/ {
         return new DigitalOceanSetup();
     }
 
+    public function setup_ssh_key($server_name) {
+        error_log(sprintf('[SIYA Server Manager][DigitalOcean] Setting up SSH key for server: %s', $server_name));
+        
+        $public_key = get_option('arsol_ssh_public_key');
+        if (empty($public_key)) {
+            error_log('[SIYA Server Manager][DigitalOcean] Error: SSH public key not found in settings');
+            throw new \Exception('SSH public key not found');
+        }
+
+        error_log('[SIYA Server Manager][DigitalOcean] Attempting to add SSH key to DigitalOcean');
+        $response = wp_remote_post($this->api_endpoint . '/account/keys', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+                'name' => $server_name,
+                'public_key' => $public_key
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            $error_message = $response->get_error_message();
+            error_log(sprintf('[SIYA Server Manager][DigitalOcean] Failed to add SSH key: %s', $error_message));
+            throw new \Exception('Failed to add SSH key: ' . $error_message);
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        
+        if ($response_code !== 201) {
+            error_log(sprintf('[SIYA Server Manager][DigitalOcean] API Error: Failed to add SSH key. Status: %d, Response: %s', 
+                $response_code, 
+                $response_body
+            ));
+            throw new \Exception('Failed to add SSH key. Response code: ' . $response_code);
+        }
+
+        $response_data = json_decode(wp_remote_retrieve_body($response), true);
+        $ssh_key_id = $response_data['ssh_key']['id'] ?? null;
+
+        if ($ssh_key_id) {
+            error_log(sprintf('[SIYA Server Manager][DigitalOcean] Successfully added SSH key with ID: %s', $ssh_key_id));
+        } else {
+            error_log('[SIYA Server Manager][DigitalOcean] Warning: SSH key added but no ID returned');
+        }
+
+        return $ssh_key_id;
+    }
+
     public function provision_server($server_name, $server_plan, $server_region = 'nyc1', $server_image = 'ubuntu-20-04-x64') {
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
@@ -29,17 +79,23 @@ class DigitalOcean /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Add SSH key before creating server
+        $ssh_key_id = $this->setup_ssh_key($server_name);
+
+        $server_data = [
+            'name' => $server_name,
+            'size' => $server_plan,
+            'region' => $server_region,
+            'image' => $server_image,
+            'ssh_keys' => [$ssh_key_id]  // Add SSH key ID to droplet creation
+        ];
+
         $response = wp_remote_post($this->api_endpoint . '/droplets', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
-            'body' => json_encode([
-                'name' => $server_name,
-                'size' => $server_plan,
-                'region' => $server_region,
-                'image' => $server_image
-            ])
+            'body' => json_encode($server_data)
         ]);
 
         if (is_wp_error($response)) {
