@@ -397,14 +397,14 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-        $response = wp_remote_request($this->api_endpoint . "/instances/{$server_provisioned_id}", [
+        $response = wp_remote_request($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'method' => 'PATCH',
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'firewall_group_id' => 'runcloud'
+                'firewall_group_id' => '1d93959e-06c7-43d0-9f87-85e91b6d27ac'
             ])
         ]);
 
