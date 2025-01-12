@@ -84,7 +84,7 @@ class Runcloud /*implements ServerManager*/ {
         ];
     }
 
-    private function connect_server_manager_to_provisioned_server($server_id, $ipAddress) {
+    public function connect_server_manager_to_provisioned_server($server_id, $ipAddress) {
         // Get installation script
         $script_response = wp_remote_get(
             $this->api_endpoint . '/servers/' . $server_id . '/installation-script',
