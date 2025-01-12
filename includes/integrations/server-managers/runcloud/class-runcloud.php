@@ -102,6 +102,8 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud] ====================================');
 
         // Check if the server meets the requirements for installing RunCloud
+
+        /*
         if (!$this->is_static_ip($server_ip)) {
             throw new \Exception('RunCloud can only be installed on a static IP address.');
         }
@@ -113,6 +115,7 @@ class Runcloud /*implements ServerManager*/ {
         if ($this->is_openvz_virtualization($server_post_id)) {
             throw new \Exception('OpenVZ virtualization (Kernel 2.6) is not supported.');
         }
+            */
 
         // Get installation script
         $script_response = wp_remote_get(
