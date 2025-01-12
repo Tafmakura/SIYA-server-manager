@@ -850,6 +850,10 @@ class ServerOrchestrator {
             );
             error_log('[SIYA Server Manager] Created server post with ID: ' . $this->server_post_id);
 
+            // Generate SSH key pair
+            $ssh_keys = $this->generate_key_pair();
+            error_log('[SIYA Server Manager] Generated SSH key pair for server post ID: ' . $this->server_post_id);
+
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
@@ -870,7 +874,9 @@ class ServerOrchestrator {
                 'arsol_server_image_slug' => $server_product->get_meta('_arsol_server_image', true),
                 'arsol_server_max_applications' => $server_product->get_meta('_arsol_max_applications', true),
                 'arsol_server_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true),
-                'arsol_server_suspension' => 'no' // Add suspension status
+                'arsol_server_suspension' => 'no', // Add suspension status
+                'arsol_ssh_private_key' => $ssh_keys['private_key'],
+                'arsol_ssh_public_key' => $ssh_keys['public_key']
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
@@ -887,6 +893,25 @@ class ServerOrchestrator {
             $subscription->update_status('on-hold'); // Switch subscription status to on hold
             throw new \Exception('Failed to create server post');
         }
+    }
+
+    private function generate_key_pair() {
+        $res = openssl_pkey_new([
+            'private_key_bits' => 2048,
+            'private_key_type' => OPENSSL_KEYTYPE_RSA,
+        ]);
+
+        // Extract the private key from $res to $private_key
+        openssl_pkey_export($res, $private_key);
+
+        // Extract the public key from $res to $public_key
+        $public_key_details = openssl_pkey_get_details($res);
+        $public_key = $public_key_details['key'];
+
+        return [
+            'private_key' => $private_key,
+            'public_key' => $public_key
+        ];
     }
 
     // Step 2: Provision server and update server post metadata
