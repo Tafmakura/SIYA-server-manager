@@ -4,10 +4,20 @@ namespace Siya;
 
 class AdminMenus {
     public function __construct() {
-        $this->add_siya_menu();
-        $this->add_slugs_submenu();
-        $this->add_ssh_submenu();
-        $this->add_api_submenu();
+        add_action('admin_menu', array($this, 'add_siya_menu'));
+        add_action('admin_menu', array($this, 'add_slugs_submenu'));
+        add_action('admin_menu', array($this, 'add_ssh_submenu'));
+        add_action('admin_menu', array($this, 'add_api_submenu'));
+        add_action('admin_init', array($this, 'register_settings'));
+    }
+
+    public function register_settings() {
+        register_setting('siya_settings_ssh', 'arsol_global_ssh_public_key');
+        register_setting('siya_settings_ssh', 'arsol_global_ssh_private_key');
+        register_setting('siya_settings_api', 'runcloud_api_key');
+        register_setting('siya_settings_api', 'hetzner_api_key');
+        register_setting('siya_settings_api', 'digitalocean_api_key');
+        register_setting('siya_settings_api', 'vultr_api_key');
     }
 
     /**
