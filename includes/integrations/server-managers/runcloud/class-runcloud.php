@@ -98,22 +98,6 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
         error_log('[SIYA Server Manager][RunCloud] ====================================');
 
-        // Check if the server meets the requirements for installing RunCloud
-
-        /*
-        if (!$this->is_static_ip($server_ip)) {
-            throw new \Exception('RunCloud can only be installed on a static IP address.');
-        }
-
-        if (!$this->are_ports_open($server_ip, [22, 80, 443, 34210])) {
-            throw new \Exception('Ports 22, 80, 443, and 34210 must be open to install RunCloud.');
-        }
-
-        if ($this->is_openvz_virtualization($server_post_id)) {
-            throw new \Exception('OpenVZ virtualization (Kernel 2.6) is not supported.');
-        }
-            */
-
         // Get installation script
         $script_response = wp_remote_get(
             $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
@@ -156,11 +140,12 @@ class Runcloud /*implements ServerManager*/ {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             
-            $ssh = ssh2_connect($server_ip, 22);
+            $ssh = @ssh2_connect($server_ip, 22);
 
             if (!$ssh) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $server_ip . ' on port 22');
+                error_log('[SIYA Server Manager][RunCloud] Possible reasons: incorrect IP address, server not reachable, SSH service not running, firewall blocking port 22.');
                 throw new \Exception($error_message);
             } else {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $server_ip . ' on port 22');
