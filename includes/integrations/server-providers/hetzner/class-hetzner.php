@@ -477,17 +477,16 @@ class Hetzner /*implements ServerProvider*/ {
         $firewall_id = 1841021;
         $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/actions/apply_to_resources', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->api_key,
-                'Content-Type' => 'application/json'
+            'Authorization' => 'Bearer ' . $this->api_key,
+            'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'type' => 'assign_to_resources',
-                'resources' => [
-                    [
-                        'type' => 'server',
-                        'server' => ['id' => $server_provisioned_id]
-                    ]
+            'apply_to' => [
+                [
+                'type' => 'server',
+                'server' => ['id' => $server_provisioned_id]
                 ]
+            ]
             ])
         ]);
 
