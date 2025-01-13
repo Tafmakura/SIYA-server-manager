@@ -4,8 +4,7 @@ namespace Siya\AdminSettings;
 
 class SSH {
     public function __construct() {
-        // Ensure the settings are registered on admin initialization
-        add_action('admin_init', array($this, 'register_ssh_settings'));
+        $this->register_ssh_settings();
     }
 
     public function register_ssh_settings() {
