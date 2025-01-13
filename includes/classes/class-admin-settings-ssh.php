@@ -35,16 +35,6 @@ class SSH {
         );
     }
 
-    public function public_key_field() {
-        $public_key = get_option('arsol_global_ssh_public_key', '');
-        echo '<textarea name="arsol_global_ssh_public_key" rows="5" cols="50" style="resize: none;">' . esc_textarea($public_key) . '</textarea>';
-    }
-
-    public function private_key_field() {
-        $private_key = get_option('arsol_global_ssh_private_key', '');
-        echo '<textarea name="arsol_global_ssh_private_key" rows="5" cols="50" style="resize: none;">' . esc_textarea($private_key) . '</textarea>';
-    }
-
     public static function settings_page() {
         include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-ssh.php';
     }
