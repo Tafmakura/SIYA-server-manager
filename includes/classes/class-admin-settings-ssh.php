@@ -4,10 +4,10 @@ namespace Siya\AdminSettings;
 
 class SSH {
     public function __construct() {
-        add_action('admin_init', array($this, 'register_settings'));
+        $this->register_api_settings();
     }
 
-    public function register_settings() {
+    public function register_api_settings() {
         register_setting('siya_settings_ssh', 'arsol_global_ssh_public_key');
         register_setting('siya_settings_ssh', 'arsol_global_ssh_private_key');
 
@@ -47,9 +47,5 @@ class SSH {
 
     public static function settings_page() {
         include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-ssh.php';
-    }
-
-    public function get_ssh_keys() {
-        // This method can be removed or updated if needed
     }
 }
