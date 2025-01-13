@@ -475,7 +475,7 @@ class Hetzner /*implements ServerProvider*/ {
         error_log('[SIYA Server Manager][Hetzner] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = 1841021;
-        $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/actions', [
+        $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/actions/apply_to_resources', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
