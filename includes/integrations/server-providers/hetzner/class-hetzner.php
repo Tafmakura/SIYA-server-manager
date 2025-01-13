@@ -472,16 +472,22 @@ class Hetzner /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-        error_log('[SIYA Server Manager][Hetzner] Opening ports for server: ' . $server_provisioned_id);
+        error_log('[SIYA Server Manager][Hetzner] Assigning firewall group to server: ' . $server_provisioned_id);
 
-        $response = wp_remote_post($this->api_endpoint . "/firewalls", [
+        $firewall_id = 1841021;
+        $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/actions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'name' => 'runcloud',
-                'apply_to' => [['type' => 'server', 'server' => ['id' => $server_provisioned_id]]]
+                'type' => 'assign_to_resources',
+                'resources' => [
+                    [
+                        'type' => 'server',
+                        'server' => ['id' => $server_provisioned_id]
+                    ]
+                ]
             ])
         ]);
 

@@ -502,13 +502,16 @@ class DigitalOcean /*implements ServerProvider*/ {
     }
 
     public function open_server_ports($server_provisioned_id) {
-        $response = wp_remote_post($this->api_endpoint . "/firewalls", [
+        error_log('[SIYA Server Manager][DigitalOcean] Assigning firewall group to server: ' . $server_provisioned_id);
+
+        $firewall_id = 'e08f1e94-778d-4184-97ea-8091b3b64a83'; // Replace with your actual firewall group ID
+
+        $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/droplets', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
             'body' => json_encode([
-                'name' => 'runcloud',
                 'droplet_ids' => [$server_provisioned_id]
             ])
         ]);
@@ -522,6 +525,6 @@ class DigitalOcean /*implements ServerProvider*/ {
         $response_body = wp_remote_retrieve_body($response);
         error_log('DigitalOcean open ports response: ' . $response_body . ', Status: ' . $response_code);
 
-        return $response_code === 201;
+        return $response_code === 204;
     }
 }
