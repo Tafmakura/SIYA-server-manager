@@ -26,4 +26,3 @@ if (is_ssh_available()) {
     echo "SSH is not available on this server.";
 }
 
-
