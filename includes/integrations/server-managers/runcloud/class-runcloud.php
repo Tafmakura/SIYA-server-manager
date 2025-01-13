@@ -96,6 +96,8 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
         error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $server_ip);
         error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
+        error_log('[SIYA Server Manager][RunCloud] Public Key: ' . $ssh_public_key);
+        error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
         error_log('[SIYA Server Manager][RunCloud] ====================================');
     
         // Get installation script
