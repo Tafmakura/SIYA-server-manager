@@ -188,11 +188,21 @@ class Runcloud /*implements ServerManager*/ {
 
             // Test SSH connection with a simple command
             $test_command = ssh2_exec($ssh, 'echo "SSH Connection Test Successful"');
+            if ($test_command === false) {
+                $error_message = 'Failed to execute test command';
+                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+                throw new \Exception($error_message);
+            }
             error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . stream_get_contents($test_command));
 
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
             $result = ssh2_exec($ssh, $installation_script);
+            if ($result === false) {
+                $error_message = 'Failed to execute installation script';
+                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+                throw new \Exception($error_message);
+            }
 
             // Log the execution result
             error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . stream_get_contents($result));
