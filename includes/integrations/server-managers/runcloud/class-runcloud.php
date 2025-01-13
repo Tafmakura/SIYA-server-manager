@@ -85,20 +85,8 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function connect_server_manager_to_provisioned_server($server_post_id) {
-        // Retrieve necessary details from server post metadata
-        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
-        $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
-        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+       
         $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
-        $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
-    
-        error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
-        error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
-        error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $server_ip);
-        error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
-        error_log('[SIYA Server Manager][RunCloud] Public Key: ' . $ssh_public_key);
-        error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
-        error_log('[SIYA Server Manager][RunCloud] ====================================');
     
         // Get installation script
         $script_response = wp_remote_get(
@@ -139,21 +127,33 @@ class Runcloud /*implements ServerManager*/ {
         $installation_script = $script_data['script'];
     
         try {
+
+            // Retrieve necessary details from server post metadata
+            $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+            $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+          //  $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
+            $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
+            $ssh_private_key_temp_path = plugin_dir_path(__DIR__) . 'keys/' . 'ARSOL' . $subscription_id . '_private_key.pem';
+            $ssh_public_key_temp_path = plugin_dir_path(__DIR__) . 'keys/' . 'ARSOL' . $subscription_id . '_public_key.pub';
+            $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+            $ssh_port = 22;
+            
+        
+            error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
+            error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
+            error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $server_ip);
+            error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);
+            error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
+            error_log('[SIYA Server Manager][RunCloud] Public Key: ' . $ssh_public_key);
+            error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
+            error_log('[SIYA Server Manager][RunCloud] ====================================');
+
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
+
+            $ssh_connection = ssh2_connect($server_ip, $ssh_port);
     
-            // Enable SSH Debugging
-            $ssh = ssh2_connect($server_ip, 22, array(
-                'stream_context' => stream_context_create(array(
-                    'ssh2' => array(
-                        'debug' => function($type, $msg) {
-                            error_log("[SIYA Server Manager][RunCloud][SSH Debug] $type: $msg");
-                        }
-                    )
-                ))
-            ));
-    
-            if (!$ssh) {
+            if (!$ssh-connection) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $server_ip . ' on port 22');
                 throw new \Exception($error_message);
@@ -162,17 +162,18 @@ class Runcloud /*implements ServerManager*/ {
             }
     
             // Authenticate using public/private key
-            $auth = ssh2_auth_pubkey_file($ssh, $ssh_username, $ssh_public_key, $ssh_private_key);
+            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_public_key_temp_path, $ssh_private_key_temp_path);
             if (!$auth) {
                 $error_message = 'Failed to authenticate using SSH key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+                unlink($ssh_private_key_temp_path); // Remove the temporary private key file
                 throw new \Exception($error_message);
             }
     
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
     
             // Test SSH connection with a simple command
-            $test_command = ssh2_exec($ssh, 'echo "SSH Connection Test Successful"');
+            $test_command = ssh2_exec($ssh_connection, 'echo "SSH Connection Test Successful"');
             if ($test_command === false) {
                 $error_message = 'Failed to execute test command';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
@@ -184,7 +185,7 @@ class Runcloud /*implements ServerManager*/ {
     
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
-            $result = ssh2_exec($ssh, $installation_script);
+            $result = ssh2_exec($ssh_connection, $installation_script);
             if ($result === false) {
                 $error_message = 'Failed to execute installation script';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
