@@ -4,10 +4,10 @@ namespace Siya\AdminSettings;
 
 class SSH {
     public function __construct() {
-        $this->register_api_settings();
+        add_action('admin_init', array($this, 'register_settings'));
     }
 
-    public function register_api_settings() {
+    public function register_settings() {
         register_setting('siya_settings_ssh', 'arsol_global_ssh_public_key');
         register_setting('siya_settings_ssh', 'arsol_global_ssh_private_key');
 
@@ -21,7 +21,7 @@ class SSH {
         add_settings_field(
             'arsol_global_ssh_public_key',
             __('Public Key', 'arsol_siya'),
-            null,
+            array($this, 'public_key_field'),
             'siya_settings_ssh',
             'siya_ssh_section'
         );
@@ -29,13 +29,27 @@ class SSH {
         add_settings_field(
             'arsol_global_ssh_private_key',
             __('Private Key', 'arsol_siya'),
-            null,
+            array($this, 'private_key_field'),
             'siya_settings_ssh',
             'siya_ssh_section'
         );
     }
 
+    public function public_key_field() {
+        $public_key = get_option('arsol_global_ssh_public_key', '');
+        echo '<textarea name="arsol_global_ssh_public_key" rows="5" cols="50" style="resize: none;">' . esc_textarea($public_key) . '</textarea>';
+    }
+
+    public function private_key_field() {
+        $private_key = get_option('arsol_global_ssh_private_key', '');
+        echo '<textarea name="arsol_global_ssh_private_key" rows="5" cols="50" style="resize: none;">' . esc_textarea($private_key) . '</textarea>';
+    }
+
     public static function settings_page() {
         include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-ssh.php';
+    }
+
+    public function get_ssh_keys() {
+        // This method can be removed or updated if needed
     }
 }
