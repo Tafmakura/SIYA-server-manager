@@ -153,7 +153,7 @@ class Runcloud /*implements ServerManager*/ {
 
             $ssh_connection = ssh2_connect($server_ip, $ssh_port);
     
-            if (!$ssh-connection) {
+            if (!$ssh_connection) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $server_ip . ' on port 22');
                 throw new \Exception($error_message);
