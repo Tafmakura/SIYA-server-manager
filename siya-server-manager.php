@@ -16,18 +16,14 @@ use Siya\Setup;
 $siyaServerManager = new Setup();
 
 function is_ssh_available() {
-    $output = [];
-    $return_var = 0;
-
-    exec('which ssh', $output, $return_var);
-
-    return $return_var === 0;
+    $output = shell_exec('which ssh'); // or 'command -v ssh'
+    return !empty($output);
 }
 
 if (is_ssh_available()) {
-    echo "SSH is available.";
+    echo "SSH is available on this server.";
 } else {
-    echo "SSH is not available.";
+    echo "SSH is not available on this server.";
 }
 
 
