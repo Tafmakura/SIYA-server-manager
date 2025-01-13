@@ -91,13 +91,13 @@ class Runcloud /*implements ServerManager*/ {
         $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
         $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
-
+    
         error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
         error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
         error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $server_ip);
         error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
         error_log('[SIYA Server Manager][RunCloud] ====================================');
-
+    
         // Get installation script
         $script_response = wp_remote_get(
             $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
@@ -108,40 +108,49 @@ class Runcloud /*implements ServerManager*/ {
                 )
             )
         );
-
+    
         if (is_wp_error($script_response)) {
             $error_message = 'Failed to get installation script: ' . $script_response->get_error_message();
             error_log('[SIYA Server Manager][RunCloud] Script Fetch Error: ' . $error_message);
             throw new \Exception($error_message);
         }
-
+    
         $response_code = wp_remote_retrieve_response_code($script_response);
         $script_body = wp_remote_retrieve_body($script_response);
         $script_data = json_decode($script_body, true);
-
+    
         error_log('[SIYA Server Manager][RunCloud] Installation Script Response Status: ' . $response_code);
         error_log('[SIYA Server Manager][RunCloud] Installation Script Response: ' . $script_body);
-
+    
         if ($response_code !== 200) {
             throw new \Exception('Invalid response code from RunCloud: ' . $response_code);
         }
-
+    
         if (!is_array($script_data) || !isset($script_data['script'])) {
             throw new \Exception('Invalid installation script format received from RunCloud');
         }
-
+    
         if (empty($script_data['script'])) {
             throw new \Exception('Empty installation script received from RunCloud');
         }
-
+    
         $installation_script = $script_data['script'];
-
+    
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             
-            $ssh = @ssh2_connect($server_ip, 22);
-
+            // Enable SSH Debugging
+            $ssh = @ssh2_connect($server_ip, 22, array(
+                'stream_context' => stream_context_create(array(
+                    'ssh2' => array(
+                        'debug' => function($type, $msg) {
+                            error_log("[SIYA Server Manager][RunCloud][SSH Debug] $type: $msg");
+                        }
+                    )
+                ))
+            ));
+    
             if (!$ssh) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $server_ip . ' on port 22');
@@ -150,10 +159,10 @@ class Runcloud /*implements ServerManager*/ {
             } else {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $server_ip . ' on port 22');
             }
-
+    
             // Load the private key
             $private_key = ssh2_auth_pubkey_file($ssh, $ssh_username, $ssh_public_key, $ssh_private_key);
-
+    
             if (!$private_key) {
                 $error_message = 'Failed to load SSH private key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
@@ -161,16 +170,16 @@ class Runcloud /*implements ServerManager*/ {
             } else {
                 error_log('[SIYA Server Manager][RunCloud] SSH private key loaded successfully.');
             }
-
+    
             // Use the SSH username and private key for authentication
             if (!ssh2_auth_password($ssh, $ssh_username, $private_key)) {
                 $error_message = 'SSH authentication failed';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
-
+    
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
-
+    
             // Test SSH connection with a simple command
             $test_command = ssh2_exec($ssh, 'echo "SSH Connection Test Successful"');
             if ($test_command === false) {
@@ -179,7 +188,7 @@ class Runcloud /*implements ServerManager*/ {
                 throw new \Exception($error_message);
             }
             error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . stream_get_contents($test_command));
-
+    
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
             $result = ssh2_exec($ssh, $installation_script);
@@ -188,26 +197,28 @@ class Runcloud /*implements ServerManager*/ {
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
-
+    
             // Log the execution result
             error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . stream_get_contents($result));
-
+    
             // Check for SSH errors or timeouts
             if (!$result) {
                 $error_message = 'SSH connection timed out during script execution.';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
-
+    
             error_log('[SIYA Server Manager][RunCloud] Installation script executed successfully.');
             return true;
-
+    
         } catch (\Exception $e) {
             $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();
             error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
             throw new \Exception($error_message);
         }
     }
+    
+
 
     private function is_static_ip($ip) {
         // Implement logic to check if the IP is static
