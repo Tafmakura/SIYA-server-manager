@@ -15,3 +15,19 @@ use Siya\Setup;
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
+function is_ssh_available() {
+    $output = [];
+    $return_var = 0;
+
+    exec('which ssh', $output, $return_var);
+
+    return $return_var === 0;
+}
+
+if (is_ssh_available()) {
+    echo "SSH is available.";
+} else {
+    echo "SSH is not available.";
+}
+
+
