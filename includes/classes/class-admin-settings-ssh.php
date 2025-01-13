@@ -24,7 +24,7 @@ class SSH {
         add_settings_field(
             'arsol_global_ssh_public_key',
             __('Public Key', 'arsol_siya'),
-            array($this, 'render_public_key_field'),
+         //   array($this, 'render_public_key_field'),
             'siya_settings_ssh',
             'siya_ssh_section'
         );
@@ -32,7 +32,7 @@ class SSH {
         add_settings_field(
             'arsol_global_ssh_private_key',
             __('Private Key', 'arsol_siya'),
-            array($this, 'render_private_key_field'),
+       //     array($this, 'render_private_key_field'),
             'siya_settings_ssh',
             'siya_ssh_section'
         );
