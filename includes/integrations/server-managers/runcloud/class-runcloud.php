@@ -139,9 +139,9 @@ class Runcloud /*implements ServerManager*/ {
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
-            
+    
             // Enable SSH Debugging
-            $ssh = @ssh2_connect($server_ip, 22, array(
+            $ssh = ssh2_connect($server_ip, 22, array(
                 'stream_context' => stream_context_create(array(
                     'ssh2' => array(
                         'debug' => function($type, $msg) {
@@ -154,26 +154,15 @@ class Runcloud /*implements ServerManager*/ {
             if (!$ssh) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $server_ip . ' on port 22');
-                error_log('[SIYA Server Manager][RunCloud] Possible reasons: incorrect IP address, server not reachable, SSH service not running, firewall blocking port 22.');
                 throw new \Exception($error_message);
             } else {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $server_ip . ' on port 22');
             }
     
-            // Load the private key
-            $private_key = ssh2_auth_pubkey_file($ssh, $ssh_username, $ssh_public_key, $ssh_private_key);
-    
-            if (!$private_key) {
-                $error_message = 'Failed to load SSH private key';
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                throw new \Exception($error_message);
-            } else {
-                error_log('[SIYA Server Manager][RunCloud] SSH private key loaded successfully.');
-            }
-    
-            // Use the SSH username and private key for authentication
-            if (!ssh2_auth_password($ssh, $ssh_username, $private_key)) {
-                $error_message = 'SSH authentication failed';
+            // Authenticate using public/private key
+            $auth = ssh2_auth_pubkey_file($ssh, $ssh_username, $ssh_public_key, $ssh_private_key);
+            if (!$auth) {
+                $error_message = 'Failed to authenticate using SSH key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
@@ -187,7 +176,9 @@ class Runcloud /*implements ServerManager*/ {
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
-            error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . stream_get_contents($test_command));
+            $test_output = stream_get_contents($test_command);
+            fclose($test_command);
+            error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_output);
     
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
@@ -199,10 +190,12 @@ class Runcloud /*implements ServerManager*/ {
             }
     
             // Log the execution result
-            error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . stream_get_contents($result));
+            $execution_output = stream_get_contents($result);
+            fclose($result);
+            error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $execution_output);
     
             // Check for SSH errors or timeouts
-            if (!$result) {
+            if (!$execution_output) {
                 $error_message = 'SSH connection timed out during script execution.';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
@@ -217,6 +210,7 @@ class Runcloud /*implements ServerManager*/ {
             throw new \Exception($error_message);
         }
     }
+    
     
 
 
