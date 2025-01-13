@@ -4,7 +4,7 @@ namespace Siya\AdminSettings;
 
 class SSH {
     public function __construct() {
-        add_action('admin_init', array($this, 'register_api_settings'));
+        $this->register_api_settings();
     }
 
     public function register_api_settings() {
