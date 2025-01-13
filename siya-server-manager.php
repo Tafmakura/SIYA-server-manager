@@ -15,8 +15,3 @@ use Siya\Setup;
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
-if (function_exists('ssh2_connect')) {
-    echo 'PHP SSH2 is enabled';
-} else {
-    echo 'PHP SSH2 is not enabled';
-}
