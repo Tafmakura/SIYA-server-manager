@@ -72,6 +72,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nyc1';
         $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20-04-x64';
+        $ssh_key_id = 'ad:a1:8f:2f:ec:a0:c6:f9:ba:f5:f2:63:d5:4d:8c:d9';
 
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
@@ -86,14 +87,15 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-        $user_script = $this->setup_ssh_access($server_post_id);
+       // $user_script = $this->setup_ssh_access($server_post_id); DELETE
 
         $server_data = [
             'name' => $server_name,
             'size' => $server_plan,
             'region' => $server_region,
             'image' => $server_image,
-            'user_data' => base64_encode($user_script)
+            'user_data' => base64_encode($user_script),
+            'ssh_keys' => [$ssh_key_id]
         ];
 
         $response = wp_remote_post($this->api_endpoint . '/droplets', [

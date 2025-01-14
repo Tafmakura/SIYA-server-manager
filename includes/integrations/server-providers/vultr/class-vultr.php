@@ -22,6 +22,7 @@ class Vultr /*implements ServerProvider*/ {
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'ewr';
         $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2465;
+        $ssh_key_id = '86125daf-08ed-4950-9052-fc6eb9eb9207';
 
         error_log(sprintf('[SIYA Server Manager] Vultr: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
@@ -36,7 +37,7 @@ class Vultr /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-        $user_script = $this->setup_ssh_access($server_post_id);
+       // $user_script = $this->setup_ssh_access($server_post_id); DELETE
 
         $response = wp_remote_post($this->api_endpoint . '/instances', [
             'headers' => [
@@ -48,7 +49,8 @@ class Vultr /*implements ServerProvider*/ {
                 'plan' => $server_plan,
                 'region' => $server_region,
                 'os_id' => $server_image,
-                'user_data' => base64_encode($user_script)
+                'user_data' => base64_encode($user_script),
+                'sshkey_id' => [$ssh_key_id]
             ])
         ]);
 
