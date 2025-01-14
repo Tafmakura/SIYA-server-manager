@@ -149,12 +149,11 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
             error_log('[SIYA Server Manager][RunCloud] ====================================');
 
-            // Initialize SSH connection
+            // Initialize SSH connection with retry mechanism
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
-
-            $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
+            $ssh_connection = $this->attempt_ssh_connection($ssh_host, $ssh_port);
             if (!$ssh_connection) {
-                $error_message = 'Failed to establish SSH connection';
+                $error_message = 'Failed to establish SSH connection after multiple attempts';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $ssh_host . ' on port 22');
                 throw new \Exception($error_message);
             } else {
@@ -214,8 +213,35 @@ class Runcloud /*implements ServerManager*/ {
         }
     }
     
-    
-
+    private function attempt_ssh_connection($ssh_host, $ssh_port, $max_attempts = 3) {
+        $attempt = 1;
+        
+        while ($attempt <= $max_attempts) {
+            try {
+                error_log("SSH Connection attempt {$attempt} of {$max_attempts} to {$ssh_host}:{$ssh_port}");
+                
+                $ssh_connection = @ssh2_connect($ssh_host, $ssh_port);
+                
+                if ($ssh_connection) {
+                    error_log("SSH Connection successful on attempt {$attempt}");
+                    return $ssh_connection;
+                }
+                
+                error_log("SSH Connection failed on attempt {$attempt}");
+                $attempt++;
+                
+                if ($attempt <= $max_attempts) {
+                    sleep(2); // Wait 2 seconds before next attempt
+                }
+                
+            } catch (\Exception $e) {
+                error_log("SSH Connection error on attempt {$attempt}: " . $e->getMessage());
+                $attempt++;
+            }
+        }
+        
+        return false;
+    }
 
     private function is_static_ip($ip) {
         // Implement logic to check if the IP is static
