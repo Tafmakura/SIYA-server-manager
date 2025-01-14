@@ -45,6 +45,8 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
       // DELETE  require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
+
+        require_once plugin_dir_path(__DIR__) . '/libraries/phpseclib/maunal-autoload.php';
     }
 
     /**
