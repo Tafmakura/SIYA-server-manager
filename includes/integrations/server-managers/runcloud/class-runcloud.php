@@ -135,8 +135,8 @@ class Runcloud /*implements ServerManager*/ {
             $ssh_private_key = get_option('arsol_global_ssh_private_key');
             $ssh_public_key = get_option('arsol_global_ssh_public_key');
             $ssh_host = $server_ip;
-            $ssh_private_key_temp_path = plugin_dir_path(__DIR__) . 'keys/';
-          //  $ssh_public_key_temp_path = plugin_dir_path(__DIR__) . 'keys/' . 'ARSOL' . $subscription_id . '_public_key.pub';
+            $ssh_private_key_temp_path = plugin_dir_path(__DIR__) . 'keys/private_key';
+            $ssh_public_key_temp_path = plugin_dir_path(__DIR__) . 'keys/public_key.pub';
             $ssh_username = 'root';
             $ssh_port = 22;
             
@@ -146,7 +146,8 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] SSH Host: ' . $ssh_host);
             error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);
             error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
-            error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
+            error_log('[SIYA Server Manager][RunCloud] Private Key Path: ' . $ssh_private_key_temp_path);
+            error_log('[SIYA Server Manager][RunCloud] Public Key Path: ' . $ssh_public_key_temp_path);
             error_log('[SIYA Server Manager][RunCloud] ====================================');
 
             // Initialize SSH connection with retry mechanism
@@ -161,7 +162,7 @@ class Runcloud /*implements ServerManager*/ {
             }
     
             // Authenticate using public/private key
-            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_private_key_temp_path .'.pub', $ssh_private_key_temp_path);
+            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_public_key_temp_path, $ssh_private_key_temp_path);
             if (!$auth) {
                 $error_message = 'Failed to authenticate using SSH key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
