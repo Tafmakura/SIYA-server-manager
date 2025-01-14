@@ -15,9 +15,16 @@ use Siya\Setup;
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
-if (function_exists('ssh2_connect')) {
-    echo 'SSH2 extension is enabled!';
+$ssh_host = '137.184.156.94';
+$ssh_port = 22;
+
+
+$ssh_connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$ssh_connection) {
+    error_log('Failed to establish SSH connection to ' . $ssh_host . ' on port ' . $ssh_port);
+    echo 'Failed to establish SSH connection to ' . $ssh_host . ' on port ' . $ssh_port;
 } else {
-    echo 'SSH2 extension is not enabled!';
+    error_log('SSH connection successful to ' . $ssh_host);
+    echo 'SSH connection successful to ' . $ssh_host;
 }
 
