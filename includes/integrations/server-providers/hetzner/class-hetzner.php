@@ -101,7 +101,7 @@ class Hetzner /*implements ServerProvider*/ {
             'server_type' => $server_plan,
             'location' => $server_region,
             'image' => $server_image,
-            'user_data' => base64_encode($user_script),
+           // 'user_data' => base64_encode($user_script),
             'ssh_keys' => [$ssh_key_id]
         ];
 
