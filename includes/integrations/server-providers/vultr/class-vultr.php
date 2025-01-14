@@ -37,7 +37,7 @@ class Vultr /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-       // $user_script = $this->setup_ssh_access($server_post_id); DELETE
+        // $user_script = $this->setup_ssh_access($server_post_id); DELETE
 
         $response = wp_remote_post($this->api_endpoint . '/instances', [
             'headers' => [

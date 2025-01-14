@@ -87,7 +87,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-       // $user_script = $this->setup_ssh_access($server_post_id); DELETE
+        // $user_script = $this->setup_ssh_access($server_post_id); DELETE
 
         $server_data = [
             'name' => $server_name,
