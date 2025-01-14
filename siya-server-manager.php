@@ -22,6 +22,10 @@ $ssh_host = 'https://staging.portal.automatedretail.io/';
 $ssh_port = 22;
 $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
 
+
+echo 'HOYO>>>>>>>>>>>>>>>>>>>>>>>>';
+
+
 if($ssh_connection) {
     echo 'Connected to ' . $ssh_host . ' on port ' . $ssh_port . '<br>';
 } else {
