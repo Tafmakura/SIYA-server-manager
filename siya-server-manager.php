@@ -11,14 +11,12 @@
 require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
 use Siya\Setup;
-use \Exception;
 
 
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
 // Initialize the plugin
-
 
 echo 'HOYO>>>>>>>>>>>>>>>>>>>>>>>>';
 
