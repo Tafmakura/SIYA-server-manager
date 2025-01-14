@@ -153,6 +153,10 @@ class Runcloud /*implements ServerManager*/ {
             // Set restrictive permissions
             chmod($ssh_public_key_temp_path, 0600);
 
+            // Log the contents of the temporary files
+            error_log('[SIYA Server Manager][RunCloud] Private Key File Contents: ' . file_get_contents($ssh_private_key_temp_path));
+            error_log('[SIYA Server Manager][RunCloud] Public Key File Contents: ' . file_get_contents($ssh_public_key_temp_path));
+
             error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
             error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
             error_log('[SIYA Server Manager][RunCloud] SSH Host: ' . $ssh_host);
@@ -337,9 +341,7 @@ class Runcloud /*implements ServerManager*/ {
             return true;
         }
     
-        // Log the error if the deletion failed
-        error_log('[SIYA Server Manager][RunCloud] Server deletion failed with response code: ' . $response_code);
-        return false; // Return false if the deletion failed
+        // Log the error if the deletion failed        error_log('[SIYA Server Manager][RunCloud] Server deletion failed with response code: ' . $response_code);        return false; // Return false if the deletion failed    }    private function validate_ssh_keys($privateKey, $publicKey) {        if (empty($privateKey) || empty($publicKey)) {            throw new \Exception('SSH keys cannot be empty.');        }        if (!preg_match('/BEGIN(.*?)KEY/', $privateKey)) {            throw new \Exception('Invalid private key format.');        }        if (!(            str_starts_with($publicKey, 'ssh-rsa') ||            str_starts_with($publicKey, 'ssh-ed25519') ||            str_starts_with($publicKey, 'ecdsa-sha2-nistp')        )) {            throw new \Exception('Invalid public key format.');        }
     }
     
 }
