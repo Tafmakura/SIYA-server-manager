@@ -11,9 +11,17 @@
 require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
 use Siya\Setup;
+use phpseclib\Net\SSH2;
 
 
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
 
+
+$ssh = new SSH2('example.com');
+if (!$ssh->login('username', 'password')) {
+    exit('Login Failed');
+}
+
+echo $ssh->exec('pwd');
