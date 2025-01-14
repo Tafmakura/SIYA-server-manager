@@ -240,7 +240,7 @@ class Runcloud /*implements ServerManager*/ {
         }
     }
     
-    private function attempt_ssh_connection($ssh_host, $ssh_port, $max_attempts = 3) {
+    private function attempt_ssh_connection($ssh_host, $ssh_port, $max_attempts = 5) {
         $attempt = 1;
         
         while ($attempt <= $max_attempts) {
@@ -258,7 +258,7 @@ class Runcloud /*implements ServerManager*/ {
                 $attempt++;
                 
                 if ($attempt <= $max_attempts) {
-                    sleep(2); // Wait 2 seconds before next attempt
+                    sleep(3); // Wait 3 seconds before next attempt
                 }
                 
             } catch (\Exception $e) {
