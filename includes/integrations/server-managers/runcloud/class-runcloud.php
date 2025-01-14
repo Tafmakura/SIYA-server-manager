@@ -3,6 +3,7 @@
 namespace Siya\Integrations\ServerManagers\Runcloud;
 
 use Siya\Interfaces\ServerManager;
+use \Exception;
 
 class Runcloud /*implements ServerManager*/ {
     private $api_key;
