@@ -86,9 +86,20 @@ class DigitalOcean /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Check if we need to connect to RunCloud
+        $connect_server_manager = get_post_meta($server_post_id, 'arsol_connect_server_manager', true);
+        $runcloud_script = '';
+
+        if ($connect_server_manager === 'yes') {
+            $runcloud_script = $this->get_runcloud_agent_script();
+        }
+
         // Setup SSH access
         try {
             $user_script = $this->setup_ssh_access($server_post_id);
+            if ($runcloud_script) {
+                $user_script .= "\n" . $runcloud_script;
+            }
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][DigitalOcean] Error setting up SSH access: ' . $e->getMessage());
             throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
@@ -128,6 +139,13 @@ class DigitalOcean /*implements ServerProvider*/ {
         error_log('[SIYA Server Manager] DigitalOcean: Compiled server data: ' . json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $server_data;
+    }
+
+    private function get_runcloud_agent_script() {
+        return <<<'EOD'
+#!/bin/bash
+curl -s https://manage.runcloud.io/installer.sh | sudo bash
+EOD;
     }
 
     private function setup_ssh_access($server_post_id) {
