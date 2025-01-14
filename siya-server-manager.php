@@ -9,6 +9,7 @@
 
 // Include the Setup class
 require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
+require_once plugin_dir_path(__FILE__) . 'includes/libraries/phpseclib/manual-autoload.php';
 
 use Siya\Setup;
 use phpseclib3\Net\SSH2;
