@@ -87,7 +87,12 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-        // $user_script = $this->setup_ssh_access($server_post_id); DELETE
+        try {
+            $user_script = $this->setup_ssh_access($server_post_id);
+        } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][DigitalOcean] Error setting up SSH access: ' . $e->getMessage());
+            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
+        }
 
         $server_data = [
             'name' => $server_name,

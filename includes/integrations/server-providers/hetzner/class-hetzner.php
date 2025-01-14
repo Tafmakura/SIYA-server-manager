@@ -88,14 +88,13 @@ class Hetzner /*implements ServerProvider*/ {
         }
 
         // Setup SSH access
-        /* DELETE 
         try {
             $user_script = $this->setup_ssh_access($server_post_id);
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][Hetzner] Error setting up SSH access: ' . $e->getMessage());
             throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
         }
-            */
+
 
         $server_data = [
             'name' => $server_name,
