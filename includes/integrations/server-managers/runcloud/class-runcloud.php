@@ -86,47 +86,9 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function connect_server_manager_to_provisioned_server($server_post_id) {
-       
         $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
-    
-        // Get installation script
-        $script_response = wp_remote_get(
-            $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
-            array(
-                'headers' => array(
-                    'Authorization' => 'Bearer ' . $this->api_key,
-                    'Accept' => 'application/json',
-                )
-            )
-        );
-    
-        if (is_wp_error($script_response)) {
-            $error_message = 'Failed to get installation script: ' . $script_response->get_error_message();
-            error_log('[SIYA Server Manager][RunCloud] Script Fetch Error: ' . $error_message);
-            throw new \Exception($error_message);
-        }
-    
-        $response_code = wp_remote_retrieve_response_code($script_response);
-        $script_body = wp_remote_retrieve_body($script_response);
-        $script_data = json_decode($script_body, true);
-    
-        error_log('[SIYA Server Manager][RunCloud] Installation Script Response Status: ' . $response_code);
-        error_log('[SIYA Server Manager][RunCloud] Installation Script Response: ' . $script_body);
-    
-        if ($response_code !== 200) {
-            throw new \Exception('Invalid response code from RunCloud: ' . $response_code);
-        }
-    
-        if (!is_array($script_data) || !isset($script_data['script'])) {
-            throw new \Exception('Invalid installation script format received from RunCloud');
-        }
-    
-        if (empty($script_data['script'])) {
-            throw new \Exception('Empty installation script received from RunCloud');
-        }
-    
-        $installation_script = $script_data['script'];
-    
+        $installation_script = $this->get_installation_script($server_id);
+
         try {
 
             // Retrieve necessary details from server post metadata
@@ -238,7 +200,46 @@ class Runcloud /*implements ServerManager*/ {
             }
         }
     }
-    
+
+    public function get_installation_script($server_id) {
+        $script_response = wp_remote_get(
+            $this->api_endpoint . '/servers/' . $server_id . '/installationscript',
+            array(
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $this->api_key,
+                    'Accept' => 'application/json',
+                )
+            )
+        );
+
+        if (is_wp_error($script_response)) {
+            $error_message = 'Failed to get installation script: ' . $script_response->get_error_message();
+            error_log('[SIYA Server Manager][RunCloud] Script Fetch Error: ' . $error_message);
+            throw new \Exception($error_message);
+        }
+
+        $response_code = wp_remote_retrieve_response_code($script_response);
+        $script_body = wp_remote_retrieve_body($script_response);
+        $script_data = json_decode($script_body, true);
+
+        error_log('[SIYA Server Manager][RunCloud] Installation Script Response Status: ' . $response_code);
+        error_log('[SIYA Server Manager][RunCloud] Installation Script Response: ' . $script_body);
+
+        if ($response_code !== 200) {
+            throw new \Exception('Invalid response code from RunCloud: ' . $response_code);
+        }
+
+        if (!is_array($script_data) || !isset($script_data['script'])) {
+            throw new \Exception('Invalid installation script format received from RunCloud');
+        }
+
+        if (empty($script_data['script'])) {
+            throw new \Exception('Empty installation script received from RunCloud');
+        }
+
+        return $script_data['script'];
+    }
+
     private function attempt_ssh_connection($ssh_host, $ssh_port, $max_attempts = 5) {
         $attempt = 1;
         

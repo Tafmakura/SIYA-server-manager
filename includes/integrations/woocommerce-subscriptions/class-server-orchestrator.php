@@ -917,6 +917,13 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
+            // Check if we need to connect to the server manager
+            if ($this->connect_server_manager === 'yes') {
+                $this->runcloud = new Runcloud();
+                $installation_script = $this->runcloud->get_installation_script($this->server_provisioned_id);
+                update_post_meta($this->server_post_id, 'arsol_server_manager_installation_script', $installation_script);
+            }
+
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
             return true;

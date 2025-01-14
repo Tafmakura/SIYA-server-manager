@@ -111,7 +111,7 @@ class DigitalOcean /*implements ServerProvider*/ {
             'region' => $server_region,
             'image' => $server_image,
             //'user_data' => base64_encode($user_script),
-            'user_data' => '#!/bin/bash\ncurl -s https://runcloud.io/install | bash',
+            'user_data' => $user_script,
             'ssh_keys' => [$ssh_key_id]
         ];
 
