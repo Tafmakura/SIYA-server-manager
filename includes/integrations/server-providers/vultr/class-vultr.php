@@ -406,7 +406,7 @@ class Vultr /*implements ServerProvider*/ {
     public function open_server_ports($server_provisioned_id) {
         error_log('[SIYA Server Manager][Vultr] Assigning firewall group to server: ' . $server_provisioned_id);
 
-        $firewall_id = 'your_firewall_group_id'; // Replace with your actual firewall group ID
+        $firewall_id = '1d93959e-06c7-43d0-9f87-85e91b6d27ac'; // Replace with your actual firewall group ID
 
         $response = wp_remote_request($this->api_endpoint . "/instances/{$server_provisioned_id}", [
             'method' => 'PATCH',
