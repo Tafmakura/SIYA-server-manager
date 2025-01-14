@@ -18,8 +18,13 @@ $siyaServerManager = new Setup();
 
 // Initialize the plugin
 
-$ssh_host = 'localhost';
+$ssh_host = 'https://staging.portal.automatedretail.io/';
 $ssh_port = 22;
 $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
+if($ssh_connection) {
+    echo 'Connected to ' . $ssh_host . ' on port ' . $ssh_port . '<br>';
+} else {
+    echo 'Connection to ' . $ssh_host . ' on port ' . $ssh_port . ' failed.<br>';
+}
 
 
