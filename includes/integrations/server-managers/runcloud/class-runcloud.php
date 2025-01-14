@@ -87,7 +87,7 @@ class Runcloud /*implements ServerManager*/ {
 
     public function connect_server_manager_to_provisioned_server($server_post_id) {
         $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
-        $installation_script = $this->get_installation_script($server_id);
+        //$installation_script = $this->get_installation_script($server_id);
 
         try {
 
