@@ -28,8 +28,7 @@ $ssh_port = 22;
 if (function_exists('ssh2_connect')) {
     try {
         $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
-    if ($ssh_connection) {
-        echo 'Connected to ' . $ssh_host . ' on port ' . $ssh_port . PHP_EOL;
+        if ($ssh_connection) {
             echo 'Connected to ' . $ssh_host . ' on port ' . $ssh_port . PHP_EOL;
         } else {
             echo 'Connection to ' . $ssh_host . ' on port ' . $ssh_port . ' failed.' . PHP_EOL;
@@ -37,8 +36,7 @@ if (function_exists('ssh2_connect')) {
     } catch (Exception $e) {
         echo 'An error occurred: ' . $e->getMessage() . PHP_EOL;
     }
+} else {
     echo 'The SSH2 PHP extension is not installed or enabled.' . PHP_EOL;
-    echo 'The ssh2_connect function is not available.' . PHP_EOL;
 }
-
 
