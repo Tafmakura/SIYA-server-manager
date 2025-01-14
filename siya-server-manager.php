@@ -23,9 +23,11 @@ echo 'HOYO>>>>>>>>>>>>>>>>>>>>>>>>';
 
 $ssh_host = 'staging.portal.automatedretail.io';
 $ssh_port = 22;
+
 if (function_exists('ssh2_connect')) {
     try {
     echo 'Connected to ' . $ssh_host . ' on port ' . $ssh_port . PHP_EOL;
+        $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
         if ($ssh_connection) {
             echo 'Connected to ' . $ssh_host . ' on port ' . $ssh_port . PHP_EOL;
         } else {
