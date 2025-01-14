@@ -21,7 +21,7 @@ $siyaServerManager = new Setup();
 
 echo 'HOYO>>>>>>>>>>>>>>>>>>>>>>>>';
 
-$ssh_host = 'https://staging.portal.automatedretail.io/';
+$ssh_host = 'staging.portal.automatedretail.io';
 $ssh_port = 22;
 $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
 
