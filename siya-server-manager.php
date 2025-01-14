@@ -11,6 +11,7 @@
 require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
 use Siya\Setup;
+use phpseclib3\Net\SSH2;
 
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
@@ -18,9 +19,8 @@ $siyaServerManager = new Setup();
 $ssh_host = '137.184.156.94';
 $ssh_port = 22;
 
-
-$ssh_connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$ssh_connection) {
+$ssh = new SSH2($ssh_host, $ssh_port);
+if (!$ssh->login('username', 'password')) {
     error_log('Failed to establish SSH connection to ' . $ssh_host . ' on port ' . $ssh_port);
     echo 'Failed to establish SSH connection to ' . $ssh_host . ' on port ' . $ssh_port;
 } else {
