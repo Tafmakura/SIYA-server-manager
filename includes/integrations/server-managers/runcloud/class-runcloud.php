@@ -131,12 +131,11 @@ class Runcloud /*implements ServerManager*/ {
             // Retrieve necessary details from server post metadata
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
             $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
-          //  $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
             $ssh_private_key = get_option('arsol_global_ssh_private_key');
             $ssh_public_key = get_option('arsol_global_ssh_public_key');
             $ssh_private_key_temp_path = plugin_dir_path(__DIR__) . 'keys/' . 'ARSOL' . $subscription_id . '_private_key.pem';
             $ssh_public_key_temp_path = plugin_dir_path(__DIR__) . 'keys/' . 'ARSOL' . $subscription_id . '_public_key.pub';
-            $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+            $ssh_username = 'root';
             $ssh_port = 22;
             
         
@@ -145,7 +144,6 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] IP Address: ' . $server_ip);
             error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);
             error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
-          //  error_log('[SIYA Server Manager][RunCloud] Public Key: ' . $ssh_public_key);
             error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
             error_log('[SIYA Server Manager][RunCloud] ====================================');
 
