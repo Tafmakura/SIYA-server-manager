@@ -15,3 +15,9 @@ use Siya\Setup;
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
+if (function_exists('ssh2_connect')) {
+    echo 'SSH2 extension is enabled!';
+} else {
+    echo 'SSH2 extension is not enabled!';
+}
+

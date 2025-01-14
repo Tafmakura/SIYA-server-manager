@@ -162,7 +162,7 @@ class Runcloud /*implements ServerManager*/ {
             }
     
             // Authenticate using public/private key
-            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_private_key_temp_path . '.pub', $ssh_private_key_temp_path);
+            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_private_key_temp_path .'.pub', $ssh_private_key_temp_path);
             if (!$auth) {
                 $error_message = 'Failed to authenticate using SSH key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
