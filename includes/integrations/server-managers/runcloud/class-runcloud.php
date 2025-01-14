@@ -133,6 +133,7 @@ class Runcloud /*implements ServerManager*/ {
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
             $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
             $ssh_private_key = get_option('arsol_global_ssh_private_key');
+            $ssh_public_key = get_option('arsol_global_ssh_public_key');
             $ssh_host = $server_ip;
             $ssh_username = 'root';
             $ssh_port = 22;
@@ -140,6 +141,15 @@ class Runcloud /*implements ServerManager*/ {
             // Write the private key to a temporary file
             $ssh_private_key_temp_path = tempnam(sys_get_temp_dir(), 'ssh_private_key');
             file_put_contents($ssh_private_key_temp_path, $ssh_private_key);
+            // Set restrictive permissions
+            chmod($ssh_private_key_temp_path, 0600);
+
+            // Write the public key to a temporary file
+            $ssh_public_key_temp_path = tempnam(sys_get_temp_dir(), 'ssh_public_key');
+            file_put_contents($ssh_public_key_temp_path, $ssh_public_key);
+            // Set restrictive permissions
+            chmod($ssh_public_key_temp_path, 0600);
+
 
             error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
             error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
@@ -147,6 +157,7 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);
             error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
             error_log('[SIYA Server Manager][RunCloud] Private Key Path: ' . $ssh_private_key_temp_path);
+            error_log('[SIYA Server Manager][RunCloud] Public Key Path: ' . $ssh_public_key_temp_path);
             error_log('[SIYA Server Manager][RunCloud] ====================================');
 
             // Initialize SSH connection with retry mechanism
@@ -160,12 +171,13 @@ class Runcloud /*implements ServerManager*/ {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $ssh_host . ' on port 22');
             }
     
-            // Authenticate using private key only
-            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_private_key_temp_path);
+            // Authenticate using public/private key
+            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_public_key_temp_path, $ssh_private_key_temp_path);
             if (!$auth) {
                 $error_message = 'Failed to authenticate using SSH key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 unlink($ssh_private_key_temp_path); // Remove the temporary private key file
+                unlink($ssh_public_key_temp_path); // Remove the temporary public key file
                 throw new \Exception($error_message);
             }
     
@@ -214,6 +226,9 @@ class Runcloud /*implements ServerManager*/ {
             // Clean up temporary key files
             if (file_exists($ssh_private_key_temp_path)) {
                 unlink($ssh_private_key_temp_path);
+            }
+            if (file_exists($ssh_public_key_temp_path)) {
+                unlink($ssh_public_key_temp_path);
             }
         }
     }
