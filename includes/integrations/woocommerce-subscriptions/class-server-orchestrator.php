@@ -918,6 +918,7 @@ class ServerOrchestrator {
             $subscription->save();
 
             // Check if we need to connect to the server manager
+            $this->connect_server_manager = $server_product->get_meta('_arsol_connect_server_manager', true);
             if ($this->connect_server_manager === 'yes') {
                 $this->runcloud = new Runcloud();
                 $installation_script = $this->runcloud->get_installation_script($this->server_provisioned_id);
