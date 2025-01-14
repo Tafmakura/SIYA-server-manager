@@ -141,11 +141,6 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] SSH Private Key: ' . $ssh_private_key);
             error_log('[SIYA Server Manager][RunCloud] SSH Public Key: ' . $ssh_public_key);
 
-            // Validate the public key
-            if (empty($ssh_public_key) || strlen($ssh_public_key) < 256) {
-                throw new \Exception('Invalid public key, too short');
-            }
-
             // Write the private key to a temporary file
             $ssh_private_key_temp_path = tempnam(sys_get_temp_dir(), 'ssh_private_key');
             file_put_contents($ssh_private_key_temp_path, $ssh_private_key);
