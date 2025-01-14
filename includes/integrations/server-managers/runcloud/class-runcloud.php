@@ -142,7 +142,7 @@ class Runcloud /*implements ServerManager*/ {
         
             error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
             error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
-            error_log('[SIYA Server Manager][RunCloud] SSH Host: ' . $server_ip);
+            error_log('[SIYA Server Manager][RunCloud] SSH Host: ' . $ssh_host);
             error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);
             error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
             error_log('[SIYA Server Manager][RunCloud] Private Key: ' . $ssh_private_key);
@@ -152,7 +152,7 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
 
             $ssh_connection = ssh2_connect($ssh_host, $ssh_port);
-    
+
             if (!$ssh_connection) {
                 $error_message = 'Failed to establish SSH connection';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $ssh_host . ' on port 22');
