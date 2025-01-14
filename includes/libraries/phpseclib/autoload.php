@@ -1,7 +1,7 @@
 <?php
 // autoload.php
 spl_autoload_register(function ($class) {
-    $baseDir = __DIR__ . '/libs/phpseclib3/phpseclib/';
+    $baseDir = __DIR__ . '/libraries/phpseclib/';
 
     // Replace namespace separator with directory separator
     $class = str_replace('\\', DIRECTORY_SEPARATOR, $class);
