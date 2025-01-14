@@ -160,8 +160,8 @@ class Runcloud /*implements ServerManager*/ {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $ssh_host . ' on port 22');
             }
     
-            // Authenticate using public/private key
-            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_private_key_temp_path . '.pub', $ssh_private_key_temp_path);
+            // Authenticate using private key only
+            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_private_key_temp_path);
             if (!$auth) {
                 $error_message = 'Failed to authenticate using SSH key';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
