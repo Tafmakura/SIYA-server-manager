@@ -13,22 +13,26 @@ require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 use Siya\Setup;
 
 
-// Instantiate the Setup class
-$siyaServerManager = new Setup();
-
+// Include the Composer autoload to load phpseclib classes
+require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 use phpseclib3\Net\SSH2;
 use phpseclib3\Crypt\PublicKeyLoader;
 
+// Your existing functions and plugin setup...
 
+/**
+ * Test SSH connection to the server
+ */
 function test_ssh_connection() {
-    // Retrieve necessary details
-    $ssh_private_key = get_option('arsol_global_ssh_private_key'); // or the correct location of your private key
-    $ssh_public_key = get_option('arsol_global_ssh_public_key');  // You can use this later for other purposes
+    // Retrieve necessary details from WordPress options
+    $ssh_private_key = get_option('arsol_global_ssh_private_key'); // Path or contents of your private key
     $server_ip = '128.140.37.37'; // Your server IP
     $ssh_username = 'root'; // Your SSH username
     $ssh_port = 22; // SSH Port (usually 22, but verify it)
     
+    echo 'HELOOOOOOOOOOOOOOOOOOOOOO';
+
     try {
         // Initialize SSH connection
         $ssh = new SSH2($server_ip, $ssh_port);
@@ -41,18 +45,17 @@ function test_ssh_connection() {
             throw new \Exception('SSH authentication failed');
         }
 
-        // SSH connection is successful, echo success
-        echo "Success: SSH connection established to {$server_ip}.\n";
-
-        // You can also execute a command to verify further
+        // SSH connection is successful
         $output = $ssh->exec('echo "SSH Test Successful"');
-        echo "Command Output: " . $output . "\n";
+
+        // Show success message
+        echo "<div class='updated notice is-dismissible'><p>Success: SSH connection established to {$server_ip}. Command Output: " . esc_html($output) . "</p></div>";
 
     } catch (\Exception $e) {
         // If any error occurs, display the error message
-        echo "Error: " . $e->getMessage() . "\n";
+        echo "<div class='error notice is-dismissible'><p>Error: " . esc_html($e->getMessage()) . "</p></div>";
     }
 }
 
-// Run the SSH test function
-test_ssh_connection();
+// Trigger the SSH test function when the plugin is loaded
+add_action('admin_notices', 'test_ssh_connection');
