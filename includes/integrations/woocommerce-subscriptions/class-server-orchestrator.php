@@ -195,9 +195,11 @@ class ServerOrchestrator {
                     } catch (\Exception $e) {
                         error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
                         $this->subscription->add_order_note(sprintf(
-                            "Error occurred during server provisioning:%s%s",
+                            "Error occurred during server provisioning:%s%s%s%s",
                             PHP_EOL,
-                            $e->getMessage()
+                            $e->getMessage(),
+                            PHP_EOL,
+                            json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                         ));
                         $this->subscription->update_status('on-hold');
                         return;
