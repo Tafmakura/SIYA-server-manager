@@ -98,6 +98,7 @@ class Runcloud /*implements ServerManager*/ {
             $ssh_public_key = get_option('arsol_global_ssh_public_key');
             $ssh_host = $server_ip;
             $ssh_username = 'root';
+            $ssh_password = 'password';
             $ssh_port = 22;
 
             error_log('[SIYA Server Manager][RunCloud] SSH Private Key: ' . $ssh_private_key);
@@ -134,30 +135,58 @@ class Runcloud /*implements ServerManager*/ {
             } else {
                 error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $ssh_host . ' on port 22');
             }
-    
-            // Authenticate using public/private key
-            $auth = ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_public_key_temp_path, $ssh_private_key_temp_path);
 
-            if (!$auth) {
-                $error_message = 'Failed to authenticate using SSH key';
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                unlink($ssh_private_key_temp_path); // Remove the temporary private key file
-                unlink($ssh_public_key_temp_path); // Remove the temporary public key file
-                throw new \Exception($error_message);
+            // Debug log the SSH connection resource
+            if (is_resource($ssh_connection)) {
+                error_log('[SIYA Server Manager][RunCloud] SSH connection resource: ' . get_resource_type($ssh_connection));
+            } else {
+                error_log('[SIYA Server Manager][RunCloud] SSH connection is not a valid resource.');
             }
     
+            // Authenticate using public/private key
+            //stream_set_timeout($ssh_connection, 10); // 10 seconds timeout
+
+          
+            if (!ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_public_key_temp_path, $ssh_private_key_temp_path)) {
+                throw new \Exception('Failed to authenticate using SSH key');
+            }
+                    
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
-    
+            
             // Test SSH connection with a simple command
-            $test_command = ssh2_exec($ssh_connection, 'echo "SSH Connection Test Successful"');
+            error_log('[SIYA Server Manager][RunCloud] Testing SSH connection with simple command...');
+            $test_command = ssh2_exec($ssh_connection, '/bin/bash -c "hostname"'); // Using a simple, safe command
+
             if ($test_command === false) {
                 $error_message = 'Failed to execute test command';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
+            } else {
+                // Set the timeout for the result stream
+                stream_set_timeout($test_command, 60); // Set timeout for the test command stream (60 seconds)
+
+                // Get the output from the test command
+                $test_output = stream_get_contents($test_command);
+                $test_error = stream_get_contents($test_command, -1, 0); // Get any error output from the command
+
+                fclose($test_command);
+
+                // Log both the output and error of the command
+                if ($test_output) {
+                    error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_output);
+                }
+
+                if ($test_error) {
+                    error_log('[SIYA Server Manager][RunCloud] Test Command Error: ' . $test_error);
+                }
+
+                // If no output or error is found, log a message indicating so
+                if (empty($test_output) && empty($test_error)) {
+                    error_log('[SIYA Server Manager][RunCloud] No output or error returned from test command.');
+                }
             }
-            $test_output = stream_get_contents($test_command);
-            fclose($test_command);
-            error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_output);
+
+
     
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');

@@ -72,7 +72,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nyc1';
         $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20-04-x64';
-        $ssh_key_id = 'ad:a1:8f:2f:ec:a0:c6:f9:ba:f5:f2:63:d5:4d:8c:d9';
+        $ssh_key_id = '9b:e9:7b:2f:16:df:a5:1b:b4:a6:e5:8c:f3:39:14:27';
 
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
