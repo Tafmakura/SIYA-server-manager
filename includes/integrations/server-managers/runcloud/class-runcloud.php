@@ -105,8 +105,11 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] SSH Public Key: ' . $ssh_public_key);
 
             // Initialize SSH connection
-            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
-            $ssh = new SSH2($ssh_host, $ssh_port);
+            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection with PHPSECLIB...');
+            $ssh = new SSH2($ssh_host);
+            if (!$ssh->connect($ssh_host, $ssh_port)) {
+                throw new \Exception('Failed to establish SSH connection');
+            }
 
             error_log ('Milestone Y2');
 
