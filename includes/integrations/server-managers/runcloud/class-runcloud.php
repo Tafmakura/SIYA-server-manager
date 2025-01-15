@@ -126,7 +126,9 @@ class Runcloud /*implements ServerManager*/ {
                     error_log("SSH Connection error on attempt {$attempt}: " . $e->getMessage());
                     $attempt++;
                     if ($attempt <= $max_attempts) {
-                        sleep(3); // Wait 3 seconds before next attempt
+                        $backoff_time = pow(2, $attempt); // Exponential backoff
+                        error_log("Waiting for {$backoff_time} seconds before next attempt");
+                        sleep($backoff_time);
                     }
                 }
             }
