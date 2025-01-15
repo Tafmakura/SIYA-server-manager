@@ -72,7 +72,7 @@ class Hetzner /*implements ServerProvider*/ {
         $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nbg1';
-        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20.04';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-22.04';
         $ssh_key_id = 26338453;
 
         error_log(sprintf('[SIYA Server Manager][Hetzner] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
