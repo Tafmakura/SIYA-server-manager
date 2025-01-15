@@ -155,7 +155,7 @@ class Runcloud /*implements ServerManager*/ {
 
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
-            $ssh->setTimeout(600);
+            
             $execution_output = $ssh->exec('/bin/bash -c "' . $installation_script . '" &');
 
             if (empty($execution_output)) {
