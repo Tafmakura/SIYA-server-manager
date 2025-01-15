@@ -12,6 +12,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
 use Siya\Setup;
 
+// Instantiate the Setup class
+$siyaServerManager = new Setup();
+
 
 // Include the Composer autoload to load phpseclib classes
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
