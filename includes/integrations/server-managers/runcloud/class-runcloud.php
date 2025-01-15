@@ -155,7 +155,8 @@ class Runcloud /*implements ServerManager*/ {
 
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
-            $execution_output = $ssh->exec($installation_script);
+            $ssh->setTimeout(600);
+            $execution_output = $ssh->exec('/bin/bash -c "' . $installation_script . '"');
 
             if (empty($execution_output)) {
                 $error_message = 'SSH connection timed out during script execution.';
@@ -164,7 +165,7 @@ class Runcloud /*implements ServerManager*/ {
             }
 
             error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $execution_output);
-            error_log('[SIYA Server Manager][RunCloud] Installation script executed successfully.');
+            error_log('[SIYA Server Manager][RunCloud] Installation script started...');
             return true;
 
         } catch (\Exception $e) {
