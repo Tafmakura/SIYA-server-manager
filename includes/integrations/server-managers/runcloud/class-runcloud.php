@@ -4,6 +4,8 @@ namespace Siya\Integrations\ServerManagers\Runcloud;
 
 use Siya\Interfaces\ServerManager;
 use \Exception;
+use phpseclib3\Net\SSH2;
+use phpseclib3\Crypt\PublicKeyLoader;
 
 class Runcloud /*implements ServerManager*/ {
     private $api_key;
@@ -90,7 +92,6 @@ class Runcloud /*implements ServerManager*/ {
         //$installation_script = $this->get_installation_script($server_id);
 
         try {
-
             // Retrieve necessary details from server post metadata
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
             $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
@@ -98,132 +99,52 @@ class Runcloud /*implements ServerManager*/ {
             $ssh_public_key = get_option('arsol_global_ssh_public_key');
             $ssh_host = $server_ip;
             $ssh_username = 'root';
-            $ssh_password = 'password';
             $ssh_port = 22;
 
             error_log('[SIYA Server Manager][RunCloud] SSH Private Key: ' . $ssh_private_key);
             error_log('[SIYA Server Manager][RunCloud] SSH Public Key: ' . $ssh_public_key);
 
-            // Write the private key to a temporary file
-            $ssh_private_key_temp_path = tempnam(sys_get_temp_dir(), 'ssh_private_key');
-            file_put_contents($ssh_private_key_temp_path, $ssh_private_key);
-            // Set restrictive permissions
-            chmod($ssh_private_key_temp_path, 0600);
-
-            // Write the public key to a temporary file
-            $ssh_public_key_temp_path = tempnam(sys_get_temp_dir(), 'ssh_public_key');
-            file_put_contents($ssh_public_key_temp_path, $ssh_public_key);
-            // Set restrictive permissions
-            chmod($ssh_public_key_temp_path, 0600);
-
-            error_log('[SIYA Server Manager][RunCloud] ========= SSH Connection Details =========');
-            error_log('[SIYA Server Manager][RunCloud] Server Post ID: ' . $server_post_id);
-            error_log('[SIYA Server Manager][RunCloud] SSH Host: ' . $ssh_host);
-            error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);
-            error_log('[SIYA Server Manager][RunCloud] Using SSH username: ' . $ssh_username);
-            error_log('[SIYA Server Manager][RunCloud] Private Key Path: ' . $ssh_private_key_temp_path);
-            error_log('[SIYA Server Manager][RunCloud] Public Key Path: ' . $ssh_public_key_temp_path);
-            error_log('[SIYA Server Manager][RunCloud] ====================================');
-
-            // Initialize SSH connection with retry mechanism
+            // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
-            $ssh_connection = $this->attempt_ssh_connection($ssh_host, $ssh_port);
-            if (!$ssh_connection) {
-                $error_message = 'Failed to establish SSH connection after multiple attempts';
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message . ' to IP: ' . $ssh_host . ' on port 22');
-                throw new \Exception($error_message);
-            } else {
-                error_log('[SIYA Server Manager][RunCloud] SSH connection established to IP: ' . $ssh_host . ' on port 22');
-            }
+            $ssh = new SSH2($ssh_host, $ssh_port);
+            $private_key = PublicKeyLoader::load($ssh_private_key);
 
-            // Debug log the SSH connection resource
-            if (is_resource($ssh_connection)) {
-                error_log('[SIYA Server Manager][RunCloud] SSH connection resource: ' . get_resource_type($ssh_connection));
-            } else {
-                error_log('[SIYA Server Manager][RunCloud] SSH connection is not a valid resource.');
-            }
-    
-            // Authenticate using public/private key
-            //stream_set_timeout($ssh_connection, 10); // 10 seconds timeout
-
-          
-            if (!ssh2_auth_pubkey_file($ssh_connection, $ssh_username, $ssh_public_key_temp_path, $ssh_private_key_temp_path)) {
+            if (!$ssh->login($ssh_username, $private_key)) {
                 throw new \Exception('Failed to authenticate using SSH key');
             }
-                    
+
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
-            
+
             // Test SSH connection with a simple command
             error_log('[SIYA Server Manager][RunCloud] Testing SSH connection with simple command...');
-            $test_command = ssh2_exec($ssh_connection, '/bin/bash -c "hostname"'); // Using a simple, safe command
+            $test_output = $ssh->exec('echo "SSH Connection Test Successful"');
 
-            if ($test_command === false) {
-                $error_message = 'Failed to execute test command';
+            if (empty($test_output)) {
+                $error_message = 'Test command output is blank';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
-            } else {
-                // Set the timeout for the result stream
-                stream_set_timeout($test_command, 60); // Set timeout for the test command stream (60 seconds)
-
-                // Get the output from the test command
-                $test_output = stream_get_contents($test_command);
-                $test_error = stream_get_contents($test_command, -1, 0); // Get any error output from the command
-
-                fclose($test_command);
-
-                // Log both the output and error of the command
-                if ($test_output) {
-                    error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_output);
-                }
-
-                if ($test_error) {
-                    error_log('[SIYA Server Manager][RunCloud] Test Command Error: ' . $test_error);
-                }
-
-                // If no output or error is found, log a message indicating so
-                if (empty($test_output) && empty($test_error)) {
-                    error_log('[SIYA Server Manager][RunCloud] No output or error returned from test command.');
-                }
             }
 
+            error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_output);
 
-    
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
-            $result = ssh2_exec($ssh_connection, $installation_script);
-            if ($result === false) {
-                $error_message = 'Failed to execute installation script';
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                throw new \Exception($error_message);
-            }
-    
-            // Log the execution result
-            $execution_output = stream_get_contents($result);
-            fclose($result);
-            error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $execution_output);
-    
-            // Check for SSH errors or timeouts
-            if (!$execution_output) {
+            $execution_output = $ssh->exec($installation_script);
+
+            if (empty($execution_output)) {
                 $error_message = 'SSH connection timed out during script execution.';
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
-    
+
+            error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $execution_output);
             error_log('[SIYA Server Manager][RunCloud] Installation script executed successfully.');
             return true;
-    
+
         } catch (\Exception $e) {
             $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();
             error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
             throw new \Exception($error_message);
-        } finally {
-            // Clean up temporary key files
-            if (file_exists($ssh_private_key_temp_path)) {
-                unlink($ssh_private_key_temp_path);
-            }
-            if (file_exists($ssh_public_key_temp_path)) {
-                unlink($ssh_public_key_temp_path);
-            }
         }
     }
 
