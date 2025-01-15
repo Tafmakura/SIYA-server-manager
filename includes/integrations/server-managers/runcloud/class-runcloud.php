@@ -90,6 +90,8 @@ class Runcloud /*implements ServerManager*/ {
         $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
         $installation_script = $this->get_installation_script($server_id);
 
+        error_log('[SIYA Server Manager][RunCloud] Installation Script: ' . $installation_script);
+
         try {
             // Retrieve necessary details from server post metadata
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
@@ -108,7 +110,7 @@ class Runcloud /*implements ServerManager*/ {
             
             $ssh = null;
             $attempt = 1;
-            $max_attempts = 5;
+            $max_attempts = 8;
 
             while ($attempt <= $max_attempts) {
                 try {
