@@ -109,6 +109,8 @@ class Runcloud /*implements ServerManager*/ {
             $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
 
+            error_log('[SIYA Server Manager][RunCloud] SSH connection initialized successfully.');
+
             if (!$ssh->login($ssh_username, $private_key)) {
                 throw new \Exception('Failed to authenticate using SSH key');
             }
