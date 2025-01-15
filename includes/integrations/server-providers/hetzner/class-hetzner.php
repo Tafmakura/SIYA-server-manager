@@ -120,7 +120,7 @@ class Hetzner /*implements ServerProvider*/ {
         $response_code = wp_remote_retrieve_response_code($response);
         $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . $response_body);
+            throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . json_encode($response_body));
         }
 
         $api_response = json_decode($response_body, true);
