@@ -16,7 +16,65 @@ class Hetzner /*implements ServerProvider*/ {
         return new HetznerSetup();
     }
 
-    public function provision_server($server_name, $server_plan, $server_region = 'nbg1', $server_image = 'ubuntu-20.04') {
+    public function setup_ssh_key($server_name) {
+        error_log(sprintf('[SIYA Server Manager][Hetzner] Setting up SSH key for server: %s', $server_name));
+        
+        $public_key = get_option('arsol_ssh_public_key');
+        if (empty($public_key)) {
+            error_log('[SIYA Server Manager][Hetzner] Error: SSH public key not found in settings');
+            throw new \Exception('SSH public key not found');
+        }
+
+        error_log('[SIYA Server Manager][Hetzner] Attempting to add SSH key to Hetzner');
+        $response = wp_remote_post($this->api_endpoint . '/ssh-keys', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+                'name' => $server_name,
+                'public_key' => $public_key
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            $error_message = $response->get_error_message();
+            error_log(sprintf('[SIYA Server Manager][Hetzner] Failed to add SSH key: %s', $error_message));
+            throw new \Exception('Failed to add SSH key: ' . $error_message);
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        
+        if ($response_code !== 201) {
+            error_log(sprintf('[SIYA Server Manager][Hetzner] API Error: Failed to add SSH key. Status: %d, Response: %s', 
+                $response_code, 
+                $response_body
+            ));
+            throw new \Exception('Failed to add SSH key. Response code: ' . $response_code);
+        }
+
+        $response_data = json_decode(wp_remote_retrieve_body($response), true);
+        $ssh_key_id = $response_data['ssh_key']['id'] ?? null;
+
+        if ($ssh_key_id) {
+            error_log(sprintf('[SIYA Server Manager][Hetzner] Successfully added SSH key with ID: %s', $ssh_key_id));
+        } else {
+            error_log('[SIYA Server Manager][Hetzner] Warning: SSH key added but no ID returned');
+        }
+
+        return $ssh_key_id;
+    }
+
+    public function provision_server($server_post_id) {
+   
+        // Retrieve necessary information from metadata
+        $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
+        $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
+        $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nbg1';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20.04';
+        $ssh_key_id = 26338453;
+
         error_log(sprintf('[SIYA Server Manager][Hetzner] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
         ));
@@ -29,17 +87,30 @@ class Hetzner /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Setup SSH access
+        try {
+            $user_script = $this->setup_ssh_access($server_post_id);
+        } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][Hetzner] Error setting up SSH access: ' . $e->getMessage());
+            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
+        }
+
+
+        $server_data = [
+            'name' => $server_name,
+            'server_type' => $server_plan,
+            'location' => $server_region,
+            'image' => $server_image,
+           // 'user_data' => base64_encode($user_script),
+            'ssh_keys' => [$ssh_key_id]
+        ];
+
         $response = wp_remote_post($this->api_endpoint . '/servers', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
-            'body' => json_encode([
-                'name' => $server_name,
-                'server_type' => $server_plan,
-                'location' => $server_region,
-                'image' => $server_image
-            ])
+            'body' => json_encode($server_data)
         ]);
 
         if (is_wp_error($response)) {
@@ -62,7 +133,50 @@ class Hetzner /*implements ServerProvider*/ {
         // Return the compiled data
         return $server_data;
     }
-    
+
+    private function setup_ssh_access($server_post_id) {
+        // Retrieve SSH key and username from server metadata
+        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
+        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+
+        if (empty($ssh_public_key) || empty($ssh_username)) {
+            $error_message = 'SSH key or username not found in server metadata';
+            error_log('[SIYA Server Manager][Hetzner] ' . $error_message);
+            throw new \Exception($error_message);
+        }
+
+        error_log(sprintf('[SIYA Server Manager][Hetzner] Setting up SSH access for user: %s with public key: %s', $ssh_username, $ssh_public_key));
+
+        $user_script = sprintf(
+            "#!/bin/bash\n" .
+            "echo '[SIYA Server Manager][Hetzner] Creating user: %s'\n" .
+            "useradd -m -s /bin/bash %s\n" .
+            "echo '[SIYA Server Manager][Hetzner] Creating SSH directory'\n" .
+            "mkdir -p /home/%s/.ssh\n" .
+            "echo '[SIYA Server Manager][Hetzner] Copying SSH key'\n" .
+            "echo \"%s\" > /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][Hetzner] Setting permissions'\n" .
+            "chown -R %s:%s /home/%s/.ssh\n" .
+            "chmod 700 /home/%s/.ssh\n" .
+            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][Hetzner] User setup completed for: %s'\n",
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_public_key,
+            $ssh_username,
+            $ssh_username, $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username
+        );
+
+        error_log('[SIYA Server Manager][Hetzner] SSH access setup script generated successfully.');
+
+        return $user_script;
+    }
+
     private function map_statuses($raw_status) {
         $status_map = [
             'initializing' => 'starting',
@@ -85,6 +199,8 @@ class Hetzner /*implements ServerProvider*/ {
         error_log(var_export($api_response, true)); // DELETE THIS IN PRODUCTION
 
         $raw_status = $api_response['server']['status'] ?? '';
+        $os_name = $api_response['server']['image']['os_flavor'] ?? '';
+        $os_version = $api_response['server']['image']['os_version'] ?? '';
 
         return [
             'provisioned_id' => $api_response['server']['id'] ?? '',
@@ -94,7 +210,8 @@ class Hetzner /*implements ServerProvider*/ {
             'provisioned_disk_size' => $api_response['server']['server_type']['disk'] ?? '',
             'provisioned_ipv4' => $api_response['server']['public_net']['ipv4']['ip'] ?? '',
             'provisioned_ipv6' => $api_response['server']['public_net']['ipv6']['ip'] ?? '',
-            'provisioned_os' => $api_response['server']['image']['os_flavor'] ?? '',
+            'provisioned_os' => $os_name,
+            'provisioned_os_version' => $os_version,
             'provisioned_image_slug' => $api_response['server']['image']['name'] ?? '',
             'provisioned_region_slug' => $api_response['server']['datacenter']['location']['name'] ?? '',
             'provisioned_date' => $api_response['server']['created'] ?? '',
@@ -356,6 +473,37 @@ class Hetzner /*implements ServerProvider*/ {
             'ipv4' => $api_response['server']['public_net']['ipv4']['ip'] ?? '',
             'ipv6' => $api_response['server']['public_net']['ipv6']['ip'] ?? ''
         ];
+    }
+
+    public function open_server_ports($server_provisioned_id) {
+        error_log('[SIYA Server Manager][Hetzner] Assigning firewall group to server: ' . $server_provisioned_id);
+
+        $firewall_id = 1841021;
+        $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/actions/apply_to_resources', [
+            'headers' => [
+            'Authorization' => 'Bearer ' . $this->api_key,
+            'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+            'apply_to' => [
+                [
+                'type' => 'server',
+                'server' => ['id' => $server_provisioned_id]
+                ]
+            ]
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('Hetzner open ports error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('Hetzner open ports response: ' . json_encode($response_body, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . ', Status: ' . $response_code);
+
+        return $response_code === 201;
     }
 
 }

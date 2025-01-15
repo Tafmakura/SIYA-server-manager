@@ -16,7 +16,14 @@ class Vultr /*implements ServerProvider*/ {
         return new VultrSetup();
     }
 
-    public function provision_server($server_name, $server_plan, $server_region = 'ewr', $server_image = 2465) {
+    public function provision_server($server_post_id) {
+        // Retrieve necessary information from metadata
+        $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
+        $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
+        $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'ewr';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2465;
+        $ssh_key_id = '86125daf-08ed-4950-9052-fc6eb9eb9207';
+
         error_log(sprintf('[SIYA Server Manager] Vultr: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
         ));
@@ -29,6 +36,14 @@ class Vultr /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Setup SSH access
+        try {
+            $user_script = $this->setup_ssh_access($server_post_id);
+        } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][Vultr] Error setting up SSH access: ' . $e->getMessage());
+            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
+        }
+
         $response = wp_remote_post($this->api_endpoint . '/instances', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
@@ -38,7 +53,9 @@ class Vultr /*implements ServerProvider*/ {
                 'label' => $server_name,
                 'plan' => $server_plan,
                 'region' => $server_region,
-                'os_id' => $server_image
+                'os_id' => $server_image,
+                'user_data' => base64_encode($user_script),
+                'sshkey_id' => [$ssh_key_id]
             ])
         ]);
 
@@ -63,6 +80,49 @@ class Vultr /*implements ServerProvider*/ {
         return $server_data;
     }
 
+    private function setup_ssh_access($server_post_id) {
+        // Retrieve SSH key and username from server metadata
+        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
+        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+
+        if (empty($ssh_public_key) || empty($ssh_username)) {
+            $error_message = 'SSH key or username not found in server metadata';
+            error_log('[SIYA Server Manager][Vultr] ' . $error_message);
+            throw new \Exception($error_message);
+        }
+
+        error_log(sprintf('[SIYA Server Manager][Vultr] Setting up SSH access for user: %s with public key: %s', $ssh_username, $ssh_public_key));
+
+        $user_script = sprintf(
+            "#!/bin/bash\n" .
+            "echo '[SIYA Server Manager][Vultr] Creating user: %s'\n" .
+            "useradd -m -s /bin/bash %s\n" .
+            "echo '[SIYA Server Manager][Vultr] Creating SSH directory'\n" .
+            "mkdir -p /home/%s/.ssh\n" .
+            "echo '[SIYA Server Manager][Vultr] Copying SSH key'\n" .
+            "echo \"%s\" > /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][Vultr] Setting permissions'\n" .
+            "chown -R %s:%s /home/%s/.ssh\n" .
+            "chmod 700 /home/%s/.ssh\n" .
+            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][Vultr] User setup completed for: %s'\n",
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_public_key,
+            $ssh_username,
+            $ssh_username, $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username
+        );
+
+        error_log('[SIYA Server Manager][Vultr] SSH access setup script generated successfully.');
+
+        return $user_script;
+    }
+
     private function map_statuses($raw_status) {
         $status_map = [
             'pending' => 'starting',
@@ -85,7 +145,9 @@ class Vultr /*implements ServerProvider*/ {
 
         $raw_status = $api_response['instance']['status'] ?? '';
         $power_status = $api_response['instance']['power_status'] ?? '';
-        
+        $os_name = $api_response['instance']['os'] ?? '';
+        $os_version = $api_response['instance']['os_version'] ?? '';
+
         return [
             'provisioned_id' => $api_response['instance']['id'] ?? '',
             'provisioned_name' => $api_response['instance']['label'] ?? '',
@@ -94,7 +156,8 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_disk_size' => $api_response['instance']['disk'] ?? '',
             'provisioned_ipv4' => $api_response['instance']['main_ip'] ?? '',
             'provisioned_ipv6' => $api_response['instance']['v6_main_ip'] ?? '',
-            'provisioned_os' => $api_response['instance']['os'] ?? '',
+            'provisioned_os' => $os_name,
+            'provisioned_os_version' => $os_version,
             'provisioned_image_slug' => $api_response['instance']['os_id'] ?? '',
             'provisioned_region_slug' => $api_response['instance']['region'] ?? '',
             'provisioned_date' => $api_response['instance']['date_created'] ?? '',
@@ -339,4 +402,33 @@ class Vultr /*implements ServerProvider*/ {
             'ipv6' => $api_response['instance']['v6_main_ip'] ?? ''
         ];
     }
+
+    public function open_server_ports($server_provisioned_id) {
+        error_log('[SIYA Server Manager][Vultr] Assigning firewall group to server: ' . $server_provisioned_id);
+
+        $firewall_id = '1d93959e-06c7-43d0-9f87-85e91b6d27ac'; // Replace with your actual firewall group ID
+
+        $response = wp_remote_request($this->api_endpoint . "/instances/{$server_provisioned_id}", [
+            'method' => 'PATCH',
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+                'firewall_group_id' => $firewall_id
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('Vultr open ports error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('Vultr open ports response: ' . $response_body . ', Status: ' . $response_code);
+
+        return $response_code === 202;
+    }
+
 }

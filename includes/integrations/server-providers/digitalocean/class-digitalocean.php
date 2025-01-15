@@ -16,7 +16,64 @@ class DigitalOcean /*implements ServerProvider*/ {
         return new DigitalOceanSetup();
     }
 
-    public function provision_server($server_name, $server_plan, $server_region = 'nyc1', $server_image = 'ubuntu-20-04-x64') {
+    public function setup_ssh_key($server_name) {
+        error_log(sprintf('[SIYA Server Manager][DigitalOcean] Setting up SSH key for server: %s', $server_name));
+        
+        $public_key = get_option('arsol_ssh_public_key');
+        if (empty($public_key)) {
+            error_log('[SIYA Server Manager][DigitalOcean] Error: SSH public key not found in settings');
+            throw new \Exception('SSH public key not found');
+        }
+
+        error_log('[SIYA Server Manager][DigitalOcean] Attempting to add SSH key to DigitalOcean');
+        $response = wp_remote_post($this->api_endpoint . '/account/keys', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+                'name' => $server_name,
+                'public_key' => $public_key
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            $error_message = $response->get_error_message();
+            error_log(sprintf('[SIYA Server Manager][DigitalOcean] Failed to add SSH key: %s', $error_message));
+            throw new \Exception('Failed to add SSH key: ' . $error_message);
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        
+        if ($response_code !== 201) {
+            error_log(sprintf('[SIYA Server Manager][DigitalOcean] API Error: Failed to add SSH key. Status: %d, Response: %s', 
+                $response_code, 
+                $response_body
+            ));
+            throw new \Exception('Failed to add SSH key. Response code: ' . $response_code);
+        }
+
+        $response_data = json_decode(wp_remote_retrieve_body($response), true);
+        $ssh_key_id = $response_data['ssh_key']['id'] ?? null;
+
+        if ($ssh_key_id) {
+            error_log(sprintf('[SIYA Server Manager][DigitalOcean] Successfully added SSH key with ID: %s', $ssh_key_id));
+        } else {
+            error_log('[SIYA Server Manager][DigitalOcean] Warning: SSH key added but no ID returned');
+        }
+
+        return $ssh_key_id;
+    }
+
+    public function provision_server($server_post_id) {
+        // Retrieve necessary information from metadata
+        $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
+        $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
+        $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nyc1';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20-04-x64';
+        $ssh_key_id = '9b:e9:7b:2f:16:df:a5:1b:b4:a6:e5:8c:f3:39:14:27';
+
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
             PHP_EOL, $server_name, PHP_EOL, $server_plan, PHP_EOL, $server_region, PHP_EOL, $server_image
         ));
@@ -29,17 +86,41 @@ class DigitalOcean /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
+        // Check if we need to connect to RunCloud
+        $connect_server_manager = get_post_meta($server_post_id, 'arsol_connect_server_manager', true);
+        $runcloud_script = '';
+
+        if ($connect_server_manager === 'yes') {
+            $runcloud_script = $this->get_runcloud_agent_script();
+        }
+
+        // Setup SSH access
+        try {
+            $user_script = $this->setup_ssh_access($server_post_id);
+            if ($runcloud_script) {
+                $user_script .= "\n" . $runcloud_script;
+            }
+        } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][DigitalOcean] Error setting up SSH access: ' . $e->getMessage());
+            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
+        }
+
+        $server_data = [
+            'name' => $server_name,
+            'size' => $server_plan,
+            'region' => $server_region,
+            'image' => $server_image,
+            //'user_data' => base64_encode($user_script),
+          //  'user_data' => $user_script,
+            'ssh_keys' => [$ssh_key_id]
+        ];
+
         $response = wp_remote_post($this->api_endpoint . '/droplets', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ],
-            'body' => json_encode([
-                'name' => $server_name,
-                'size' => $server_plan,
-                'region' => $server_region,
-                'image' => $server_image
-            ])
+            'body' => json_encode($server_data)
         ]);
 
         if (is_wp_error($response)) {
@@ -60,6 +141,57 @@ class DigitalOcean /*implements ServerProvider*/ {
 
         return $server_data;
     }
+
+    private function get_runcloud_agent_script() {
+        return <<<'EOD'
+#!/bin/bash
+curl -s https://manage.runcloud.io/installer.sh | sudo bash
+EOD;
+    }
+
+    private function setup_ssh_access($server_post_id) {
+        // Retrieve SSH key and username from server metadata
+        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
+        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
+
+        if (empty($ssh_public_key) || empty($ssh_username)) {
+            $error_message = 'SSH key or username not found in server metadata';
+            error_log('[SIYA Server Manager][DigitalOcean] ' . $error_message);
+            throw new \Exception($error_message);
+        }
+
+        error_log(sprintf('[SIYA Server Manager][DigitalOcean] Setting up SSH access for user: %s with public key: %s', $ssh_username, $ssh_public_key));
+
+        $user_script = sprintf(
+            "#!/bin/bash\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Creating user: %s'\n" .
+            "useradd -m -s /bin/bash %s\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Creating SSH directory'\n" .
+            "mkdir -p /home/%s/.ssh\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Copying SSH key'\n" .
+            "echo \"%s\" > /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] Setting permissions'\n" .
+            "chown -R %s:%s /home/%s/.ssh\n" .
+            "chmod 700 /home/%s/.ssh\n" .
+            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
+            "echo '[SIYA Server Manager][DigitalOcean] User setup completed for: %s'\n",
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_public_key,
+            $ssh_username,
+            $ssh_username, $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username,
+            $ssh_username
+        );
+
+        error_log('[SIYA Server Manager][DigitalOcean] SSH access setup script generated successfully.');
+
+        return $user_script;
+    }
+
 
     private function map_statuses($raw_status) {
         $status_map = [
@@ -97,6 +229,9 @@ class DigitalOcean /*implements ServerProvider*/ {
             }
         }
         
+        $os_name = $droplet['image']['distribution'] ?? '';
+        $os_version = $droplet['image']['version'] ?? '';
+
         return [
             'provisioned_id' => $droplet['id'] ?? '',
             'provisioned_name' => $droplet['name'] ?? '',
@@ -105,7 +240,8 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_disk_size' => $droplet['disk'] ?? '',
             'provisioned_ipv4' => $ipv4,
             'provisioned_ipv6' => $ipv6,
-            'provisioned_os' => $droplet['image']['distribution'] ?? '',
+            'provisioned_os' => $os_name,
+            'provisioned_os_version' => $os_version,
             'provisioned_image_slug' => $droplet['image']['slug'] ?? '',
             'provisioned_region_slug' => $droplet['region']['slug'] ?? '',
             'provisioned_date' => $droplet['created_at'] ?? '',
@@ -114,7 +250,6 @@ class DigitalOcean /*implements ServerProvider*/ {
             'provisioned_remote_raw_status' => $droplet['status'] ?? ''
         ];
     }
-    
 
     public function ping_server($server_provisioned_id) {
         $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
@@ -390,5 +525,32 @@ class DigitalOcean /*implements ServerProvider*/ {
             'ipv4' => $ipv4,
             'ipv6' => $ipv6
         ];
+    }
+
+    public function open_server_ports($server_provisioned_id) {
+        error_log('[SIYA Server Manager][DigitalOcean] Assigning firewall group to server: ' . $server_provisioned_id);
+
+        $firewall_id = 'e08f1e94-778d-4184-97ea-8091b3b64a83'; // Replace with your actual firewall group ID
+
+        $response = wp_remote_post($this->api_endpoint . '/firewalls/' . $firewall_id . '/droplets', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => json_encode([
+                'droplet_ids' => [$server_provisioned_id]
+            ])
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('DigitalOcean open ports error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('DigitalOcean open ports response: ' . $response_body . ', Status: ' . $response_code);
+
+        return $response_code === 204;
     }
 }

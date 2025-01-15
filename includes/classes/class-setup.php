@@ -14,6 +14,9 @@ class Setup {
      */
     private function include_files() {
 
+
+
+
         // Core Classes
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup-custom-post-types.php';
@@ -21,6 +24,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-general.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-slugs.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-api.php';
+        require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-ssh.php';
 
         
         // Interfaces
@@ -41,6 +45,8 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
       // DELETE  require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
+
+        // require_once plugin_dir_path(__DIR__) . '/libraries/phpseclib/autoload.php';
     }
 
     /**
@@ -87,6 +93,9 @@ class Setup {
         }
         if (class_exists('Siya\AdminSettings\Slugs')) {
             new \Siya\AdminSettings\Slugs();
+        }
+        if (class_exists('Siya\AdminSettings\SSH')) {
+            new \Siya\AdminSettings\SSH();
         }
     }
 

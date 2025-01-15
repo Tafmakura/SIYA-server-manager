@@ -6,6 +6,7 @@ class AdminMenus {
     public function __construct() {
         $this->add_siya_menu();
         $this->add_slugs_submenu();
+        $this->add_ssh_submenu();
         $this->add_api_submenu();
     }
 
@@ -47,7 +48,21 @@ class AdminMenus {
             array('Siya\AdminSettings\Slugs', 'settings_page') // Callback function
         );
     }
-    
+
+    /**
+     * Add SSH Keys submenu page
+     */
+    public function add_ssh_submenu() {
+        add_submenu_page(
+            'siya',
+            'SSH Keys',
+            'SSH Keys',
+            'manage_options',
+            'siya-ssh-settings',
+            array('Siya\AdminSettings\SSH', 'settings_page')
+        );
+    }
+      
     /**
      * Add API Settings submenu page
      */
@@ -61,6 +76,4 @@ class AdminMenus {
             array('Siya\AdminSettings\API', 'settings_page') // Callback function
         );
     }
-
-
 }

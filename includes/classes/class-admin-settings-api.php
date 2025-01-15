@@ -18,7 +18,7 @@ class API  {
         register_setting('siya_settings_api', 'digitalocean_api_key');
         register_setting('siya_settings_api', 'vultr_api_key');
 
-        // Add hooks for field data
+        // Add hooks for field data /*
         add_action('siya_server_managers_fields', array($this, 'get_server_managers_data'));
         add_action('siya_server_providers_fields', array($this, 'get_server_providers_data'));
     }
