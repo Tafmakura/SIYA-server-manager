@@ -106,30 +106,33 @@ class Runcloud /*implements ServerManager*/ {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection with phpseclib...');
             
-            try {
-                
-                error_log('[SIYA Server Manager][RunCloud] SSH Host: ' . $ssh_host);
-                error_log('[SIYA Server Manager][RunCloud] SSH Port: ' . $ssh_port);        
-                
-                $ssh = new SSH2($ssh_host, $ssh_port); // Optional: port can be provided here
-                
+            $ssh = null;
+            $attempt = 1;
+            $max_attempts = 5;
 
-                error_log('Milestone Y2');
+            while ($attempt <= $max_attempts) {
+                try {
+                    error_log("SSH Connection attempt {$attempt} of {$max_attempts} to {$ssh_host}:{$ssh_port}");
+                    $ssh = new SSH2($ssh_host, $ssh_port);
+                    $private_key = PublicKeyLoader::load($ssh_private_key);
 
-                $private_key = PublicKeyLoader::load($ssh_private_key);
-
-            } catch (\Exception $e) {
-                $error_message = 'Failed to initialize SSH connection: ' . $e->getMessage();
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                throw new \Exception($error_message);
+                    if ($ssh->login($ssh_username, $private_key)) {
+                        error_log("SSH Connection successful on attempt {$attempt}");
+                        break;
+                    } else {
+                        throw new \Exception('Failed to authenticate using SSH key');
+                    }
+                } catch (\Exception $e) {
+                    error_log("SSH Connection error on attempt {$attempt}: " . $e->getMessage());
+                    $attempt++;
+                    if ($attempt <= $max_attempts) {
+                        sleep(3); // Wait 3 seconds before next attempt
+                    }
+                }
             }
 
-            // Attempt to establish SSH connection
-            error_log('[SIYA Server Manager][RunCloud] SSH connection initialized successfully.');
-
-            // Authenticate using SSH key
-            if (!$ssh->login($ssh_username, $private_key)) {
-                throw new \Exception('Failed to authenticate using SSH key');
+            if (!$ssh || !$ssh->isConnected()) {
+                throw new \Exception('Failed to establish SSH connection after multiple attempts');
             }
 
             error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
