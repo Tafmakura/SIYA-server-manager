@@ -17,6 +17,9 @@ use Siya\Setup;
 $siyaServerManager = new Setup();
 
 
+use phpseclib3\Net\SSH2;
+use phpseclib3\Crypt\PublicKeyLoader;
+
 
 function test_ssh_connection() {
     // Retrieve necessary details
