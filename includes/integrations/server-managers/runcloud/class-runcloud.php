@@ -106,15 +106,39 @@ class Runcloud /*implements ServerManager*/ {
             $ssh_username = 'root';
             $ssh_port = 22;
     
-            // Initialize SSH connection with retries
-            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
-            $ssh = new SSH2($ssh_host, $ssh_port);
-            $private_key = PublicKeyLoader::load($ssh_private_key);
-            if (!$ssh->login($ssh_username, $private_key)) {
-                throw new \Exception('Failed to authenticate using SSH key');
-            }
+            // Initialize SSH connection with exponential backoff retries
+            $max_retries = 8; // Max number of retries
+            $retry_delay = 2; // Initial retry delay (in seconds)
+            $retry_count = 0;
     
-            error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
+            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
+            
+            while ($retry_count < $max_retries) {
+                try {
+                    $ssh = new SSH2($ssh_host, $ssh_port);
+                    $private_key = PublicKeyLoader::load($ssh_private_key);
+                    
+                    if ($ssh->login($ssh_username, $private_key)) {
+                        error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
+                        break;
+                    }
+                    
+                    throw new \Exception('Failed to authenticate using SSH key');
+                } catch (\Exception $e) {
+                    $retry_count++;
+                    $error_message = 'SSH connection failed on attempt ' . $retry_count . ': ' . $e->getMessage();
+                    error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+    
+                    if ($retry_count >= $max_retries) {
+                        throw new \Exception('Max retries reached for SSH connection.');
+                    }
+    
+                    // Exponential backoff delay
+                    $backoff_delay = $retry_delay * (2 ** ($retry_count - 1));
+                    error_log('[SIYA Server Manager][RunCloud] Retrying in ' . $backoff_delay . ' seconds...');
+                    sleep($backoff_delay);
+                }
+            }
     
             // Test SSH connection
             error_log('[SIYA Server Manager][RunCloud] Testing SSH connection...');
