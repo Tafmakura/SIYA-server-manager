@@ -21,7 +21,7 @@ class Vultr /*implements ServerProvider*/ {
         $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'ewr';
-        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2465;  // Default must support Runcloud
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2284;  // Default must support Runcloud
         $ssh_key_id = '86125daf-08ed-4950-9052-fc6eb9eb9207';
 
         error_log(sprintf('[SIYA Server Manager] Vultr: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
