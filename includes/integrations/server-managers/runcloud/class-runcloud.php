@@ -156,17 +156,29 @@ class Runcloud /*implements ServerManager*/ {
             // Execute the installation script
             error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
             
+            // Execute the installation script in the background using nohup
             $execution_output = $ssh->exec('nohup /bin/bash -c "' . $installation_script . '" > /tmp/runcloud_script.log 2>&1 &');
 
-            if (empty($execution_output)) {
-                $error_message = 'SSH connection timed out during script execution.';
+            // Log the command execution for debugging
+            error_log('[SIYA Server Manager][RunCloud] Executing installation script using nohup...');
+
+            // Immediately check for potential errors in $execution_output
+            if ($execution_output === false || stripos($execution_output, 'error') !== false) {
+                $error_message = 'Error during nohup execution: ' . $execution_output;
                 error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
                 throw new \Exception($error_message);
             }
 
-            error_log('[SIYA Server Manager][RunCloud] Installation Script Output: ' . $execution_output);
-            error_log('[SIYA Server Manager][RunCloud] Installation script started...');
-            return true;
+            // Confirm that the script is running or that logs are being created
+            $log_check_output = $ssh->exec('ls /tmp/runcloud_script.log');
+
+            if (empty(trim($log_check_output))) {
+                $error_message = 'Log file /tmp/runcloud_script.log was not created. The script might not have started.';
+                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
+                throw new \Exception($error_message);
+            }
+
+            error_log('[SIYA Server Manager][RunCloud] Installation script started successfully.');
 
         } catch (\Exception $e) {
             $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();

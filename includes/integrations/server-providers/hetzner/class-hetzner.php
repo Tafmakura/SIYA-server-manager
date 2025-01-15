@@ -99,7 +99,7 @@ class Hetzner /*implements ServerProvider*/ {
         $server_data = [
             'name' => $server_name,
             'server_type' => $server_plan,
-           // 'location' => $server_region,
+            'location' => $server_region,
             'image' => $server_image,
            // 'user_data' => base64_encode($user_script),
             'ssh_keys' => [$ssh_key_id]
