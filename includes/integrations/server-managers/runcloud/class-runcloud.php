@@ -216,12 +216,14 @@ class Runcloud /*implements ServerManager*/ {
     
         try {
             // Initialize SSH connection
+            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
     
             if (!$ssh->login($ssh_username, $private_key)) {
                 throw new \Exception('SSH login failed in finish_server_connection');
             }
+            error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
     
             // Exponential backoff settings
             $max_attempts = 7;
@@ -231,6 +233,7 @@ class Runcloud /*implements ServerManager*/ {
     
             // Set initial interval to 5 seconds after the initial delay
             $elapsed_time += $backoff_time;
+            error_log("[SIYA Server Manager][RunCloud] Initial backoff for {$backoff_time} seconds...");
             sleep($backoff_time);
             $backoff_time = 5;
     
@@ -239,6 +242,7 @@ class Runcloud /*implements ServerManager*/ {
     
                 // Check RunCloud installation status
                 $runcloud_status = $ssh->exec('sudo systemctl status runcloud-agent');
+                error_log("[SIYA Server Manager][RunCloud] RunCloud status output: " . $runcloud_status);
     
                 if (empty($runcloud_status)) {
                     error_log('[SIYA Server Manager][RunCloud] No output from RunCloud status check. Possible timeout or misconfiguration.');
