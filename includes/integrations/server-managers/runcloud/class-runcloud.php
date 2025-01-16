@@ -94,7 +94,6 @@ class Runcloud /*implements ServerManager*/ {
     public function finish_server_connection($args) {
         $subscription_id = $args['subscription_id'];
         $server_post_id = $args['server_post_id'];
-        $server_id = isset($args['server_id']) ? $args['server_id'] : null;
         $ssh_host = $args['ssh_host'];
         $ssh_username = $args['ssh_username'];
         $ssh_private_key = $args['ssh_private_key'];
@@ -102,9 +101,8 @@ class Runcloud /*implements ServerManager*/ {
 
         error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
 
-        // Logic to check RunCloud installation status and determine success or failure
+        // Initialize SSH connection
         try {
-            // Initialize SSH connection
             $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
 
@@ -112,21 +110,51 @@ class Runcloud /*implements ServerManager*/ {
                 throw new \Exception('SSH login failed in finish_server_connection');
             }
 
-            // Check if RunCloud is installed by querying for version
-            $runcloud_version = $ssh->exec('runcloud --version');
+            // Variables for backoff
+            $max_attempts = 7; // Maximum number of attempts
+            $timeout = 20 * 60; // Timeout after 20 minutes (in seconds)
+            $backoff_time = 180; // Initial backoff time (3 minutes)
+            $elapsed_time = 0; // Elapsed time
 
-            if (!empty($runcloud_version)) {
-                error_log('[SIYA Server Manager][RunCloud] RunCloud version found: ' . $runcloud_version);
-                update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
-            } else {
-                throw new \Exception('RunCloud not found or version check failed');
+            // Loop with exponential backoff to check for script completion
+            for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
+                error_log("[SIYA Server Manager][RunCloud] Checking if installation script is complete (Attempt {$attempt}/{$max_attempts})...");
+
+                // Check if RunCloud is installed by checking version
+                $runcloud_version = $ssh->exec('runcloud --version');
+
+                if (!empty($runcloud_version)) {
+                    error_log('[SIYA Server Manager][RunCloud] RunCloud version found: ' . $runcloud_version);
+                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
+                    return;
+                }
+
+                // Check if the script has been running for too long
+                if ($elapsed_time >= $timeout) {
+                    error_log('[SIYA Server Manager][RunCloud] Timeout reached. RunCloud not found after 20 minutes.');
+                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
+                    return;
+                }
+
+                // Exponential backoff
+                error_log("[SIYA Server Manager][RunCloud] Backing off for {$backoff_time} seconds...");
+                sleep($backoff_time);
+                $elapsed_time += $backoff_time;
+
+                // Increase backoff time (exponential backoff)
+                $backoff_time = min($backoff_time * 2, 900); // Cap the backoff time at 15 minutes
             }
+
+            // If the loop ends without success, mark the task as failed
+            error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached. RunCloud not found.');
+            update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
 
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][RunCloud] Error during finish server connection: ' . $e->getMessage());
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
         }
     }
+
 
 
         public function finish_server_connection_with_check($server_post_id)
