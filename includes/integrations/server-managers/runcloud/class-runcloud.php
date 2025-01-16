@@ -266,7 +266,7 @@ class Runcloud /*implements ServerManager*/ {
 
                 if ($status === 'running') {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
-                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
+                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'yes');
                     return;
                 }
 
@@ -283,7 +283,7 @@ class Runcloud /*implements ServerManager*/ {
 
             // If all attempts are exhausted
             error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached. RunCloud installation could not be verified.');
-            update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
+            update_post_meta($server_post_id, 'arsol_server_manager_connection', 'check-timed-out');
         
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][RunCloud] Exception in finish_server_connection: ' . $e->getMessage());
