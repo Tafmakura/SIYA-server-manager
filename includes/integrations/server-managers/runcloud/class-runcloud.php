@@ -214,6 +214,10 @@ class Runcloud /*implements ServerManager*/ {
         $ssh_private_key = $args['ssh_private_key'];
         $ssh_port = $args['ssh_port'];
         
+        $timeout = 300;
+        $elapsed_time = 0;
+        $backoff_time = 10;
+
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
