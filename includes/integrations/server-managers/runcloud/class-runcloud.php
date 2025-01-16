@@ -206,6 +206,9 @@ class Runcloud /*implements ServerManager*/ {
 
     public function finish_server_connection($args) {
         error_log('[SIYA Server Manager][RunCloud] Starting finish_server_connection...');
+
+         // Disable PHP time limit to ensure the script can run as long as needed
+        set_time_limit(0);
         
         $server_post_id = $args['server_post_id'];
         $subscription_id = $args['subscription_id'];
