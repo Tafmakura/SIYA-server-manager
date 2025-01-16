@@ -237,9 +237,9 @@ class Runcloud /*implements ServerManager*/ {
                 error_log("[SIYA Server Manager][RunCloud] Checking if installation script is complete (Attempt {$attempt}/{$max_attempts})...");
 
                 // Check if RunCloud is installed by checking version
-                $runcloud_version = $ssh->exec('runcloud --version');
+                $runcloud_version = $ssh->exec('sudo systemctl status runcloud-agent');
 
-                if (!empty($runcloud_version)) {
+                if (!empty($runcloud_version) && stripos($runcloud_version, 'command not found') === false) {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud version found: ' . $runcloud_version);
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
