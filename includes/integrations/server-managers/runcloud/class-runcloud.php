@@ -220,7 +220,7 @@ class Runcloud /*implements ServerManager*/ {
         
         $timeout = 600; // 10 minutes timeout in seconds
         $interval = 60; // Interval between retries in seconds
-    
+        
         // Check server status using RunCloud API
         $start_time = time();
     
@@ -229,14 +229,17 @@ class Runcloud /*implements ServerManager*/ {
     
             $status = $this->check_server_status_via_api($server_id);
     
+            // Log the exact API response to understand what we're dealing with
+            error_log("[SIYA Server Manager][RunCloud] API response: {$status}");
+            
             if ($status === 'running') {
-                error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
+                error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running via API.');
                 update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                 return;
             }
     
             if ($status === 'failed' || $status === 'not-installed' || $status === 'inactive') {
-                error_log("[SIYA Server Manager][RunCloud] RunCloud status: {$status}. Retrying...");
+                error_log("[SIYA Server Manager][RunCloud] RunCloud API status: {$status}. Retrying...");
             } else {
                 error_log('[SIYA Server Manager][RunCloud] Unexpected status output. Retrying...');
             }
@@ -252,8 +255,9 @@ class Runcloud /*implements ServerManager*/ {
             $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
     
+            // Log detailed error if SSH login fails
             if (!$ssh->login($ssh_username, $private_key)) {
-                throw new \Exception('SSH login failed in finish_server_connection.');
+                throw new \Exception("SSH login failed: Unable to authenticate with provided credentials.");
             }
     
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
@@ -261,17 +265,17 @@ class Runcloud /*implements ServerManager*/ {
             while ((time() - $start_time) < $timeout) {
                 error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via SSH...");
     
-                // Check RunCloud Agent status
+                // Check RunCloud Agent status via SSH
                 $status = $this->check_server_manager_status($ssh);
     
                 if ($status === 'running') {
-                    error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
+                    error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running via SSH.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
                 }
     
                 if ($status === 'failed' || $status === 'not-installed' || $status === 'inactive') {
-                    error_log("[SIYA Server Manager][RunCloud] RunCloud status: {$status}. Retrying...");
+                    error_log("[SIYA Server Manager][RunCloud] RunCloud SSH status: {$status}. Retrying...");
                 } else {
                     error_log('[SIYA Server Manager][RunCloud] Unexpected status output. Retrying...');
                 }
@@ -286,10 +290,12 @@ class Runcloud /*implements ServerManager*/ {
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'check-timed-out');
         
         } catch (\Exception $e) {
+            // Log exception details for better troubleshooting
             error_log('[SIYA Server Manager][RunCloud] Exception in finish_server_connection: ' . $e->getMessage());
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
         }
     }
+    
     
 
     private function check_server_status_via_api($server_id) {
