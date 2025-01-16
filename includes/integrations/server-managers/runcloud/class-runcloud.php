@@ -219,29 +219,24 @@ class Runcloud /*implements ServerManager*/ {
         $server_id = $args['server_id'];
         
         $timeout = 600; // 10 minutes timeout in seconds
-        $initial_interval = 60; // Initial delay in seconds for the first retry
-        $decrease_amount = 10; // Amount by which the interval decreases each retry
-        $min_interval = 10; // Minimum interval between retries in seconds
+        $interval = 60; // Interval between retries in seconds
     
         // Check server status using RunCloud API
         $start_time = time();
-        $elapsed_time = 0;
-        $interval = $initial_interval;
     
-        // Attempt to verify via API
-        while (($elapsed_time = time() - $start_time) < $timeout) {
+        while ((time() - $start_time) < $timeout) {
             error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via API...");
     
             $status = $this->check_server_status_via_api($server_id);
     
             if ($status === 'running') {
-                error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running via API.');
+                error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
                 update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                 return;
             }
     
             if ($status === 'failed' || $status === 'not-installed' || $status === 'inactive') {
-                error_log("[SIYA Server Manager][RunCloud] RunCloud API status: {$status}. Retrying...");
+                error_log("[SIYA Server Manager][RunCloud] RunCloud status: {$status}. Retrying...");
             } else {
                 error_log('[SIYA Server Manager][RunCloud] Unexpected status output. Retrying...');
             }
@@ -249,7 +244,6 @@ class Runcloud /*implements ServerManager*/ {
             // Sleep for the current interval
             error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
             sleep($interval);
-            $interval = max($min_interval, $interval - $decrease_amount); // Decrease interval over time
         }
     
         // If API check fails, revert to SSH status check
@@ -264,21 +258,20 @@ class Runcloud /*implements ServerManager*/ {
     
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
     
-            $interval = $initial_interval; // Reset interval for SSH checks
-            while (($elapsed_time = time() - $start_time) < $timeout) {
+            while ((time() - $start_time) < $timeout) {
                 error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via SSH...");
     
                 // Check RunCloud Agent status
                 $status = $this->check_server_manager_status($ssh);
     
                 if ($status === 'running') {
-                    error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running via SSH.');
-                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'yes');
+                    error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
+                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
                 }
     
                 if ($status === 'failed' || $status === 'not-installed' || $status === 'inactive') {
-                    error_log("[SIYA Server Manager][RunCloud] RunCloud SSH status: {$status}. Retrying...");
+                    error_log("[SIYA Server Manager][RunCloud] RunCloud status: {$status}. Retrying...");
                 } else {
                     error_log('[SIYA Server Manager][RunCloud] Unexpected status output. Retrying...');
                 }
@@ -286,7 +279,6 @@ class Runcloud /*implements ServerManager*/ {
                 // Sleep for the current interval
                 error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
                 sleep($interval);
-                $interval = max($min_interval, $interval - $decrease_amount); // Decrease interval over time
             }
     
             // If all attempts are exhausted
