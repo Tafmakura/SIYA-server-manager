@@ -240,26 +240,16 @@ class Runcloud /*implements ServerManager*/ {
     
                 if (empty($runcloud_status)) {
                     error_log('[SIYA Server Manager][RunCloud] No output from RunCloud status check. Possible timeout or misconfiguration.');
-                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
-                    return;
-                }
-    
-                if (stripos($runcloud_status, 'Unit runcloud-agent.service could not be found') !== false) {
+                } else if (stripos($runcloud_status, 'Unit runcloud-agent.service could not be found') !== false) {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is not installed.');
-                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
-                    return;
-                }
-    
-                if (stripos($runcloud_status, 'Active: active (running)') !== false) {
+                } else if (stripos($runcloud_status, 'Active: active (running)') !== false) {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is active and running.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
-                }
-    
-                if (stripos($runcloud_status, 'Active: failed') !== false) {
+                } else if (stripos($runcloud_status, 'Active: failed') !== false) {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed but failed to start.');
-                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
-                    return;
+                } else {
+                    error_log('[SIYA Server Manager][RunCloud] Unexpected status output: ' . $runcloud_status);
                 }
     
                 // Check timeout
