@@ -15,11 +15,8 @@ class Runcloud /*implements ServerManager*/ {
     public function __construct() {
         $this->api_key = get_option('runcloud_api_key');
         $this->ssh_log_file = plugin_dir_path(__DIR__) . 'logs/ssh_log.txt'; // Set the log file path
-        $this->register_hooks(); // Register hooks
-    }
-
-    private function register_hooks() {
-        add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
+        
+      
     }
 
     public function create_server_in_server_manager(
@@ -186,8 +183,8 @@ class Runcloud /*implements ServerManager*/ {
 
             error_log('[SIYA Server Manager][RunCloud] Installation script started successfully.');
 
-            // Call finish_server_connection directly
-            $this->finish_server_connection([
+            // Schedule finish_server_connection using Action Scheduler
+            as_schedule_single_action(time() + 60, 'arsol_finish_server_connection_hook', [
                 'subscription_id' => $subscription_id,
                 'server_post_id' => $server_post_id,
                 'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
@@ -197,15 +194,18 @@ class Runcloud /*implements ServerManager*/ {
                 'ssh_port' => $ssh_port
             ]);
 
+            add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
+
         } catch (\Exception $e) {
             $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();
             error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
             throw new \Exception($error_message);
         }
+
     }
 
     public function finish_server_connection($args) {
-        error_log('[SIYA Server Manager][RunCloud] Starting finish_server_connection...');
+        error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
     
         // Disable PHP time limit to ensure the script can run as long as needed
         set_time_limit(0);
@@ -305,8 +305,6 @@ class Runcloud /*implements ServerManager*/ {
         }
     }
     
-    
-
     private function check_server_status_via_api($server_id) {
         $response = wp_remote_get(
             $this->api_endpoint . '/servers/' . $server_id . '/status',
