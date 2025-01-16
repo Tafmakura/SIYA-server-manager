@@ -476,7 +476,7 @@ class ServerOrchestrator {
             $this->runcloud = new Runcloud();
             
             try {
-                $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server($server_post_id);
+                $connection_result = $this->runcloud->start_server_connection($server_post_id);
             } catch (\Exception $e) {
                 error_log(sprintf(
                     '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',

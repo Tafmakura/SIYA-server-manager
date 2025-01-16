@@ -14,6 +14,11 @@ class Runcloud /*implements ServerManager*/ {
     public function __construct() {
         $this->api_key = get_option('runcloud_api_key');
         $this->ssh_log_file = plugin_dir_path(__DIR__) . 'logs/ssh_log.txt'; // Set the log file path
+        $this->register_hooks(); // Register hooks
+    }
+
+    private function register_hooks() {
+        add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
     }
 
     public function create_server_in_server_manager(
@@ -86,106 +91,132 @@ class Runcloud /*implements ServerManager*/ {
         ];
     }
 
-    public function connect_server_manager_to_provisioned_server($server_post_id) {
-        $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
-        $installation_script = $this->get_installation_script($server_id);
+    public function finish_server_connection($args) {
+        $subscription_id = $args['subscription_id'];
+        $server_post_id = $args['server_post_id'];
+        $server_id = isset($args['server_id']) ? $args['server_id'] : null;
+        $ssh_host = $args['ssh_host'];
+        $ssh_username = $args['ssh_username'];
+        $ssh_private_key = $args['ssh_private_key'];
+        $ssh_port = $args['ssh_port'];
 
-        error_log('[SIYA Server Manager][RunCloud] Installation Script: ' . $installation_script);
+        error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
+
+        // Logic to check RunCloud installation status and determine success or failure
+        try {
+            // Initialize SSH connection
+            $ssh = new SSH2($ssh_host, $ssh_port);
+            $private_key = PublicKeyLoader::load($ssh_private_key);
+
+            if (!$ssh->login($ssh_username, $private_key)) {
+                throw new \Exception('SSH login failed in finish_server_connection');
+            }
+
+            // Check if RunCloud is installed by querying for version
+            $runcloud_version = $ssh->exec('runcloud --version');
+
+            if (!empty($runcloud_version)) {
+                error_log('[SIYA Server Manager][RunCloud] RunCloud version found: ' . $runcloud_version);
+                update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
+            } else {
+                throw new \Exception('RunCloud not found or version check failed');
+            }
+
+        } catch (\Exception $e) {
+            error_log('[SIYA Server Manager][RunCloud] Error during finish server connection: ' . $e->getMessage());
+            update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
+        }
+    }
+
+
+        public function finish_server_connection_with_check($server_post_id)
+    {
+        error_log('[SIYA Server Manager][RunCloud] Finishing server connection and checking installation status...');
 
         try {
-            // Retrieve necessary details from server post metadata
+            // Retrieve server IP and other metadata
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
-            $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
             $ssh_private_key = get_option('arsol_global_ssh_private_key');
-            $ssh_public_key = get_option('arsol_global_ssh_public_key');
-            $ssh_host = $server_ip;
             $ssh_username = 'root';
             $ssh_port = 22;
-
-            error_log('[SIYA Server Manager][RunCloud] SSH Private Key: ' . $ssh_private_key);
-            error_log('[SIYA Server Manager][RunCloud] SSH Public Key: ' . $ssh_public_key);
-
-            // Initialize SSH connection
-            error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection with phpseclib...');
             
-            $ssh = null;
-            $attempt = 1;
-            $max_attempts = 8;
+            // Initialize SSH connection
+            $ssh = new SSH2($server_ip, $ssh_port);
+            $private_key = PublicKeyLoader::load($ssh_private_key);
 
-            while ($attempt <= $max_attempts) {
-                try {
-                    error_log("SSH Connection attempt {$attempt} of {$max_attempts} to {$ssh_host}:{$ssh_port}");
-                    $ssh = new SSH2($ssh_host, $ssh_port);
-                    $private_key = PublicKeyLoader::load($ssh_private_key);
+            if (!$ssh->login($ssh_username, $private_key)) {
+                throw new \Exception('Failed to authenticate using SSH key');
+            }
 
-                    if ($ssh->login($ssh_username, $private_key)) {
-                        error_log("SSH Connection successful on attempt {$attempt}");
-                        break;
-                    } else {
-                        throw new \Exception('Failed to authenticate using SSH key');
-                    }
-                } catch (\Exception $e) {
-                    error_log("SSH Connection error on attempt {$attempt}: " . $e->getMessage());
-                    $attempt++;
-                    if ($attempt <= $max_attempts) {
-                        $backoff_time = pow(2, $attempt); // Exponential backoff
-                        error_log("Waiting for {$backoff_time} seconds before next attempt");
-                        sleep($backoff_time);
-                    }
+            error_log('[SIYA Server Manager][RunCloud] SSH authentication successful.');
+
+            // Define retry times and max duration
+            $max_attempts = 6; // Maximum number of attempts (will run for up to 20 minutes)
+            $backoff_times = [180, 240, 300, 360, 420, 900]; // Exponential backoff times (in seconds): 3min, 4min, 5min, 6min, 7min, 15min
+            $start_time = time();
+            
+            for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
+                $current_time = time();
+                $elapsed_time = $current_time - $start_time;
+
+                // If elapsed time exceeds 20 minutes, break
+                if ($elapsed_time >= 1200) {  // 20 minutes = 1200 seconds
+                    error_log('[SIYA Server Manager][RunCloud] Timeout reached. Installation not completed in time.');
+                    $this->update_server_post_status($server_post_id, 'failed');
+                    return;
+                }
+
+                // Log the attempt
+                error_log("[SIYA Server Manager][RunCloud] Checking log status attempt {$attempt}...");
+
+                // Check the log file for the script's progress
+                $log_check_output = $ssh->exec('tail -n 20 /tmp/runcloud_script.log');
+
+                // Log the output for debugging
+                error_log("[SIYA Server Manager][RunCloud] Log output from attempt {$attempt}: {$log_check_output}");
+
+                // Check if installation is complete
+                if (strpos($log_check_output, 'Installation Complete') !== false) {
+                    error_log("[SIYA Server Manager][RunCloud] Installation completed successfully.");
+                    $this->update_server_post_status($server_post_id, 'success');
+                    return;
+                }
+
+                // Check for any error in the log output
+                if (strpos($log_check_output, 'error') !== false) {
+                    error_log("[SIYA Server Manager][RunCloud] Installation error detected in log.");
+                    $this->update_server_post_status($server_post_id, 'failed');
+                    return;
+                }
+
+                // Log that the process will retry after a backoff
+                if ($attempt < $max_attempts) {
+                    $wait_time = $backoff_times[$attempt - 1];
+                    error_log("[SIYA Server Manager][RunCloud] Waiting {$wait_time} seconds before retrying...");
+                    sleep($wait_time);
                 }
             }
 
-            if (!$ssh || !$ssh->isConnected()) {
-                throw new \Exception('Failed to establish SSH connection after multiple attempts');
-            }
-
-            error_log('[SIYA Server Manager][RunCloud] SSH authentication succeeded.');
-
-            // Test SSH connection with a simple command
-            error_log('[SIYA Server Manager][RunCloud] Testing SSH connection with simple command...');
-            $test_output = $ssh->exec('echo "SSH Connection Test Successful"');
-
-            if (empty($test_output)) {
-                $error_message = 'Test command output is blank';
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                throw new \Exception($error_message);
-            }
-
-            error_log('[SIYA Server Manager][RunCloud] Test Command Output: ' . $test_output);
-
-            // Execute the installation script
-            error_log('[SIYA Server Manager][RunCloud] Executing installation script...');
-            
-            // Execute the installation script in the background using nohup
-            $execution_output = $ssh->exec('nohup /bin/bash -c "' . $installation_script . '" > /tmp/runcloud_script.log 2>&1 &');
-
-            // Log the command execution for debugging
-            error_log('[SIYA Server Manager][RunCloud] Executing installation script using nohup...');
-
-            // Immediately check for potential errors in $execution_output
-            if ($execution_output === false || stripos($execution_output, 'error') !== false) {
-                $error_message = 'Error during nohup execution: ' . $execution_output;
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                throw new \Exception($error_message);
-            }
-
-            // Confirm that the script is running or that logs are being created
-            $log_check_output = $ssh->exec('ls /tmp/runcloud_script.log');
-
-            if (empty(trim($log_check_output))) {
-                $error_message = 'Log file /tmp/runcloud_script.log was not created. The script might not have started.';
-                error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-                throw new \Exception($error_message);
-            }
-
-            error_log('[SIYA Server Manager][RunCloud] Installation script started successfully.');
+            // If we reached here, all attempts failed
+            error_log('[SIYA Server Manager][RunCloud] Installation process failed after maximum retries.');
+            $this->update_server_post_status($server_post_id, 'failed');
 
         } catch (\Exception $e) {
-            $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();
+            $error_message = 'Failed to finish server connection: ' . $e->getMessage();
             error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-            throw new \Exception($error_message);
+            $this->update_server_post_status($server_post_id, 'failed');
         }
     }
+
+    public function update_server_post_status($server_post_id, $status)
+    {
+        // Update the post meta for arsol_server_manager_connection with the given status
+        update_post_meta($server_post_id, 'arsol_server_manager_connection', $status);
+        error_log('[SIYA Server Manager][RunCloud] Server connection status updated to: ' . $status);
+    }
+
+
+        
 
     public function get_installation_script($server_id) {
         $script_response = wp_remote_get(
@@ -334,3 +365,5 @@ class Runcloud /*implements ServerManager*/ {
     }
     
 }
+
+
