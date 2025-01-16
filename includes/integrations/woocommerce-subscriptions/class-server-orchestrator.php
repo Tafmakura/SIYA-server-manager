@@ -74,6 +74,9 @@ class ServerOrchestrator {
 
         add_action('woocommerce_subscription_status_pending-cancel_to_cancelled', array($this, 'start_server_deletion'), 10, 1);
         add_action('arsol_finish_server_deletion', array($this, 'finish_server_deletion'), 20, 1);
+
+
+
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -449,13 +452,15 @@ class ServerOrchestrator {
 
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
-       
-       error_log('Milestone X4');
-       
+        error_log('Milestone X4');
+        
         $runcloud_response_data = json_decode($runcloud_response_body, true);
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+        $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
+        $ssh_username = 'ARSOL' . $subscription->get_id();
+        $ssh_port = 22;
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
@@ -476,7 +481,7 @@ class ServerOrchestrator {
             $this->runcloud = new Runcloud();
             
             try {
-                $connection_result = $this->runcloud->start_server_connection($server_post_id);
+                $connection_result = $this->runcloud->execute_installation_script_on_server($server_post_id);
             } catch (\Exception $e) {
                 error_log(sprintf(
                     '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
@@ -499,9 +504,24 @@ class ServerOrchestrator {
                     $connection_result->get_error_message()
                 ));
             } else {
-                error_log('[SIYA Server Manager - ServerOrchestrator] Successfully connected server manager to provisioned server.');
+               
+                error_log('[SIYA Server Manager - Server Orchestrator] Successfully executed script on server.');
                 $subscription->add_order_note('Successfully connected server manager to provisioned server.');
+
+                // Schedule finish_server_connection using Action Scheduler
+                as_schedule_single_action(time() + 5, 'arsol_finish_server_connection_hook', [
+                    'subscription_id' => $subscription->get_id(),
+                    'server_post_id' => $server_post_id,
+                    'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
+                    'ssh_host' => $server_ip,
+                    'ssh_username' => $ssh_username,
+                    'ssh_private_key' => $ssh_private_key,
+                    'ssh_port' => $ssh_port
+                ], 'arsol_runcloud');
+
+                error_log('[SIYA Server Manager][RunCloud] Scheduled finish_server_connection action.');
             }
+
         } else {
             error_log('[SIYA Server Manager - ServerOrchestrator] Missing server ID or IP address for connection.');
             $subscription->add_order_note('Missing server ID or IP address for connection.');
@@ -541,7 +561,7 @@ class ServerOrchestrator {
 
 
 
-    
+
 
     // Step 5: Schedule server shutdown
     public function start_server_shutdown($subscription) {
