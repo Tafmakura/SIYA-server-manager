@@ -1,6 +1,6 @@
 <?php
 
-namespace Siya\Integrations\ServerManagers\Runcloud;
+namespace Siya\Integrations\ServerManagers;
 
 use Siya\Interfaces\ServerManager;
 use phpseclib3\Net\SSH2;
