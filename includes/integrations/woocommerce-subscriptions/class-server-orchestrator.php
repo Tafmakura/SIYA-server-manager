@@ -472,12 +472,8 @@ class ServerOrchestrator {
         }
 
         if ($server_id && $server_ip) {
-
-            error_log ('Milestone 2X5');
             
             $this->runcloud = new Runcloud();
-
-            error_log ('Milestone 3X5');
             
             try {
                 $connection_result = $this->runcloud->start_server_connection($server_post_id);

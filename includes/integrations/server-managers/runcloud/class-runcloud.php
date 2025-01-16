@@ -212,6 +212,9 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function finish_server_connection($args) {
+
+        error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
+
         $subscription_id = $args['subscription_id'];
         $server_post_id = $args['server_post_id'];
         $ssh_host = $args['ssh_host'];
@@ -219,7 +222,7 @@ class Runcloud /*implements ServerManager*/ {
         $ssh_private_key = $args['ssh_private_key'];
         $ssh_port = $args['ssh_port'];
 
-        error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
+       
 
         // Initialize SSH connection
         try {
