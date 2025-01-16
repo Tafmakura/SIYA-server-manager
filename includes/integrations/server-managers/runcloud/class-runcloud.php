@@ -224,6 +224,9 @@ class Runcloud /*implements ServerManager*/ {
         // Check server status using RunCloud API
         $start_time = time();
     
+        $retries = 0;
+        $max_retries = $timeout / $interval;
+        
         while ((time() - $start_time) < $timeout) {
             error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via API...");
     
@@ -247,6 +250,12 @@ class Runcloud /*implements ServerManager*/ {
             // Sleep for the current interval
             error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
             sleep($interval);
+            
+            $retries++;
+            if ($retries >= $max_retries) {
+                error_log("[SIYA Server Manager][RunCloud] Maximum retries reached. Exiting loop.");
+                break;
+            }
         }
     
         // If API check fails, revert to SSH status check
