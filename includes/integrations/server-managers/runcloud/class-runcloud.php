@@ -227,6 +227,11 @@ class Runcloud /*implements ServerManager*/ {
             $max_attempts = 7;
             $timeout = 20 * 60; // Total timeout: 20 minutes
             $backoff_time = 180; // Initial backoff: 3 minutes
+            $elapsed_time += $backoff_time;
+            sleep($backoff_time);
+
+            // Set initial interval to 5 seconds after the initial delay
+            $backoff_time = 5;
             $elapsed_time = 0;
     
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
