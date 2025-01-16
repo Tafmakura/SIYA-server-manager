@@ -207,7 +207,7 @@ class Runcloud /*implements ServerManager*/ {
     public function finish_server_connection($args) {
         error_log('[SIYA Server Manager][RunCloud] Starting finish_server_connection...');
 
-         // Disable PHP time limit to ensure the script can run as long as needed
+        // Disable PHP time limit to ensure the script can run as long as needed
         set_time_limit(0);
         
         $server_post_id = $args['server_post_id'];
@@ -219,17 +219,14 @@ class Runcloud /*implements ServerManager*/ {
         $server_id = $args['server_id'];
         
         $timeout = 600; // 10 minutes timeout in seconds
-        $initial_interval = 60; // Initial delay in seconds for the first retry
-        $decrease_amount = 10; // Amount by which the interval decreases each retry
+        $interval = 60; // Initial delay in seconds for the first retry
         $min_interval = 10; // Minimum interval between retries in seconds
         
         // Check server status using RunCloud API
-        $elapsed_time = 0;
-        $interval = $initial_interval;
-        $attempt = 1;
+        $start_time = time();
 
-        while ($elapsed_time < $timeout) {
-            error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt} to verify RunCloud installation via API...");
+        while ((time() - $start_time) < $timeout) {
+            error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via API...");
 
             $status = $this->check_server_status_via_api($server_id);
 
@@ -248,11 +245,9 @@ class Runcloud /*implements ServerManager*/ {
             // Sleep for the current interval
             error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
             sleep($interval);
-            $elapsed_time += $interval;
 
             // Decrease interval linearly (with a minimum limit)
-            $interval = max($min_interval, $interval - $decrease_amount);
-            $attempt++;
+            $interval = max($min_interval, $interval - 10);
         }
 
         // If API check fails, revert to SSH status check
@@ -267,12 +262,10 @@ class Runcloud /*implements ServerManager*/ {
 
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
 
-            $elapsed_time = 0;
-            $interval = $initial_interval;
-            $attempt = 1;
+            $interval = 60; // Reset interval for SSH check
 
-            while ($elapsed_time < $timeout) {
-                error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt} to verify RunCloud installation via SSH...");
+            while ((time() - $start_time) < $timeout) {
+                error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via SSH...");
 
                 // Check RunCloud Agent status
                 $status = $this->check_server_manager_status($ssh);
@@ -292,11 +285,9 @@ class Runcloud /*implements ServerManager*/ {
                 // Sleep for the current interval
                 error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
                 sleep($interval);
-                $elapsed_time += $interval;
 
                 // Decrease interval linearly (with a minimum limit)
-                $interval = max($min_interval, $interval - $decrease_amount);
-                $attempt++;
+                $interval = max($min_interval, $interval - 10);
             }
 
             // If all attempts are exhausted
