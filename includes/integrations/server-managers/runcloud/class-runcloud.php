@@ -184,7 +184,7 @@ class Runcloud /*implements ServerManager*/ {
             error_log('[SIYA Server Manager][RunCloud] Installation script started successfully.');
 
             // Schedule finish_server_connection using Action Scheduler
-            as_schedule_single_action(time() + 60, 'arsol_finish_server_connection_hook', [
+            as_schedule_single_action(time() + 5, 'arsol_finish_server_connection_hook', [
                 'subscription_id' => $subscription_id,
                 'server_post_id' => $server_post_id,
                 'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
@@ -193,6 +193,8 @@ class Runcloud /*implements ServerManager*/ {
                 'ssh_private_key' => $ssh_private_key,
                 'ssh_port' => $ssh_port
             ]);
+
+            error_log('[SIYA Server Manager][RunCloud] Scheduled finish_server_connection action.');
 
             add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
 
@@ -203,6 +205,8 @@ class Runcloud /*implements ServerManager*/ {
         }
 
     }
+
+
 
     public function finish_server_connection($args) {
         error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
