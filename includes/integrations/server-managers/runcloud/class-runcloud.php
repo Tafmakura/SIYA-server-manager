@@ -225,10 +225,11 @@ class Runcloud /*implements ServerManager*/ {
             }
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
     
-            // Exponential backoff settings
+            // Inverse backoff settings
             $max_attempts = 7;
-            $timeout = 20 * 60; // Total timeout: 20 minutes
-            $backoff_time = 5; // Start with 5 seconds for first attempt
+            $timeout = 20 * 60;       // total timeout: 20 minutes
+            $backoff_time = 180;      // start at 3 minutes
+            $min_backoff_time = 5;    // minimum delay
             $elapsed_time = 0;
     
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
@@ -243,7 +244,7 @@ class Runcloud /*implements ServerManager*/ {
                 } else if (stripos($runcloud_status, 'Unit runcloud-agent.service could not be found') !== false) {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is not installed.');
                 } else if (stripos($runcloud_status, 'Active: active (running)') !== false) {
-                    error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is active and running.');
+                    error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
                 } else if (stripos($runcloud_status, 'Active: failed') !== false) {
@@ -258,14 +259,13 @@ class Runcloud /*implements ServerManager*/ {
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
                     return;
                 }
-    
-                // Exponential backoff logic
-                error_log("[SIYA Server Manager][RunCloud] Backing off for {$backoff_time} seconds...");
+                
+                error_log("[SIYA Server Manager][RunCloud] Inverse backoff: sleeping for {$backoff_time} seconds...");
                 sleep($backoff_time);
                 $elapsed_time += $backoff_time;
     
-                // Increase backoff time (capped at 15 minutes)
-                $backoff_time = min($backoff_time * 2, 900);
+                // Decrease backoff time, capped at minimum
+                $backoff_time = max(floor($backoff_time / 2), $min_backoff_time);
             }
     
             // If maximum attempts are reached
