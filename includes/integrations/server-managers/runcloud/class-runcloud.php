@@ -206,14 +206,14 @@ class Runcloud /*implements ServerManager*/ {
 
     public function finish_server_connection($args) {
         error_log('[SIYA Server Manager][RunCloud] Starting finish_server_connection...');
-    
+        
         $subscription_id = $args['subscription_id'];
         $server_post_id = $args['server_post_id'];
         $ssh_host = $args['ssh_host'];
         $ssh_username = $args['ssh_username'];
         $ssh_private_key = $args['ssh_private_key'];
         $ssh_port = $args['ssh_port'];
-    
+        
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
@@ -228,20 +228,12 @@ class Runcloud /*implements ServerManager*/ {
             // Exponential backoff settings
             $max_attempts = 7;
             $timeout = 20 * 60; // Total timeout: 20 minutes
-            $backoff_time = 180; // Initial backoff: 3 minutes
-            $elapsed_time = 0; // Initialize elapsed time
-    
-            // Set initial interval to 5 seconds after the initial delay
-            $elapsed_time += $backoff_time;
-            error_log("[SIYA Server Manager][RunCloud] Initial backoff for {$backoff_time} seconds...");
-            sleep($backoff_time);
-            $backoff_time = 5;
-
-            error_log ('Milestone Y2');
+            $backoff_time = 5; // Start with 5 seconds for first attempt
+            $elapsed_time = 0;
     
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
                 error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts}: Checking installation status...");
-    
+                
                 // Check RunCloud installation status
                 $runcloud_status = $ssh->exec('sudo systemctl status runcloud-agent');
                 error_log("[SIYA Server Manager][RunCloud] RunCloud status output: " . $runcloud_status);
@@ -270,13 +262,14 @@ class Runcloud /*implements ServerManager*/ {
                     return;
                 }
     
-                // Exponential backoff
+                // Check timeout
                 if ($elapsed_time + $backoff_time > $timeout) {
                     error_log('[SIYA Server Manager][RunCloud] Timeout reached while waiting for RunCloud Agent installation.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
                     return;
                 }
     
+                // Exponential backoff logic
                 error_log("[SIYA Server Manager][RunCloud] Backing off for {$backoff_time} seconds...");
                 sleep($backoff_time);
                 $elapsed_time += $backoff_time;
@@ -294,6 +287,7 @@ class Runcloud /*implements ServerManager*/ {
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
         }
     }
+    
     
 
     public function update_server_post_status($server_post_id, $status)
