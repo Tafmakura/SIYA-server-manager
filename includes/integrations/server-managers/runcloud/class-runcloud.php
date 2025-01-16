@@ -16,6 +16,7 @@ class Runcloud /*implements ServerManager*/ {
         $this->api_key = get_option('runcloud_api_key');
         $this->ssh_log_file = plugin_dir_path(__DIR__) . 'logs/ssh_log.txt'; // Set the log file path
         
+        add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
       
     }
 
@@ -192,11 +193,10 @@ class Runcloud /*implements ServerManager*/ {
                 'ssh_username' => $ssh_username,
                 'ssh_private_key' => $ssh_private_key,
                 'ssh_port' => $ssh_port
-            ]);
+            ], 'arsol_runcloud');
 
             error_log('[SIYA Server Manager][RunCloud] Scheduled finish_server_connection action.');
 
-            add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
 
         } catch (\Exception $e) {
             $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();
