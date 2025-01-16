@@ -236,6 +236,8 @@ class Runcloud /*implements ServerManager*/ {
             error_log("[SIYA Server Manager][RunCloud] Initial backoff for {$backoff_time} seconds...");
             sleep($backoff_time);
             $backoff_time = 5;
+
+            error_log ('Milestone Y2');
     
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
                 error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts}: Checking installation status...");
