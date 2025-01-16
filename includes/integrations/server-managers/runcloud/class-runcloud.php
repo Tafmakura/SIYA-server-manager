@@ -24,23 +24,23 @@ class Runcloud /*implements ServerManager*/ {
 
     public function create_server_in_server_manager(
         string $server_name,
-        string $ipAddress,
-        string $webServerType,
-        string $installationType,
+        string $ip_address,
+        string $web_server_type,
+        string $installation_type,
         ?string $provider = null
     ) {
 
         error_log ('Mileston Y1');
 
-        if (empty($ipAddress) || empty($webServerType) || empty($installationType)) {
+        if (empty($ip_address) || empty($web_server_type) || empty($installation_type)) {
             throw new \InvalidArgumentException('IP Address, Web Server Type and Installation Type are required');
         }
 
         $args = [
             'name' => $server_name,
-            'ipAddress' => $ipAddress,
-            'webServerType' => $webServerType,
-            'installationType' => $installationType
+            'ipAddress' => $ip_address,
+            'webServerType' => $web_server_type,
+            'installationType' => $installation_type
         ];
 
         if (!empty($provider)) {
@@ -206,86 +206,94 @@ class Runcloud /*implements ServerManager*/ {
 
     public function finish_server_connection($args) {
         error_log('[SIYA Server Manager][RunCloud] Starting finish_server_connection...');
-    
+        
         $server_post_id = $args['server_post_id'];
         $subscription_id = $args['subscription_id'];
         $ssh_host = $args['ssh_host'];
         $ssh_username = $args['ssh_username'];
         $ssh_private_key = $args['ssh_private_key'];
         $ssh_port = $args['ssh_port'];
-    
-        $timeout = 300; // Total timeout in seconds
-        $elapsed_time = 0;
-        $backoff_time = 10; // Initial retry interval
-        $max_attempts = 8;
-    
+        
+        $timeout = 600; // 10 minutes timeout in seconds
+        $initial_interval = 60; // Initial delay in seconds for the first retry
+        $decrease_amount = 10; // Amount by which the interval decreases each retry
+        $min_interval = 10; // Minimum interval between retries in seconds
+        $max_attempts = ceil($timeout / $min_interval); // Max attempts calculated based on timeout and min interval
+        
         try {
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
-    
+        
             if (!$ssh->login($ssh_username, $private_key)) {
                 throw new \Exception('SSH login failed in finish_server_connection.');
             }
-    
+        
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
-    
+        
+            // Initial interval is set to the starting value
+            $interval = $initial_interval;
+            $elapsed_time = 0;
+        
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
                 error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts} to verify RunCloud installation...");
-    
+        
                 // Check RunCloud Agent status
                 $status = $this->check_server_manager_status($ssh);
-    
+        
                 if ($status === 'running') {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
                 }
-    
+        
                 if ($status === 'failed' || $status === 'not-installed' || $status === 'inactive') {
                     error_log("[SIYA Server Manager][RunCloud] RunCloud status: {$status}. Retrying...");
                 } else {
                     error_log('[SIYA Server Manager][RunCloud] Unexpected status output. Retrying...');
                 }
-    
-                // Apply exponential backoff for retries
-                $backoff_time = pow(2, $attempt);
-                $elapsed_time += $backoff_time;
-    
-                if ($elapsed_time >= $timeout) {
+        
+                // Check if timeout has been reached
+                if ($elapsed_time + $interval >= $timeout) {
                     error_log('[SIYA Server Manager][RunCloud] Timeout reached while waiting for RunCloud Agent installation.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
                     return;
                 }
     
-                sleep($backoff_time);
+                // Sleep for the current interval
+                sleep($interval);
+                $elapsed_time += $interval;
+        
+                // Decrease interval linearly (with a minimum limit)
+                $interval = max($min_interval, $interval - $decrease_amount);
             }
-    
+        
             // If all attempts are exhausted
             error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached. RunCloud installation could not be verified.');
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
+        
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][RunCloud] Exception in finish_server_connection: ' . $e->getMessage());
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
         }
     }
-
+    
 
     private function check_server_manager_status($ssh) {
         error_log('[SIYA Server Manager][RunCloud] Checking RunCloud Agent status...');
-        $statusOutput = $ssh->exec('sudo systemctl status runcloud-agent');
+        $status_output = $ssh->exec('sudo systemctl status runcloud-agent');
     
-        if (stripos($statusOutput, 'Active: active (running)') !== false) {
+        if (stripos($status_output, 'Active: active (running)') !== false) {
             return 'running';
-        } elseif (stripos($statusOutput, 'Active: failed') !== false) {
+        } elseif (stripos($status_output, 'Active: failed') !== false) {
             return 'failed';
-        } elseif (stripos($statusOutput, 'Unit runcloud-agent.service could not be found') !== false) {
+        } elseif (stripos($status_output, 'Unit runcloud-agent.service could not be found') !== false) {
             return 'not-installed';
-        } elseif (stripos($statusOutput, 'Active: inactive (dead)') !== false) {
+        } elseif (stripos($status_output, 'Active: inactive (dead)') !== false) {
             return 'inactive';
         } else {
-            error_log('[SIYA Server Manager][RunCloud] Unexpected status output: ' . $statusOutput);
+            error_log('[SIYA Server Manager][RunCloud] Unexpected status output: ' . $status_output);
             return 'unknown';
         }
     }
