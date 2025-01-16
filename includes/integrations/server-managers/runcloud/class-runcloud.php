@@ -218,10 +218,9 @@ class Runcloud /*implements ServerManager*/ {
         $initial_interval = 60; // Initial delay in seconds for the first retry
         $decrease_amount = 10; // Amount by which the interval decreases each retry
         $min_interval = 10; // Minimum interval between retries in seconds
-        $max_attempts = ceil($timeout / $min_interval); // Max attempts calculated based on timeout and min interval
         
+        // Initialize SSH connection
         try {
-            // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
@@ -231,44 +230,51 @@ class Runcloud /*implements ServerManager*/ {
             }
         
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
-        
-            // Initial interval is set to the starting value
-            $interval = $initial_interval;
+    
+            // Calculate the maximum number of attempts based on linear decrease
             $elapsed_time = 0;
-        
-            for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
-                error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts} to verify RunCloud installation...");
-        
+            $interval = $initial_interval;
+            $attempt = 1;
+    
+            // Keep checking until we hit the timeout or success
+            while ($elapsed_time < $timeout) {
+                error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt} to verify RunCloud installation...");
+    
                 // Check RunCloud Agent status
                 $status = $this->check_server_manager_status($ssh);
-        
+    
+                error_log("[SIYA Server Manager][RunCloud] Status check returned: {$status}");
+    
                 if ($status === 'running') {
                     error_log('[SIYA Server Manager][RunCloud] RunCloud Agent is installed and running.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
                 }
-        
+    
                 if ($status === 'failed' || $status === 'not-installed' || $status === 'inactive') {
                     error_log("[SIYA Server Manager][RunCloud] RunCloud status: {$status}. Retrying...");
                 } else {
                     error_log('[SIYA Server Manager][RunCloud] Unexpected status output. Retrying...');
                 }
         
-                // Check if timeout has been reached
-                if ($elapsed_time + $interval >= $timeout) {
+                // Sleep for the current interval
+                error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
+                sleep($interval);
+                $elapsed_time += $interval;
+        
+                // Check if elapsed time exceeds timeout
+                error_log("[SIYA Server Manager][RunCloud] Elapsed time: {$elapsed_time} seconds, Timeout: {$timeout} seconds.");
+                if ($elapsed_time >= $timeout) {
                     error_log('[SIYA Server Manager][RunCloud] Timeout reached while waiting for RunCloud Agent installation.');
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
                     return;
                 }
     
-                // Sleep for the current interval
-                sleep($interval);
-                $elapsed_time += $interval;
-        
                 // Decrease interval linearly (with a minimum limit)
                 $interval = max($min_interval, $interval - $decrease_amount);
+                $attempt++;
             }
-        
+    
             // If all attempts are exhausted
             error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached. RunCloud installation could not be verified.');
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
@@ -278,6 +284,8 @@ class Runcloud /*implements ServerManager*/ {
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
         }
     }
+    
+    
     
 
     private function check_server_manager_status($ssh) {
