@@ -206,9 +206,9 @@ class Runcloud /*implements ServerManager*/ {
 
     public function finish_server_connection($args) {
         error_log('[SIYA Server Manager][RunCloud] Starting finish_server_connection...');
-        
-        $subscription_id = $args['subscription_id'];
+
         $server_post_id = $args['server_post_id'];
+        $subscription_id = $args['subscription_id'];
         $ssh_host = $args['ssh_host'];
         $ssh_username = $args['ssh_username'];
         $ssh_private_key = $args['ssh_private_key'];
@@ -225,8 +225,12 @@ class Runcloud /*implements ServerManager*/ {
             }
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
     
-            // Inverse backoff settings
+            $attempt = (int) get_post_meta($server_post_id, 'arsol_runcloud_finish_attempt', true) ?: 1;
             $max_attempts = 7;
+            
+            error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts}...");
+    
+            // Inverse backoff settings
             $timeout = 20 * 60;       // total timeout: 20 minutes
             $backoff_time = 180;      // start at 3 minutes
             $min_backoff_time = 5;    // minimum delay
@@ -271,6 +275,18 @@ class Runcloud /*implements ServerManager*/ {
             // If maximum attempts are reached
             error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached. RunCloud installation could not be verified.');
             update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
+    
+            if ($attempt >= $max_attempts) {
+                error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached...');
+                update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
+                return;
+            }
+            
+            // Schedule next attempt via wp_cron
+            update_post_meta($server_post_id, 'arsol_runcloud_finish_attempt', $attempt + 1);
+            wp_schedule_single_event(time() + 180, 'arsol_finish_server_connection_hook', [$args]); 
+
+            error_log("[SIYA Server Manager][RunCloud] Scheduled next finish_server_connection attempt.");
     
         } catch (\Exception $e) {
             error_log('[SIYA Server Manager][RunCloud] Exception during finish_server_connection: ' . $e->getMessage());
