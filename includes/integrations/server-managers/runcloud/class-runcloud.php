@@ -230,12 +230,7 @@ class Runcloud /*implements ServerManager*/ {
             
             error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts}...");
     
-            // Inverse backoff settings
-            $timeout = 20 * 60;       // total timeout: 20 minutes
-            $backoff_time = 180;      // start at 3 minutes
-            $min_backoff_time = 5;    // minimum delay
-            $elapsed_time = 0;
-    
+            // Remove backoff delay
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
                 error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts}: Checking installation status...");
                 
@@ -263,13 +258,6 @@ class Runcloud /*implements ServerManager*/ {
                     update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
                     return;
                 }
-                
-                error_log("[SIYA Server Manager][RunCloud] Inverse backoff: sleeping for {$backoff_time} seconds...");
-                sleep($backoff_time);
-                $elapsed_time += $backoff_time;
-    
-                // Decrease backoff time, capped at minimum
-                $backoff_time = max(floor($backoff_time / 2), $min_backoff_time);
             }
     
             // If maximum attempts are reached
@@ -284,7 +272,7 @@ class Runcloud /*implements ServerManager*/ {
             
             // Schedule next attempt via wp_cron
             update_post_meta($server_post_id, 'arsol_runcloud_finish_attempt', $attempt + 1);
-            wp_schedule_single_event(time() + 180, 'arsol_finish_server_connection_hook', [$args]); 
+            wp_schedule_single_event(time() + 30, 'arsol_finish_server_connection_hook', [$args]); 
 
             error_log("[SIYA Server Manager][RunCloud] Scheduled next finish_server_connection attempt.");
     
