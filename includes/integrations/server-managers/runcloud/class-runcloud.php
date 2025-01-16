@@ -186,23 +186,16 @@ class Runcloud /*implements ServerManager*/ {
 
             error_log('[SIYA Server Manager][RunCloud] Installation script started successfully.');
 
-            // Now we pass the necessary arguments to the scheduled task, including SSH details
-            as_schedule_single_action(
-                time(),
-                'arsol_finish_server_connection_hook',
-                [[
-                    'subscription_id' => $subscription_id,
-                    'server_post_id' => $server_post_id,
-                    'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
-                    'ssh_host' => $ssh_host,
-                    'ssh_username' => $ssh_username,
-                    'ssh_private_key' => $ssh_private_key,
-                    'ssh_port' => $ssh_port
-                ]],
-                'arsol_server_provision'
-            );
-
-            error_log('[SIYA Server Manager][RunCloud] Scheduled the task to finish server connection.');
+            // Call finish_server_connection directly
+            $this->finish_server_connection([
+                'subscription_id' => $subscription_id,
+                'server_post_id' => $server_post_id,
+                'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
+                'ssh_host' => $ssh_host,
+                'ssh_username' => $ssh_username,
+                'ssh_private_key' => $ssh_private_key,
+                'ssh_port' => $ssh_port
+            ]);
 
         } catch (\Exception $e) {
             $error_message = 'Failed to establish SSH connection: ' . $e->getMessage();
