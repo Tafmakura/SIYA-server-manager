@@ -211,83 +211,70 @@ class Runcloud /*implements ServerManager*/ {
         }
     }
 
-    public function finish_server_connection_with_check($server_post_id){
-        error_log('[SIYA Server Manager][RunCloud] Finishing server connection and checking installation status...');
+    public function finish_server_connection($args) {
+        $subscription_id = $args['subscription_id'];
+        $server_post_id = $args['server_post_id'];
+        $ssh_host = $args['ssh_host'];
+        $ssh_username = $args['ssh_username'];
+        $ssh_private_key = $args['ssh_private_key'];
+        $ssh_port = $args['ssh_port'];
 
+        error_log('[SIYA Server Manager][RunCloud] Finishing server connection...');
+
+        // Initialize SSH connection
         try {
-            // Retrieve server IP and other metadata
-            $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
-            $ssh_private_key = get_option('arsol_global_ssh_private_key');
-            $ssh_username = 'root';
-            $ssh_port = 22;
-            
-            // Initialize SSH connection
-            $ssh = new SSH2($server_ip, $ssh_port);
+            $ssh = new SSH2($ssh_host, $ssh_port);
             $private_key = PublicKeyLoader::load($ssh_private_key);
 
             if (!$ssh->login($ssh_username, $private_key)) {
-                throw new \Exception('Failed to authenticate using SSH key');
+                throw new \Exception('SSH login failed in finish_server_connection');
             }
 
-            error_log('[SIYA Server Manager][RunCloud] SSH authentication successful.');
+            // Variables for backoff
+            $max_attempts = 7; // Maximum number of attempts
+            $timeout = 20 * 60; // Timeout after 20 minutes (in seconds)
+            $backoff_time = 180; // Initial backoff time (3 minutes)
+            $elapsed_time = 0; // Elapsed time
 
-            // Define retry times and max duration
-            $max_attempts = 6; // Maximum number of attempts (will run for up to 20 minutes)
-            $backoff_times = [180, 240, 300, 360, 420, 900]; // Exponential backoff times (in seconds): 3min, 4min, 5min, 6min, 7min, 15min
-            $start_time = time();
-            
+            // Loop with exponential backoff to check for script completion
             for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
-                $current_time = time();
-                $elapsed_time = $current_time - $start_time;
+                error_log("[SIYA Server Manager][RunCloud] Checking if installation script is complete (Attempt {$attempt}/{$max_attempts})...");
 
-                // If elapsed time exceeds 20 minutes, break
-                if ($elapsed_time >= 1200) {  // 20 minutes = 1200 seconds
-                    error_log('[SIYA Server Manager][RunCloud] Timeout reached. Installation not completed in time.');
-                    $this->update_server_post_status($server_post_id, 'failed');
+                // Check if RunCloud is installed by checking version
+                $runcloud_version = $ssh->exec('runcloud --version');
+
+                if (!empty($runcloud_version)) {
+                    error_log('[SIYA Server Manager][RunCloud] RunCloud version found: ' . $runcloud_version);
+                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'success');
                     return;
                 }
 
-                // Log the attempt
-                error_log("[SIYA Server Manager][RunCloud] Checking log status attempt {$attempt}...");
-
-                // Check the log file for the script's progress
-                $log_check_output = $ssh->exec('tail -n 20 /tmp/runcloud_script.log');
-
-                // Log the output for debugging
-                error_log("[SIYA Server Manager][RunCloud] Log output from attempt {$attempt}: {$log_check_output}");
-
-                // Check if installation is complete
-                if (strpos($log_check_output, 'Installation Complete') !== false) {
-                    error_log("[SIYA Server Manager][RunCloud] Installation completed successfully.");
-                    $this->update_server_post_status($server_post_id, 'success');
+                // Check if the script has been running for too long
+                if ($elapsed_time >= $timeout) {
+                    error_log('[SIYA Server Manager][RunCloud] Timeout reached. RunCloud not found after 20 minutes.');
+                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
                     return;
                 }
 
-                // Check for any error in the log output
-                if (strpos($log_check_output, 'error') !== false) {
-                    error_log("[SIYA Server Manager][RunCloud] Installation error detected in log.");
-                    $this->update_server_post_status($server_post_id, 'failed');
-                    return;
-                }
+                // Exponential backoff
+                error_log("[SIYA Server Manager][RunCloud] Backing off for {$backoff_time} seconds...");
+                sleep($backoff_time);
+                $elapsed_time += $backoff_time;
 
-                // Log that the process will retry after a backoff
-                if ($attempt < $max_attempts) {
-                    $wait_time = $backoff_times[$attempt - 1];
-                    error_log("[SIYA Server Manager][RunCloud] Waiting {$wait_time} seconds before retrying...");
-                    sleep($wait_time);
-                }
+                // Increase backoff time (exponential backoff)
+                $backoff_time = min($backoff_time * 2, 900); // Cap the backoff time at 15 minutes
             }
 
-            // If we reached here, all attempts failed
-            error_log('[SIYA Server Manager][RunCloud] Installation process failed after maximum retries.');
-            $this->update_server_post_status($server_post_id, 'failed');
+            // If the loop ends without success, mark the task as failed
+            error_log('[SIYA Server Manager][RunCloud] Maximum attempts reached. RunCloud not found.');
+            update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
 
         } catch (\Exception $e) {
-            $error_message = 'Failed to finish server connection: ' . $e->getMessage();
-            error_log('[SIYA Server Manager][RunCloud] ' . $error_message);
-            $this->update_server_post_status($server_post_id, 'failed');
+            error_log('[SIYA Server Manager][RunCloud] Error during finish server connection: ' . $e->getMessage());
+            update_post_meta($server_post_id, 'arsol_server_manager_connection', 'failed');
         }
     }
+
 
     public function update_server_post_status($server_post_id, $status)
     {
