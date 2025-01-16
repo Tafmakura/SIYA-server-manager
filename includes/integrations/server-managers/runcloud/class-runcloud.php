@@ -250,13 +250,6 @@ class Runcloud /*implements ServerManager*/ {
             sleep($interval);
             $elapsed_time += $interval;
 
-            // Check if elapsed time exceeds timeout
-            error_log("[SIYA Server Manager][RunCloud] Elapsed time: {$elapsed_time} seconds, Timeout: {$timeout} seconds.");
-            if ($elapsed_time >= $timeout) {
-                error_log('[SIYA Server Manager][RunCloud] Timeout reached while waiting for RunCloud Agent installation.');
-                break;
-            }
-
             // Decrease interval linearly (with a minimum limit)
             $interval = max($min_interval, $interval - $decrease_amount);
             $attempt++;
@@ -274,8 +267,12 @@ class Runcloud /*implements ServerManager*/ {
 
             error_log('[SIYA Server Manager][RunCloud] SSH connection established.');
 
-            for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
-                error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt}/{$max_attempts} to verify RunCloud installation...");
+            $elapsed_time = 0;
+            $interval = $initial_interval;
+            $attempt = 1;
+
+            while ($elapsed_time < $timeout) {
+                error_log("[SIYA Server Manager][RunCloud] Attempt {$attempt} to verify RunCloud installation via SSH...");
 
                 // Check RunCloud Agent status
                 $status = $this->check_server_manager_status($ssh);
@@ -296,14 +293,6 @@ class Runcloud /*implements ServerManager*/ {
                 error_log("[SIYA Server Manager][RunCloud] Sleeping for {$interval} seconds...");
                 sleep($interval);
                 $elapsed_time += $interval;
-
-                // Check if elapsed time exceeds timeout
-                error_log("[SIYA Server Manager][RunCloud] Elapsed time: {$elapsed_time} seconds, Timeout: {$timeout} seconds.");
-                if ($elapsed_time >= $timeout) {
-                    error_log('[SIYA Server Manager][RunCloud] Timeout reached while waiting for RunCloud Agent installation.');
-                    update_post_meta($server_post_id, 'arsol_server_manager_connection', 'timeout');
-                    return;
-                }
 
                 // Decrease interval linearly (with a minimum limit)
                 $interval = max($min_interval, $interval - $decrease_amount);
