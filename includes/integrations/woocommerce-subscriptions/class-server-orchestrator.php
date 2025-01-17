@@ -405,6 +405,7 @@ class ServerOrchestrator {
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
+                // TODO FIX THIS
             // Successful API subscription note for RunCloud deployment
           /* $subscription->add_order_note(sprintf(
                 "RunCloud deployment successful with Response body: %s",
