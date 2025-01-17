@@ -60,8 +60,8 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
 
         // Register new hooks to trigger shutdown
-        add_action('woocommerce_subscription_status_active_to_on-hold', array($this, 'start_server_shutdown'), 20, 1);
-        add_action('woocommerce_subscription_status_active_to_expired', array($this, 'start_server_shutdown'), 20, 1);
+        add_action('woocommerce_subscription_status_on-hold', array($this, 'start_server_shutdown'), 20, 1);
+        add_action('woocommerce_subscription_status_expired', array($this, 'start_server_shutdown'), 20, 1);
         add_action('arsol_server_shutdown', array($this, 'finish_server_shutdown'), 20, 1);
 
         // Add new action hook for the scheduled processes
@@ -566,7 +566,7 @@ class ServerOrchestrator {
 
     public function verify_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
-        $runcloud = new \Siya\Integrations\ServerManagers\Runcloud();
+        $server_manager_instance = new Runcloud();
     
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
     
@@ -575,7 +575,7 @@ class ServerOrchestrator {
             $installationTimeout = apply_filters('siya_server_installation_timeout', 5 * 60);
             $startTime = time();
             while ((time() - $startTime) < $installationTimeout) {
-                $status = $runcloud->get_installation_status($server_post_id);
+                $status = $server_manager_instance->get_installation_status($server_post_id);
                 if (isset($status['status']) && $status['status'] === 'running') {
                     update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
                     break;
@@ -587,7 +587,7 @@ class ServerOrchestrator {
             $connectTimeout = apply_filters('siya_server_connection_timeout', 60);
             $connectStart = time();
             while ((time() - $connectStart) < $connectTimeout) {
-                $connStatus = $runcloud->get_connection_status($server_post_id);
+                $connStatus = $server_manager_instance->get_connection_status($server_post_id);
                 if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
                     update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
                     update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
