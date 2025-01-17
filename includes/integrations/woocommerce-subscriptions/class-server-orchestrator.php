@@ -261,7 +261,7 @@ class ServerOrchestrator {
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
                 'server_provisioned_id'     => $this->server_provisioned_id,
-                'subscription'              => $this->subscription,
+                'subscription'              => $subscription,
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
