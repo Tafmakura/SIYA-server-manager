@@ -529,7 +529,7 @@ class ServerOrchestrator {
                 as_schedule_single_action(time() + 5, 
                     'arsol_verify_server_manager_connection_hook', 
                     [[
-                       // 'subscription_id' => $subscription->get_id(),
+                        'subscription_id' => $subscription->get_id(),
                         'server_post_id' => $server_post_id,
                         'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
                         'ssh_host' => $server_ip,
@@ -550,7 +550,7 @@ class ServerOrchestrator {
 
     // Step 4 (Optional): Finish server connection
     public function verify_server_manager_connection($args) {
-        // $subscription_id = $args['subscription_id'];
+        $subscription_id = $args['subscription_id'];
         $server_post_id = $args['server_post_id'];
         $server_id = $args['server_id'];
         $ssh_host = $args['ssh_host'];
