@@ -103,7 +103,7 @@ class ServerOrchestrator {
 
             if (!$existing_server_post) {
                 error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
-                $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
+                $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $this->subscription);
             } else {
                 error_log('#003 [SIYA Server Manager - ServerOrchestrator] Server post already exists, skipping Step 1');
                 $this->server_post_id = $existing_server_post->post_id;
@@ -111,7 +111,7 @@ class ServerOrchestrator {
             
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
             $this->schedule_action('arsol_finish_server_provision', [
-                'subscription' => $this->$subscription,
+                'subscription' => $this->subscription,
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
@@ -121,7 +121,7 @@ class ServerOrchestrator {
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
 
         } catch (\Exception $e) {
-            $this->handle_exception($e, $subscription, 'Error occurred during server provisioning');
+            $this->handle_exception($e, $this->subscription, 'Error occurred during server provisioning');
         }
     }
 
@@ -275,7 +275,7 @@ class ServerOrchestrator {
             error_log(sprintf('#013 [SIYA Server Manager - ServerOrchestrator] Provisioned server ID: %s', $this->server_provisioned_id));
 
         } catch (\Exception $e) {
-            $this->handle_exception($e, $subscription, 'Error in server completion');
+            $this->handle_exception($e, $this->subscription, 'Error in server completion');
         }
     }
 
