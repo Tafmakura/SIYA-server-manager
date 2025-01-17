@@ -566,73 +566,39 @@ class ServerOrchestrator {
 
     // Step 4 (Optional): Finish server connection
     public function verify_server_manager_connection($args) {
-        $subscription_id = $args['subscription_id'];
         $server_post_id = $args['server_post_id'];
-        $server_id = $args['server_id'];
-        $ssh_host = $args['ssh_host'];
-        $ssh_username = $args['ssh_username'];
-        $ssh_private_key = $args['ssh_private_key'];
-        $ssh_port = $args['ssh_port'];
+        $runcloud = new \Siya\Integrations\ServerManagers\Runcloud();
 
-        error_log(sprintf(
-            '[SIYA Server Manager - ServerOrchestrator] Finishing server connection for subscription %d',
-            $subscription_id
-        ));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
 
-
-        /*
-
-        $this->runcloud = new Runcloud();
-
-        $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server(
-            $server_id,
-            $ssh_host,
-            $ssh_username,
-            $ssh_private_key,
-            $ssh_port
-        );
-
-        if (is_wp_error($connection_result)) {
-            error_log(sprintf(
-                '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
-                $connection_result->get_error_message()
-            ));
-            $subscription->add_order_note(sprintf(
-                'Failed to connect server manager to provisioned server: %s',
-                $connection_result->get_error_message()
-            ));
-        } else {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Successfully connected server manager to provisioned server.');
-            $subscription->add_order_note('Successfully connected server manager to provisioned server.');
+        // Check installation status
+        $startTime = time();
+        $installationTimeout = 5 * 60;
+        while ((time() - $startTime) < $installationTimeout) {
+            $status = $runcloud->get_installation_status($server_post_id);
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Installation status for server post ID %d: %s', $server_post_id, $status));
+            if ($status === 'running') {
+                update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status);
+                break;
+            }
+            sleep(30);
         }
 
-        */
+        // Check connection status
+        $connectStart = time();
+        $connectTimeout = 60;
+        while ((time() - $connectStart) < $connectTimeout) {
+            $connStatus = $runcloud->get_connection_status($server_post_id);
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Connection status for server post ID %d: %s', $server_post_id, json_encode($connStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
+            if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
+                update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
+                update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
+                update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? '');
+                break;
+            }
+            sleep(15);
+        }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Step 5: Schedule server shutdown
     public function start_server_shutdown($subscription) {
