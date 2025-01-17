@@ -397,7 +397,7 @@ class ServerOrchestrator {
 
             // Update server metadata
             $metadata = [
-                'arsol_server_deployed_server_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
+                'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
                 'arsol_server_deployment_date' => current_time('mysql'),
                 'arsol_server_deployed_status' => 1,
                 'arsol_server_connection_status' => 0,
@@ -484,7 +484,7 @@ class ServerOrchestrator {
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
-            $$server_deployed_id,
+            $server_deployed_id,
             $server_ip
         ));
 
@@ -893,7 +893,7 @@ class ServerOrchestrator {
      
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-        $server_deployed_server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
+        $server_deployed_server_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
 
         error_log(sprintf(
             '#058 [SIYA Server Manager - ServerOrchestrator] Server Provider Slug: %s, Server Provisioned ID: %s, Server Deployed Server ID: %s',

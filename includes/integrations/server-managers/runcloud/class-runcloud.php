@@ -91,7 +91,7 @@ class Runcloud /*implements ServerManager*/ {
     }
 
     public function execute_installation_script_on_server($server_post_id) {
-        $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
+        $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
         $installation_script = $this->get_installation_script($server_id);
 
         error_log('[SIYA Server Manager][RunCloud] Installation Script: ' . $installation_script);
@@ -198,7 +198,7 @@ class Runcloud /*implements ServerManager*/ {
         // Disable PHP time limit to ensure the script can run as long as needed
         set_time_limit(0);
         
-        $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_server_id', true);
+        $server_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
         $timeout = 600; // 10 minutes timeout in seconds
         $interval = 60; // Interval between retries in seconds
         

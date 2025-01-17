@@ -111,7 +111,7 @@ class ServerPost {
         $this->server_deployed_date = get_post_meta($this->post_id, 'arsol_server_deployed_date', true);
         $this->server_deployed_applications = get_post_meta($this->post_id, 'arsol_server_deployed_applications', true);
         $this->server_deployed_staging_sites = get_post_meta($this->post_id, 'arsol_server_deployed_staging_sites', true);
-        $this->server_deployed_server_id = get_post_meta($this->post_id, 'arsol_server_deployed_server_id', true);  // Add missing load
+        $this->server_deployed_server_id = get_post_meta($this->post_id, 'arsol_server_deployed_id', true);  // Add missing load
         $this->server_deployment_date = get_post_meta($this->post_id, 'arsol_server_deployment_date', true);  // Add missing load
         $this->server_manager = get_post_meta($this->post_id, 'arsol_server_manager', true);  // Changed from arsol_server_deployment_manager
     }
@@ -219,7 +219,6 @@ class ServerPost {
             'arsol_server_deployed_applications' => get_post_meta($post_id, 'arsol_server_deployed_applications', true),
             'arsol_server_deployed_staging_sites' => get_post_meta($post_id, 'arsol_server_deployed_staging_sites', true),
             'arsol_server_manager' => get_post_meta($post_id, 'arsol_server_manager', true),  // Changed from arsol_server_deployment_manager
-            'arsol_server_deployed_server_id' => get_post_meta($post_id, 'arsol_server_deployed_server_id', true),  // Added missing field
             'arsol_server_deployment_date' => get_post_meta($post_id, 'arsol_server_deployment_date', true),  // Added missing field
         );
         
