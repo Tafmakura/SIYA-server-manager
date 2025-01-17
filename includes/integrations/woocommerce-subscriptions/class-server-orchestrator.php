@@ -416,7 +416,7 @@ class ServerOrchestrator {
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
             // Trigger the connection to the provisioned server
-            $this->connect_server_manager($server_post_id, $subscription, $runcloud_response['body']);
+            $this->connect_server_manager($server_post_id);
 
         } elseif (!isset($runcloud_response['status']) || !in_array($runcloud_response['status'], [200, 201])) {
             error_log('#029 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
@@ -452,17 +452,17 @@ class ServerOrchestrator {
     }
 
     // New method to connect server manager to provisioned server
-    protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
+    protected function connect_server_manager($server_post_id) {
+       
+ 
         error_log ('Milestone X4');
 
-        //$subscription_id = $subscription->get_id(); FIX THIS 
-        
-        $runcloud_response_data = json_decode($runcloud_response_body, true);
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+        $subscription = wcs_get_subscription($subscription_id);
+        $server_deployed_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
+        $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
         error_log ('Milestone X5');
-
-        $server_id = $runcloud_response_data['id'] ?? null;
-        $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
@@ -477,7 +477,7 @@ class ServerOrchestrator {
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
-            $server_id,
+            $$server_deployed_id,
             $server_ip
         ));
 
@@ -493,7 +493,7 @@ class ServerOrchestrator {
 
         error_log('Milestone X9');
 
-        if ($server_id && $server_ip) {
+        if ($server_deployed_id && $server_ip) {
             
             $this->runcloud = new Runcloud();
             
@@ -531,7 +531,7 @@ class ServerOrchestrator {
                     [[
                         'subscription_id' => $subscription->get_id(),
                         'server_post_id' => $server_post_id,
-                        'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
+                        'server_id' => $server_deployed_id, // Optional: if you need to reference server_id in finish method
                         'ssh_host' => $server_ip,
                         'ssh_username' => $ssh_username,
                         'ssh_private_key' => $ssh_private_key,
