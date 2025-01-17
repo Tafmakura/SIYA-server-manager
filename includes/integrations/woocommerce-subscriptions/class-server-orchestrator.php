@@ -111,6 +111,7 @@ class ServerOrchestrator {
             
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
             $this->schedule_action('arsol_finish_server_provision', [
+                'subscription' => $this->$subscription,
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
@@ -131,6 +132,7 @@ class ServerOrchestrator {
             error_log('#006 [SIYA Server Manager - ServerOrchestrator] Starting server completion');
         
             // Extract the arguments from action scheduler
+            $this->subscription = $args['subscription'];
             $this->subscription_id = $args['subscription_id'];
             $this->subscription = wcs_get_subscription($this->subscription_id);
             $this->server_post_id = $args['server_post_id'];
@@ -261,7 +263,7 @@ class ServerOrchestrator {
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
                 'server_provisioned_id'     => $this->server_provisioned_id,
-                'subscription'              => $subscription,
+                'subscription'              => $this->subscription,
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
