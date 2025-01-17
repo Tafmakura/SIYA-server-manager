@@ -602,65 +602,61 @@ class ServerOrchestrator {
     }
     
 
-    // Step 5: Schedule server shutdown
     public function start_server_shutdown($subscription) {
         $subscription_id = $subscription->get_id();
-        $server_post_instance = new ServerPost();
-        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
-        
-        if (!$server_post) {
-            error_log('#032 [SIYA Server Manager - ServerOrchestrator] No server post found for shutdown.');
+        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+    
+        // Check if the server post ID exists
+        if (!$server_post_id) {
+            error_log('#032 [SIYA Server Manager - ServerOrchestrator] No server post found for shutdown. Subscription ID: ' . $subscription_id);
             return;
         }
-
-        $this->server_circuit_breaker_status = get_post_meta($server_post->post_id, 'arsol_server_circuit_breaker_status', true);
+    
+        // Get the circuit breaker status directly from the post meta
+        $this->server_circuit_breaker_status = get_post_meta($server_post_id, 'arsol_server_circuit_breaker_status', true);
         if ($this->server_circuit_breaker_status == 'tripped') {
-            error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' .  $subscription_id . ' is in the tripped position. Skipping shutdown.');
+            error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping shutdown.');
             return;
         }
-
-        $server_post_id = $server_post->post_id;
+    
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-
-        // New check: Ensure server ID exists
+    
+        // New check: Ensure server provisioning ID exists
         if (empty($server_provisioned_id)) {
-            error_log('[SIYA Server Manager] Server provisioning ID not found, skipping shutdown.');
+            error_log('[SIYA Server Manager] Server provisioning ID not found, skipping shutdown. Server Post ID: ' . $server_post_id);
             return;
         }
-
-        // New check: Ensure remote server exists
+    
+        // Initialize the server provider
         $this->initialize_server_provider($server_provider_slug);
+    
+        // New check: Ensure remote server exists
         $status = $this->server_provider->get_server_status($server_post_id);
         if (is_wp_error($status) || !isset($status['provisioned_remote_status'])) {
-            error_log('[SIYA Server Manager] Remote server not found, skipping shutdown.');
+            error_log('[SIYA Server Manager] Remote server not found or invalid status response for Server Post ID: ' . $server_post_id);
             return;
         }
-
+    
         $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
-        
-        
+    
+        // Update suspension status
         update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
-
-       
+    
+        // Early return for inactive servers
         if ($this->server_provisioned_remote_status !== 'active') {
-            
-            error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
-
-            // Verify server status from the remote server directly as a final check
-            $this->initialize_server_provider($server_provider_slug);
+            error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for Server Post ID ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
+    
+            // Final check of server status from the remote server
             $latest_remote_status = $this->server_provider->get_server_status($server_post_id);
-            if ($latest_remote_status !== 'active' ) {
-                error_log('[SIYA Server Manager] Final check failed: Server is not active.');
-         
-                // Update the post meta to indicate suspension due to the current server status
+            if ($latest_remote_status !== 'active') {
+                error_log('[SIYA Server Manager] Final check failed: Server is not active. Server Post ID: ' . $server_post_id);
                 update_post_meta($server_post_id, 'arsol_server_suspension_reason', 'Server status: ' . $this->server_provisioned_remote_status);
-
                 return;
             }
-
-        } 
-
+        }
+    
+        // Schedule the shutdown action
         as_schedule_single_action(
             time(),
             'arsol_server_shutdown',
@@ -672,9 +668,6 @@ class ServerOrchestrator {
             ]],
             'arsol_class_server_orchestrator'
         );
-
-       
-
     }
 
     // Step 5: Finish server shutdown
@@ -1311,13 +1304,12 @@ class ServerOrchestrator {
     }
 
     private function update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id) {
-        
-        $this->initialize_server_provider($server_provider_slug);
 
         // Get remote status
+        $this->initialize_server_provider($server_provider_slug);
         $remote_status = $this->server_provider->get_server_status($server_post_id);
+        
         if (!$remote_status || !isset($remote_status['provisioned_remote_status']) || !isset($remote_status['provisioned_remote_raw_status'])) {
-
             error_log ('Failed to retrieve valid server status from provider.');
             throw new \Exception('Failed to retrieve valid server status from provider.');
         }
