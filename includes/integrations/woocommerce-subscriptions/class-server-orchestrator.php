@@ -474,11 +474,7 @@ class ServerOrchestrator {
 
         error_log('Milestone X7');
 
-        if (!$subscription || !method_exists($subscription, 'get_id')) {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Invalid subscription object.');
-            return;
-        }
-        $subscription_id = $subscription->get_id();
+     
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
