@@ -42,7 +42,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             // Get server metadata
             $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
             $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
-            $requires_server_manager = get_post_meta($this->server_post_id, 'arsol_connect_server_manager', true);
+            $requires_server_manager = get_post_meta($this->server_post_id, 'arsol_server_manager_required', true);
     
             error_log(sprintf('[SIYA Server Manager - ServerCircuitBreaker] Status - Provisioned: %s, Deployed: %s, Requires Manager: %s', 
                 $is_provisioned ? 'true' : 'false',

@@ -81,7 +81,7 @@ class ServerPost {
         $this->server_plan_slug = get_post_meta($this->post_id, 'arsol_server_plan_slug', true);
         $this->server_region_slug = get_post_meta($this->post_id, 'arsol_server_region_slug', true);
         $this->server_image_slug = get_post_meta($this->post_id, 'arsol_server_image_slug', true);
-        $this->connect_server_manager = get_post_meta($this->post_id, 'arsol_connect_server_manager', true);  // Add missing load
+        $this->connect_server_manager = get_post_meta($this->post_id, 'arsol_server_manager_required', true);  // Add missing load
         $this->server_suspension = get_post_meta($this->post_id, 'arsol_server_suspension', true); // Add missing load
         
         // Provisioned/Provisioning data
@@ -186,7 +186,7 @@ class ServerPost {
             'arsol_server_region_slug' => get_post_meta($post_id, 'arsol_server_region_slug', true),
             'arsol_server_image_slug' => get_post_meta($post_id, 'arsol_server_image_slug', true),
             'arsol_server_connection_status' => get_post_meta($post_id, 'arsol_server_connection_status', true),
-            'arsol_connect_server_manager' => get_post_meta($post_id, 'arsol_connect_server_manager', true),  // Added missing field
+            'arsol_server_manager_required' => get_post_meta($post_id, 'arsol_server_manager_required', true),  // Added missing field
             'arsol_server_post_creation_date' => get_post_meta($post_id, 'arsol_server_post_creation_date', true),  // Added missing field
             'arsol_server_post_name' => get_post_meta($post_id, 'arsol_server_post_name', true),  // Added missing field
             'arsol_server_suspension' => get_post_meta($post_id, 'arsol_server_suspension', true), // Add missing field

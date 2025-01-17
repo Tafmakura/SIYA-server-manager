@@ -87,7 +87,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         // Check if we need to connect to RunCloud
-        $connect_server_manager = get_post_meta($server_post_id, 'arsol_connect_server_manager', true);
+        $connect_server_manager = get_post_meta($server_post_id, 'arsol_server_manager_required', true);
         $runcloud_script = '';
 
         if ($connect_server_manager === 'yes') {
