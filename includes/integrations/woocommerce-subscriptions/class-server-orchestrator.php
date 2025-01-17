@@ -1301,7 +1301,7 @@ class ServerOrchestrator {
     }
 
     // New method to open ports at the provider
-    private function open_ports_at_provider($server_provider_slug, $server_provisioned_id) {
+    private function assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id) {
         $this->initialize_server_provider($server_provider_slug);
         $result = $this->server_provider->open_server_ports($server_provisioned_id);
         if (!$result) {
