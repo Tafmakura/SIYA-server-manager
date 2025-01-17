@@ -723,6 +723,7 @@ class ServerOrchestrator {
     public function start_server_powerup($subscription) {
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
 
         error_log('HOYOOOOO>>>>>>>'.$server_post_id);
 
@@ -749,9 +750,7 @@ class ServerOrchestrator {
             }
 
         } 
-        
 
-        $server_post_id = $server_post->post_id;
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
 
