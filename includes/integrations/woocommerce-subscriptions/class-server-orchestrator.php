@@ -464,9 +464,8 @@ class ServerOrchestrator {
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
 
-        error_log('Milestone X6');
-
-        $ssh_username = 'ARSOL' . $subscription->get_id();
+        
+        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
 
         error_log('Milestone X6');
 
