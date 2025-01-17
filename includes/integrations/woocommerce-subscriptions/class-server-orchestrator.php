@@ -564,42 +564,43 @@ class ServerOrchestrator {
         }
     }
 
-    // Step 4 (Optional): Finish server connection
     public function verify_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
         $runcloud = new \Siya\Integrations\ServerManagers\Runcloud();
-
+    
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
-
-        // Check installation status
-        $startTime = time();
-        $installationTimeout = 5 * 60;
-        while ((time() - $startTime) < $installationTimeout) {
-            $status = $runcloud->get_installation_status($server_post_id);
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Installation status for server post ID %d: %s', $server_post_id, json_encode($status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
-            if ($status === 'running') {
-                update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status);
-                break;
+    
+        try {
+            // Check installation status
+            $installationTimeout = apply_filters('siya_server_installation_timeout', 5 * 60);
+            $startTime = time();
+            while ((time() - $startTime) < $installationTimeout) {
+                $status = $runcloud->get_installation_status($server_post_id);
+                if (isset($status['status']) && $status['status'] === 'running') {
+                    update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
+                    break;
+                }
+                sleep(30);
             }
-            sleep(30);
-            error_log('retrying...');
-        }
-
-        // Check connection status
-        $connectStart = time();
-        $connectTimeout = 60;
-        while ((time() - $connectStart) < $connectTimeout) {
-            $connStatus = $runcloud->get_connection_status($server_post_id);
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Connection status for server post ID %d: %s', $server_post_id, json_encode($connStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
-            if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
-                update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
-                update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
-                update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? '');
-                break;
+    
+            // Check connection status
+            $connectTimeout = apply_filters('siya_server_connection_timeout', 60);
+            $connectStart = time();
+            while ((time() - $connectStart) < $connectTimeout) {
+                $connStatus = $runcloud->get_connection_status($server_post_id);
+                if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
+                    update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
+                    update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
+                    update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
+                    break;
+                }
+                sleep(15);
             }
-            sleep(15);
+        } catch (\Exception $e) {
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error verifying connection: %s', $e->getMessage()));
         }
     }
+    
 
     // Step 5: Schedule server shutdown
     public function start_server_shutdown($subscription) {
