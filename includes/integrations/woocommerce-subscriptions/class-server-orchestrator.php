@@ -648,7 +648,7 @@ class ServerOrchestrator {
             error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
 
             // Verify server status from the remote server directly as a final check
-            $latest_remote_status !== 'active' ($server_provisioned_id);
+            $this->server_provider->get_server_status($server_provisioned_id);
             if ($latest_remote_status !== 'active' ) {
                 error_log('[SIYA Server Manager] Final check failed: Server is not active.');
          
