@@ -405,14 +405,12 @@ class ServerOrchestrator {
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
-            // Successful API subscription note /*
-           /* $subscription->add_order_note(sprintf(
+            // Successful API subscription note for RunCloud deployment
+           $subscription->add_order_note(sprintf(
                 "RunCloud deployment successful with Response body: %s",
                 $runcloud_response['body']
             ));
 
-            */
-           
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
 
             // Trigger the connection to the provisioned server
@@ -462,6 +460,11 @@ class ServerOrchestrator {
 
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
+        if ($subscription) {
+            error_log('ZZZ Subscription retrieved successfully: ' . $subscription->get_id());
+        } else {
+            error_log('ZZZ Failed to retrieve subscription for ID: ' . $subscription_id);
+        }
         $server_deployed_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
