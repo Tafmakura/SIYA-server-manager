@@ -315,7 +315,6 @@ class ServerOrchestrator {
                         // Validate $subscription variable
                         if (empty($subscription) || !is_object($subscription) || !method_exists($subscription, 'get_id')) {
                             error_log('#019a [SIYA Server Manager - ServerOrchestrator] Invalid subscription object.');
-                            return;
                         }
 
 
