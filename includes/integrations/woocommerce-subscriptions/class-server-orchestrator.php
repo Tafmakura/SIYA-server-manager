@@ -12,8 +12,7 @@ class ServerOrchestrator {
    
     const POST_TYPE = 'server';
 
-    private $subscription;
-    private $subscription_id;
+    public $subscription_id;
     public $server_post_id;
     public $server_provider;
     public $server_provider_slug;
@@ -83,7 +82,6 @@ class ServerOrchestrator {
     // Step 1: Start server provisioning process (Create server post)
     public function start_server_provision($subscription) {
         try {
-            $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id();
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
             $this->server_product = wc_get_product($this->server_product_id); 
@@ -99,11 +97,11 @@ class ServerOrchestrator {
            
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
-            $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
+            $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
 
             if (!$existing_server_post) {
                 error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
-                $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $this->subscription);
+                $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
             } else {
                 error_log('#003 [SIYA Server Manager - ServerOrchestrator] Server post already exists, skipping Step 1');
                 $this->server_post_id = $existing_server_post->post_id;
@@ -111,7 +109,7 @@ class ServerOrchestrator {
             
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
             $this->schedule_action('arsol_finish_server_provision', [
-                'subscription' => $this->subscription,
+                'subscription' => $subscription,
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
@@ -121,7 +119,7 @@ class ServerOrchestrator {
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
 
         } catch (\Exception $e) {
-            $this->handle_exception($e, $this->subscription, 'Error occurred during server provisioning');
+            $this->handle_exception($e, $subscription, 'Error occurred during server provisioning');
         }
     }
 
@@ -132,9 +130,8 @@ class ServerOrchestrator {
             error_log('#006 [SIYA Server Manager - ServerOrchestrator] Starting server completion');
         
             // Extract the arguments from action scheduler
-            $this->subscription = $args['subscription'];
             $this->subscription_id = $args['subscription_id'];
-            $this->subscription = wcs_get_subscription($this->subscription_id);
+            $subscription = wcs_get_subscription($this->subscription_id);
             $this->server_post_id = $args['server_post_id'];
             $this->server_product_id = $args['server_product_id'];
             $this->server_provider_slug = $args['server_provider_slug'];
@@ -196,17 +193,17 @@ class ServerOrchestrator {
                     error_log('Milestone 5b');
 
                     try {
-                        $server_data = $this->provision_server_at_provider($this->subscription);
+                        $server_data = $this->provision_server_at_provider($subscription);
                     } catch (\Exception $e) {
                         error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
-                        $this->subscription->add_order_note(sprintf(
+                        $subscription->add_order_note(sprintf(
                             "Error occurred during server provisioning:%s%s%s%s",
                             PHP_EOL,
                             $e->getMessage(),
                             PHP_EOL,
                             json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                         ));
-                        $this->subscription->update_status('on-hold');
+                        $subscription->update_status('on-hold');
                         return;
                     }
 
@@ -219,12 +216,12 @@ class ServerOrchestrator {
 
                 } catch (\Exception $e) {
                     error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
-                    $this->subscription->add_order_note(sprintf(
+                    $subscription->add_order_note(sprintf(
                         "Error occurred during server provisioning:%s%s",
                         PHP_EOL,
                         $e->getMessage()
                     ));
-                    $this->subscription->update_status('on-hold');
+                    $subscription->update_status('on-hold');
                     return;
                 }
             }
@@ -263,7 +260,7 @@ class ServerOrchestrator {
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
                 'server_provisioned_id'     => $this->server_provisioned_id,
-                'subscription'              => $this->subscription,
+                'subscription'              => $subscription,
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
@@ -275,7 +272,7 @@ class ServerOrchestrator {
             error_log(sprintf('#013 [SIYA Server Manager - ServerOrchestrator] Provisioned server ID: %s', $this->server_provisioned_id));
 
         } catch (\Exception $e) {
-            $this->handle_exception($e, $this->subscription, 'Error in server completion');
+            $this->handle_exception($e, $subscription, 'Error in server completion');
         }
     }
 
