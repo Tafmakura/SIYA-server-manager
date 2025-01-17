@@ -561,6 +561,9 @@ class ServerOrchestrator {
             $subscription_id
         ));
 
+
+        /*
+
         $this->runcloud = new Runcloud();
 
         $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server(
@@ -584,6 +587,8 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager - ServerOrchestrator] Successfully connected server manager to provisioned server.');
             $subscription->add_order_note('Successfully connected server manager to provisioned server.');
         }
+
+        */
     }
 
 
