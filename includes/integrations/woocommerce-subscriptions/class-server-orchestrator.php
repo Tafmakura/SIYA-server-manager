@@ -450,7 +450,7 @@ class ServerOrchestrator {
 
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
-        error_log('Milestone X4');
+        error_log ('Milestone X4');
         
         $runcloud_response_data = json_decode($runcloud_response_body, true);
 
@@ -459,7 +459,7 @@ class ServerOrchestrator {
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
-        error_log('Milestone X6');
+        error_log ('Milestone X6');
 
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
