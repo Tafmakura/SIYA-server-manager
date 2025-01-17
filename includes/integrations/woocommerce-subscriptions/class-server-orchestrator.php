@@ -457,14 +457,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager - ServerOrchestrator] Missing required arguments for connecting server manager.');
             return;
         }
-        error_log ('Milestone X4');
-
-        error_log('Subscription type: ' . gettype($subscription));
-        if (is_object($subscription)) {
-            error_log('Subscription class: ' . get_class($subscription));
-        } else {
-            error_log('Subscription is not an object.');
-        }
+        error_log ('Milestone X4'. $subscription);
 
 
         error_log('Milestone' . $subscription_id);
