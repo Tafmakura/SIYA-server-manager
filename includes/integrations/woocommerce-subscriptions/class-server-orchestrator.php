@@ -75,8 +75,6 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_pending-cancel_to_cancelled', array($this, 'start_server_deletion'), 10, 1);
         add_action('arsol_finish_server_deletion', array($this, 'finish_server_deletion'), 20, 1);
 
-
-
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -455,8 +453,14 @@ class ServerOrchestrator {
         error_log('Milestone X4');
         
         $runcloud_response_data = json_decode($runcloud_response_body, true);
+
+        error_log ('Milestone X5');
+
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+
+        error_log('Milestone X6');
+
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
         $ssh_username = 'ARSOL' . $subscription->get_id();

@@ -17,7 +17,6 @@ class Runcloud /*implements ServerManager*/ {
         $this->ssh_log_file = plugin_dir_path(__DIR__) . 'logs/ssh_log.txt'; // Set the log file path
         
         add_action('arsol_finish_server_connection_hook', [$this, 'finish_server_connection']);
-      
     }
 
     public function create_server_in_server_manager(
@@ -88,6 +87,7 @@ class Runcloud /*implements ServerManager*/ {
             'status' => $status_code,
             'body' => $response_body
         ];
+
     }
 
     public function execute_installation_script_on_server($server_post_id) {
@@ -208,6 +208,7 @@ class Runcloud /*implements ServerManager*/ {
         $max_retries = $timeout / $interval;
         
         while ((time() - $start_time) < $timeout) {
+
             error_log("[SIYA Server Manager][RunCloud] Attempt to verify RunCloud installation via API...");
             
             $response = wp_remote_get(
@@ -265,6 +266,7 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud] API check failed. RunCloud installation could not be verified.');
         update_post_meta($server_post_id, 'arsol_server_manager_connection', 'check-timed-out');
         return false;
+        
     }
 
     public function check_installation_status($server_post_id) {
