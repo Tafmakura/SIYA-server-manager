@@ -313,9 +313,9 @@ class Runcloud /*implements ServerManager*/ {
         }
     
         // Extract required fields
-        $connected = !empty($data['healthStatus']) && $data['healthStatus'] === 'connected';
-        $online = !empty($data['status']) && $data['status'] === 'online';
-        $agentVersion = $data['agentVersion'] ?? null;
+        $connected = !empty($data['connected']) && $data['connected'] === true;
+        $online = !empty($data['online']) && $data['online'] === true;
+        $agentVersion = isset($data['agentVersion']) ? $data['agentVersion'] : null;
     
         error_log(sprintf(
             '[SIYA Server Manager][RunCloud] Connection status - Connected: %s, Online: %s, Agent Version: %s',
