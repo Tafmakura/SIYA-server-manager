@@ -314,6 +314,15 @@ class ServerOrchestrator {
                     if (!$server_deployed_status && $connect_server_manager === 'yes') {
                         error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
                         $this->runcloud = new Runcloud();  
+
+                        // Validate $subscription variable
+                        if (empty($subscription) || !is_object($subscription) || !method_exists($subscription, 'get_id')) {
+                            error_log('#019a [SIYA Server Manager - ServerOrchestrator] Invalid subscription object.');
+                            return;
+                        }
+
+
+
                         $this->deploy_to_runcloud_and_update_metadata($server_post_id, $subscription);
                     } else {
                         error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no Runcloud deployment needed');
