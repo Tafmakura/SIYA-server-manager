@@ -648,7 +648,7 @@ class ServerOrchestrator {
             error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
 
             // Verify server status from the remote server directly as a final check
-            $this->server_provider->get_server_status($server_post_id);
+            $latest_remote_status = $this->server_provider->get_server_status($server_post_id);
             if ($latest_remote_status !== 'active' ) {
                 error_log('[SIYA Server Manager] Final check failed: Server is not active.');
          
@@ -728,12 +728,10 @@ class ServerOrchestrator {
     // Step 5: Schedule server powerup
     public function start_server_powerup($subscription) {
         $subscription_id = $subscription->get_id();
-        $server_post_instance = new ServerPost();
-        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
-        $server_post_id = $server_post->post_id;
+        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
 
-        if (!$server_post) {
-            error_log('#041 [SIYA Server Manager - ServerOrchestrator] No server post found for powerup.');
+        if (!$server_post_id) {
+            error_log('#041 [SIYA Server Manager - ServerOrchestrator] No linked server post ID found for powerup.');
             return;
         }
 
