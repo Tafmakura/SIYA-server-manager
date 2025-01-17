@@ -555,7 +555,7 @@ class ServerOrchestrator {
                     ]],  
                     'arsol_class_server_orchestrator');
 
-                error_log('[SIYA Server Manager][RunCloud] Scheduled finish_server_connection action.');
+                error_log('[SIYA Server Manager][RunCloud] Scheduled server verification.');
             }
 
         } else {
