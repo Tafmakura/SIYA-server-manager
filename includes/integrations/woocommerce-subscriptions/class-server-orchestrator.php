@@ -631,7 +631,7 @@ class ServerOrchestrator {
 
         // New check: Ensure remote server exists
         $this->initialize_server_provider($server_provider_slug);
-        $status = $this->server_provider->get_server_status($server_provisioned_id);
+        $status = $this->server_provider->get_server_status($server_post_id);
         if (is_wp_error($status) || !isset($status['provisioned_remote_status'])) {
             error_log('[SIYA Server Manager] Remote server not found, skipping shutdown.');
             return;
@@ -648,7 +648,7 @@ class ServerOrchestrator {
             error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
 
             // Verify server status from the remote server directly as a final check
-            $this->server_provider->get_server_status($server_provisioned_id);
+            $this->server_provider->get_server_status($server_post_id);
             if ($latest_remote_status !== 'active' ) {
                 error_log('[SIYA Server Manager] Final check failed: Server is not active.');
          
@@ -747,7 +747,7 @@ class ServerOrchestrator {
         error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only shut down servers can be powered on');
          
             // Verify server status from remote server directly as a final check
-            $latest_remote_status = $this->server_provider->get_server_status($server_provisioned_id);
+            $latest_remote_status = $this->server_provider->get_server_status($server_post_id);
             if ( $latest_remote_status != 'off') {
                 error_log('[SIYA Server Manager] Final check failed: Server is not off.');
                 return;
@@ -1313,7 +1313,7 @@ class ServerOrchestrator {
         $this->initialize_server_provider($server_provider_slug);
 
         // Get remote status
-        $remote_status = $this->server_provider->get_server_status($server_provisioned_id);
+        $remote_status = $this->server_provider->get_server_status($server_post_id);
         if (!$remote_status || !isset($remote_status['provisioned_remote_status']) || !isset($remote_status['provisioned_remote_raw_status'])) {
 
             error_log ('Failed to retrieve valid server status from provider.');

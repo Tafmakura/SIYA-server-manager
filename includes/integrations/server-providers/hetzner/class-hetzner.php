@@ -377,7 +377,9 @@ class Hetzner /*implements ServerProvider*/ {
         
     }
 
-    public function get_server_status($server_provisioned_id) {
+    public function get_server_status($server_post_id) {
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+
         $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key

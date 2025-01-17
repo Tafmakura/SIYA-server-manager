@@ -126,7 +126,7 @@ class Vultr /*implements ServerProvider*/ {
     private function map_statuses($raw_status) {
         $status_map = [
             'pending' => 'starting',
-            'installing' => 'starting',
+            'installing' => 'update_server_status',
             'active' => 'active',
             'stopped' => 'off',
             'rebooting' => 'rebooting'
@@ -353,7 +353,9 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function get_server_status($server_provisioned_id) {
+    public function get_server_status($server_post_id) {
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+
         $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
