@@ -453,6 +453,9 @@ class ServerOrchestrator {
 
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id) {
+
+        // TODO 
+        // ADD validation for servers that have Runcloud Deployed
        
  
         error_log ('Milestone X4');
