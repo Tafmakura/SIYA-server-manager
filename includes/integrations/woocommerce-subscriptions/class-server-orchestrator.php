@@ -459,18 +459,25 @@ class ServerOrchestrator {
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
-        error_log ('Milestone X6');
+ 
 
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
+
+        error_log('Milestone X6');
+
         $ssh_username = 'ARSOL' . $subscription->get_id();
         $ssh_port = 22;
+
+        error_log('Milestone X7');
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
             $server_id,
             $server_ip
         ));
+
+        error_log('Milestone X8');       
 
         // Open ports before connecting server manager
         $open_ports_result = $this->open_ports_at_provider($this->server_provider_slug, $this->server_provisioned_id);
