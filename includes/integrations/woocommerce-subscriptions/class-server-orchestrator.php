@@ -12,7 +12,8 @@ class ServerOrchestrator {
    
     const POST_TYPE = 'server';
 
-    public $subscription_id;
+    private $subscription;
+    private $subscription_id;
     public $server_post_id;
     public $server_provider;
     public $server_provider_slug;
@@ -82,6 +83,7 @@ class ServerOrchestrator {
     // Step 1: Start server provisioning process (Create server post)
     public function start_server_provision($subscription) {
         try {
+            $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id();
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
             $this->server_product = wc_get_product($this->server_product_id); 
@@ -97,7 +99,7 @@ class ServerOrchestrator {
            
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
-            $existing_server_post = $this->check_existing_server($server_post_instance, $subscription);
+            $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
 
             if (!$existing_server_post) {
                 error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
@@ -109,7 +111,6 @@ class ServerOrchestrator {
             
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
             $this->schedule_action('arsol_finish_server_provision', [
-                'subscription' => $subscription,
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
@@ -131,7 +132,7 @@ class ServerOrchestrator {
         
             // Extract the arguments from action scheduler
             $this->subscription_id = $args['subscription_id'];
-            $subscription = wcs_get_subscription($this->subscription_id);
+            $this->subscription = wcs_get_subscription($this->subscription_id);
             $this->server_post_id = $args['server_post_id'];
             $this->server_product_id = $args['server_product_id'];
             $this->server_provider_slug = $args['server_provider_slug'];
@@ -193,17 +194,17 @@ class ServerOrchestrator {
                     error_log('Milestone 5b');
 
                     try {
-                        $server_data = $this->provision_server_at_provider($subscription);
+                        $server_data = $this->provision_server_at_provider($this->subscription);
                     } catch (\Exception $e) {
                         error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
-                        $subscription->add_order_note(sprintf(
+                        $this->subscription->add_order_note(sprintf(
                             "Error occurred during server provisioning:%s%s%s%s",
                             PHP_EOL,
                             $e->getMessage(),
                             PHP_EOL,
                             json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                         ));
-                        $subscription->update_status('on-hold');
+                        $this->subscription->update_status('on-hold');
                         return;
                     }
 
@@ -216,12 +217,12 @@ class ServerOrchestrator {
 
                 } catch (\Exception $e) {
                     error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
-                    $subscription->add_order_note(sprintf(
+                    $this->subscription->add_order_note(sprintf(
                         "Error occurred during server provisioning:%s%s",
                         PHP_EOL,
                         $e->getMessage()
                     ));
-                    $subscription->update_status('on-hold');
+                    $this->subscription->update_status('on-hold');
                     return;
                 }
             }
@@ -260,7 +261,7 @@ class ServerOrchestrator {
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
                 'server_provisioned_id'     => $this->server_provisioned_id,
-                'subscription'              => $subscription,
+                'subscription'              => $this->subscription,
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
@@ -311,14 +312,6 @@ class ServerOrchestrator {
                     if (!$server_deployed_status && $connect_server_manager === 'yes') {
                         error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
                         $this->runcloud = new Runcloud();  
-
-                        // Validate $subscription variable
-                        if (empty($subscription) || !is_object($subscription) || !method_exists($subscription, 'get_id')) {
-                            error_log('#019a [SIYA Server Manager - ServerOrchestrator] Invalid subscription object.');
-                        }
-
-
-
                         $this->deploy_to_runcloud_and_update_metadata($server_post_id, $subscription);
                     } else {
                         error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no Runcloud deployment needed');
@@ -460,14 +453,9 @@ class ServerOrchestrator {
 
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
-        if (empty($server_post_id) || empty($subscription) || empty($runcloud_response_body)) {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Missing required arguments for connecting server manager.');
-            return;
-        }
-        error_log ('Milestone X4'. $subscription->get_id() );
+        error_log ('Milestone X4');
 
-
-        error_log('Milestone' . $subscription->get_id());
+        //$subscription_id = $subscription->get_id(); FIX THIS 
         
         $runcloud_response_data = json_decode($runcloud_response_body, true);
 
@@ -541,7 +529,7 @@ class ServerOrchestrator {
                 as_schedule_single_action(time() + 5, 
                     'arsol_verify_server_manager_connection_hook', 
                     [[
-                        'subscription_id' => $subscription->get_id(),
+                       // 'subscription_id' => $subscription->get_id(),
                         'server_post_id' => $server_post_id,
                         'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
                         'ssh_host' => $server_ip,
@@ -562,7 +550,7 @@ class ServerOrchestrator {
 
     // Step 4 (Optional): Finish server connection
     public function verify_server_manager_connection($args) {
-        $subscription_id = $args['subscription_id'];
+        // $subscription_id = $args['subscription_id'];
         $server_post_id = $args['server_post_id'];
         $server_id = $args['server_id'];
         $ssh_host = $args['ssh_host'];
