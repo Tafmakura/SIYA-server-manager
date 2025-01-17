@@ -75,6 +75,9 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_pending-cancel_to_cancelled', array($this, 'start_server_deletion'), 10, 1);
         add_action('arsol_finish_server_deletion', array($this, 'finish_server_deletion'), 20, 1);
 
+        // Add new action hooks for server connection
+        add_action('arsol_verify_server_manager_connection_hook', [$this, 'verify_server_manager_connection']);
+
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -459,22 +462,16 @@ class ServerOrchestrator {
         $server_id = $runcloud_response_data['id'] ?? null;
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
- 
-
         $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
-
         
         $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
 
         error_log('Milestone X6');
 
-
         $ssh_port = 22;
 
         error_log('Milestone X7');
-
-     
 
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
@@ -527,15 +524,18 @@ class ServerOrchestrator {
                 $subscription->add_order_note('Successfully connected server manager to provisioned server.');
 
                 // Schedule finish_server_connection using Action Scheduler
-                as_schedule_single_action(time() + 5, 'arsol_finish_server_connection_hook', [
-                    'subscription_id' => $subscription->get_id(),
-                    'server_post_id' => $server_post_id,
-                    'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
-                    'ssh_host' => $server_ip,
-                    'ssh_username' => $ssh_username,
-                    'ssh_private_key' => $ssh_private_key,
-                    'ssh_port' => $ssh_port
-                ], 'arsol_runcloud');
+                as_schedule_single_action(time() + 5, 
+                    'arsol_verify_server_manager_connection_hook', 
+                    [[
+                        'subscription_id' => $subscription->get_id(),
+                        'server_post_id' => $server_post_id,
+                        'server_id' => $server_id, // Optional: if you need to reference server_id in finish method
+                        'ssh_host' => $server_ip,
+                        'ssh_username' => $ssh_username,
+                        'ssh_private_key' => $ssh_private_key,
+                        'ssh_port' => $ssh_port
+                    ]],  
+                    'arsol_class_server_orchestrator');
 
                 error_log('[SIYA Server Manager][RunCloud] Scheduled finish_server_connection action.');
             }
@@ -546,15 +546,45 @@ class ServerOrchestrator {
         }
     }
 
+    // Step 4 (Optional): Finish server connection
+    public function verify_server_manager_connection($args) {
+        $subscription_id = $args['subscription_id'];
+        $server_post_id = $args['server_post_id'];
+        $server_id = $args['server_id'];
+        $ssh_host = $args['ssh_host'];
+        $ssh_username = $args['ssh_username'];
+        $ssh_private_key = $args['ssh_private_key'];
+        $ssh_port = $args['ssh_port'];
 
+        error_log(sprintf(
+            '[SIYA Server Manager - ServerOrchestrator] Finishing server connection for subscription %d',
+            $subscription_id
+        ));
 
+        $this->runcloud = new Runcloud();
 
+        $connection_result = $this->runcloud->connect_server_manager_to_provisioned_server(
+            $server_id,
+            $ssh_host,
+            $ssh_username,
+            $ssh_private_key,
+            $ssh_port
+        );
 
-
-
-
-
-
+        if (is_wp_error($connection_result)) {
+            error_log(sprintf(
+                '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
+                $connection_result->get_error_message()
+            ));
+            $subscription->add_order_note(sprintf(
+                'Failed to connect server manager to provisioned server: %s',
+                $connection_result->get_error_message()
+            ));
+        } else {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Successfully connected server manager to provisioned server.');
+            $subscription->add_order_note('Successfully connected server manager to provisioned server.');
+        }
+    }
 
 
 
@@ -637,7 +667,7 @@ class ServerOrchestrator {
                     'server_provider_slug' => $server_provider_slug,
                     'server_provisioned_id' => $server_provisioned_id,
                 ]],
-                'arsol_server_provision'
+                'arsol_class_server_orchestrator'
             );
 
         }
@@ -685,7 +715,7 @@ class ServerOrchestrator {
                         'server_provisioned_id' => $server_provisioned_id,
                         'retry_count' => $retry_count + 1
                     ]],
-                    'arsol_server_provision'
+                    'arsol_class_server_orchestrator'
                 );
             } else {
                 error_log('#040 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server shutdown failed.');
@@ -743,7 +773,7 @@ class ServerOrchestrator {
                     'server_provider_slug' => $server_provider_slug,
                     'server_provisioned_id' => $server_provisioned_id
                 ]],
-                'arsol_server_provision'
+                'arsol_class_server_orchestrator'
             );
         }
     }
@@ -789,7 +819,7 @@ class ServerOrchestrator {
                         'server_provisioned_id' => $server_provisioned_id,
                         'retry_count' => $retry_count + 1
                     ]],
-                    'arsol_server_provision'
+                    'arsol_class_server_orchestrator'
                 );
             } else {
                 error_log('#048 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server powerup failed.');
@@ -825,7 +855,7 @@ class ServerOrchestrator {
                 'subscription_id' => $subscription_id,
                 'server_post_id' => $linked_server_post_id
             ]],
-            'arsol_server_provision'
+            'arsol_class_server_orchestrator'
         );
         error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for' . $subscription_id . ' Server post ID' . $linked_server_post_id);
     
@@ -889,7 +919,7 @@ class ServerOrchestrator {
                             'server_post_id' => $server_post_id,
                             'retry_count' => $retry_count + 1
                         ]],
-                        'arsol_server_provision'
+                        'arsol_class_server_orchestrator'
                     );
                     return;
                 } else {
@@ -919,7 +949,7 @@ class ServerOrchestrator {
                             'server_post_id' => $server_post_id,
                             'retry_count' => $retry_count + 1
                         ]],
-                        'arsol_server_provision'
+                        'arsol_class_server_orchestrator'
                     );
                     return;
                 } else {
@@ -1290,7 +1320,7 @@ class ServerOrchestrator {
 
     // New helper method to schedule actions
     private function schedule_action($hook, $args) {
-        as_schedule_single_action(time(), $hook, [$args], 'arsol_server_provision');
+        as_schedule_single_action(time(), $hook, [$args], 'arsol_class_server_orchestrator');
     }
 
     // New helper method to handle exceptions
