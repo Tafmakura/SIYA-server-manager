@@ -542,7 +542,7 @@ class ServerOrchestrator {
                // $subscription->add_order_note('Successfully connected server manager to provisioned server.');
 
                 // Schedule finish_server_connection using Action Scheduler
-                as_schedule_single_action(time() + 5, 
+                as_schedule_single_action(time() + 120, 
                     'arsol_verify_server_manager_connection_hook', 
                     [[
                         'subscription_id' => $subscription->get_id(),
@@ -576,12 +576,13 @@ class ServerOrchestrator {
         $installationTimeout = 5 * 60;
         while ((time() - $startTime) < $installationTimeout) {
             $status = $runcloud->get_installation_status($server_post_id);
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Installation status for server post ID %d: %s', $server_post_id, $status));
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Installation status for server post ID %d: %s', $server_post_id, json_encode($status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
             if ($status === 'running') {
                 update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status);
                 break;
             }
             sleep(30);
+            error_log('retrying...');
         }
 
         // Check connection status
