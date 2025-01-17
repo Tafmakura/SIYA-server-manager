@@ -459,7 +459,13 @@ class ServerOrchestrator {
         }
         error_log ('Milestone X4');
 
-        $subscription_id = $subscription->get_id();
+        error_log('Subscription type: ' . gettype($subscription));
+        if (is_object($subscription)) {
+            error_log('Subscription class: ' . get_class($subscription));
+        } else {
+            error_log('Subscription is not an object.');
+        }
+
 
         error_log('Milestone' . $subscription_id);
         
