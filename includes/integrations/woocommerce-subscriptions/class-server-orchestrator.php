@@ -730,6 +730,8 @@ class ServerOrchestrator {
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
 
+        error_log('HOYOOOOO>>>>>>>'.$server_post_id);
+
         if (!$server_post_id) {
             error_log('#041 [SIYA Server Manager - ServerOrchestrator] No linked server post ID found for powerup.');
             return;
