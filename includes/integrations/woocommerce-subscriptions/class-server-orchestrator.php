@@ -474,6 +474,8 @@ class ServerOrchestrator {
 
         error_log('Milestone X7');
 
+        $subscription_id  = $subscription->get_id();
+
         error_log(sprintf(
             '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
             $server_id,
@@ -489,6 +491,8 @@ class ServerOrchestrator {
             $subscription->add_order_note('Failed to open ports for server.');
             return;
         }
+
+        error_log('Milestone X9');
 
         if ($server_id && $server_ip) {
             
