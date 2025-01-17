@@ -523,7 +523,7 @@ class ServerOrchestrator {
             } else {
                
                 error_log('[SIYA Server Manager - Server Orchestrator] Successfully executed script on server.');
-                $subscription->add_order_note('Successfully connected server manager to provisioned server.');
+               // $subscription->add_order_note('Successfully connected server manager to provisioned server.');
 
                 // Schedule finish_server_connection using Action Scheduler
                 as_schedule_single_action(time() + 5, 
