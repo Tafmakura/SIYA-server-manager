@@ -454,6 +454,10 @@ class ServerOrchestrator {
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
         error_log ('Milestone X4');
+
+        $subscription_id = $subscription->get_id();
+
+        error_log('Milestone' . $subscription_id);
         
         $runcloud_response_data = json_decode($runcloud_response_body, true);
 
