@@ -453,6 +453,10 @@ class ServerOrchestrator {
 
     // New method to connect server manager to provisioned server
     protected function connect_server_manager($server_post_id, $subscription, $runcloud_response_body) {
+        if (empty($server_post_id) || empty($subscription) || empty($runcloud_response_body)) {
+            error_log('[SIYA Server Manager - ServerOrchestrator] Missing required arguments for connecting server manager.');
+            return;
+        }
         error_log ('Milestone X4');
 
         $subscription_id = $subscription->get_id();
