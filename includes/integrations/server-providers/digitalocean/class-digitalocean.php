@@ -527,7 +527,7 @@ EOD;
         ];
     }
 
-    public function open_server_ports($server_provisioned_id) {
+    public function assign_firewall_rules_to_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][DigitalOcean] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = 'e08f1e94-778d-4184-97ea-8091b3b64a83'; // Replace with your actual firewall group ID

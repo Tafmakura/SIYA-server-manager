@@ -403,7 +403,7 @@ class Vultr /*implements ServerProvider*/ {
         ];
     }
 
-    public function open_server_ports($server_provisioned_id) {
+    public function assign_firewall_rules_to_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][Vultr] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = '1d93959e-06c7-43d0-9f87-85e91b6d27ac'; // Replace with your actual firewall group ID

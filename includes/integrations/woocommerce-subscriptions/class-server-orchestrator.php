@@ -467,6 +467,10 @@ class ServerOrchestrator {
         error_log('Milestone X6');
 
         $ssh_username = 'ARSOL' . $subscription->get_id();
+
+        error_log('Milestone X6');
+
+
         $ssh_port = 22;
 
         error_log('Milestone X7');
@@ -480,7 +484,7 @@ class ServerOrchestrator {
         error_log('Milestone X8');       
 
         // Open ports before connecting server manager
-        $open_ports_result = $this->open_ports_at_provider($this->server_provider_slug, $this->server_provisioned_id);
+        $open_ports_result = $this->assign_firewall_rules_to_server($this->server_provider_slug, $this->server_provisioned_id);
         if (!$open_ports_result) {
             error_log('[SIYA Server Manager - ServerOrchestrator] Failed to open ports for server.');
             $subscription->add_order_note('Failed to open ports for server.');

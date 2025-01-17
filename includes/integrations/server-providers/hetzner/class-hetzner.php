@@ -475,7 +475,7 @@ class Hetzner /*implements ServerProvider*/ {
         ];
     }
 
-    public function open_server_ports($server_provisioned_id) {
+    public function assign_firewall_rules_to_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][Hetzner] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = 1841021;
