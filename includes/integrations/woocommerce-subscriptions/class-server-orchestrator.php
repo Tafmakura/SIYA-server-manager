@@ -1295,8 +1295,12 @@ class ServerOrchestrator {
 
         // Get remote status
         $remote_status = $this->server_provider->get_server_status($server_provisioned_id);
-        $provisioned_remote_status = $remote_status['provisioned_remote_status'] ?? null;
-        $provisioned_remote_raw_status = $remote_status['provisioned_remote_raw_status'] ?? null;
+        if (!$remote_status || !isset($remote_status['provisioned_remote_status']) || !isset($remote_status['provisioned_remote_raw_status'])) {
+            throw new \Exception('Failed to retrieve valid server status from provider.');
+        }
+
+        $provisioned_remote_status = $remote_status['provisioned_remote_status'];
+        $provisioned_remote_raw_status = $remote_status['provisioned_remote_raw_status'];
 
         // Update server status metadata
         $server_post_instance = new ServerPost($server_post_id);
