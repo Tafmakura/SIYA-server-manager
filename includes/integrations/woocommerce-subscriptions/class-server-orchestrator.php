@@ -162,8 +162,6 @@ class ServerOrchestrator {
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
 
-
-
             // Step 2: Provision server if not already provisioned
             // Check server status flags
             error_log('Milestone 3');
@@ -280,9 +278,10 @@ class ServerOrchestrator {
     // Step 3: Update server status 
     public function start_update_server_status($args) {
        
-       error_log('Milestone 7');
+        error_log('Milestone 7');
  
         error_log('#015 [SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
+
         $server_provider_slug = $args['server_provider'];
         $server_manager = $args['server_manager'];
         $connect_server_manager = $args['connect_server_manager'];
@@ -298,34 +297,45 @@ class ServerOrchestrator {
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
             try {
-               
+                // Fetch the server status
                 $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-
                 error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking status: ' . print_r($remote_status, true));
+
+                // Check if the remote status matches the target status (e.g., "active")
                 if ($remote_status['provisioned_remote_status'] === $target_status) {
                     error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
 
-                    ///Here we adjutst hetzner 
+                    // Proceed with RunCloud deployment only if the server is "active"
+                    if ($target_status === 'active') {
+                        $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
 
-                    $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
-                    
-                    if (!$server_deployed_status && $connect_server_manager === 'yes') {
-                        error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
-                        $this->runcloud = new Runcloud();  
-                        $this->deploy_to_runcloud_and_update_metadata($server_post_id, $subscription);
+                        if (!$server_deployed_status && $connect_server_manager === 'yes') {
+                            error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
+                            $this->runcloud = new Runcloud();
+                            $this->deploy_to_runcloud_and_update_metadata($server_post_id, $subscription);
+                        } else {
+                            error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no RunCloud deployment needed');
+                        }
                     } else {
-                        error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no Runcloud deployment needed');
+                        error_log('#021 [SIYA Server Manager - ServerOrchestrator] Target status is not "active", skipping RunCloud deployment.');
                     }
 
+                    // Exit the loop since the target status has been reached
+                    return true;
                 }
+
+                // Wait for the next polling interval
                 sleep($poll_interval);
             } catch (\Exception $e) {
-                error_log("#021 [SIYA Server Manager - ServerOrchestrator] Error fetching server status: " . $e->getMessage());
+                error_log("#022 [SIYA Server Manager - ServerOrchestrator] Error fetching server status: " . $e->getMessage());
                 return false;
             }
         }
-        error_log("#022 [SIYA Server Manager - ServerOrchestrator] Server status update timed out for server post ID: " . $server_post_id);
+
+        // Log timeout if the loop ends without reaching the target status
+        error_log("#023 [SIYA Server Manager - ServerOrchestrator] Server status update timed out for server post ID: " . $server_post_id);
         return false;
+
     }
 
     // Step 4 (Optional): Deploy to RunCloud and update server metadata
@@ -456,7 +466,6 @@ class ServerOrchestrator {
         // TODO 
         // ADD validation for servers that have Runcloud Deployed
        
- 
         error_log ('Milestone X4');
 
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
