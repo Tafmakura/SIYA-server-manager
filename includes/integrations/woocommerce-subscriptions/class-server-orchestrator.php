@@ -299,7 +299,7 @@ class ServerOrchestrator {
             try {
                 // Fetch the server status
                 $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-                error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking status: ' . print_r($remote_status, true));
+                error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking status: ' . json_encode($remote_status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
                 // Check if the remote status matches the target status (e.g., "active")
                 if ($remote_status['provisioned_remote_status'] === $target_status) {
@@ -555,7 +555,7 @@ class ServerOrchestrator {
                     ]],  
                     'arsol_class_server_orchestrator');
 
-                error_log('[SIYA Server Manager][RunCloud] Scheduled server verification.');
+                error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled server verification.');
             }
 
         } else {
