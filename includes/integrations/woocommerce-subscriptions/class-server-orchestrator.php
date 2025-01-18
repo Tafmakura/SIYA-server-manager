@@ -480,7 +480,7 @@ class ServerOrchestrator {
     }
 
     // Install Runcloud agent on provisioned server to connect server to Runcloud
-    protected function finish_server_manager_connection($args) {
+    public function finish_server_manager_connection($args) {
 
         // TODO 
         // ADD validation for servers that have Runcloud Deployed
