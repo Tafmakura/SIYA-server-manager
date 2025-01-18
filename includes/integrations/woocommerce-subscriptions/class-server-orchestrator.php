@@ -75,11 +75,14 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_pending-cancel_to_cancelled', array($this, 'start_server_deletion'), 10, 1);
         add_action('arsol_finish_server_deletion', array($this, 'finish_server_deletion'), 20, 1);
 
-        // Add new action hooks for server connection
-        add_action('arsol_verify_server_manager_connection_hook', [$this, 'verify_server_manager_connection']);
-
         // Add new action hook for deploying to RunCloud
         add_action('arsol_start_server_manager_connection_hook', array($this, 'start_server_manager_connection'), 20, 2);
+
+        // Add new action hook for the scheduled server manager connection completion
+        add_action('arsol_finish_server_manager_connection_hook', array($this, 'finish_server_manager_connection'), 20, 1);
+
+        // Add new action hooks for server connection
+        add_action('arsol_verify_server_manager_connection_hook', [$this, 'verify_server_manager_connection']);
 
     }
 
@@ -433,20 +436,15 @@ class ServerOrchestrator {
 
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
 
-            // Trigger the connection to the provisioned server
-            $this->finish_server_manager_connection($server_post_id);
+            // Schedule finish_server_manager_connection using Action Scheduler
+            as_schedule_single_action(time(), 
+                'arsol_finish_server_manager_connection_hook', 
+                [[
+                    'server_post_id' => $server_post_id
+                ]],  
+                'arsol_class_server_orchestrator');
 
-
-
-
-
-
-
-
-
-
-
-
+            error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
 
         } elseif (!isset($runcloud_response['status']) || !in_array($runcloud_response['status'], [200, 201])) {
             error_log('#029 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
