@@ -123,17 +123,21 @@ class Vultr /*implements ServerProvider*/ {
         return $user_script;
     }
 
-    private function map_statuses($raw_power_status) {
-        $status_map = [
+    private function map_statuses($raw_power_status, $raw_server_status) {
+        if ($raw_server_status === 'installingbooting') {
+            return 'starting';
+        }
+
+        $power_status_map = [
             'running' => 'active',
-            'stopped' => 'off',
-            'rebooting' => 'rebooting'
+            'stopped' => 'off'
         ];
-        $mapped_status = $status_map[$raw_power_status] ?? $raw_power_status;
-        error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sFrom: %s%sTo: %s', 
-            PHP_EOL, var_export($raw_power_status, true), 
-            PHP_EOL, var_export($mapped_status, true)
+
+        $mapped_status = $power_status_map[$raw_power_status] ?? $raw_power_status;
+        error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sPower Status From: %s%sTo: %s', 
+            PHP_EOL, var_export($raw_power_status, true), PHP_EOL, var_export($mapped_status, true)
         ));
+
         return $mapped_status;
     }
 
@@ -143,6 +147,7 @@ class Vultr /*implements ServerProvider*/ {
 
         $raw_power_status = $api_response['instance']['power_status'] ?? '';
         $raw_server_status = $api_response['instance']['server_status'] ?? '';
+        $raw_status = $api_response['instance']['status'] ?? '';
         $os_name = $api_response['instance']['os'] ?? '';
         $os_version = $api_response['instance']['os_version'] ?? '';
 
@@ -161,9 +166,9 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_date' => $api_response['instance']['date_created'] ?? '',
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['instance']['default_password'] ?? '',
-            'provisioned_remote_status' => $this->map_statuses($raw_power_status),
-            'provisioned_remote_raw_status' => "$raw_power_status ($raw_power_status)",
-            'provisioned_server_status' => $this->map_server_status($raw_server_status)
+            'provisioned_remote_status' => $this->map_statuses($raw_power_status, $raw_server_status),
+            'provisioned_remote_raw_status' => $raw_status,
+            'provisioned_server_status' => $raw_server_status
         ];
     }
 
@@ -372,11 +377,12 @@ class Vultr /*implements ServerProvider*/ {
         $api_response = json_decode(wp_remote_retrieve_body($response), true);
         $raw_power_status = $api_response['instance']['power_status'] ?? '';
         $raw_server_status = $api_response['instance']['server_status'] ?? '';
+        $raw_status = $api_response['instance']['status'] ?? '';
 
         return [
-            'provisioned_remote_status' => $this->map_statuses($raw_power_status),
-            'provisioned_remote_raw_status' => "$raw_power_status ($raw_power_status)",
-            'provisioned_server_status' => $this->map_server_status($raw_server_status)
+            'provisioned_remote_status' => $this->map_statuses($raw_power_status, $raw_server_status),
+            'provisioned_remote_raw_status' => $raw_status,
+            'provisioned_server_status' => $raw_server_status
         ];
     }
 
