@@ -601,7 +601,6 @@ class ServerOrchestrator {
         }
     }
     
-
     public function start_server_shutdown($subscription) {
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
@@ -644,12 +643,12 @@ class ServerOrchestrator {
         update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
     
         // Early return for inactive servers
-        if ($this->server_provisioned_remote_status !== 'active') {
+        if ($this->server_provisioned_remote_status !== 'active' || $this->server_provisioned_remote_status !== 'starting') {
             error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for Server Post ID ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
     
             // Final check of server status from the remote server
             $latest_remote_status = $this->server_provider->get_server_status($server_post_id);
-            if ($latest_remote_status !== 'active') {
+            if ($latest_remote_status !== 'active' || $latest_remote_status !== 'starting') {
                 error_log('[SIYA Server Manager] Final check failed: Server is not active. Server Post ID: ' . $server_post_id);
                 return;
             }
@@ -688,7 +687,6 @@ class ServerOrchestrator {
 
         // Update server suspension status
         $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-
         error_log(sprintf('#036 [SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
 
         // Verify server shutdown
@@ -736,7 +734,7 @@ class ServerOrchestrator {
 
         // Check if server is already powered on
         if ($this->server_provisioned_remote_status != 'off') {
-        error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only shut down servers can be powered on');
+        error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $subscription_id . ' is ' . $this->server_provisioned_remote_status . ' - only shut down servers can be powered on');
          
             // Verify server status from remote server directly as a final check
             $this->initialize_server_provider($server_provider_slug);
@@ -798,15 +796,15 @@ class ServerOrchestrator {
         
         // Get remote status and update metadata
         $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-
-        error_log(sprintf('#044 [SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
+       
+        error_log(sprintf('#044 [SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $subscription_id, $remote_status['provisioned_remote_status']));
 
         // Verify server powered up
-        if ($remote_status['provisioned_remote_status'] === 'active') {
-            error_log('#045 [SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully powered up.');
+        if ($remote_status['provisioned_remote_status'] === 'active' || $remote_status['provisioned_remote_status'] === 'starting') {
+            error_log('#045 [SIYA Server Manager - ServerOrchestrator] Server ' . $subscription_id . ' successfully powered up.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');
         } else {
-            error_log('#046 [SIYA Server Manager - ServerOrchestrator] Server powerup verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
+            error_log('#046 [SIYA Server Manager - ServerOrchestrator] Server powerup for Server:'. $subscription_id . 'verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
 
             if ($retry_count < 5) {
                 error_log('#047 [SIYA Server Manager - ServerOrchestrator] Retrying powerup in 1 minute. Attempt: ' . ($retry_count + 1));

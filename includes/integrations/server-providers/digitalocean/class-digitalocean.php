@@ -201,7 +201,6 @@ EOD;
             'rebooting' => 'rebooting'
         ];
         $mapped_status = $status_map[$raw_status] ?? $raw_status;
-        error_log(sprintf('[SIYA Server Manager] DigitalOcean: Mapping status from "%s" to "%s"', $raw_status, $mapped_status));
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Full status mapping details:%sFrom: %s%sTo: %s', 
             PHP_EOL, var_export($raw_status, true), 
             PHP_EOL, var_export($mapped_status, true)
