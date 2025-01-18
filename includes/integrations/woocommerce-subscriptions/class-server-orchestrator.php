@@ -742,119 +742,96 @@ class ServerOrchestrator {
         }
     }
 
-    // Step 5: Schedule server powerup
+
+    // Start server power-up process
     public function start_server_powerup($subscription) {
-
-        error_log ('Starting server power up') ;
-
+        error_log('Starting server power-up process.');
+    
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-
+    
         if (!$server_post_id) {
-            error_log('#041 [SIYA Server Manager - ServerOrchestrator] No linked server post ID found for powerup.');
+            error_log(sprintf('#041 No linked server post ID found for power-up. Subscription ID: %s', $subscription_id));
             return;
         }
-
-        $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
-        
-        // Update server suspension status
-        update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-reconnection');
-
-        // Check if server is already powered on
-        if ($this->server_provisioned_remote_status != 'off') {
-        error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server status for ' . $subscription_id . ' is ' . $this->server_provisioned_remote_status . ' - only shut down servers can be powered on');
-         
-            // Verify server status from remote server directly as a final check
-            $this->initialize_server_provider($server_provider_slug);
-            $latest_remote_status = $this->server_provider->get_server_status($server_post_id);
-            if ( $latest_remote_status != 'off') {
-                error_log('[SIYA Server Manager] Final check failed: Server is not off.');
-                return;
-            }
-
-        } 
-
+    
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-
-        // New check: Ensure server ID exists
-        if (empty($server_provisioned_id)) {
-            error_log('[SIYA Server Manager] Server provisioning ID not found, skipping powerup.');
-            return;
-        }
-
-        // New check: Ensure remote server exists
+        $server_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
+    
         $this->initialize_server_provider($server_provider_slug);
-        $status = $this->server_provider->get_server_status($server_provisioned_id);
-        if (is_wp_error($status) || !isset($status['provisioned_remote_status'])) {
-            error_log('[SIYA Server Manager] Remote server not found, skipping powerup.');
+    
+        // Check if the server is off
+        if ($server_remote_status !== 'off' && $this->server_provider->get_server_status($server_post_id) !== 'off') {
+            error_log(sprintf('#042 Server must be off to power up. Server Post ID: %s', $server_post_id));
             return;
         }
-
-        as_schedule_single_action(
-            time(),
-            'arsol_server_powerup',
-            [[
-                'subscription_id' => $subscription_id,
-                'server_post_id' => $server_post_id,
-                'server_provider_slug' => $server_provider_slug,
-                'server_provisioned_id' => $server_provisioned_id
-            ]],
-            'arsol_class_server_orchestrator'
-        );
-        
+    
+        // Ensure server provisioning ID exists
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+        if (empty($server_provisioned_id)) {
+            error_log(sprintf('[SIYA Server Manager] Server provisioning ID not found, skipping power-up. Server Post ID: %s', $server_post_id));
+            return;
+        }
+    
+        // Schedule the power-up action
+        as_schedule_single_action(time(), 'arsol_server_powerup', [[
+            'subscription_id' => $subscription_id,
+            'server_post_id' => $server_post_id,
+            'server_provisioned_id' => $server_provisioned_id,
+            'server_provider_slug' => $server_provider_slug
+        ]], 'arsol_class_server_orchestrator');
     }
-
-    // Step 5: Finish server powerup
+    
+    // Finish server power-up process
     public function finish_server_powerup($args) {
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
-        $server_provider_slug = $args['server_provider_slug'] ?? null;
         $server_provisioned_id = $args['server_provisioned_id'] ?? null;
+        $server_provider_slug = $args['server_provider_slug'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
-
-        if (!$subscription_id || !$server_post_id || !$server_provider_slug || !$server_provisioned_id) {
-            error_log('#043 [SIYA Server Manager - ServerOrchestrator] Missing parameters for powerup.');
+    
+        // Validate required parameters
+        if (!$subscription_id || !$server_post_id || !$server_provisioned_id || !$server_provider_slug) {
+            error_log(sprintf('#043 Missing parameters for power-up. Args: %s', json_encode($args)));
             return;
         }
-
-        // Power up server
-        $this->initialize_server_provider($server_provider_slug);   
+    
+        $this->initialize_server_provider($server_provider_slug);
         $this->server_provider->poweron_server($server_provisioned_id);
-        
-        // Get remote status and update metadata
+    
         $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-       
-        error_log(sprintf('#044 [SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $subscription_id, $remote_status['provisioned_remote_status']));
-
-        // Verify server powered up
-        if ($remote_status['provisioned_remote_status'] == 'active' || $remote_status['provisioned_remote_status'] == 'starting') {
-            error_log('#045 [SIYA Server Manager - ServerOrchestrator] Server ' . $subscription_id . ' successfully powered up.');
+        error_log(sprintf('#044 Updated remote status metadata for Server Post ID: %s', $server_post_id));
+    
+        // Handle success or retry logic
+        if (in_array($remote_status['provisioned_remote_status'], ['active', 'starting'], true)) {
+            error_log(sprintf('#045 Server successfully powered up. Server Post ID: %s', $server_post_id));
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');
         } else {
-            error_log('#046 [SIYA Server Manager - ServerOrchestrator] Server powerup for Server:'. $subscription_id . 'verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
-
-            if ($retry_count < 5) {
-                error_log('#047 [SIYA Server Manager - ServerOrchestrator] Retrying powerup in 1 minute. Attempt: ' . ($retry_count + 1));
-                as_schedule_single_action(
-                    time() + 60, // Retry in 1 minute
-                    'arsol_server_powerup',
-                    [[
-                        'subscription_id' => $subscription_id,
-                        'server_post_id' => $server_post_id,
-                        'server_provider_slug' => $server_provider_slug,
-                        'server_provisioned_id' => $server_provisioned_id,
-                        'retry_count' => $retry_count + 1
-                    ]],
-                    'arsol_class_server_orchestrator'
-                );
+            $max_retries = 5;
+            $retry_delay = 60 * pow(2, $retry_count); // Exponential backoff
+    
+            if ($retry_count < $max_retries) {
+                error_log(sprintf(
+                    '#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d',
+                    $server_post_id,
+                    $retry_delay,
+                    $retry_count + 1
+                ));
+    
+                as_schedule_single_action(time() + $retry_delay, 'arsol_server_powerup', [[
+                    'subscription_id' => $subscription_id,
+                    'server_post_id' => $server_post_id,
+                    'server_provisioned_id' => $server_provisioned_id,
+                    'server_provider_slug' => $server_provider_slug,
+                    'retry_count' => $retry_count + 1
+                ]], 'arsol_class_server_orchestrator');
             } else {
-                error_log('#048 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server powerup failed.');
+                error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
+                // Optional: Notify admin or trigger a fallback process here
             }
         }
     }
-
+    
     // Start server deletion process
     public function start_server_deletion($subscription) {
         
