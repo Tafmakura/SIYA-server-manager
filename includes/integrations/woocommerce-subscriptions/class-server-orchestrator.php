@@ -643,7 +643,7 @@ class ServerOrchestrator {
         update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
     
         // Early return for inactive servers
-        if ($this->server_provisioned_remote_status !== 'active' || $this->server_provisioned_remote_status !== 'starting') {
+        if ($this->server_provisioned_remote_status != 'active' || $this->server_provisioned_remote_status != 'starting') {
             error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for Server Post ID ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
     
             // Final check of server status from the remote server
