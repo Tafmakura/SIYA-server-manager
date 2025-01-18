@@ -373,8 +373,7 @@ class Vultr /*implements ServerProvider*/ {
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
         ]);
-
-    
+        error_log('XXX1 Response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         if (is_wp_error($response)) {
             error_log('Vultr status error: ' . $response->get_error_message());
@@ -384,7 +383,7 @@ class Vultr /*implements ServerProvider*/ {
         $response_code = wp_remote_retrieve_response_code($response);
         if ($response_code !== 200) {
 
-            error_log('XXX1 Response code:' . $server_provisioned_id);
+            error_log('XXX2 Response code:' . $server_provisioned_id);
             return false;
         }
 
