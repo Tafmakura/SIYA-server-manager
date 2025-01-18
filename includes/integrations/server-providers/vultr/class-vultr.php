@@ -178,7 +178,6 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_root_password' => $api_response['instance']['default_password'] ?? '',
             'provisioned_remote_status' => $this->map_statuses($raw_power_status, $raw_status, $raw_server_status),
             'provisioned_remote_raw_status' => $raw_status,
-            'provisioned_server_status' => $raw_server_status
         ];
     }
 
@@ -394,7 +393,6 @@ class Vultr /*implements ServerProvider*/ {
         return [
             'provisioned_remote_status' => $this->map_statuses($raw_power_status, $raw_status, $raw_server_status),
             'provisioned_remote_raw_status' => $raw_status,
-            'provisioned_server_status' => $raw_server_status
         ];
     }
 
