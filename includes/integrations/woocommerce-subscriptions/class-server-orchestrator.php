@@ -358,7 +358,7 @@ class ServerOrchestrator {
         error_log(sprintf('#023 [SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $subscription_id));
 
         // Get server metadata from post
-        $erver_post_id = $server_post_id;
+        $server_post_id = $server_post_id;
         $server_post_instance = new ServerPost($server_post_id);
         $server_name = 'ARSOL' . $subscription_id;
         $web_server_type = 'nginx';
@@ -438,7 +438,7 @@ class ServerOrchestrator {
                 $runcloud_response['body']
             )); */
 
-            error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $this->subscription_id));
+            error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
 
             // Trigger the connection to the provisioned server
             $this->connect_server_manager($server_post_id);
