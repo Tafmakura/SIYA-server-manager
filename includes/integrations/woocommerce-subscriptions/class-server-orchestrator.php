@@ -69,7 +69,7 @@ class ServerOrchestrator {
         add_action('arsol_start_update_server_status_hook', array($this, 'start_update_server_status'), 20, 1);
 
         // Add new action hooks for server powerup
-        add_action('woocommerce_subscription_status_on-hold_to_active', array($this, 'start_server_powerup'), 20, 1);
+        add_action('woocommerce_subscription_status_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
 
         add_action('woocommerce_subscription_status_cancelled', array($this, 'start_server_deletion'), 10, 1);
