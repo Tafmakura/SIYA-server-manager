@@ -351,7 +351,7 @@ class ServerOrchestrator {
     }
 
     // Step 4 (Optional): Deploy to RunCloud and update server metadata
-    protected function start_server_manager_connection($args) {
+    public function start_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
