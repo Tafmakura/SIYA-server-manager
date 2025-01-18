@@ -124,6 +124,12 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     private function map_statuses($raw_power_status, $raw_status, $raw_server_status) {
+
+        error_log (sprintf('[SIYA Server Manager] Vultr: Mapping statuses with raw power status: %s, raw status: %s, raw server status: %s', 
+            $raw_power_status, $raw_status, $raw_server_status )
+        );
+
+
         
         if ($raw_server_status == 'installingbooting') {
             $mapped_status = 'starting';
