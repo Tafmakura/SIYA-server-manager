@@ -374,6 +374,8 @@ class Vultr /*implements ServerProvider*/ {
             ]
         ]);
 
+    
+
         if (is_wp_error($response)) {
             error_log('Vultr status error: ' . $response->get_error_message());
             return false;
@@ -381,6 +383,8 @@ class Vultr /*implements ServerProvider*/ {
 
         $response_code = wp_remote_retrieve_response_code($response);
         if ($response_code !== 200) {
+
+            error_log('XXX1 Response code:' . $server_provisioned_id);
             return false;
         }
 
