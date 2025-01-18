@@ -263,7 +263,7 @@ class ServerOrchestrator {
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
-                'time_out'                  => 120
+                'time_out'                  => 300
             ]);
 
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
