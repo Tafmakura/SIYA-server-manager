@@ -1302,6 +1302,8 @@ class ServerOrchestrator {
         // Get remote status
         $this->initialize_server_provider($server_provider_slug);
         $remote_status = $this->server_provider->get_server_status($server_post_id);
+
+        error_log ('#049 [SIYA Server Manager - ServerOrchestrator] Updated server status: ' . json_encode($remote_status));
         
         if (!$remote_status || !isset($remote_status['provisioned_remote_status']) || !isset($remote_status['provisioned_remote_raw_status'])) {
             error_log ('Failed to retrieve valid server status from provider.');
