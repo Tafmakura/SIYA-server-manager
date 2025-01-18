@@ -569,7 +569,11 @@ class ServerOrchestrator {
         $server_manager_instance = new Runcloud();
     
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
-    
+        
+        // Prevent PHP from timing out
+        set_time_limit(0);
+
+
         try {
             // Check installation status
             $installationTimeout = apply_filters('siya_server_installation_timeout', 5 * 60);
