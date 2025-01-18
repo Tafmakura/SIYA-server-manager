@@ -480,13 +480,15 @@ class ServerOrchestrator {
     }
 
     // Install Runcloud agent on provisioned server to connect server to Runcloud
-    protected function finish_server_manager_connection($server_post_id) {
+    protected function finish_server_manager_connection($args) {
 
         // TODO 
         // ADD validation for servers that have Runcloud Deployed
+
        
         error_log ('Milestone X4');
 
+        $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
         if ($subscription) {
