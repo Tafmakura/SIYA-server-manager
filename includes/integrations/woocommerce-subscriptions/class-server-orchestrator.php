@@ -741,6 +741,8 @@ class ServerOrchestrator {
     // Step 5: Schedule server powerup
     public function start_server_powerup($subscription) {
 
+        error_log ('Starting server power up') ;
+
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
