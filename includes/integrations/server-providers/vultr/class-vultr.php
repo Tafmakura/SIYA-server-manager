@@ -129,6 +129,7 @@ class Vultr /*implements ServerProvider*/ {
             'installing' => 'starting',
             'active (running)' => 'active',
             'active' => 'active',
+            'suspended' => 'off',
             'active (stopped)' => 'off',
             'stopped' => 'off',
             'rebooting' => 'rebooting'
