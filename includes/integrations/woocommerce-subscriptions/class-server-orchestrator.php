@@ -350,7 +350,7 @@ class ServerOrchestrator {
 
     }
 
-    // Step 4 (Optional): Deploy to RunCloud and update server metadata
+    // Step 4 (Optional): Create server in Runcloud
     public function start_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
@@ -481,7 +481,7 @@ class ServerOrchestrator {
         }
     }
 
-    // New method to connect server manager to provisioned server
+    // Install Runcloud agent on provisioned server to connect server to Runcloud
     protected function finish_server_manager_connection($server_post_id) {
 
         // TODO 
@@ -560,8 +560,7 @@ class ServerOrchestrator {
             } else {
                
                 error_log('[SIYA Server Manager - Server Orchestrator] Successfully executed script on server.');
-               // $subscription->add_order_note('Successfully connected server manager to provisioned server.');
-
+               
                 // Schedule finish_server_connection using Action Scheduler
                 as_schedule_single_action(time() + 120, 
                     'arsol_verify_server_manager_connection_hook', 
@@ -616,6 +615,7 @@ class ServerOrchestrator {
                     update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
                     update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
                     update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
+                    error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server manager connected to server post ID %d', $server_post_id . ' & verified.'));
                     break;
                 }
                 sleep(15);
