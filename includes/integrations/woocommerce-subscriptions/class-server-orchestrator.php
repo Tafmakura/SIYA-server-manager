@@ -355,18 +355,21 @@ class ServerOrchestrator {
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
-        error_log(sprintf('#023 [SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
-        $this->server_post_id = $server_post_id;
+        error_log(sprintf('#023 [SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $subscription_id));
+
+        // Get server metadata from post
+        $erver_post_id = $server_post_id;
         $server_post_instance = new ServerPost($server_post_id);
-        $server_name = 'ARSOL' . $this->subscription_id;
+        $server_name = 'ARSOL' . $subscription_id;
         $web_server_type = 'nginx';
         $installation_type = 'native';
-        $provider = $this->server_provider_slug;
-        $server_ips = $this->get_provisioned_server_ip($this->server_provider_slug, $this->server_provisioned_id);
+        $provider = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+        $server_ips = $this->get_provisioned_server_ip($provider, $server_provisioned_id);
         $ipv4 = $server_ips['ipv4'];
         $ipv6 = $server_ips['ipv6'];
         
-        // Save IP addresses to post meta so that it is available for RunCloud deployment Investigate why this is only needed for DigitalOcean but not Vultr an Hetzner 
+        // Save IP addresses to post meta so that it is available for RunCloud deployment
         if (!empty($ipv4)) {
             update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
         }
@@ -426,7 +429,7 @@ class ServerOrchestrator {
                 'arsol_server_connection_status' => 0,
                 'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
             ];
-            $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+            $server_post_instance->update_meta_data($server_post_id, $metadata);
 
                 // TODO FIX THIS
             // Successful API subscription note for RunCloud deployment
