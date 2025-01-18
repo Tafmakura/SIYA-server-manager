@@ -363,21 +363,28 @@ class Vultr /*implements ServerProvider*/ {
             ]
         ]);
 
+
+        error_log('XXX 1: Vultr status response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
         if (is_wp_error($response)) {
             error_log('Vultr status error: ' . $response->get_error_message());
             return false;
         }
+
+        error_log('XXX 2');
 
         $response_code = wp_remote_retrieve_response_code($response);
         if ($response_code !== 200) {
             return false;
         }
 
-        error_log ('MAIHWEEEEEEEE');
+        error_log ('XXX 3');
 
         $api_response = json_decode(wp_remote_retrieve_body($response), true);
         $raw_status = $api_response['instance']['status'] ?? '';
         $power_status = $api_response['instance']['power_status'] ?? '';
+
+        error_log ('XXX 4');
 
         return [
             'provisioned_remote_status' => $this->map_statuses($raw_status),
