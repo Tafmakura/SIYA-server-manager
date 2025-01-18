@@ -313,7 +313,7 @@ class ServerOrchestrator {
                         $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
 
                         if (!$server_deployed_status && $connect_server_manager === 'yes') {
-                            error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
+                            error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment');
                             
                             // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler
                             as_schedule_single_action(
@@ -431,17 +431,22 @@ class ServerOrchestrator {
             ];
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
-                // TODO FIX THIS
-            // Successful API subscription note for RunCloud deployment
-          /* $subscription->add_order_note(sprintf(
-                "RunCloud deployment successful with Response body: %s",
-                $runcloud_response['body']
-            )); */
-
             error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
 
             // Trigger the connection to the provisioned server
-            $this->connect_server_manager($server_post_id);
+            $this->finish_server_manager_connection($server_post_id);
+
+
+
+
+
+
+
+
+
+
+
+
 
         } elseif (!isset($runcloud_response['status']) || !in_array($runcloud_response['status'], [200, 201])) {
             error_log('#029 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
@@ -477,7 +482,7 @@ class ServerOrchestrator {
     }
 
     // New method to connect server manager to provisioned server
-    protected function connect_server_manager($server_post_id) {
+    protected function finish_server_manager_connection($server_post_id) {
 
         // TODO 
         // ADD validation for servers that have Runcloud Deployed
@@ -588,7 +593,6 @@ class ServerOrchestrator {
         
         // Prevent PHP from timing out
         set_time_limit(0);
-
 
         try {
             // Check installation status
@@ -738,6 +742,7 @@ class ServerOrchestrator {
 
     // Step 5: Schedule server powerup
     public function start_server_powerup($subscription) {
+
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
