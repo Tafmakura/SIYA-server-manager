@@ -277,6 +277,8 @@ class ServerOrchestrator {
 
     // Step 3: Update server status 
     public function start_update_server_status($args) {
+
+        
        
         error_log('Milestone 7');
  
@@ -293,6 +295,8 @@ class ServerOrchestrator {
         $time_out = $args['time_out'];
 
         error_log('#016 [SIYA Server Manager - ServerOrchestrator] HOYO >>>>> Provisioned ID ' . $server_provisioned_id);
+
+        set_time_limit(0); // Disable timeout for the script
 
         $start_time = time();
         while ((time() - $start_time) < $time_out) {

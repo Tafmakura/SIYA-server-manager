@@ -129,12 +129,7 @@ class Vultr /*implements ServerProvider*/ {
             $raw_power_status, $raw_status, $raw_server_status )
         );
 
-
-        
-        if ($raw_server_status == 'installingbooting') {
-            $mapped_status = 'starting';
-
-        } elseif ($raw_power_status == 'stopped') {
+        if ($raw_power_status == 'stopped') {
             $mapped_status = 'off';
             
         } elseif ($raw_power_status == 'running') {
