@@ -72,8 +72,8 @@ class ServerOrchestrator {
         add_action('woocommerce_subscription_status_on-hold_to_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
 
-        add_action('woocommerce_subscription_status_pending-cancel_to_cancelled', array($this, 'start_server_deletion'), 10, 1);
-        add_action('arsol_finish_server_deletion', array($this, 'finish_server_deletion'), 20, 1);
+        add_action('woocommerce_subscription_status_cancelled', array($this, 'start_server_deletion'), 10, 1);
+        add_action('woocommerce_subscription_status_trash', array($this, 'start_server_deletion'), 10, 1);
 
         // Add new action hook for deploying to RunCloud
         add_action('arsol_start_server_manager_connection_hook', array($this, 'start_server_manager_connection'), 20, 2);
