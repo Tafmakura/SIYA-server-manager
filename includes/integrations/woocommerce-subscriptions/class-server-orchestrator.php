@@ -84,6 +84,8 @@ class ServerOrchestrator {
         // Add new action hooks for server connection
         add_action('arsol_verify_server_manager_connection_hook', [$this, 'verify_server_manager_connection']);
 
+        add_action('arsol_finish_server_deletion_hook', [$this, 'finish_server_deletion']);  
+
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -480,7 +482,7 @@ class ServerOrchestrator {
     }
 
     // Install Runcloud agent on provisioned server to connect server to Runcloud
-    public function finish_server_manager_connection($args) {
+   public function finish_server_manager_connection($args) {
 
         // TODO 
         // ADD validation for servers that have Runcloud Deployed
@@ -876,10 +878,11 @@ class ServerOrchestrator {
 
         as_schedule_single_action(
             time(),
-            'arsol_finish_server_deletion',
+            'arsol_finish_server_deletion_hook',
             [[
                 'subscription_id' => $subscription_id,
-                'server_post_id' => $linked_server_post_id
+                'server_post_id' => $linked_server_post_id,
+                'retry_count' => $retry_count + 1
             ]],
             'arsol_class_server_orchestrator'
         );
@@ -939,7 +942,7 @@ class ServerOrchestrator {
                 if ($retry_count < 5) {
                     as_schedule_single_action(
                         time() + 60,
-                        'arsol_finish_server_deletion',
+                        'arsol_finish_server_deletion_hook',
                         [[
                             'subscription_id' => $subscription_id,
                             'server_post_id' => $server_post_id,
