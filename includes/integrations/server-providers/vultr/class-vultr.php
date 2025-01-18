@@ -367,13 +367,14 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function get_server_status($server_provisioned_id) {
+    public function get_server_status($server_post_id) {
+
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
             ]
         ]);
-        error_log('XXX1 Response: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         if (is_wp_error($response)) {
             error_log('Vultr status error: ' . $response->get_error_message());
@@ -382,8 +383,6 @@ class Vultr /*implements ServerProvider*/ {
 
         $response_code = wp_remote_retrieve_response_code($response);
         if ($response_code !== 200) {
-
-            error_log('XXX2 Response code:' . $server_provisioned_id);
             return false;
         }
 
