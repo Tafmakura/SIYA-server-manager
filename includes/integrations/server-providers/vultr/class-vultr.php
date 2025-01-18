@@ -124,15 +124,17 @@ class Vultr /*implements ServerProvider*/ {
     }
 
     private function map_statuses($raw_power_status, $raw_status, $raw_server_status) {
-        if ($raw_server_status === 'installingbooting') {
+        
+        if ($raw_server_status == 'installingbooting') {
             $mapped_status = 'starting';
-            
-        } elseif ($raw_power_status === 'stopped') {
+
+        } elseif ($raw_power_status == 'stopped') {
             $mapped_status = 'off';
             
-        } elseif ($raw_power_status === 'running') {
+        } elseif ($raw_power_status == 'running') {
             $status_map = [
                 'active' => 'active',
+                'active (running)' => 'active',
                 'pending' => 'starting',
                 'resizing' => 'upgrading'
             ];
