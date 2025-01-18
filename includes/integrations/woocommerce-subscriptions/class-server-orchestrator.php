@@ -78,6 +78,9 @@ class ServerOrchestrator {
         // Add new action hooks for server connection
         add_action('arsol_verify_server_manager_connection_hook', [$this, 'verify_server_manager_connection']);
 
+        // Add new action hook for deploying to RunCloud
+        add_action('arsol_start_server_manager_connection_hook', array($this, 'start_server_manager_connection'), 20, 2);
+
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -263,7 +266,7 @@ class ServerOrchestrator {
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
-                'time_out'                  => 300
+                'time_out'                  => 120
             ]);
 
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -311,8 +314,17 @@ class ServerOrchestrator {
 
                         if (!$server_deployed_status && $connect_server_manager === 'yes') {
                             error_log('#019 [SIYA Server Manager - ServerOrchestrator] Initializing RunCloud deployment');
-                            $this->runcloud = new Runcloud();
-                            $this->deploy_to_runcloud_and_update_metadata($server_post_id, $subscription);
+                            
+                            // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler
+                            as_schedule_single_action(
+                                time(),
+                                'arsol_start_server_manager_connection_hook',
+                                [[
+                                    'server_post_id' => $server_post_id,
+                                ]],
+                                'arsol_class_server_orchestrator'
+                            );
+
                         } else {
                             error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no RunCloud deployment needed');
                         }
@@ -339,18 +351,17 @@ class ServerOrchestrator {
     }
 
     // Step 4 (Optional): Deploy to RunCloud and update server metadata
-    protected function deploy_to_runcloud_and_update_metadata($server_post_id, $subscription) {
+    protected function start_server_manager_connection($args) {
+        $server_post_id = $args['server_post_id'];
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+        $subscription = wcs_get_subscription($subscription_id);
         error_log(sprintf('#023 [SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $this->subscription_id));
-
-        // Get server metadata from post
         $this->server_post_id = $server_post_id;
         $server_post_instance = new ServerPost($server_post_id);
         $server_name = 'ARSOL' . $this->subscription_id;
         $web_server_type = 'nginx';
         $installation_type = 'native';
         $provider = $this->server_provider_slug;
-
-        // Get server IP addresses
         $server_ips = $this->get_provisioned_server_ip($this->server_provider_slug, $this->server_provisioned_id);
         $ipv4 = $server_ips['ipv4'];
         $ipv6 = $server_ips['ipv6'];
@@ -380,7 +391,9 @@ class ServerOrchestrator {
         error_log('Milestone X2');
         
         // Initialize RunCloud & Deploy to RunCloud
-        $this->runcloud = new Runcloud();
+        if (!$this->runcloud) {
+            $this->runcloud = new Runcloud();
+        }
         error_log('Milestone X2b');
         
         $runcloud_response = $this->runcloud->create_server_in_server_manager(
