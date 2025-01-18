@@ -125,30 +125,29 @@ class Vultr /*implements ServerProvider*/ {
 
     private function map_statuses($raw_power_status, $raw_status, $raw_server_status) {
         if ($raw_server_status === 'installingbooting') {
-            return 'starting';
-        }
-
-        if ($raw_power_status === 'stopped') {
-            return 'off';
-        }
-
-        if ($raw_power_status === 'running') {
+            $mapped_status = 'starting';
+            
+        } elseif ($raw_power_status === 'stopped') {
+            $mapped_status = 'off';
+            
+        } elseif ($raw_power_status === 'running') {
             $status_map = [
                 'active' => 'active',
                 'pending' => 'starting',
-                'suspended' => 'off',
                 'resizing' => 'upgrading'
             ];
-
             $mapped_status = $status_map[$raw_status] ?? $raw_status;
-            error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sRaw Status From: %s%sTo: %s', 
-                PHP_EOL, var_export($raw_status, true), PHP_EOL, var_export($mapped_status, true)
-            ));
 
-            return $mapped_status;
+        } else {
+
+            $mapped_status = $raw_power_status;
         }
 
-        return $raw_power_status;
+        error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sRaw Status From: %s%sTo: %s', 
+            PHP_EOL, var_export($raw_status, true), PHP_EOL, var_export($mapped_status, true)
+        ));
+
+        return $mapped_status;
     }
 
     public function compile_server_return_data($api_response) {
