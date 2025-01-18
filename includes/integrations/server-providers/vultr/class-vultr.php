@@ -373,6 +373,8 @@ class Vultr /*implements ServerProvider*/ {
             return false;
         }
 
+        error_log ('MAIHWEEEEEEEE');
+
         $api_response = json_decode(wp_remote_retrieve_body($response), true);
         $raw_status = $api_response['instance']['status'] ?? '';
         $power_status = $api_response['instance']['power_status'] ?? '';
