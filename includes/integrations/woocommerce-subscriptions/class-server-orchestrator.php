@@ -66,7 +66,7 @@ class ServerOrchestrator {
 
         // Add new action hook for the scheduled processes
         add_action('arsol_finish_server_provision', array($this, 'finish_server_provision'), 20, 1);
-        add_action('arsol_update_server_status', array($this, 'start_update_server_status'), 20, 1);
+        add_action('arsol_start_update_server_status_hook', array($this, 'start_update_server_status'), 20, 1);
 
         // Add new action hooks for server powerup
         add_action('woocommerce_subscription_status_on-hold_to_active', array($this, 'start_server_powerup'), 20, 1);
@@ -254,7 +254,7 @@ class ServerOrchestrator {
             error_log('Milestone 6');
 
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
-            $this->schedule_action('arsol_update_server_status', [
+            $this->schedule_action('arsol_start_update_server_status_hook', [
                 'server_provider'           => $this->server_provider_slug,
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
@@ -278,8 +278,6 @@ class ServerOrchestrator {
     // Step 3: Update server status 
     public function start_update_server_status($args) {
 
-        
-       
         error_log('Milestone 7');
  
         error_log('#015 [SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
@@ -295,8 +293,6 @@ class ServerOrchestrator {
         $time_out = $args['time_out'];
 
         error_log('#016 [SIYA Server Manager - ServerOrchestrator] HOYO >>>>> Provisioned ID ' . $server_provisioned_id);
-
-        set_time_limit(0); // Disable timeout for the script
 
         $start_time = time();
         while ((time() - $start_time) < $time_out) {
