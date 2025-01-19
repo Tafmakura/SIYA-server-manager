@@ -1234,7 +1234,7 @@ class ServerOrchestrator {
                 'Server post for ARSOL(%d) with Post ID: %d created successfully. <a href="%s" target="_blank">View Now</a>',
                 $this->subscription_id,
                 $this->server_post_id,
-                esc_url($order_url) // Ensure the URL is properly escaped
+                esc_url($server_post_url) // Ensure the URL is properly escaped
             );
 
             // Add server post URL to the subscription note
