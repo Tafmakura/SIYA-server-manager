@@ -1110,7 +1110,7 @@ class ServerOrchestrator {
             $subscription->add_order_note(
                 'Failed to create server post. Error: ' . $post_id->get_error_message()
             );
-            $subscription->update_status('on-hold'); // Switch subscription status to on hold
+        
             throw new \Exception('Failed to create server post');
         }
     }
@@ -1176,7 +1176,6 @@ class ServerOrchestrator {
                 $error_message = "Failed to provision server";
                 error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
                 $subscription->add_order_note($error_message);
-                $subscription->update_status('on-hold');
                 throw new \Exception($error_message);
             }
 
@@ -1405,7 +1404,6 @@ class ServerOrchestrator {
     private function handle_exception($e, $subscription, $message) {
         error_log(sprintf('#005 [SIYA Server Manager - ServerOrchestrator] %s: %s', $message, $e->getMessage()));
         $subscription->add_order_note(sprintf("%s:%s%s", $message, PHP_EOL, $e->getMessage()));
-        $subscription->update_status('on-hold');
     }
 
     // New method to open ports at the provider
