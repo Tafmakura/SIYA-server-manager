@@ -126,7 +126,7 @@ class ServerOrchestrator {
                 'task_id' => uniqid()
             ]);
             $subscription->add_order_note(
-                'Scheduled background server provision with task ID: ' . $args['task_id']
+                'Scheduled background server provision with task ID: ',
             );
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
@@ -623,7 +623,8 @@ class ServerOrchestrator {
             // If both script installation and connection are successful, proceed to schedule the next event
             $subscription_id = $args['subscription_id'];
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
-            $this->schedule_next_event($server_post_id, $subscription_id, $server_ip);
+
+            error_log('[SIYA Server Manager - ServerOrchestrator] Success :) for Server ARSOL' . $subscription_id );
     
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error verifying connection: %s', $e->getMessage()));
@@ -631,23 +632,7 @@ class ServerOrchestrator {
         }
     }
     
-    // Scheduling the next event
-    public function schedule_next_event($server_post_id, $subscription_id, $server_ip) {
-        as_schedule_single_action(time() + 120, 
-            'arsol_next_server_manager_step_hook', 
-            [
-                'server_post_id' => $server_post_id,
-                'subscription_id' => $subscription_id,
-                'server_ip' => $server_ip,
-                'task_id' => uniqid()
-            ],  
-            'arsol_class_server_orchestrator');
-    
-        error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled next server manager step.');
-    }
-    
-    
-    
+
     public function start_server_shutdown($subscription) {
         // Early validation of required parameters
         $subscription_id = $subscription->get_id();

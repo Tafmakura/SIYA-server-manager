@@ -106,9 +106,6 @@ class Runcloud /*implements ServerManager*/ {
             $ssh_username = 'root';
             $ssh_port = 22;
 
-            error_log('[SIYA Server Manager][RunCloud] SSH Private Key: ' . $ssh_private_key);
-            error_log('[SIYA Server Manager][RunCloud] SSH Public Key: ' . $ssh_public_key);
-
             // Initialize SSH connection
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection with phpseclib...');
             
