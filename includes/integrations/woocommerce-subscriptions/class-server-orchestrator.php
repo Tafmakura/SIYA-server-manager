@@ -310,125 +310,118 @@ class ServerOrchestrator {
 
                     if ($remote_status['provisioned_remote_status'] === $target_status) {
                         error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
-    
-                        // Proceed with RunCloud deployment only if the server is "active"
-                        if ($target_status === 'active') {
-                            try {
-                                // Fetch the provisioned server IPs
-                                $server_ips = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id);
-                            } catch (\Exception $e) {
-                                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error fetching provisioned server IP: ' . $e->getMessage());
-                                $subscription->add_order_note('RunCloud deployment failed: Error fetching provisioned server IP.');
-                                
-                                update_post_meta($server_post_id, 'arsol_server_ip_status', -1);
-                                return; // Stop processing if there's an error fetching the IP
-                            }
+                   
+                        try {
+                            // Fetch the provisioned server IPs
+                            $server_ips = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id);
+                        } catch (\Exception $e) {
+                            error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error fetching provisioned server IP: ' . $e->getMessage());
+                            $subscription->add_order_note('RunCloud deployment failed: Error fetching provisioned server IP.');
                             
-                            // Extract IPv4 and IPv6 addresses
-                            $ipv4 = $server_ips['ipv4'];
-                            $ipv6 = $server_ips['ipv6'];
-                            
-                            if (empty($ipv4) || empty($ipv6)) {
-                                if (empty($ipv4)) {
-                                    // Handle case where IPv4 is empty (priority check)
-                                    error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
-                                    $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
-                                    
-                                    // Update server_deployed_status to -1 on failure
-                                    update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
-                                    return; // Stop processing if IPv4 is empty
-                                }
-    
-                                if (empty($ipv6)) {
-                                    // Handle case where IPv6 is empty (IPv4 is present, so continue)
-                                    error_log('#026 [SIYA Server Manager - ServerOrchestrator] Warning: IPv6 address is empty.');
-                                    // No return here, continue processing
-                                }
-                            }
-    
-                            // Save IP addresses to post meta for RunCloud deployment
-                            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
-                            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
-                            update_post_meta($server_post_id, 'arsol_server_ip_status', 2);
-    
-                            // Add order note with IP addresses
-                            $success_message = sprintf(
-                                'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
-                                PHP_EOL,
-                                $ipv4 ?: 'Not provided',
-                                PHP_EOL,
-                                $ipv6 ?: 'Not provided'
-                            );
-    
-                            $subscription->add_order_note($success_message);
-                            error_log($success_message);
-
-                            break; // Exit the loop after acquiring the IP addresses
+                            update_post_meta($server_post_id, 'arsol_server_ip_status', -1);
+                            return; // Stop processing if there's an error fetching the IP
                         }
+                        
+                        // Extract IPv4 and IPv6 addresses
+                        $ipv4 = $server_ips['ipv4'];
+                        $ipv6 = $server_ips['ipv6'];
+                        
+                        if (empty($ipv4) || empty($ipv6)) {
+                            if (empty($ipv4)) {
+                                // Handle case where IPv4 is empty (priority check)
+                                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
+                                $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
+                                
+                                // Update server_deployed_status to -1 on failure
+                                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                                return; // Stop processing if IPv4 is empty
+                            }
+
+                            if (empty($ipv6)) {
+                                // Handle case where IPv6 is empty (IPv4 is present, so continue)
+                                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Warning: IPv6 address is empty.');
+                                // No return here, continue processing
+                            }
+                        }
+
+                        // Save IP addresses to post meta for RunCloud deployment
+                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
+                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
+                        update_post_meta($server_post_id, 'arsol_server_ip_status', 2);
+
+                        // Add order note with IP addresses
+                        $success_message = sprintf(
+                            'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
+                            PHP_EOL,
+                            $ipv4 ?: 'Not provided',
+                            PHP_EOL,
+                            $ipv6 ?: 'Not provided'
+                        );
+
+                        $subscription->add_order_note($success_message);
+                        error_log($success_message);
+
+                        break; // Exit the loop after acquiring the IP addresses
                         
                     } 
 
                 } catch (\Exception $e) {
                     error_log("#022 [SIYA Server Manager - ServerOrchestrator] Error fetching server status: " . $e->getMessage());
-                    return false; // Exit on exception
                 }
-    
+            
+                // Timeout check inside the loop
+                if ((time() - $start_time) >= $time_out) {
+                    // Timeout reached without acquiring the target status
+                    error_log("#023 [SIYA Server Manager] Timeout reached for server post ID: " . $server_post_id);
+                    $subscription->add_order_note('Server provisioning failed: Timeout reached.');
+                    
+                    // Check if the retry count is within the allowed maximum
+                    if ($retry_count < $max_retries) {
+                        error_log(sprintf('#024 [SIYA Server Manager] Retrying server status update. Attempt: %d', $retry_count + 1));
+
+                        // Increment retry count and schedule next retry
+                        $task_id = uniqid(); // New task ID for retry
+                        as_schedule_single_action(
+                            time() + 10, // Retry after 10 seconds
+                            'arsol_wait_for_server_active_state_hook',
+                            [[
+                                'server_provider' => $server_provider_slug,
+                                'connect_server_manager' => $connect_server_manager,
+                                'server_manager' => $server_manager,
+                                'server_provisioned_id' => $server_provisioned_id,
+                                'target_status' => $target_status,
+                                'server_post_id' => $server_post_id,
+                                'poll_interval' => $poll_interval,
+                                'time_out' => $time_out,
+                                'retry_count' => $retry_count + 1,
+                                'task_id' => $task_id
+                            ]],
+                            'arsol_class_server_orchestrator'
+                        );
+
+                        // Add order note for retry
+                        $subscription->add_order_note('Could not get a server status. Scheduled a retry.' . PHP_EOL . '(Task ID: ' . $task_id . ')');
+                        return false; // Retry
+                    }
+
+                    // If max retries have been reached, stop the process
+                    return false; // Max retries reached or timeout
+                }
+
                 // Wait for the next polling interval before retrying
                 sleep($poll_interval);
             }
+           
+        } else {
     
-            // Timeout reached without acquiring the target status
-            error_log("#023 [SIYA Server Manager - ServerOrchestrator] Server status update timed out for server post ID: " . $server_post_id);
-            $subscription->add_order_note('Server provisioning failed: Timeout reached.');
-    
-            // Schedule a retry if the max retries are not reached
-            if ($retry_count < $max_retries) {
-                error_log(sprintf('#024 [SIYA Server Manager - ServerOrchestrator] Retrying server status update. Attempt: %d', $retry_count + 1));
-    
-                // Increment retry count and schedule next retry
-                $task_id = uniqid(); // New task ID for retry
-                as_schedule_single_action(
-                    time() + 10, // Retry after 10 seconds
-                    'arsol_wait_for_server_active_state_hook',
-                    [[
-                        'server_provider' => $server_provider_slug,
-                        'connect_server_manager' => $connect_server_manager,
-                        'server_manager' => $server_manager,
-                        'server_provisioned_id' => $server_provisioned_id,
-                        'target_status' => $target_status,
-                        'server_post_id' => $server_post_id,
-                        'poll_interval' => $poll_interval,
-                        'time_out' => $time_out,
-                        'retry_count' => $retry_count + 1,
-                        'task_id' => $task_id
-                    ]],
-                    'arsol_class_server_orchestrator'
-                );
-    
-                $subscription->add_order_note(
-                    'Could not get a server status. Scheduled a retry.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
-                );
-    
-                return false; // Retry
-            }
-            return false; // Max retries reached or timeout
-        }
-    
-        // If IP status is already 2, skip the status check and proceed with server manager or marking subscription as active
-        error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is 2. Skipping IP validation and status check.');
-    
-        // Proceed to check the remote status and take the next step
-        $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-        error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking remote status: ' . json_encode($remote_status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    
-        // If remote status matches the target status, we proceed
-        if ($remote_status['provisioned_remote_status'] === $target_status) {
-            error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
-    
+            // If IP status is already 2, skip the status check and proceed with server manager or marking subscription as active
+            error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is 2. Skipping IP validation and status check.');
+        
+        
             // Proceed with RunCloud deployment or mark as active
             if ($connect_server_manager === 'yes') {
                 error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment after IP validation.');
-    
+
                 // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
                 as_schedule_single_action(
                     time(),
@@ -439,64 +432,23 @@ class ServerOrchestrator {
                     ]],
                     'arsol_class_server_orchestrator'
                 );
-    
+
                 // Add order note to inform the user about scheduling
                 $subscription->add_order_note(
                     'Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                 );
+
             } else {
                 // No server manager required, mark the subscription as active
                 error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server manager is not required. Marking subscription as active.');
-    
+
                 $success_message = 'Server is ready, no server manager needed. Turning subscription status to active.';
                 $subscription->add_order_note($success_message);
                 $subscription->update_status('active');
             }
-    
-            return true; // Success
-        } else {
-            error_log('#021 [SIYA Server Manager - ServerOrchestrator] Remote status did not match target.');
-            return false; // Failure: Remote status did not match
+
         }
     
-        // Log timeout if the loop ends without reaching the target status
-        error_log("#023 [SIYA Server Manager - ServerOrchestrator] Server status update timed out for server post ID: " . $server_post_id);
-    
-
-        if ($retry_count < 2) {
-            error_log(sprintf('#024 [SIYA Server Manager - ServerOrchestrator] Retrying server status update. Attempt: %d', $retry_count + 1));
-            
-            // Schedule the next retry using Action Scheduler
-            $task_id = uniqid();
-            
-            as_schedule_single_action(
-                time() + 10, // Retry after 10 seconds
-                'arsol_wait_for_server_active_state_hook',
-                [[
-                    'server_provider' => $server_provider_slug,
-                    'connect_server_manager' => $connect_server_manager,
-                    'server_manager' => $server_manager,
-                    'server_provisioned_id' => $server_provisioned_id,
-                    'target_status' => $target_status,
-                    'server_post_id' => $server_post_id,
-                    'poll_interval' => $poll_interval,
-                    'time_out' => $time_out,
-                    'retry_count' => $retry_count + 1,
-                    'task_id' => $task_id
-                ]],
-                'arsol_class_server_orchestrator'
-            );
-
-            $subscription->add_order_note(
-                'Could not get a server status. Scheduled a retry.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
-            );
-
-            return false; // Retry
-        }
-    
-        // If retries are exhausted, log failure
-        error_log("#025 [SIYA Server Manager - ServerOrchestrator] Max retry attempts reached, failing server status update for server post ID: " . $server_post_id);
-        return false; // Exit after max retries
     }
     
     // Step 4 (Optional): Create server in Runcloud
