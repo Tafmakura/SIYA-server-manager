@@ -428,78 +428,78 @@ class ServerOrchestrator {
                     // No return here, continue processing
                 }
 
+            } 
+
+            // Save IP addresses to post meta so that it is available for RunCloud deployment
+            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
+            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
+            
+            // Add order note with IP addresses
+            $success_message = sprintf(
+                'Successfully acquired IP address!%sIPv4: %s%sIPv6: %s',
+                PHP_EOL,
+                $ipv4 ?: 'Not provided',
+                PHP_EOL,
+                $ipv6 ?: 'Not provided'
+            );
+
+            $subscription->add_order_note($success_message);
+
+            // Log the success message
+            error_log($success_message);
+
+            // Initialize RunCloud class if not already initialized
+            if (!$this->runcloud) {
+                $this->runcloud = new Runcloud();
+            }
+            
+            // Deploy server to RunCloud
+            $runcloud_response = $this->runcloud->create_server_in_server_manager(
+                $server_name,
+                $ipv4,
+                $web_server_type,
+                $installation_type, 
+                $provider
+            );
+
+            // Debug log the RunCloud response
+            error_log(sprintf(
+                '#027 [SIYA Server Manager - ServerOrchestrator] RunCloud Response:%s%s',
+                PHP_EOL, 
+                print_r($runcloud_response, true)
+            ));
+
+            if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
+                // Successful Log
+                error_log('#028 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
+
+                // Update server metadata
+                $metadata = [
+                    'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
+                    'arsol_server_deployment_date' => current_time('mysql'),
+                    'arsol_server_deployed_status' => 2, // Set status to 2 on success
+                    'arsol_server_connection_status' => 0,
+                    'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
+                ];
+                $server_post_instance->update_meta_data($server_post_id, $metadata);
+
+                error_log(sprintf('#029 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
+                $deployment_status = true; // Mark deployment as successful
             } else {
-
-                // Save IP addresses to post meta so that it is available for RunCloud deployment
-                update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
-                update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
-                
-                // Add order note with IP addresses
-                $success_message = sprintf(
-                    'Successfully acquired IP address!%sIPv4: %s%sIPv6: %s',
-                    PHP_EOL,
-                    $ipv4 ?: 'Not provided',
-                    PHP_EOL,
-                    $ipv6 ?: 'Not provided'
-                );
-
-                $subscription->add_order_note($success_message);
-
-                // Log the success message
-                error_log($success_message);
-
-                // Initialize RunCloud class if not already initialized
-                if (!$this->runcloud) {
-                    $this->runcloud = new Runcloud();
-                }
-                
-                // Deploy server to RunCloud
-                $runcloud_response = $this->runcloud->create_server_in_server_manager(
-                    $server_name,
-                    $ipv4,
-                    $web_server_type,
-                    $installation_type, 
-                    $provider
-                );
-    
-                // Debug log the RunCloud response
-                error_log(sprintf(
-                    '#027 [SIYA Server Manager - ServerOrchestrator] RunCloud Response:%s%s',
-                    PHP_EOL, 
+                // Failure condition
+                error_log('#030 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
+                $subscription->add_order_note(sprintf(
+                    "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
+                    $runcloud_response['status'],
+                    $runcloud_response['body'],
                     print_r($runcloud_response, true)
                 ));
-    
-                if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
-                    // Successful Log
-                    error_log('#028 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
-    
-                    // Update server metadata
-                    $metadata = [
-                        'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
-                        'arsol_server_deployment_date' => current_time('mysql'),
-                        'arsol_server_deployed_status' => 2, // Set status to 2 on success
-                        'arsol_server_connection_status' => 0,
-                        'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
-                    ];
-                    $server_post_instance->update_meta_data($server_post_id, $metadata);
-    
-                    error_log(sprintf('#029 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
-                    $deployment_status = true; // Mark deployment as successful
-                } else {
-                    // Failure condition
-                    error_log('#030 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
-                    $subscription->add_order_note(sprintf(
-                        "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
-                        $runcloud_response['status'],
-                        $runcloud_response['body'],
-                        print_r($runcloud_response, true)
-                    ));
-    
-                    // Update server_deployed_status to -1 on failure
-                    update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
-                    return; // Exit on failure
-                }
+
+                // Update server_deployed_status to -1 on failure
+                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                return; // Exit on failure
             }
+        
         } else {
             // If the server has already been deployed (status == 2), skip deployment
             error_log('#024 [SIYA Server Manager - ServerOrchestrator] Server already deployed, skipping deployment.');
