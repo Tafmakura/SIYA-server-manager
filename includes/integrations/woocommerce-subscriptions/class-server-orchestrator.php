@@ -122,7 +122,8 @@ class ServerOrchestrator {
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
-                'server_provider_slug' => $this->server_provider_slug
+                'server_provider_slug' => $this->server_provider_slug,
+                'task_id' => uniqid()
             ]);
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
@@ -271,7 +272,8 @@ class ServerOrchestrator {
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
-                'time_out'                  => 120
+                'time_out'                  => 120,
+                'task_id'                   => uniqid()
             ]);
 
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -326,6 +328,7 @@ class ServerOrchestrator {
                                 'arsol_start_server_manager_connection_hook',
                                 [[
                                     'server_post_id' => $server_post_id,
+                                    'task_id' => uniqid()
                                 ]],
                                 'arsol_class_server_orchestrator'
                             );
@@ -442,7 +445,8 @@ class ServerOrchestrator {
             as_schedule_single_action(time(), 
                 'arsol_finish_server_manager_connection_hook', 
                 [[
-                    'server_post_id' => $server_post_id
+                    'server_post_id' => $server_post_id,
+                    'task_id' => uniqid()
                 ]],  
                 'arsol_class_server_orchestrator');
 
@@ -573,7 +577,8 @@ class ServerOrchestrator {
                         'ssh_host' => $server_ip,
                         'ssh_username' => $ssh_username,
                         'ssh_private_key' => $ssh_private_key,
-                        'ssh_port' => $ssh_port
+                        'ssh_port' => $ssh_port,
+                        'task_id' => uniqid()
                     ]],  
                     'arsol_class_server_orchestrator');
 
@@ -689,6 +694,7 @@ class ServerOrchestrator {
                 'server_post_id' => $server_post_id,
                 'server_provider_slug' => $server_provider_slug,
                 'server_provisioned_id' => $server_provisioned_id,
+                'task_id' => uniqid()
             ]],
             'arsol_class_server_orchestrator'
         );
@@ -732,7 +738,8 @@ class ServerOrchestrator {
                         'server_post_id' => $server_post_id,
                         'server_provider_slug' => $server_provider_slug,
                         'server_provisioned_id' => $server_provisioned_id,
-                        'retry_count' => $retry_count + 1
+                        'retry_count' => $retry_count + 1,
+                        'task_id' => uniqid()
                     ]],
                     'arsol_class_server_orchestrator'
                 );
@@ -744,6 +751,7 @@ class ServerOrchestrator {
 
     // Start server power-up process
     public function start_server_powerup($subscription) {
+
         // Log the start of the power-up process
         error_log('Starting server power-up process.');
     
@@ -782,7 +790,8 @@ class ServerOrchestrator {
             'subscription_id' => $subscription_id,
             'server_post_id' => $server_post_id,
             'server_provisioned_id' => $server_provisioned_id,
-            'server_provider_slug' => $server_provider_slug
+            'server_provider_slug' => $server_provider_slug,
+            'task_id' => uniqid()
         ]], 'arsol_class_server_orchestrator');
     }
     
@@ -816,6 +825,7 @@ class ServerOrchestrator {
             error_log(sprintf('#045 Server successfully powered up. Server Post ID: %s', $server_post_id));
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');
         } else {
+
             // If the maximum retry count is not reached, retry power-up with exponential backoff
             if ($retry_count < 5) {
                 $delay = 60 * pow(2, $retry_count); // Calculate retry delay
@@ -832,15 +842,16 @@ class ServerOrchestrator {
                     'server_post_id' => $server_post_id,
                     'server_provisioned_id' => $server_provisioned_id,
                     'server_provider_slug' => $server_provider_slug,
-                    'retry_count' => $retry_count + 1
+                    'retry_count' => $retry_count + 1,
+                    'task_id' => uniqid()
                 ]], 'arsol_class_server_orchestrator');
             } else {
+
                 // Log an error if the maximum retries are reached
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
             }
         }
     }
-    
     
     // Start server deletion process
     public function start_server_deletion($subscription) {
@@ -869,7 +880,8 @@ class ServerOrchestrator {
             [[
                 'subscription_id' => $subscription_id,
                 'server_post_id' => $linked_server_post_id,
-                'retry_count' => $retry_count + 1
+                'retry_count' => $retry_count + 1,
+                'task_id' => uniqid()
             ]],
             'arsol_class_server_orchestrator'
         );
@@ -933,7 +945,8 @@ class ServerOrchestrator {
                         [[
                             'subscription_id' => $subscription_id,
                             'server_post_id' => $server_post_id,
-                            'retry_count' => $retry_count + 1
+                            'retry_count' => $retry_count + 1,
+                            'task_id' => uniqid()
                         ]],
                         'arsol_class_server_orchestrator'
                     );
@@ -963,7 +976,8 @@ class ServerOrchestrator {
                         [[
                             'subscription_id' => $subscription_id,
                             'server_post_id' => $server_post_id,
-                            'retry_count' => $retry_count + 1
+                            'retry_count' => $retry_count + 1,
+                            'task_id' => uniqid()
                         ]],
                         'arsol_class_server_orchestrator'
                     );
