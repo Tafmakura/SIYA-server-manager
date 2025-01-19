@@ -173,7 +173,7 @@ class ServerOrchestrator {
             $this->server_post_creation_date = $metadata['arsol_server_post_creation_date'] ?? null;
             $this->wordpress_server = $metadata['arsol_wordpress_server'] ?? null;
             $this->wordpress_ecommerce = $metadata['arsol_wordpress_ecommerce'] ?? null;
-            $this->connect_server_manager = $metadata['arsol_server_manager_required'] ?? null;
+            $this->connect_server_manager = $metadata['_arsol_server_manager_required'] ?? null;
             $this->server_provider_slug = $metadata['arsol_server_provider_slug'] ?? null;
             $this->server_group_slug = $metadata['arsol_server_group_slug'] ?? null;
             $this->server_plan_slug = $metadata['arsol_server_plan_slug'] ?? null;
@@ -1260,7 +1260,7 @@ class ServerOrchestrator {
                 'arsol_server_product_id' => $this->server_product_id,
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
-                'arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
+                '_arsol_server_manager_required' => $server_product->get_meta('__arsol_server_manager_required', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
@@ -1280,7 +1280,7 @@ class ServerOrchestrator {
 
             // Check if we need to connect to the server manager
             /*
-            $this->connect_server_manager = $server_product->get_meta('_arsol_server_manager_required', true);
+            $this->connect_server_manager = $server_product->get_meta('__arsol_server_manager_required', true);
             if ($this->connect_server_manager === 'yes') {
                 $this->runcloud = new Runcloud();
                 $installation_script = $this->runcloud->get_installation_script($this->server_provisioned_id);

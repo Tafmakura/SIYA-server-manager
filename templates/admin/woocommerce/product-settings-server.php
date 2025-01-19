@@ -15,7 +15,7 @@
         $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
         $is_wordpress_server = get_post_meta($post->ID, '_arsol_wordpress_server', true) === 'yes';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_wordpress_ecommerce', true) === 'yes';
-        $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
+        $is_server_manager = get_post_meta($post->ID, '__arsol_server_manager_required', true) === 'yes';
 
         woocommerce_wp_text_input(array(
             'id'          => '_arsol_max_applications',
@@ -48,7 +48,7 @@
             'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
         ));
         woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_server_manager_required',
+            'id'          => '__arsol_server_manager_required',
             'label'       => __('Runcloud', 'woocommerce'),
             'description' => __('Connect this server to Runcloud server manager.', 'woocommerce'),
             'desc_tip'    => 'true',

@@ -55,13 +55,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Server Metadata: ' . print_r($server_metadata, true));
 
             // Check if server manager is required
-            $server_manager_required = $server_metadata['arsol_server_manager_required'];
+            $server_manager_required = $server_metadata['_arsol_server_manager_required'];
 
             // If server manager is required, check all statuses must be 2
             if ($server_manager_required === 'yes') {
                 $all_status_complete = true;
                 foreach ($server_metadata as $key => $value) {
-                    if ($key != 'arsol_server_manager_required' && $value != 2) {
+                    if ($key != '_arsol_server_manager_required' && $value != 2) {
                         $all_status_complete = false;
                         break;
                     }
