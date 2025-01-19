@@ -1223,44 +1223,6 @@ class ServerOrchestrator {
                 throw new \Exception($error_message);
             }
 
-            $subscription->update_status('active');
-
-            // Update subscription notes with the provisioned server data
-
-            $success_message = sprintf(
-                "Server provisioned successfully! %s" .
-                "Server Provider: %s%s" .
-                "Server ID: %s%s" .
-                "Server Name: %s%s" .
-                "OS: %s%s" .
-                "OS Version: %s%s" .
-                "Provisioned Date: %s%s" .
-                "IPv4: %s%s" .
-                "IPv6: %s%s" .
-                "CPU Cores: %s%s" .
-                "Memory: %s%s" .
-                "Storage: %s%s" .
-                "Region: %s",
-                PHP_EOL,
-                $server_provider_slug ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_id'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_name'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_os'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_os_version'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_date'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_ipv4'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_ipv6'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_vcpu_count'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_memory'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_storage'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_region_slug'] ?: 'Not provided'
-            );
-
-            $subscription->add_order_note($success_message);
-
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
-      
-
             // Update server post metadata using the standardized data
             $server_post_instance = new ServerPost;
             $metadata = [
@@ -1279,20 +1241,42 @@ class ServerOrchestrator {
             ];
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Provider Status Details:%sRemote Status: %s%sRaw Status: %s', 
+            // Update subscription notes and logs with the provisioned server data
+            $success_message = sprintf(
+                "Server provisioned successfully! %s" .
+                "Server Provider: %s%s" .
+                "Server ID: %s%s" .
+                "Server Name: %s%s" .
+                "OS: %s%s" .
+                "OS Version: %s%s" .
+                "IPv4: %s%s" .
+                "IPv6: %s%s" .
+                "CPU Cores: %s%s" .
+                "Memory: %s%s" .
+                "Storage: %s%s" .
+                "Region: %s%s" .
+                "Provisioned Date: %s",
                 PHP_EOL,
-                $server_data['provisioned_remote_status'],
-                PHP_EOL,
-                $server_data['provisioned_remote_raw_status']
-            ));
+                $server_provider_slug ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_id'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_name'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_os'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_os_version'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_ipv4'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_ipv6'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_vcpu_count'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_memory'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_storage'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_region_slug'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_date'] ?: 'Not provided'
+            );
 
-            $subscription->add_order_note(sprintf(
-                "Server metadata updated successfully:%s%s",
-                PHP_EOL,
-                print_r($metadata, true)
-            ));
+            $subscription->add_order_note($success_message);
+
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
 
             return $server_data;
+
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Exception caught: %s', $e->getMessage()));
             throw $e;
