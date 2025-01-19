@@ -1268,7 +1268,8 @@ class ServerOrchestrator {
                 'arsol_server_provisioned_root_password' => $server_data['provisioned_root_password'],
                 'arsol_server_provisioned_date' => $server_data['provisioned_date'],
                 'arsol_server_provisioned_remote_status' => $server_data['provisioned_remote_status'],
-                'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status']
+                'arsol_server_provisioned_remote_raw_status' => $server_data['provisioned_remote_raw_status'],
+                'arsol_server_provisioned_disk_size' => $server_data['provisioned_disk_size'] // Add this line
             ];
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
@@ -1284,7 +1285,7 @@ class ServerOrchestrator {
                 "IPv6: %s%s" .
                 "CPU Cores: %s%s" .
                 "Memory: %s%s" .
-                "Storage: %s%s" .
+                "Disk Size: %s%s" .
                 "Region: %s%s" .
                 "Provisioned Date: %s",
                 PHP_EOL,
@@ -1297,7 +1298,7 @@ class ServerOrchestrator {
                 $server_data['provisioned_ipv6'] ?: 'Not provided', PHP_EOL,
                 $server_data['provisioned_vcpu_count'] ?: 'Not provided', PHP_EOL,
                 $server_data['provisioned_memory'] ?: 'Not provided', PHP_EOL,
-                $server_data['provisioned_storage'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_disk_size'] ?: 'Not provided', PHP_EOL, // Update this line
                 $server_data['provisioned_region_slug'] ?: 'Not provided', PHP_EOL,
                 $server_data['provisioned_date'] ?: 'Not provided'
             );
