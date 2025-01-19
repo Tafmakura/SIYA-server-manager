@@ -238,7 +238,7 @@ class Runcloud /*implements ServerManager*/ {
                     'status' => 'failed',
                     'message' => 'RunCloud Agent is installed but has failed.',
                 ];
-            } elseif (stripos($status_output, 'Unit runcloud-agent.service could not be found') !== false) {
+            } elseif (stripos($status_output, 'Unit runcloud-agent.service could not be found') !== false || stripos($status_output, 'could not be found') !== false) {
                 return [
                     'status' => 'not-installed',
                     'message' => 'RunCloud Agent is not installed.',
