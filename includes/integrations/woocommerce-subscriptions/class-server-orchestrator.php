@@ -633,26 +633,28 @@ class ServerOrchestrator {
     }
     
     public function start_server_shutdown($subscription) {
+        // Early validation of required parameters
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-    
-        // Check if the server post ID exists
+        
+        // If no linked server post ID is found, log the error and exit
         if (!$server_post_id) {
             error_log('#032 [SIYA Server Manager - ServerOrchestrator] No server post found for shutdown. Subscription ID: ' . $subscription_id);
             return;
         }
     
-        // Get the circuit breaker status directly from the post meta
+        // Check circuit breaker status for shutdown
         $this->server_circuit_breaker_status = get_post_meta($server_post_id, 'arsol_server_circuit_breaker_status', true);
         if ($this->server_circuit_breaker_status == 'tripped') {
             error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping shutdown.');
             return;
         }
     
+        // Fetch the necessary metadata
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-    
-        // New check: Ensure server provisioning ID exists
+        
+        // If provisioning ID is missing, log the error and exit
         if (empty($server_provisioned_id)) {
             error_log('[SIYA Server Manager] Server provisioning ID not found, skipping shutdown. Server Post ID: ' . $server_post_id);
             return;
@@ -660,31 +662,7 @@ class ServerOrchestrator {
     
         // Initialize the server provider
         $this->initialize_server_provider($server_provider_slug);
-    
-        // New check: Ensure remote server exists
-        $status = $this->server_provider->get_server_status($server_post_id);
-        if (is_wp_error($status) || !isset($status['provisioned_remote_status'])) {
-            error_log('[SIYA Server Manager] Remote server not found or invalid status response for Server Post ID: ' . $server_post_id);
-            return;
-        }
-    
-        $this->server_provisioned_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
-    
-        // Update suspension status
-        update_post_meta($server_post_id, 'arsol_server_suspension', 'pending-suspension');
-    
-        // Early return for inactive servers
-        if ($this->server_provisioned_remote_status !== 'active' && $this->server_provisioned_remote_status !== 'starting') {
-            error_log('#034 [SIYA Server Manager - ServerOrchestrator] Server status for Server Post ID ' . $server_post_id . ' is ' . $this->server_provisioned_remote_status . ' - only active servers can be shut down');
-    
-            // Final check of server status from the remote server
-            $latest_remote_status = $this->server_provider->get_server_status($server_post_id);
-            if ($latest_remote_status !== 'active' && $latest_remote_status !== 'starting') {
-                error_log('[SIYA Server Manager] Final check failed: Server is not active. Server Post ID: ' . $server_post_id);
-                return;
-            }
-        }
-    
+        
         // Schedule the shutdown action
         as_schedule_single_action(
             time(),
@@ -699,35 +677,37 @@ class ServerOrchestrator {
             'arsol_class_server_orchestrator'
         );
     }
-
-    // Step 5: Finish server shutdown
+    
     public function finish_server_shutdown($args) {
+        // Early validation of required parameters
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $server_provider_slug = $args['server_provider_slug'] ?? null;
         $server_provisioned_id = $args['server_provisioned_id'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
-
+    
+        // If any required parameter is missing, log the error and exit early
         if (!$subscription_id || !$server_post_id || !$server_provider_slug || !$server_provisioned_id) {
-            error_log('#035 [SIYA Server Manager - ServerOrchestrator] Missing parameters for shutdown.');
+            error_log('#035 [SIYA Server Manager - ServerOrchestrator] Missing parameters for shutdown. Args: ' . json_encode($args));
             return;
         }
-
-        // Shutdown server
+    
+        // Proceed with the shutdown process
         $this->initialize_server_provider($server_provider_slug);
         $this->server_provider->shutdown_server($server_provisioned_id);
-
+    
         // Update server suspension status
         $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
         error_log(sprintf('#036 [SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
-
+    
         // Verify server shutdown
         if ($remote_status['provisioned_remote_status'] === 'off') {
             error_log('#037 [SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully shut down.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
         } else {
             error_log('#038 [SIYA Server Manager - ServerOrchestrator] Server shutdown verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
-
+    
+            // Retry logic
             if ($retry_count < 5) {
                 error_log('#039 [SIYA Server Manager - ServerOrchestrator] Retrying shutdown in 1 minute. Attempt: ' . ($retry_count + 1));
                 as_schedule_single_action(
@@ -748,28 +728,29 @@ class ServerOrchestrator {
             }
         }
     }
-
-    // Start server power-up process
-    public function start_server_powerup($subscription) {
-
-        // Log the start of the power-up process
-        error_log('Starting server power-up process.');
     
-        // Retrieve subscription and server information
+    public function start_server_powerup($subscription) {
+        // Early validation of required parameters
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-    
+        
         // If no linked server post ID is found, log the error and exit
         if (!$server_post_id) {
             error_log(sprintf('#041 No linked server post ID found for power-up. Subscription ID: %s', $subscription_id));
             return;
         }
     
+        // Check circuit breaker status for power-up
+        $this->server_circuit_breaker_status = get_post_meta($server_post_id, 'arsol_server_circuit_breaker_status', true);
+        if ($this->server_circuit_breaker_status == 'tripped') {
+            error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping power-up.');
+            return;
+        }
+    
         // Fetch server metadata required for the power-up process
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-        $server_remote_status = get_post_meta($server_post_id, 'arsol_server_provisioned_remote_status', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-    
+        
         // If any critical metadata is missing, log the error and exit
         if (!$server_provider_slug || !$server_provisioned_id) {
             error_log(sprintf('[SIYA Server Manager] Missing server provisioning details. Server Post ID: %s', $server_post_id));
@@ -778,12 +759,6 @@ class ServerOrchestrator {
     
         // Initialize the server provider instance
         $this->initialize_server_provider($server_provider_slug);
-    
-        // Check if the server is already powered on
-        if ($server_remote_status !== 'off' && $this->server_provider->get_server_status($server_post_id) !== 'off') {
-            error_log(sprintf('#042 Server must be off to power up. Server Post ID: %s', $server_post_id));
-            return;
-        }
     
         // Schedule the power-up action
         as_schedule_single_action(time(), 'arsol_server_powerup', [[
@@ -795,16 +770,15 @@ class ServerOrchestrator {
         ]], 'arsol_class_server_orchestrator');
     }
     
-    // Finish server power-up process
     public function finish_server_powerup($args) {
-        // Extract arguments with fallback defaults
+        // Early validation of required parameters
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $server_provisioned_id = $args['server_provisioned_id'] ?? null;
         $server_provider_slug = $args['server_provider_slug'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
     
-        // Validate required arguments
+        // If any required parameter is missing, log the error and exit early
         if (!$subscription_id || !$server_post_id || !$server_provisioned_id || !$server_provider_slug) {
             error_log(sprintf('#043 Missing parameters for power-up. Args: %s', json_encode($args)));
             return;
@@ -825,16 +799,10 @@ class ServerOrchestrator {
             error_log(sprintf('#045 Server successfully powered up. Server Post ID: %s', $server_post_id));
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');
         } else {
-
-            // If the maximum retry count is not reached, retry power-up with exponential backoff
+            // Retry logic with exponential backoff
             if ($retry_count < 5) {
-                $delay = 60 * pow(2, $retry_count); // Calculate retry delay
-                error_log(sprintf(
-                    '#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d',
-                    $server_post_id,
-                    $delay,
-                    $retry_count + 1
-                ));
+                $delay = 60 * pow(2, $retry_count); // Exponential backoff
+                error_log(sprintf('#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d', $server_post_id, $delay, $retry_count + 1));
     
                 // Schedule the next retry
                 as_schedule_single_action(time() + $delay, 'arsol_server_powerup', [[
@@ -846,12 +814,11 @@ class ServerOrchestrator {
                     'task_id' => uniqid()
                 ]], 'arsol_class_server_orchestrator');
             } else {
-
-                // Log an error if the maximum retries are reached
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
             }
         }
     }
+    
     
     // Start server deletion process
     public function start_server_deletion($subscription) {
