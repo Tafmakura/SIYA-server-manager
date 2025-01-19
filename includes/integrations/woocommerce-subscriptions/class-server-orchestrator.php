@@ -269,9 +269,10 @@ class ServerOrchestrator {
         $server_manager = $args['server_manager'];
         $connect_server_manager = $args['connect_server_manager'];
         $server_provisioned_id = $args['server_provisioned_id'];
-        $subscription = $args['subscription'];
         $target_status = $args['target_status'];
         $server_post_id = $args['server_post_id'];
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+        $subscription = wcs_get_subscription($subscription_id);
         $poll_interval = $args['poll_interval'];
         $time_out = $args['time_out'];
         $retry_count = $args['retry_count'] ?? 0;
