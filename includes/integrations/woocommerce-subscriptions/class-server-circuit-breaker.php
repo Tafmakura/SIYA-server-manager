@@ -81,7 +81,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             } else {
                 // If not complete, trigger provisioning
                 update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'tripped');
-                $subscription->update_status('pending');
+                $subscription->update_status('on-hold');
                 $this->start_server_provision($this->subscription);
                 $subscription->add_order_note("Server provisioning failed or incomplete. Retrying deployment.");
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker tripped. Retrying deployment.');
@@ -91,7 +91,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         } catch (Exception $e) {
             // Log the exception and notify for manual intervention
             error_log('[SIYA Server Manager - ServerCircuitBreaker] Exception occurred: ' . $e->getMessage());
-            $subscription->update_status('pending');
+            $subscription->update_status('on-hold');
             $subscription->add_order_note("An error occurred: " . $e->getMessage() . ". Manual intervention required.");
         }
     }
