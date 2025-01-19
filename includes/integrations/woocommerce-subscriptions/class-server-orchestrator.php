@@ -676,6 +676,8 @@ class ServerOrchestrator {
             ]],
             'arsol_class_server_orchestrator'
         );
+
+        $subscription->add_order_note('Server shutdown initiated.');
     }
 
     public function finish_server_shutdown($args) {
@@ -692,6 +694,9 @@ class ServerOrchestrator {
             return;
         }
 
+        // Retrieve the subscription instance
+        $subscription = wcs_get_subscription($subscription_id);
+
         // Proceed with the shutdown process
         $this->initialize_server_provider($server_provider_slug);
         $this->server_provider->shutdown_server($server_provisioned_id);
@@ -704,6 +709,7 @@ class ServerOrchestrator {
         if ($remote_status['provisioned_remote_status'] === 'off') {
             error_log('#037 [SIYA Server Manager - ServerOrchestrator] Server ' . $server_post_id . ' successfully shut down.');
             update_post_meta($server_post_id, 'arsol_server_suspension', 'yes');
+            $subscription->add_order_note('Server shutdown verified: the server is now off.');
         } else {
             error_log('#038 [SIYA Server Manager - ServerOrchestrator] Server shutdown verification failed. Current status: ' . $remote_status['provisioned_remote_status']);
 
@@ -727,6 +733,8 @@ class ServerOrchestrator {
                 error_log('#040 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server shutdown failed.');
             }
         }
+
+        $subscription->add_order_note('Server shutdown process completed or in progress...');
     }
 
     public function start_server_powerup($subscription) {
@@ -768,6 +776,8 @@ class ServerOrchestrator {
             'server_provider_slug' => $server_provider_slug,
             'task_id' => uniqid()
         ]], 'arsol_class_server_orchestrator');
+
+        $subscription->add_order_note('Server power-up initiated.');
     }
 
     public function finish_server_powerup($args) {
@@ -784,6 +794,9 @@ class ServerOrchestrator {
             return;
         }
 
+        // Retrieve the subscription instance
+        $subscription = wcs_get_subscription($subscription_id);
+
         // Initialize the server provider instance
         $this->initialize_server_provider($server_provider_slug);
 
@@ -798,6 +811,7 @@ class ServerOrchestrator {
         if (in_array($remote_status['provisioned_remote_status'], ['active', 'starting'], true)) {
             error_log(sprintf('#045 Server successfully powered up. Server Post ID: %s', $server_post_id));
             update_post_meta($server_post_id, 'arsol_server_suspension', 'no');
+            $subscription->add_order_note('Server power-up verified: the server is now active or starting.');
         } else {
             // Retry logic with exponential backoff
             if ($retry_count < 5) {
