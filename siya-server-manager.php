@@ -25,10 +25,14 @@ require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 
 
-add_action('woocommerce_before_account_subscription', 'add_custom_hello_text');
+add_filter('wcs_view_subscription_columns', 'add_custom_hello_text_to_status_column', 10, 2);
 
-function add_custom_hello_text() {
-    echo '<h2>Hello, here are your subscription details:</h2>';
+function add_custom_hello_text_to_status_column($column, $subscription) {
+    if ($column == 'status') {
+        $status = wcs_get_subscription_status($subscription);
+        $status_text = wcs_get_subscription_status_name($status);
+        echo '<span>Hello, here is the status:</span><br>' . $status_text;
+    }
 }
 
 
