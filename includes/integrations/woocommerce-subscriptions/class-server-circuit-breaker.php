@@ -22,6 +22,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $subscription_id = $subscription->get_id();
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
 
+            error_log("HOYOOOOOOOOOOOOOOOOOOOOOOOOO MAIHWE");
+
             if (!$server_post_id) {
                 // Log and exit if no linked server post ID is found
                 error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: No linked server post ID found for subscription {$subscription_id}");
