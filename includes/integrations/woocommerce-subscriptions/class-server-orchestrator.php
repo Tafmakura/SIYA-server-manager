@@ -120,15 +120,17 @@ class ServerOrchestrator {
             }
             
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
+            $task_id = uniqid();
+
             $this->schedule_action('arsol_finish_server_provision', [
                 'subscription_id' => $this->subscription_id,
                 'server_post_id' => $this->server_post_id,
                 'server_product_id' => $this->server_product_id,
                 'server_provider_slug' => $this->server_provider_slug,
-                'task_id' => uniqid()
+                'task_id' => $task_id
             ]);
             $subscription->add_order_note(
-                'Scheduled background server provision with task ID: ',
+                'Scheduled background server provision with task ID:' . $task_id,
             );
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
@@ -236,6 +238,8 @@ class ServerOrchestrator {
             }
     
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
+            $task_id = uniqid();
+
             $this->schedule_action('arsol_wait_for_server_active_state_hook', [
                 'server_provider'           => $this->server_provider_slug,
                 'connect_server_manager'    => $this->connect_server_manager,
@@ -245,11 +249,11 @@ class ServerOrchestrator {
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
                 'time_out'                  => 120,
-                'task_id'                   => uniqid()
+                'task_id'                   => $task_id
             ]);
             
             $this->subscription->add_order_note(
-                'Scheduled background server status update with task ID: ' . $args['task_id']
+                'Scheduled background server status update with task ID: ' . $task_id
             );
     
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -295,14 +299,20 @@ class ServerOrchestrator {
                             error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment');
                             
                             // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler
+                            $task_id = uniqid();
+
                             as_schedule_single_action(
                                 time(),
                                 'arsol_start_server_manager_connection_hook',
                                 [[
                                     'server_post_id' => $server_post_id,
-                                    'task_id' => uniqid()
+                                    'task_id' => $task_id
                                 ]],
                                 'arsol_class_server_orchestrator'
+                            );
+
+                            $subscription->add_order_note(
+                                'Scheduled RunCloud deployment with task ID: ' . $task_id
                             );
     
                         } else {
@@ -332,9 +342,13 @@ class ServerOrchestrator {
         // Log timeout if the loop ends without reaching the target status
         error_log("#023 [SIYA Server Manager - ServerOrchestrator] Server status update timed out for server post ID: " . $server_post_id);
     
-        // Retry logic
+
         if ($retry_count < 2) {
             error_log(sprintf('#024 [SIYA Server Manager - ServerOrchestrator] Retrying server status update. Attempt: %d', $retry_count + 1));
+            
+            // Schedule the next retry using Action Scheduler
+            $task_id = uniqid();
+            
             as_schedule_single_action(
                 time() + 10, // Retry after 10 seconds
                 'arsol_wait_for_server_active_state_hook',
@@ -348,10 +362,15 @@ class ServerOrchestrator {
                     'poll_interval' => $poll_interval,
                     'time_out' => $time_out,
                     'retry_count' => $retry_count + 1,
-                    'task_id' => uniqid()
+                    'task_id' => $task_id
                 ]],
                 'arsol_class_server_orchestrator'
             );
+
+            $subscription->add_order_note(
+                'Scheduled retry for server status update with task ID: ' . $task_id
+            );
+
             return false; // Retry
         }
     
@@ -555,6 +574,9 @@ class ServerOrchestrator {
         }
     
         // Always schedule the next step
+
+        $task_id = uniqid();
+
         as_schedule_single_action(time() + 120, 
             'arsol_verify_server_manager_connection_hook', 
             [[
@@ -565,11 +587,15 @@ class ServerOrchestrator {
                 'ssh_username' => get_post_meta($server_post_id, 'arsol_ssh_username', true),
                 'ssh_private_key' => get_post_meta($server_post_id, 'arsol_ssh_private_key', true),
                 'ssh_port' => 22,
-                'task_id' => uniqid()
+                'task_id' => $task_id
             ]],  
-            'arsol_class_server_orchestrator');
+            'arsol_class_server_orchestrator'
+        );
     
-        $subscription->add_order_note('Scheduled server verification with task ID: ' . $args['task_id']);
+        $subscription->add_order_note(
+            'Scheduled server verification with task ID: ' . $task_id
+        );
+
         error_log('Scheduled server verification.');
     }    
     
@@ -694,7 +720,6 @@ class ServerOrchestrator {
         );
 
         $subscription->add_order_note(
-        
             'Server shutdown initiated with task ID: ' . $task_id
         );
 
@@ -799,6 +824,7 @@ class ServerOrchestrator {
 
         // Initialize the server provider instance
         $this->initialize_server_provider($server_provider_slug);
+        $task_id = uniqid();
 
         // Schedule the power-up action
         as_schedule_single_action(time(), 'arsol_server_powerup', [[
@@ -806,18 +832,19 @@ class ServerOrchestrator {
             'server_post_id' => $server_post_id,
             'server_provisioned_id' => $server_provisioned_id,
             'server_provider_slug' => $server_provider_slug,
-            'task_id' => uniqid()
+            'task_id' => $task_id
         ]], 'arsol_class_server_orchestrator');
 
         $subscription->add_order_note(
-            'Server power-up initiated with task ID: ' . $args['task_id']
+            'Server power-up initiated with task ID: ' . $task_id
         );
 
         $subscription->add_order_note('Server power-up initiated.');
     }
 
     public function finish_server_powerup($args) {
-        // Early validation of required parameters
+
+        // Early validation of required parameter
         $subscription_id = $args['subscription_id'] ?? null;
         $server_post_id = $args['server_post_id'] ?? null;
         $server_provisioned_id = $args['server_provisioned_id'] ?? null;
@@ -909,6 +936,8 @@ class ServerOrchestrator {
         update_post_meta($linked_server_post_id, 'arsol_server_suspension', 'pending-deletion');
 
         // Schedule server deletion completion
+        $task_id = uniqid();
+       
         as_schedule_single_action(
             time(),
             'arsol_finish_server_deletion_hook',
@@ -916,12 +945,12 @@ class ServerOrchestrator {
                 'subscription_id' => $subscription_id,
                 'server_post_id' => $linked_server_post_id,
                 'retry_count' => 0,
-                'task_id' => uniqid()
+                'task_id' => $task_id
             ]],
             'arsol_class_server_orchestrator'
         );
         $subscription->add_order_note(
-            'Scheduled server deletion with task ID: ' . $args['task_id']
+            'Scheduled server deletion with task ID: ' .  $task_id
         );
 
         error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for ' . $subscription_id . ' Server post ID ' . $linked_server_post_id);
@@ -979,6 +1008,8 @@ class ServerOrchestrator {
                 error_log('#065 [SIYA Server Manager - ServerOrchestrator] Provisioned server deletion failed.');
                 if ($retry_count < 5) {
                     // Retry server deletion after 60 seconds
+                    $task_id = uniqid();
+
                     as_schedule_single_action(
                         time() + 60,
                         'arsol_finish_server_deletion_hook',
@@ -986,14 +1017,17 @@ class ServerOrchestrator {
                             'subscription_id' => $subscription_id,
                             'server_post_id' => $server_post_id,
                             'retry_count' => $retry_count + 1,
-                            'task_id' => uniqid()
+                            'task_id' => $task_id
                         ]],
                         'arsol_class_server_orchestrator'
                     );
+
                     $subscription->add_order_note(
                         'Retrying server deletion with task ID: ' . $task_id
                     );
+
                     return;
+
                 } else {
                     error_log('#066 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Provisioned server deletion failed.');
                     return;
@@ -1014,6 +1048,8 @@ class ServerOrchestrator {
                 error_log('#061 [SIYA Server Manager - ServerOrchestrator] RunCloud server deletion failed.');
                 if ($retry_count < 5) {
                     // Retry server deletion after 60 seconds
+                    $task_id = uniqid();
+
                     as_schedule_single_action(
                         time() + 60,
                         'arsol_finish_server_deletion',
@@ -1021,14 +1057,16 @@ class ServerOrchestrator {
                             'subscription_id' => $subscription_id,
                             'server_post_id' => $server_post_id,
                             'retry_count' => $retry_count + 1,
-                            'task_id' => uniqid()
+                            'task_id' => $task_id
                         ]],
                         'arsol_class_server_orchestrator'
                     );
                     $subscription->add_order_note(
                         'Retrying server deletion with task ID: ' . $task_id
                     );
+
                     return;
+                    
                 } else {
                     error_log('#062 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. RunCloud server deletion failed.');
                     return;
