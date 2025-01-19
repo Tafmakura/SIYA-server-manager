@@ -1227,7 +1227,7 @@ class ServerOrchestrator {
             $this->server_post_id = $post_id;
 
             // Get the URL for the subscription/order
-            $server_post_url = get_permalink($this->server_post_id);
+            $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
                 'Server post for ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view server post</a>',
                 $this->subscription_id,
