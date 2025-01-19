@@ -130,7 +130,7 @@ class ServerOrchestrator {
                 'task_id' => $task_id
             ]);
             $subscription->add_order_note(
-                'Scheduled background server provision with task ID:' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                'Scheduled background server provision.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
@@ -253,7 +253,7 @@ class ServerOrchestrator {
             ]);
             
             $this->subscription->add_order_note(
-                'Scheduled background server status update with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
     
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -312,7 +312,7 @@ class ServerOrchestrator {
                             );
 
                             $subscription->add_order_note(
-                                'Scheduled RunCloud deployment with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                                'Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                             );
     
                         } else {
@@ -368,7 +368,7 @@ class ServerOrchestrator {
             );
 
             $subscription->add_order_note(
-                'Scheduled retry for server status update with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                'Scheduled retry for server status update.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
 
             return false; // Retry
@@ -519,7 +519,7 @@ class ServerOrchestrator {
     
             // Add order note for scheduling the next step
             $subscription->add_order_note(
-                'Scheduled the completion of the server manager connection with task ID: ' . $args['task_id'] . PHP_EOL . '(' . $args['task_id'] . ')'
+                'Scheduled the completion of the server manager connection.' . PHP_EOL . '(Task ID: ' . $args['task_id'] . ')'
             );
     
             error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
@@ -622,7 +622,7 @@ class ServerOrchestrator {
         );
     
         $subscription->add_order_note(
-            'Scheduled server verification with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+            'Scheduled server verification.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
         );
 
         error_log('Scheduled server verification.');
@@ -749,7 +749,7 @@ class ServerOrchestrator {
         );
 
         $subscription->add_order_note(
-            'Server shutdown initiated with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+            'Server shutdown initiated.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
         );
 
         $subscription->add_order_note('Server shutdown initiated.');
@@ -793,10 +793,9 @@ class ServerOrchestrator {
             if ($retry_count < 5) {
                 error_log('#039 [SIYA Server Manager - ServerOrchestrator] Retrying shutdown in 1 minute. Attempt: ' . ($retry_count + 1));
                 $subscription->add_order_note(sprintf(
-                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s. Task ID: %s' . PHP_EOL . '(%s)',
+                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s.' . PHP_EOL . '(Task ID: %s)',
                     $retry_count + 1,
                     $remote_status['provisioned_remote_status'],
-                    $task_id,
                     $task_id
                 ));
                 as_schedule_single_action(
@@ -813,7 +812,7 @@ class ServerOrchestrator {
                     'arsol_class_server_orchestrator'
                 );
                 $subscription->add_order_note(
-                    'Retrying server shutdown with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                    'Retrying server shutdown.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                 );
             } else {
                 error_log('#040 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server shutdown failed.');
@@ -866,7 +865,7 @@ class ServerOrchestrator {
         ]], 'arsol_class_server_orchestrator');
 
         $subscription->add_order_note(
-            'Server power-up initiated with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+            'Server power-up initiated.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
         );
 
         $subscription->add_order_note('Server power-up initiated.');
@@ -912,11 +911,10 @@ class ServerOrchestrator {
                 $delay = 60 * pow(2, $retry_count); // Exponential backoff
                 error_log(sprintf('#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d', $server_post_id, $delay, $retry_count + 1));
                 $subscription->add_order_note(sprintf(
-                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s. Task ID: %s' . PHP_EOL . '(%s)',
+                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s.' . PHP_EOL . '(Task ID: %s)',
                     $retry_count + 1,
                     $delay,
                     $remote_status['provisioned_remote_status'],
-                    $task_id,
                     $task_id
                 ));
 
@@ -930,7 +928,7 @@ class ServerOrchestrator {
                     'task_id' => $task_id
                 ]], 'arsol_class_server_orchestrator');
                 $subscription->add_order_note(
-                    'Retrying server power-up with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                    'Retrying server power-up.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                 );
             } else {
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
@@ -981,7 +979,7 @@ class ServerOrchestrator {
             'arsol_class_server_orchestrator'
         );
         $subscription->add_order_note(
-            'Scheduled server deletion with task ID: ' .  $task_id . PHP_EOL . '(' . $task_id . ')'
+            'Scheduled server deletion.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
         );
 
         error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for ' . $subscription_id . ' Server post ID ' . $linked_server_post_id);
@@ -1054,7 +1052,7 @@ class ServerOrchestrator {
                     );
 
                     $subscription->add_order_note(
-                        'Retrying server deletion with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                        'Retrying server deletion.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                     );
 
                     return;
@@ -1093,7 +1091,7 @@ class ServerOrchestrator {
                         'arsol_class_server_orchestrator'
                     );
                     $subscription->add_order_note(
-                        'Retrying server deletion with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
+                        'Retrying server deletion.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                     );
 
                     return;
