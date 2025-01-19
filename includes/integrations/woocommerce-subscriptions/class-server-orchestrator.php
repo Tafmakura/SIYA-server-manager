@@ -436,7 +436,7 @@ class ServerOrchestrator {
             
             // Add order note with IP addresses
             $success_message = sprintf(
-                'Successfully acquired IP address!%sIPv4: %s%sIPv6: %s',
+                'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
                 PHP_EOL,
                 $ipv4 ?: 'Not provided',
                 PHP_EOL,
@@ -1285,7 +1285,7 @@ class ServerOrchestrator {
                 "Memory: %s%s" .
                 "Disk Size: %s%s" .
                 "Region: %s%s" .
-                "Provisioned Date: %s",
+                "Time: %s",
                 PHP_EOL,
                 $server_provider_slug ?: 'Not provided', PHP_EOL,
                 $server_data['provisioned_id'] ?: 'Not provided', PHP_EOL,
