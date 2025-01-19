@@ -508,6 +508,10 @@ class ServerOrchestrator {
         $firewall_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', true);
         if ($firewall_status != 2) {
             try {
+
+                // Intentional fault
+                $server_provisioned_id = 0;
+
                 $open_ports_result = $this->assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id);
                 
                 if (!$open_ports_result) {
