@@ -12,11 +12,19 @@ require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 
 use Siya\Setup;
 
+// Add filter to modify subscription title
+add_filter('woocommerce_subscription_list_table_title', function($title, $subscription) {
+    return $title . ' HELLO world';
+}, 10, 2);
+
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
 
 // Include the Composer autoload to load phpseclib classes
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
+
+
+
 
 
 
