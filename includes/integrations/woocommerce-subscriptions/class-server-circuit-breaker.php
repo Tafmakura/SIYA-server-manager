@@ -22,8 +22,6 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $subscription_id = $subscription->get_id();
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
 
-            error_log("HOYOOOOOOOOOOOOOOOOOOOOOOOOO MAIHWE");
-
             if (!$server_post_id) {
                 // Log and exit if no linked server post ID is found
                 error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: No linked server post ID found for subscription {$subscription_id}");
@@ -71,8 +69,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 $subscription->add_order_note("Server provisioning and deployment complete. Subscription activated.");
                 error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Subscription {$subscription_id} activated successfully.");
             } else {
-                // If not, mark the circuit breaker as tripped and initiate provisioning
-                update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', -1);
+                // If not, mark the circuit breaker as half-open (in progress) and initiate provisioning
+                update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', 1);
                 $subscription->update_status('on-hold');
                 $this->start_server_provision($subscription);
                 $subscription->add_order_note("Server provisioning failed or incomplete. Retrying deployment.");
@@ -82,6 +80,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         } catch (\Exception $e) {
             // Handle exceptions gracefully
             error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Exception occurred: {$e->getMessage()}");
+            update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', -1);
             $subscription->update_status('on-hold');
             $subscription->add_order_note("An error occurred: {$e->getMessage()}. Manual intervention required.");
         }
