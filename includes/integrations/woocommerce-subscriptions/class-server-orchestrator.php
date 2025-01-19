@@ -185,7 +185,7 @@ class ServerOrchestrator {
             // Step 2: Provision server if not already provisioned
 
             // Check if the server has already been provisioned
-            $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true); 
+            $this->server_provisioned_status = get_post_meta($this->server_post_id, '_arsol_state_10_provisioning', true); 
             
             // If the server has not been provisioned or has failed before, proceed with provisioning
             if (!$this->server_provisioned_status || $this->server_provisioned_status != 2) {
@@ -197,7 +197,7 @@ class ServerOrchestrator {
                     $server_data = $this->provision_server_at_provider($this->subscription);
 
                     // Update server metadata on successful provisioning
-                    update_post_meta($this->server_post_id, 'arsol_server_provisioned_status', 2); // Status 2 indicates success
+                    update_post_meta($this->server_post_id, '_arsol_state_10_provisioning', 2); // Status 2 indicates success
     
                     error_log(sprintf('#010 [SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
                         PHP_EOL,
@@ -207,7 +207,7 @@ class ServerOrchestrator {
                 } catch (\Exception $e) {
                     
                     // Update server metadata on failed provisioning
-                    update_post_meta($this->server_post_id, 'arsol_server_provisioned_status', -1);
+                    update_post_meta($this->server_post_id, '_arsol_state_10_provisioning', -1);
     
                     // Log the error and update subscription status
                     error_log(sprintf('#SIYA Server Manager - ServerOrchestrator] Error during server provisioning: %s', $e->getMessage()));
@@ -222,7 +222,7 @@ class ServerOrchestrator {
             }
 
             // Check updated server metadata
-            $this->server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true); 
+            $this->server_provisioned_status = get_post_meta($this->server_post_id, '_arsol_state_10_provisioning', true); 
     
             if ($this->server_provisioned_status == 2) {
                 
@@ -230,7 +230,7 @@ class ServerOrchestrator {
                 $metadata = $server_post_instance->get_meta_data();
                 
                 // Load parameters into class properties
-                $this->server_provisioned_status = $metadata['arsol_server_provisioned_status'] ?? null;
+                $this->server_provisioned_status = $metadata['_arsol_state_10_provisioning'] ?? null;
                 $this->server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
                 $this->server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
                 $this->server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
@@ -289,7 +289,7 @@ class ServerOrchestrator {
         $task_id = uniqid();
     
         // Fetch current IP status
-        $server_ip_status = get_post_meta($server_post_id, 'arsol_server_ip_status', true);
+        $server_ip_status = get_post_meta($server_post_id, '_arsol_state_20_ip_address', true);
     
         // If IP status is not 2, we want to check and update the server status
         if ($server_ip_status != '2') {
@@ -318,7 +318,7 @@ class ServerOrchestrator {
                             error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error fetching provisioned server IP: ' . $e->getMessage());
                             $subscription->add_order_note('RunCloud deployment failed: Error fetching provisioned server IP.');
                             
-                            update_post_meta($server_post_id, 'arsol_server_ip_status', -1);
+                            update_post_meta($server_post_id, '_arsol_state_20_ip_address', -1);
                             return; // Stop processing if there's an error fetching the IP
                         }
                         
@@ -333,7 +333,7 @@ class ServerOrchestrator {
                                 $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
                                 
                                 // Update server_deployed_status to -1 on failure
-                                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                                update_post_meta($server_post_id, '_arsol_state_30_deployment', -1);
                                 return; // Stop processing if IPv4 is empty
                             }
 
@@ -347,7 +347,7 @@ class ServerOrchestrator {
                         // Save IP addresses to post meta for RunCloud deployment
                         update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
                         update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
-                        update_post_meta($server_post_id, 'arsol_server_ip_status', 2);
+                        update_post_meta($server_post_id, '_arsol_state_20_ip_address', 2);
 
                         // Add order note with IP addresses
                         $success_message = sprintf(
@@ -467,9 +467,10 @@ class ServerOrchestrator {
         $ipv6 = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', true);
     
         // Check server_deployed_status to avoid redundant deployment
-        $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
+        $server_deployed_status = get_post_meta($server_post_id, '_arsol_state_30_deployment', true);
     
         // Proceed only if $server_deployed_status is not 2
+
         if ($server_deployed_status != 2) {
 
             if (empty($server_deployed_status)) {
@@ -503,7 +504,7 @@ class ServerOrchestrator {
                 $metadata = [
                     'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
                     'arsol_server_deployment_date' => current_time('mysql'),
-                    'arsol_server_deployed_status' => 2, // Set status to 2 on success
+                    '_arsol_state_30_deployment' => 2, // Set status to 2 on success
                     'arsol_server_connection_status' => 0,
                     'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
                 ];
@@ -537,7 +538,7 @@ class ServerOrchestrator {
                 ));
 
                 // Update server_deployed_status to -1 on failure
-                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                update_post_meta($server_post_id, '_arsol_state_30_deployment', -1);
                 return; // Exit on failure
             }
         
@@ -547,7 +548,7 @@ class ServerOrchestrator {
         }
     
         // Check server_deployed_status to avoid redundant deployment
-        $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
+        $server_deployed_status = get_post_meta($server_post_id, '_arsol_state_30_deployment', true);
 
         if ($server_deployed_status == 2) {
            
@@ -597,7 +598,7 @@ class ServerOrchestrator {
         }
     
         // Open ports if they haven't been successfully opened before
-        $firewall_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', true);
+        $firewall_status = get_post_meta($server_post_id, '_arsol_state_40_firewall_rules', true);
         if ($firewall_status != 2) {
             try {
 
@@ -607,13 +608,13 @@ class ServerOrchestrator {
                 $open_ports_result = $this->assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id);
                 
                 if (!$open_ports_result) {
-                    update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', -1);
+                    update_post_meta($server_post_id, '_arsol_state_10_provisioning_firewall_rules', -1);
                     error_log('Failed to open ports for server.');
                     $subscription->add_order_note('Failed to open ports for server.');
                     return; // Exit on failure
                 }
     
-                update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', 2);
+                update_post_meta($server_post_id, '_arsol_state_10_provisioning_firewall_rules', 2);
     
             } catch (\Exception $e) {
                 error_log('Error occurred while opening ports: ' . $e->getMessage());
@@ -623,7 +624,7 @@ class ServerOrchestrator {
         }
     
         // Execute RunCloud script if it hasn't been successfully executed before
-        $script_execution_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', true);
+        $script_execution_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning_script_execution', true);
         if ($script_execution_status != 2) {
             $this->runcloud = new Runcloud();
             
@@ -642,7 +643,7 @@ class ServerOrchestrator {
             }
     
             // Success: update metadata
-            update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', 2);
+            update_post_meta($server_post_id, '_arsol_state_10_provisioning_script_execution', 2);
 
             // Success message
             $message = 'Successfully executed agent installation script on server.';
@@ -705,14 +706,14 @@ class ServerOrchestrator {
     
         try {
             // Check script installation status if not already successful (status 2)
-            $scriptInstallationStatus = get_post_meta($server_post_id, 'arsol_server_provisioned_status_script_installation', true);
+            $scriptInstallationStatus = get_post_meta($server_post_id, '_arsol_state_60_script_installation', true);
             if ($scriptInstallationStatus != 2) {
                 $installationTimeout = apply_filters('siya_server_installation_timeout', 5 * 60);
                 $startTime = time();
                 while ((time() - $startTime) < $installationTimeout) {
                     $status = $server_manager_instance->get_installation_status($server_post_id);
                     if (isset($status['status']) && $status['status'] === 'running') {
-                        update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_installation', 2);
+                        update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
                         update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
 
                         // Success message
@@ -739,14 +740,14 @@ class ServerOrchestrator {
             }
     
             // Check connection status if not already successful (status 2)
-            $connectionStatus = get_post_meta($server_post_id, 'arsol_server_deployed_status_connection', true);
+            $connectionStatus = get_post_meta($server_post_id, '_arsol_state_70_manager_connection', true);
             if ($connectionStatus != 2) {
                 $connectTimeout = apply_filters('siya_server_connection_timeout', 60);
                 $connectStart = time();
                 while ((time() - $connectStart) < $connectTimeout) {
                     $connStatus = $server_manager_instance->get_connection_status($server_post_id);
                     if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
-                        update_post_meta($server_post_id, 'arsol_server_deployed_status_connection', 2);
+                        update_post_meta($server_post_id, '_arsol_state_70_manager_connection', 2);
                         update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
                         update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
                         update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
@@ -1129,7 +1130,7 @@ class ServerOrchestrator {
             }
 
             if ($deleted) {
-                update_post_meta($server_post_id, 'arsol_server_provisioned_status', -2);
+                update_post_meta($server_post_id, '_arsol_state_10_provisioning', -2);
                 error_log('#064 [SIYA Server Manager - ServerOrchestrator] Provisioned server deleted successfully.');
             } else {
                 error_log('#065 [SIYA Server Manager - ServerOrchestrator] Provisioned server deletion failed.');
@@ -1169,7 +1170,7 @@ class ServerOrchestrator {
             $deleted = $this->runcloud->delete_server($server_deployed_server_id);
 
             if ($deleted) {
-                update_post_meta($server_post_id, 'arsol_server_deployed_status', -2);
+                update_post_meta($server_post_id, '_arsol_state_30_deployment', -2);
                 error_log('#060 [SIYA Server Manager - ServerOrchestrator] RunCloud server deleted successfully.');
             } else {
                 error_log('#061 [SIYA Server Manager - ServerOrchestrator] RunCloud server deletion failed.');
@@ -1332,7 +1333,7 @@ class ServerOrchestrator {
 
 
             // Check if the server post is an arsol_server and the provisioned status is 0
-            $provisioned_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status', true);
+            $provisioned_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
 
             if ($provisioned_status == 2) {
                 $error_message = "Server post already provisioned.";
@@ -1366,7 +1367,7 @@ class ServerOrchestrator {
             // Update server post metadata using the standardized data
             $server_post_instance = new ServerPost;
             $metadata = [
-                'arsol_server_provisioned_status' => 2,
+                '_arsol_state_10_provisioning' => 2,
                 'arsol_server_provisioned_id' => $server_data['provisioned_id'],
                 'arsol_server_provisioned_name' => $server_data['provisioned_name'],
                 'arsol_server_provisioned_os' => $server_data['provisioned_os'],

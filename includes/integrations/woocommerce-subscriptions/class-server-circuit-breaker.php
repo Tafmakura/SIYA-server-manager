@@ -36,14 +36,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
             // List of server metadata keys
             $server_metadata_keys = [
-                'arsol_server_provisioned_status',
-                'arsol_server_deployed_status',
-                'arsol_server_manager_required',
-                'arsol_server_deployed_status_connection',
-                'arsol_server_provisioned_status_script_execution',
-                'arsol_server_provisioned_status_script_installation',
-                'arsol_server_provisioned_status_firewall_rules',
-                'arsol_server_ip_status',
+                '_arsol_state_10_provisioning',
+                '_arsol_state_20_ip_address',
+                '_arsol_state_30_deployment',
+                '_arsol_state_40_firewall_rules',
+                '_arsol_state_50_script_execution',
+                '_arsol_state_60_script_installation',
+                '_arsol_state_70_manager_connection'
             ];
 
             // Fetching metadata values
@@ -69,7 +68,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 }
             } else {
                 // If server manager is not required, only check provisioned status
-                $all_status_complete = ($server_metadata['arsol_server_provisioned_status'] == 2);
+                $all_status_complete = ($server_metadata['_arsol_state_10_provisioning'] == 2);
             }
 
             // If all required statuses are 2, proceed to complete the process

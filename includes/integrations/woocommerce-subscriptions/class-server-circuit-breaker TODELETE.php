@@ -34,8 +34,8 @@ class ServerCircuitBreaker {
         $this->server_post_id = $server_post->post_id;
 
         $this->subscription_id = $subscription->get_id();
-        $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
-        $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+        $is_provisioned = get_post_meta($this->server_post_id, '_arsol_state_10_provisioning', true);
+        $is_deployed = get_post_meta($this->server_post_id, '_arsol_state_30_deployment', true);
 
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Status check - Provisioned: %s, Deployed: %s', 
             $is_provisioned ? 'true' : 'false',
