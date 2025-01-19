@@ -440,10 +440,15 @@ class ServerOrchestrator {
 
         } else {
             // No server manager required, mark the subscription as active
-            error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server manager is not required. Activating subscripton to active... Good day and good luck!');
-
-            $success_message = 'Server is ready, no server manager needed. Turning subscription status to active.';
+            $success_message = 'Server is ready, no server manager required. Activating subscription... Good day and good luck!';
+            
+            // Update subscription status to active
             $subscription->add_order_note($success_message);
+
+            // Log the success message
+            error_log($success_message);
+
+            // Activate Subscription
             $subscription->update_status('active');
         }
 
