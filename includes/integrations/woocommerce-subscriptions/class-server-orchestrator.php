@@ -305,6 +305,8 @@ class ServerOrchestrator {
                     error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking remote status: ' . json_encode($remote_status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     
                     // If remote status matches the target status (e.g., "active")
+                    $target_status = 'active';
+
                     if ($remote_status['provisioned_remote_status'] === $target_status) {
                         error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
     
@@ -362,7 +364,7 @@ class ServerOrchestrator {
                         }
                         
                     } else {
-                        error_log('#021 [SIYA Server Manager - ServerOrchestrator] Configured target status is not acti.');
+                        error_log('#021 [SIYA Server Manager - ServerOrchestrator] Configured target status is not active.');
                         return false; // Failure: Remote status did not match
                     }
 
