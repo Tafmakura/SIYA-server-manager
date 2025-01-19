@@ -52,7 +52,19 @@ class ServerOrchestrator {
     private $server_deployment_date;
     private $server_connection_status;
     private $server_provisioned_id;
-    protected $server_circuit_breaker_status;
+    protected $server_circuit_breaker_position;
+
+
+    /**
+     * Numeric Status Values:
+     * 0 = Not started
+     * 1 = In progress
+     * 2 = Completed
+     * -1 = Failed
+     * -2 = Deleted
+     */
+
+
 
     public function __construct() {
         // Change the action hook to use Action Scheduler
@@ -820,8 +832,8 @@ class ServerOrchestrator {
         }
 
         // Check circuit breaker status for shutdown
-        $this->server_circuit_breaker_status = get_post_meta($server_post_id, 'arsol_server_circuit_breaker_status', true);
-        if ($this->server_circuit_breaker_status == 'tripped') {
+        $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+        if ($this->server_circuit_breaker_position == -1 ) {
             error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping shutdown.');
             return;
         }
@@ -941,8 +953,8 @@ class ServerOrchestrator {
         }
 
         // Check circuit breaker status for power-up
-        $this->server_circuit_breaker_status = get_post_meta($server_post_id, 'arsol_server_circuit_breaker_status', true);
-        if ($this->server_circuit_breaker_status == 'tripped') {
+        $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+        if ($this->server_circuit_breaker_position == -1) {
             error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping power-up.');
             return;
         }
