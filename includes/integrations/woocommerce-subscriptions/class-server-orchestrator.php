@@ -107,7 +107,7 @@ class ServerOrchestrator {
             // Place subscription on hold until deployment is done 
 
             $subscription->add_order_note(
-                'Server provisioning started. Subscription will be placed on hold until provisioning is complete.'
+                'Server provisioning started. Subscription will be placed on hold until provisioning is complete. Instruction from payment gateway to change status from Pending to Active will be noted but ignored. '
             );
 
             $subscription->update_status('on-hold');
