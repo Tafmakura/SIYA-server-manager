@@ -43,6 +43,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 'arsol_server_provisioned_status_script_execution',
                 'arsol_server_provisioned_status_script_installation',
                 'arsol_server_provisioned_status_firewall_rules',
+                'arsol_server_ip_status',
             ];
 
             // Fetching metadata values

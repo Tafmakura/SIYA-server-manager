@@ -298,9 +298,64 @@ class ServerOrchestrator {
     
                     // Proceed with RunCloud deployment only if the server is "active"
                     if ($target_status === 'active') {
-                        $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
-    
-                        if (!$server_deployed_status && $connect_server_manager === 'yes') {
+                      
+                        try {
+
+                            $server_ips = $this->get_provisioned_server_ip($provider, $server_provisioned_id);
+
+                        } catch (\Exception $e) {
+                            error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error fetching provisioned server IP: ' . $e->getMessage());
+                            $subscription->add_order_note('RunCloud deployment failed: Error fetching provisioned server IP.');
+                            
+                            update_post_meta($server_post_id, 'arsol_server_ip_status', -1);
+                            return; // Stop processing if there's an error fetching the IP
+                        }
+                        
+                        $ipv4 = $server_ips['ipv4'];
+                        $ipv6 = $server_ips['ipv6'];
+                        
+                        if (empty($ipv4) || empty($ipv6)) {
+            
+                            if (empty($ipv4)) {
+                                // Handle case where IPv4 is empty (priority check)
+                                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
+                                $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
+                        
+                                // Update server_deployed_status to -1 on failure
+                                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                        
+                                return; // Stop processing if IPv4 is empty
+                            }
+                        
+                            if (empty($ipv6)) {
+                                // Handle case where IPv6 is empty (IPv4 is present, so continue)
+                                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Warning: IPv6 address is empty.');
+                    
+                                // No return here, continue processing
+                            }
+            
+                        } 
+            
+                        // Save IP addresses to post meta so that it is available for RunCloud deployment
+                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
+                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
+                        update_post_meta($server_post_id, 'arsol_server_ip_status', 2);
+                               
+                        // Add order note with IP addresses
+                        $success_message = sprintf(
+                            'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
+                            PHP_EOL,
+                            $ipv4 ?: 'Not provided',
+                            PHP_EOL,
+                            $ipv6 ?: 'Not provided'
+                        );
+
+                        $subscription->add_order_note($success_message);
+
+                        // Log the success message
+                        error_log($success_message);
+  
+                        if ($connect_server_manager === 'yes') {
                             error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment');
                             
                             // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler
@@ -317,17 +372,22 @@ class ServerOrchestrator {
                             );
 
                             $subscription->add_order_note(
-                                'Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                                'Records show that a server manager is required for this server. Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                             );
     
                         } else {
-                            error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no RunCloud deployment needed');
-                           
-                            error_log('[SIYA Server Manager - ServerOrchestrator] Success :) for Server ARSOL' . $subscription_id );
+                            
+                            // Success 
+                            $message = 'Server is ready, no server manager needed. Turning subscription status to active. :)';
+                            
+                            error_log('#020 [SIYA Server Manager - ServerOrchestrator] ' . $message);
+                            
+                            $subscription->add_order_note($message);
                             
                             $subscription->update_status('active');
                        
                         }
+
                     } else {
                         error_log('#021 [SIYA Server Manager - ServerOrchestrator] Target status is not "active", skipping RunCloud deployment.');
                     }
@@ -373,7 +433,7 @@ class ServerOrchestrator {
             );
 
             $subscription->add_order_note(
-                'Scheduled retry for server status update.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                'Could not get a server status. Scheduled a retry.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
 
             return false; // Retry
@@ -398,10 +458,8 @@ class ServerOrchestrator {
         $web_server_type = 'nginx';
         $installation_type = 'native';
         $provider = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-        $server_ips = $this->get_provisioned_server_ip($provider, $server_provisioned_id);
-        $ipv4 = $server_ips['ipv4'];
-        $ipv6 = $server_ips['ipv6'];
+        $ipv4 = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+        $ipv6 = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', true);
     
         // Check server_deployed_status to avoid redundant deployment
         $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
@@ -412,47 +470,7 @@ class ServerOrchestrator {
             if (empty($server_deployed_status)) {
                 error_log('#025 [SIYA Server Manager - ServerOrchestrator] Server_deployed_status is empty, proceeding with deployment.');
             }
-    
-            if (empty($ipv4) || empty($ipv6)) {
-
-                if (empty($ipv4)) {
-                    // Handle case where IPv4 is empty (priority check)
-                    error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
-                    $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
-            
-                    // Update server_deployed_status to -1 on failure
-                    update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
-            
-                    return; // Stop processing if IPv4 is empty
-                }
-            
-                if (empty($ipv6)) {
-                    // Handle case where IPv6 is empty (IPv4 is present, so continue)
-                    error_log('#026 [SIYA Server Manager - ServerOrchestrator] Warning: IPv6 address is empty.');
-        
-                    // No return here, continue processing
-                }
-
-            } 
-
-            // Save IP addresses to post meta so that it is available for RunCloud deployment
-            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
-            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
-            
-            // Add order note with IP addresses
-            $success_message = sprintf(
-                'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
-                PHP_EOL,
-                $ipv4 ?: 'Not provided',
-                PHP_EOL,
-                $ipv6 ?: 'Not provided'
-            );
-
-            $subscription->add_order_note($success_message);
-
-            // Log the success message
-            error_log($success_message);
-
+     
             // Initialize RunCloud class if not already initialized
             if (!$this->runcloud) {
                 $this->runcloud = new Runcloud();
@@ -513,6 +531,7 @@ class ServerOrchestrator {
     
         // Now schedule the next step if deployment was successful or if server is already deployed
         if (isset($deployment_status) && $deployment_status !== null) {
+           
             // Schedule finish_server_manager_connection using Action Scheduler
             as_schedule_single_action(time(), 
                 'arsol_finish_server_manager_connection_hook', 
@@ -531,7 +550,7 @@ class ServerOrchestrator {
         }
     }
 
-    // Install Runcloud agent on provisioned server to connect server to Runcloud
+    // Install Runcloud agent script on provisioned server to connect server to Runcloud
     public function finish_server_manager_connection($args) {
         // Retrieve server and subscription data
         $server_post_id = $args['server_post_id'];
@@ -563,7 +582,7 @@ class ServerOrchestrator {
             try {
 
                 // TO DELETE Intentional fault
-                $server_provisioned_id = 0;
+               // $server_provisioned_id = 0;
 
                 $open_ports_result = $this->assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id);
                 
