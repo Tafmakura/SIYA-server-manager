@@ -66,7 +66,7 @@ class ServerOrchestrator {
 
         // Add new action hook for the scheduled processes
         add_action('arsol_finish_server_provision', array($this, 'finish_server_provision'), 20, 1);
-        add_action('arsol_watch_for_server_active_state_hook', array($this, 'watch_for_server_active_state'), 20, 1);
+        add_action('arsol_wait_for_server_active_state_hook', array($this, 'wait_for_server_active_state'), 20, 1);
 
         // Add new action hooks for server powerup
         add_action('woocommerce_subscription_status_active', array($this, 'start_server_powerup'), 20, 1);
@@ -234,7 +234,7 @@ class ServerOrchestrator {
             }
     
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
-            $this->schedule_action('arsol_watch_for_server_active_state_hook', [
+            $this->schedule_action('arsol_wait_for_server_active_state_hook', [
                 'server_provider'           => $this->server_provider_slug,
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
@@ -258,8 +258,8 @@ class ServerOrchestrator {
         }
     }
     
-    // Step 3: Update server status 
-    public function watch_for_server_active_state($args) {
+    // Step 3: Wait for server active state (Check server status) 
+    public function wait_for_server_active_state($args) {
 
         error_log('#015 [SIYA Server Manager - ServerOrchestrator] scheduled server status update started');
 
@@ -331,7 +331,7 @@ class ServerOrchestrator {
             error_log(sprintf('#024 [SIYA Server Manager - ServerOrchestrator] Retrying server status update. Attempt: %d', $retry_count + 1));
             as_schedule_single_action(
                 time() + 10, // Retry after 60 seconds
-                'arsol_watch_for_server_active_state_hook',
+                'arsol_wait_for_server_active_state_hook',
                 [[
                     'server_provider' => $server_provider_slug,
                     'connect_server_manager' => $connect_server_manager,
@@ -349,21 +349,19 @@ class ServerOrchestrator {
             );
             return false;
         }
-
         return false;
     
     }
 
     // Step 4 (Optional): Create server in Runcloud
     public function start_server_manager_connection($args) {
-        
+    
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
         error_log(sprintf('#023 [SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $subscription_id));
-
+    
         // Get server metadata from post
-        $server_post_id = $server_post_id;
         $server_post_instance = new ServerPost($server_post_id);
         $server_name = 'ARSOL' . $subscription_id;
         $web_server_type = 'nginx';
@@ -373,121 +371,110 @@ class ServerOrchestrator {
         $server_ips = $this->get_provisioned_server_ip($provider, $server_provisioned_id);
         $ipv4 = $server_ips['ipv4'];
         $ipv6 = $server_ips['ipv6'];
-        
-        // Save IP addresses to post meta so that it is available for RunCloud deployment
-        if (!empty($ipv4)) {
-            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
+    
+        // Check server_deployed_status to avoid redundant deployment
+        $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
+    
+        // Proceed only if $server_deployed_status is not 2
+        if ($server_deployed_status != 2) {
+            if (empty($server_deployed_status)) {
+                error_log('#025 [SIYA Server Manager - ServerOrchestrator] Server_deployed_status is empty, proceeding with deployment.');
+            }
+    
+            if (empty($ipv4)) {
+                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
+                $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
+    
+                // Update server_deployed_status to -1 on failure
+                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                $deployment_status = false; // Mark deployment as failed
+            } else {
+                // Save IP addresses to post meta so that it is available for RunCloud deployment
+                update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
+                if (!empty($ipv6)) {
+                    update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
+                }
+    
+                if (!$this->runcloud) {
+                    $this->runcloud = new Runcloud();
+                }
+                
+                $runcloud_response = $this->runcloud->create_server_in_server_manager(
+                    $server_name,
+                    $ipv4,
+                    $web_server_type,
+                    $installation_type, 
+                    $provider
+                );
+    
+                // Debug log the RunCloud response
+                error_log(sprintf(
+                    '#027 [SIYA Server Manager - ServerOrchestrator] RunCloud Response:%s%s',
+                    PHP_EOL, 
+                    print_r($runcloud_response, true)
+                ));
+    
+                if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
+                    // Successful Log
+                    error_log('#028 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
+    
+                    // Update server metadata
+                    $metadata = [
+                        'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
+                        'arsol_server_deployment_date' => current_time('mysql'),
+                        'arsol_server_deployed_status' => 2, // Set status to 2 on success
+                        'arsol_server_connection_status' => 0,
+                        'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
+                    ];
+                    $server_post_instance->update_meta_data($server_post_id, $metadata);
+    
+                    error_log(sprintf('#029 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
+                    $deployment_status = true; // Mark deployment as successful
+                } else {
+                    // Failure condition
+                    error_log('#030 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
+                    $subscription->add_order_note(sprintf(
+                        "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
+                        $runcloud_response['status'],
+                        $runcloud_response['body'],
+                        print_r($runcloud_response, true)
+                    ));
+    
+                    // Update server_deployed_status to -1 on failure
+                    update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+                    $deployment_status = false; // Mark deployment as failed
+                }
+            }
+        } else {
+            // If the server has already been deployed (status == 2), skip deployment
+            error_log('#024 [SIYA Server Manager - ServerOrchestrator] Server already deployed, skipping deployment.');
+            $deployment_status = true; // Set deployment status to successful
         }
-        if (!empty($ipv6)) {
-            update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
-        }
-
-        // Milestone 1: Log IP addresses
-        error_log(sprintf('#024 [SIYA Server Manager - ServerOrchestrator] Milestone X1: Server IP Addresses:%sIPv4: %s%sIPv6: %s', 
-            PHP_EOL,
-            $ipv4,
-            PHP_EOL,
-            $ipv6
-        ));
-
-        if (empty($ipv4)) {
-            error_log('#025 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
-            $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
-            return;
-        }
-
-        error_log('Milestone X2');
-        
-        // Initialize RunCloud & Deploy to RunCloud
-        if (!$this->runcloud) {
-            $this->runcloud = new Runcloud();
-        }
-        error_log('Milestone X2b');
-        
-        $runcloud_response = $this->runcloud->create_server_in_server_manager(
-            $server_name,
-            $ipv4,
-            $web_server_type,
-            $installation_type, 
-            $provider
-        );
-
-        error_log('Milestone X3');
-
-        // Debug log the RunCloud response
-        error_log(sprintf(
-            '#026 [SIYA Server Manager - ServerOrchestrator] RunCloud Response:%s%s',
-            PHP_EOL, 
-            print_r($runcloud_response, true)
-        ));
-
-        if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
-
-            // Successful Log
-            error_log('#027 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
-
-            // Update server metadata
-            $metadata = [
-                'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
-                'arsol_server_deployment_date' => current_time('mysql'),
-                'arsol_server_deployed_status' => 2,
-                'arsol_server_connection_status' => 0,
-                'arsol_server_manager' => 'runcloud'  // Changed from arsol_server_deployment_manager
-            ];
-            $server_post_instance->update_meta_data($server_post_id, $metadata);
-
-            error_log(sprintf('#028 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
-
+    
+        // Now schedule the next step if deployment was successful or if server is already deployed
+        if ($deployment_status !== null) {
             // Schedule finish_server_manager_connection using Action Scheduler
             as_schedule_single_action(time(), 
                 'arsol_finish_server_manager_connection_hook', 
                 [[
                     'server_post_id' => $server_post_id,
-                    'task_id' => uniqid()
+                    'task_id' => $args['task_id']
                 ]],  
                 'arsol_class_server_orchestrator');
-
+    
+            // Add order note for scheduling the next step
             $subscription->add_order_note(
                 'Scheduled the completion of the server manager connection with task ID: ' . $args['task_id']
             );
-
+    
             error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
-
-        } elseif (!isset($runcloud_response['status']) || !in_array($runcloud_response['status'], [200, 201])) {
-            error_log('#029 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
-            $subscription->add_order_note(sprintf(
-                "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
-                $runcloud_response['status'],
-                $runcloud_response['body'],
-                print_r($runcloud_response, true)
-            ));
-            $subscription->update_status('on-hold'); // Switch subscription status to on hold
-            return; // Exit the function after logging the error
-        } elseif (is_wp_error($runcloud_response)){
-
-            error_log('#030 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with WP_Error: ' . $runcloud_response->get_error_message());
-            $subscription->add_order_note(sprintf(
-                "RunCloud deployment failed (WP_Error).\nError message: %s\nFull response: %s",
-                $runcloud_response->get_error_message(),
-                print_r($runcloud_response, true)
-            ));
-            $subscription->update_status('on-hold'); // Switch subscription status to on hold
-            return; // Exit the function after logging the error
-        } else {
-
-            error_log('#031 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with unknown error');
-            $subscription->add_order_note(sprintf(
-                "RunCloud deployment failed with unknown error.\nFull response: %s",
-                print_r($runcloud_response, true)
-            ));
-            $subscription->update_status('on-hold'); // Switch subscription status to on hold
-            return; // Exit the function after logging the error
-
         }
     }
+    
+    
 
     // Install Runcloud agent on provisioned server to connect server to Runcloud
-   public function finish_server_manager_connection($args) {
+    public function finish_server_manager_connection($args) {
 
         // TODO 
         // ADD validation for servers that have Runcloud Deployed
