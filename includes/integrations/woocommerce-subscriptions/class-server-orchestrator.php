@@ -1229,7 +1229,7 @@ class ServerOrchestrator {
             // Get the URL for the subscription/order
             $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
-                'Server post for ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">View Now</a>',
+                'Server post for ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view post</a>',
                 $this->subscription_id,
                 $this->server_post_id,
                 esc_url($server_post_url) // Ensure the URL is properly escaped
