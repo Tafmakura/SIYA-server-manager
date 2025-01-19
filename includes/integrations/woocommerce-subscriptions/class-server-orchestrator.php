@@ -676,12 +676,17 @@ class ServerOrchestrator {
             ]],  
             'arsol_class_server_orchestrator'
         );
-    
+        
+        // Message
+        $message = 'Scheduled agent installation and server connection verification.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+        
+        // Update server note
         $subscription->add_order_note(
-            'Scheduled server verification.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+            $message
         );
 
-        error_log('Scheduled server verification.');
+        // Log the message
+        error_log($message);
     }    
     
     // Verify server manager connection to provisioned server
@@ -1222,10 +1227,23 @@ class ServerOrchestrator {
         // Update server post metadata
         if ($post_id) {
             $this->server_post_id = $post_id;
-            $subscription->add_order_note(
-                'Server post created successfully with ID: ' . $this->server_post_id
+
+            // Get the URL for the subscription/order
+            $server_post_url = get_permalink($server_post_id);
+            $message = sprintf(
+                'Server post for ARSOL(%d) with Post ID: %d created successfully. <a href="%s" target="_blank">View Now</a>',
+                $this->subscription_id,
+                $this->server_post_id,
+                esc_url($order_url) // Ensure the URL is properly escaped
             );
-            error_log('[SIYA Server Manager] Created server post with ID: ' . $this->server_post_id);
+
+            // Add server post URL to the subscription note
+            $subscription->add_order_note(
+                $message
+            );
+
+            // Log the message
+            error_log('[SIYA Server Manager] ' . $message);
 
             // Generate SSH key pair
             $ssh_keys = $this->generate_key_pair();
