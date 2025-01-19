@@ -105,6 +105,11 @@ class ServerOrchestrator {
             }
 
             // Place subscription on hold until deployment is done 
+
+            $subscription->add_order_note(
+                'Server provisioning started. Subscription will be placed on hold until provisioning is complete.'
+            );
+
             $subscription->update_status('on-hold');
            
             // Step 1: Create server post only if it doesn't exist
