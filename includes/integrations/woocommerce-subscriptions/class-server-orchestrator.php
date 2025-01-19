@@ -475,132 +475,94 @@ class ServerOrchestrator {
 
     // Install Runcloud agent on provisioned server to connect server to Runcloud
     public function finish_server_manager_connection($args) {
-
-        // TODO 
-        // ADD validation for servers that have Runcloud Deployed
-
-       
-        error_log ('Milestone X4');
-
+        // Retrieve server and subscription data
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
-        if ($subscription) {
-            error_log('ZZZ Subscription retrieved successfully: ' . $subscription->get_id());
-        } else {
-            error_log('ZZZ Failed to retrieve subscription for ID: ' . $subscription_id);
+    
+        if (!$subscription) {
+            error_log('Failed to retrieve subscription for ID: ' . $subscription_id);
+            return;
         }
+    
+        // Log subscription retrieval
+        error_log('Subscription retrieved successfully: ' . $subscription->get_id());
+    
         $server_deployed_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
-
-        error_log ('Milestone X5');
-
-        $this->server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-        $ssh_private_key = get_post_meta($server_post_id, 'arsol_ssh_private_key', true);
-        
-        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
-
-        error_log('Milestone X6');
-
-        $ssh_port = 22;
-
-        error_log('Milestone X7');
-
-        error_log(sprintf(
-            '[SIYA Server Manager - ServerOrchestrator] Connecting server manager to provisioned server with ID: %s and IP: %s',
-            $server_deployed_id,
-            $server_ip
-        ));
-
-        error_log('Milestone X8');       
-
-        // Open ports before connecting server manager
+    
+        if (!$server_deployed_id || !$server_ip) {
+            error_log('Missing server ID or IP address for connection.');
+            $subscription->add_order_note('Missing server ID or IP address for connection.');
+            return;
+        }
+    
+        // Open ports if they haven't been successfully opened before
         $firewall_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', true);
         if ($firewall_status != 2) {
-
-            $open_ports_result = $this->assign_firewall_rules_to_server($this->server_provider_slug, $this->server_provisioned_id);
-            
-            if (!$open_ports_result) {
-
-                // Update server metadata on failed port opening
-                update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', -1);
+            try {
+                $open_ports_result = $this->assign_firewall_rules_to_server($this->server_provider_slug, $this->server_provisioned_id);
+                
+                if (!$open_ports_result) {
+                    update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', -1);
+                    error_log('Failed to open ports for server.');
+                    $subscription->add_order_note('Failed to open ports for server.');
+                    return;
+                }
     
-                error_log('[SIYA Server Manager - ServerOrchestrator] Failed to open ports for server.');
-                $subscription->add_order_note('Failed to open ports for server.');
+                update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', 2);
     
+            } catch (\Exception $e) {
+                error_log('Error occurred while opening ports: ' . $e->getMessage());
+                $subscription->add_order_note('Error occurred while opening ports: ' . $e->getMessage());
                 return;
             }
+        }
     
-             // Update server metadata on successful port opening
-             update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', 2);
-        
-        } 
-        
-        error_log('Milestone X9');
-
-        if ($server_deployed_id && $server_ip) {
-            
+        // Execute RunCloud script if it hasn't been successfully executed before
+        $script_execution_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', true);
+        if ($script_execution_status != 2) {
             $this->runcloud = new Runcloud();
             
             try {
                 $connection_result = $this->runcloud->execute_installation_script_on_server($server_post_id);
             } catch (\Exception $e) {
-                error_log(sprintf(
-                    '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
-                    $e->getMessage()
-                ));
-                $subscription->add_order_note(sprintf(
-                    'Failed to connect server manager to provisioned server: %s',
-                    $e->getMessage()
-                ));
+                error_log('Failed to connect server manager to provisioned server: ' . $e->getMessage());
+                $subscription->add_order_note('Failed to connect server manager to provisioned server: ' . $e->getMessage());
                 return;
             }
-
+    
             if (is_wp_error($connection_result)) {
-                error_log(sprintf(
-                    '[SIYA Server Manager - ServerOrchestrator] Failed to connect server manager to provisioned server: %s',
-                    $connection_result->get_error_message()
-                ));
-                $subscription->add_order_note(sprintf(
-                    'Failed to connect server manager to provisioned server: %s',
-                    $connection_result->get_error_message()
-                ));
-            } else {
-               
-                error_log('[SIYA Server Manager - Server Orchestrator] Successfully executed script on server.');
-
-                // Update server metadata
-                update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', 2);
-               
-                // Schedule finish_server_connection using Action Scheduler
-                as_schedule_single_action(time() + 120, 
-                    'arsol_verify_server_manager_connection_hook', 
-                    [[
-                        'subscription_id' => $subscription->get_id(),
-                        'server_post_id' => $server_post_id,
-                        'server_id' => $server_deployed_id, // Optional: if you need to reference server_id in finish method
-                        'ssh_host' => $server_ip,
-                        'ssh_username' => $ssh_username,
-                        'ssh_private_key' => $ssh_private_key,
-                        'ssh_port' => $ssh_port,
-                        'task_id' => uniqid()
-                    ]],  
-                    'arsol_class_server_orchestrator');
-
-               
-
-                $subscription->add_order_note(
-                    'Scheduled server verification with task ID: ' . $args['task_id']
-                );
-
-                error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled server verification.');
+                error_log('Failed to connect server manager to provisioned server: ' . $connection_result->get_error_message());
+                $subscription->add_order_note('Failed to connect server manager to provisioned server: ' . $connection_result->get_error_message());
+                return;
             }
-
-        } else {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Missing server ID or IP address for connection.');
-            $subscription->add_order_note('Missing server ID or IP address for connection.');
+    
+            // Success: update metadata
+            error_log('Successfully executed script on server.');
+            update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', 2);
         }
+    
+        // Always schedule the next step
+        as_schedule_single_action(time() + 120, 
+            'arsol_verify_server_manager_connection_hook', 
+            [[
+                'subscription_id' => $subscription->get_id(),
+                'server_post_id' => $server_post_id,
+                'server_id' => $server_deployed_id,
+                'ssh_host' => $server_ip,
+                'ssh_username' => get_post_meta($server_post_id, 'arsol_ssh_username', true),
+                'ssh_private_key' => get_post_meta($server_post_id, 'arsol_ssh_private_key', true),
+                'ssh_port' => 22,
+                'task_id' => uniqid()
+            ]],  
+            'arsol_class_server_orchestrator');
+    
+        $subscription->add_order_note('Scheduled server verification with task ID: ' . $args['task_id']);
+        error_log('Scheduled server verification.');
     }
+    
+    
 
     public function verify_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
