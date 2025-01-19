@@ -13,7 +13,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
     public $subscription_id;
 
     public function __construct() {
-        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 25, 1);
+        add_action('woocommerce_subscription_status_active', array($this, 'subscription_circuit_breaker'), 15, 1);
     }
 
     public function subscription_circuit_breaker($subscription) {

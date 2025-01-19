@@ -62,16 +62,16 @@ class Setup {
      * Initialize classes onstart.
      */
     private function initialize_classes_on_startup() {
-        
+       
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
+            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
+        }
         if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
             $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
         }
        // if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
             $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
       //  }
-        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
-            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
-        }
 
     }
 
