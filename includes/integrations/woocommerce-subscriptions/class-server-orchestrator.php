@@ -687,6 +687,7 @@ class ServerOrchestrator {
         $server_provider_slug = $args['server_provider_slug'] ?? null;
         $server_provisioned_id = $args['server_provisioned_id'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
+        $task_id = $args['task_id'] ?? uniqid();
 
         // If any required parameter is missing, log the error and exit early
         if (!$subscription_id || !$server_post_id || !$server_provider_slug || !$server_provisioned_id) {
@@ -717,9 +718,10 @@ class ServerOrchestrator {
             if ($retry_count < 5) {
                 error_log('#039 [SIYA Server Manager - ServerOrchestrator] Retrying shutdown in 1 minute. Attempt: ' . ($retry_count + 1));
                 $subscription->add_order_note(sprintf(
-                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s',
+                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s. Task ID: %s',
                     $retry_count + 1,
-                    $remote_status['provisioned_remote_status']
+                    $remote_status['provisioned_remote_status'],
+                    $task_id
                 ));
                 as_schedule_single_action(
                     time() + 60, // Retry in 1 minute
@@ -730,7 +732,7 @@ class ServerOrchestrator {
                         'server_provider_slug' => $server_provider_slug,
                         'server_provisioned_id' => $server_provisioned_id,
                         'retry_count' => $retry_count + 1,
-                        'task_id' => uniqid()
+                        'task_id' => $task_id
                     ]],
                     'arsol_class_server_orchestrator'
                 );
@@ -793,6 +795,7 @@ class ServerOrchestrator {
         $server_provisioned_id = $args['server_provisioned_id'] ?? null;
         $server_provider_slug = $args['server_provider_slug'] ?? null;
         $retry_count = $args['retry_count'] ?? 0;
+        $task_id = $args['task_id'] ?? uniqid();
 
         // If any required parameter is missing, log the error and exit early
         if (!$subscription_id || !$server_post_id || !$server_provisioned_id || !$server_provider_slug) {
@@ -824,10 +827,11 @@ class ServerOrchestrator {
                 $delay = 60 * pow(2, $retry_count); // Exponential backoff
                 error_log(sprintf('#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d', $server_post_id, $delay, $retry_count + 1));
                 $subscription->add_order_note(sprintf(
-                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s',
+                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s. Task ID: %s',
                     $retry_count + 1,
                     $delay,
-                    $remote_status['provisioned_remote_status']
+                    $remote_status['provisioned_remote_status'],
+                    $task_id
                 ));
 
                 // Schedule the next retry
@@ -837,7 +841,7 @@ class ServerOrchestrator {
                     'server_provisioned_id' => $server_provisioned_id,
                     'server_provider_slug' => $server_provider_slug,
                     'retry_count' => $retry_count + 1,
-                    'task_id' => uniqid()
+                    'task_id' => $task_id
                 ]], 'arsol_class_server_orchestrator');
             } else {
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
