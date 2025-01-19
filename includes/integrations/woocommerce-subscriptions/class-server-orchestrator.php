@@ -965,10 +965,8 @@ class ServerOrchestrator {
         ]], 'arsol_class_server_orchestrator');
 
         $subscription->add_order_note(
-            'Server power-up initiated.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+            'Server power-up scheduled.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
         );
-
-        $subscription->add_order_note('Server power-up initiated.');
     }
 
     public function finish_server_powerup($args) {
