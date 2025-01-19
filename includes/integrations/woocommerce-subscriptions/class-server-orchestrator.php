@@ -130,7 +130,7 @@ class ServerOrchestrator {
                 'task_id' => $task_id
             ]);
             $subscription->add_order_note(
-                'Scheduled background server provision with task ID:' . $task_id,
+                'Scheduled background server provision with task ID:' . $task_id . PHP_EOL . '(' . $task_id . ')'
             );
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
@@ -253,7 +253,7 @@ class ServerOrchestrator {
             ]);
             
             $this->subscription->add_order_note(
-                'Scheduled background server status update with task ID: ' . $task_id
+                'Scheduled background server status update with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
             );
     
             error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -312,7 +312,7 @@ class ServerOrchestrator {
                             );
 
                             $subscription->add_order_note(
-                                'Scheduled RunCloud deployment with task ID: ' . $task_id
+                                'Scheduled RunCloud deployment with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
                             );
     
                         } else {
@@ -368,7 +368,7 @@ class ServerOrchestrator {
             );
 
             $subscription->add_order_note(
-                'Scheduled retry for server status update with task ID: ' . $task_id
+                'Scheduled retry for server status update with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
             );
 
             return false; // Retry
@@ -403,28 +403,57 @@ class ServerOrchestrator {
     
         // Proceed only if $server_deployed_status is not 2
         if ($server_deployed_status != 2) {
+
             if (empty($server_deployed_status)) {
                 error_log('#025 [SIYA Server Manager - ServerOrchestrator] Server_deployed_status is empty, proceeding with deployment.');
             }
     
-            if (empty($ipv4)) {
-                error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
-                $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
-    
-                // Update server_deployed_status to -1 on failure
-                update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
-                return; // Exit on failure
+            if (empty($ipv4) || empty($ipv6)) {
+
+                if (empty($ipv4)) {
+                    // Handle case where IPv4 is empty (priority check)
+                    error_log('#026 [SIYA Server Manager - ServerOrchestrator] Error: IPv4 address is empty.');
+                    $subscription->add_order_note('RunCloud deployment failed: IPv4 address is empty.');
+            
+                    // Update server_deployed_status to -1 on failure
+                    update_post_meta($server_post_id, 'arsol_server_deployed_status', -1);
+            
+                    return; // Stop processing if IPv4 is empty
+                }
+            
+                if (empty($ipv6)) {
+                    // Handle case where IPv6 is empty (IPv4 is present, so continue)
+                    error_log('#026 [SIYA Server Manager - ServerOrchestrator] Warning: IPv6 address is empty.');
+        
+                    // No return here, continue processing
+                }
+
             } else {
+
                 // Save IP addresses to post meta so that it is available for RunCloud deployment
                 update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $ipv4);
-                if (!empty($ipv6)) {
-                    update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
-                }
-    
+                update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $ipv6);
+                
+                // Add order note with IP addresses
+                $success_message = sprintf(
+                    'Successfully acquired IP address!%sIPv4: %s%sIPv6: %s',
+                    PHP_EOL,
+                    $ipv4 ?: 'Not provided',
+                    PHP_EOL,
+                    $ipv6 ?: 'Not provided'
+                );
+
+                $subscription->add_order_note($success_message);
+
+                // Log the success message
+                error_log($success_message);
+
+                // Initialize RunCloud class if not already initialized
                 if (!$this->runcloud) {
                     $this->runcloud = new Runcloud();
                 }
-    
+                
+                // Deploy server to RunCloud
                 $runcloud_response = $this->runcloud->create_server_in_server_manager(
                     $server_name,
                     $ipv4,
@@ -490,7 +519,7 @@ class ServerOrchestrator {
     
             // Add order note for scheduling the next step
             $subscription->add_order_note(
-                'Scheduled the completion of the server manager connection with task ID: ' . $args['task_id']
+                'Scheduled the completion of the server manager connection with task ID: ' . $args['task_id'] . PHP_EOL . '(' . $args['task_id'] . ')'
             );
     
             error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
@@ -593,7 +622,7 @@ class ServerOrchestrator {
         );
     
         $subscription->add_order_note(
-            'Scheduled server verification with task ID: ' . $task_id
+            'Scheduled server verification with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
         );
 
         error_log('Scheduled server verification.');
@@ -720,7 +749,7 @@ class ServerOrchestrator {
         );
 
         $subscription->add_order_note(
-            'Server shutdown initiated with task ID: ' . $task_id
+            'Server shutdown initiated with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
         );
 
         $subscription->add_order_note('Server shutdown initiated.');
@@ -764,9 +793,10 @@ class ServerOrchestrator {
             if ($retry_count < 5) {
                 error_log('#039 [SIYA Server Manager - ServerOrchestrator] Retrying shutdown in 1 minute. Attempt: ' . ($retry_count + 1));
                 $subscription->add_order_note(sprintf(
-                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s. Task ID: %s',
+                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s. Task ID: %s' . PHP_EOL . '(%s)',
                     $retry_count + 1,
                     $remote_status['provisioned_remote_status'],
+                    $task_id,
                     $task_id
                 ));
                 as_schedule_single_action(
@@ -783,7 +813,7 @@ class ServerOrchestrator {
                     'arsol_class_server_orchestrator'
                 );
                 $subscription->add_order_note(
-                    'Retrying server shutdown with task ID: ' . $task_id
+                    'Retrying server shutdown with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
                 );
             } else {
                 error_log('#040 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server shutdown failed.');
@@ -836,7 +866,7 @@ class ServerOrchestrator {
         ]], 'arsol_class_server_orchestrator');
 
         $subscription->add_order_note(
-            'Server power-up initiated with task ID: ' . $task_id
+            'Server power-up initiated with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
         );
 
         $subscription->add_order_note('Server power-up initiated.');
@@ -882,10 +912,11 @@ class ServerOrchestrator {
                 $delay = 60 * pow(2, $retry_count); // Exponential backoff
                 error_log(sprintf('#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d', $server_post_id, $delay, $retry_count + 1));
                 $subscription->add_order_note(sprintf(
-                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s. Task ID: %s',
+                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s. Task ID: %s' . PHP_EOL . '(%s)',
                     $retry_count + 1,
                     $delay,
                     $remote_status['provisioned_remote_status'],
+                    $task_id,
                     $task_id
                 ));
 
@@ -899,7 +930,7 @@ class ServerOrchestrator {
                     'task_id' => $task_id
                 ]], 'arsol_class_server_orchestrator');
                 $subscription->add_order_note(
-                    'Retrying server power-up with task ID: ' . $task_id
+                    'Retrying server power-up with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
                 );
             } else {
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
@@ -950,7 +981,7 @@ class ServerOrchestrator {
             'arsol_class_server_orchestrator'
         );
         $subscription->add_order_note(
-            'Scheduled server deletion with task ID: ' .  $task_id
+            'Scheduled server deletion with task ID: ' .  $task_id . PHP_EOL . '(' . $task_id . ')'
         );
 
         error_log('#056 [SIYA Server Manager - ServerOrchestrator] Milestone 2: Scheduled server deletion for ' . $subscription_id . ' Server post ID ' . $linked_server_post_id);
@@ -1023,7 +1054,7 @@ class ServerOrchestrator {
                     );
 
                     $subscription->add_order_note(
-                        'Retrying server deletion with task ID: ' . $task_id
+                        'Retrying server deletion with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
                     );
 
                     return;
@@ -1062,7 +1093,7 @@ class ServerOrchestrator {
                         'arsol_class_server_orchestrator'
                     );
                     $subscription->add_order_note(
-                        'Retrying server deletion with task ID: ' . $task_id
+                        'Retrying server deletion with task ID: ' . $task_id . PHP_EOL . '(' . $task_id . ')'
                     );
 
                     return;
