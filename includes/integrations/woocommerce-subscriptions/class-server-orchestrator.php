@@ -104,6 +104,8 @@ class ServerOrchestrator {
                 return;
             }
 
+            // Place subscription on hold until deployment is done 
+            $subscription->update_status('on-hold');
            
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
@@ -305,6 +307,11 @@ class ServerOrchestrator {
     
                         } else {
                             error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server ready, no RunCloud deployment needed');
+                           
+                            error_log('[SIYA Server Manager - ServerOrchestrator] Success :) for Server ARSOL' . $subscription_id );
+                            
+                            $subscription->update_status('active');
+                       
                         }
                     } else {
                         error_log('#021 [SIYA Server Manager - ServerOrchestrator] Target status is not "active", skipping RunCloud deployment.');
@@ -471,9 +478,6 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
         }
     }
-    
-    
-    
 
     // Install Runcloud agent on provisioned server to connect server to Runcloud
     public function finish_server_manager_connection($args) {
@@ -624,8 +628,12 @@ class ServerOrchestrator {
             $subscription_id = $args['subscription_id'];
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
-            error_log('[SIYA Server Manager - ServerOrchestrator] Success :) for Server ARSOL' . $subscription_id );
+            error_log  ('[SIYA Server Manager - ServerOrchestrator] Server manager connected to server post ID ' . $server_post_id);
     
+            error_log('[SIYA Server Manager - ServerOrchestrator] Success :) for Server ARSOL' . $subscription_id );
+
+            $subscription->update_status('active');
+
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Error verifying connection: %s', $e->getMessage()));
             return; // Exit the function on failure
@@ -663,6 +671,7 @@ class ServerOrchestrator {
 
         // Initialize the server provider
         $this->initialize_server_provider($server_provider_slug);
+        $task_id = uniqid();
         
         // Schedule the shutdown action
         as_schedule_single_action(
@@ -673,13 +682,14 @@ class ServerOrchestrator {
                 'server_post_id' => $server_post_id,
                 'server_provider_slug' => $server_provider_slug,
                 'server_provisioned_id' => $server_provisioned_id,
-                'task_id' => uniqid()
+                'task_id' => $task_id
             ]],
             'arsol_class_server_orchestrator'
         );
 
         $subscription->add_order_note(
-            'Server shutdown initiated with task ID: ' . $args['task_id']
+        
+            'Server shutdown initiated with task ID: ' . $task_id
         );
 
         $subscription->add_order_note('Server shutdown initiated.');
