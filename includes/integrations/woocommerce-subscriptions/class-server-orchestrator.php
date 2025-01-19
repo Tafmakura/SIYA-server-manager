@@ -1265,7 +1265,7 @@ class ServerOrchestrator {
                 'arsol_server_product_id' => $this->server_product_id,
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
-                '_arsol_server_manager_required' => $server_product->get_meta('__arsol_server_manager_required', true),
+                '_arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
@@ -1285,7 +1285,7 @@ class ServerOrchestrator {
 
             // Check if we need to connect to the server manager
             /*
-            $this->connect_server_manager = $server_product->get_meta('__arsol_server_manager_required', true);
+            $this->connect_server_manager = $server_product->get_meta('_arsol_server_manager_required', true);
             if ($this->connect_server_manager === 'yes') {
                 $this->runcloud = new Runcloud();
                 $installation_script = $this->runcloud->get_installation_script($this->server_provisioned_id);

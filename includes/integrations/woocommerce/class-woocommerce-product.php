@@ -87,7 +87,7 @@ class Product {
             '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
             '_arsol_max_applications'     => absint($_POST['_arsol_max_applications'] ?? 0),
             '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
-            '__arsol_server_manager_required' => $is_wordpress_server ? 'yes' : (isset($_POST['__arsol_server_manager_required']) ? 'yes' : 'no'),
+            '_arsol_server_manager_required' => $is_wordpress_server ? 'yes' : (isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no'),
             '_arsol_wordpress_server'     => $is_wordpress_server ? 'yes' : 'no',
             '_arsol_wordpress_ecommerce'  => isset($_POST['_arsol_wordpress_ecommerce']) ? 'yes' : 'no',
         ];
@@ -161,7 +161,7 @@ class Product {
 
             function handleWordPressServerChange() {
                 var $wordpressCheckbox = $('#_arsol_wordpress_server');
-                var $runcloudCheckbox = $('#__arsol_server_manager_required');
+                var $runcloudCheckbox = $('#_arsol_server_manager_required');
                 
                 if ($wordpressCheckbox.is(':checked')) {
                     $runcloudCheckbox.prop('checked', true).prop('disabled', true);
