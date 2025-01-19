@@ -716,6 +716,11 @@ class ServerOrchestrator {
             // Retry logic
             if ($retry_count < 5) {
                 error_log('#039 [SIYA Server Manager - ServerOrchestrator] Retrying shutdown in 1 minute. Attempt: ' . ($retry_count + 1));
+                $subscription->add_order_note(sprintf(
+                    'Attempt %d: Retrying server shutdown in 1 minute. Current status: %s',
+                    $retry_count + 1,
+                    $remote_status['provisioned_remote_status']
+                ));
                 as_schedule_single_action(
                     time() + 60, // Retry in 1 minute
                     'arsol_server_shutdown',
@@ -731,6 +736,7 @@ class ServerOrchestrator {
                 );
             } else {
                 error_log('#040 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. Server shutdown failed.');
+                $subscription->add_order_note('Maximum retry attempts reached. Server shutdown failed.');
             }
         }
 
@@ -817,6 +823,12 @@ class ServerOrchestrator {
             if ($retry_count < 5) {
                 $delay = 60 * pow(2, $retry_count); // Exponential backoff
                 error_log(sprintf('#046 Retrying power-up for Server Post ID: %s in %d seconds. Retry Count: %d', $server_post_id, $delay, $retry_count + 1));
+                $subscription->add_order_note(sprintf(
+                    'Attempt %d: Retrying server power-up in %d seconds. Current status: %s',
+                    $retry_count + 1,
+                    $delay,
+                    $remote_status['provisioned_remote_status']
+                ));
 
                 // Schedule the next retry
                 as_schedule_single_action(time() + $delay, 'arsol_server_powerup', [[
@@ -829,6 +841,7 @@ class ServerOrchestrator {
                 ]], 'arsol_class_server_orchestrator');
             } else {
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
+                $subscription->add_order_note('Maximum retry attempts reached. Server power-up failed.');
             }
         }
     }
