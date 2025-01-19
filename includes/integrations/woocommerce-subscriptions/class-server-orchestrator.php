@@ -440,7 +440,7 @@ class ServerOrchestrator {
 
         } else {
             // No server manager required, mark the subscription as active
-            error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server manager is not required. Marking subscription as active.');
+            error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server manager is not required. Activating subscripton to active... Good day and good luck!');
 
             $success_message = 'Server is ready, no server manager needed. Turning subscription status to active.';
             $subscription->add_order_note($success_message);
@@ -642,8 +642,20 @@ class ServerOrchestrator {
             }
     
             // Success: update metadata
-            error_log('Successfully executed script on server.');
             update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', 2);
+
+            // Success message
+            $message = 'Successfully executed script on server.';
+
+            // Update server note
+            $subscription->add_order_note(
+                $message
+            );
+
+            // Log the success message
+            error_log($message);
+
+
         }
     
         // Always schedule the next step
@@ -675,6 +687,10 @@ class ServerOrchestrator {
     // Verify server manager connection to provisioned server
     public function verify_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
+        $subscription_id = $args['subscription_id'];
+        $subscription = wcs_get_subscription($subscription_id);
+        
+        
         $server_manager_instance = new Runcloud();
     
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
@@ -693,6 +709,19 @@ class ServerOrchestrator {
                     if (isset($status['status']) && $status['status'] === 'running') {
                         update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_installation', 2);
                         update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
+
+                        // Success message
+                        $message = 'Script installation completed successfully.';
+
+                        // Update server note
+                        $subscription->add_order_note(
+                            $message
+                        );
+
+                        // Log the success message
+                        error_log($message);
+
+
                         break;
                     }
                     sleep(30); // Retry after 30 seconds
@@ -716,7 +745,27 @@ class ServerOrchestrator {
                         update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
                         update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
                         update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
-                        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Server manager connected to server post ID %d', $server_post_id));
+                        
+                        // Success message
+                        $success_message = sprintf(
+                            'Server manager connected to server successfully!%sConnected: %s%sOnline: %s%sAgent Version: %s',
+                            PHP_EOL,
+                            get_post_meta($server_post_id, 'arsol_server_manager_connected', true) ?: 'Not provided',
+                            PHP_EOL,
+                            get_post_meta($server_post_id, 'arsol_server_manager_online', true) ?: 'Not provided',
+                            PHP_EOL,
+                            get_post_meta($server_post_id, 'arsol_server_manager_agent_version', true) ?: 'Unknown'
+                        );
+
+                        // Update server note
+                        $subscription->add_order_note(
+                            $success_message
+                        );
+
+                        // Log the success message
+                        error_log($success_message);
+                        
+                        
                         break;
                     }
                     sleep(15); // Retry after 15 seconds
@@ -727,15 +776,17 @@ class ServerOrchestrator {
                     return; // Exit the function on failure
                 }
             }
-    
-            // If both script installation and connection are successful, proceed to schedule the next event
-            $subscription_id = $args['subscription_id'];
-            $subscription = wcs_get_subscription($subscription_id);
-            $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
-            error_log  ('[SIYA Server Manager - ServerOrchestrator] Server manager connected to server post ID ' . $server_post_id);
-    
-            error_log('[SIYA Server Manager - ServerOrchestrator] Success :) for Server ARSOL' . $subscription_id );
+            // Success message
+            $success_message = 'Server manager connected to server successfully! Activating subscripton to active... Good day and good luck!';
+
+            // Update server note
+            $subscription->add_order_note(
+                $success_message
+            );
+
+            // Log the success message
+            error_log($success_message);
 
             $subscription->update_status('active');
 
