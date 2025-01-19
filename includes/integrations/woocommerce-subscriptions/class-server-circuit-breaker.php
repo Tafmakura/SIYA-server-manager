@@ -40,18 +40,27 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             }
 
             // Get server metadata
-            $is_provisioned = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
-            $is_deployed = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
-            $requires_server_manager = get_post_meta($this->server_post_id, 'arsol_server_manager_required', true);
+            $server_provisioned_status = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status', true);
+            $server_deployed_status = get_post_meta($this->server_post_id, 'arsol_server_deployed_status', true);
+            $server_manager_required = get_post_meta($this->server_post_id, 'arsol_server_manager_required', true);
+            $server_deployed_status_connection = get_post_meta($this->server_post_id, 'arsol_server_deployed_status_connection', true);
+            $server_provisioned_status_script_execution = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status_script_execution', true);
+            $server_provisioned_status_script_installation = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status_script_installation', true);
+            $server_provisioned_status_firewall_rules = get_post_meta($this->server_post_id, 'arsol_server_provisioned_status_firewall_rules', true);
+            
     
-            error_log(sprintf('[SIYA Server Manager - ServerCircuitBreaker] Status - Provisioned: %s, Deployed: %s, Requires Manager: %s', 
-                $is_provisioned ? 'true' : 'false',
-                $is_deployed ? 'true' : 'false',
-                $requires_server_manager
+            error_log(sprintf('[SIYA Server Manager - ServerCircuitBreaker] Status - Provisioned: %s, Deployed: %s, Requires Manager: %s, Deployed Connection: %s, Script Execution: %s, Script Installation: %s, Firewall Rules: %s', 
+                $server_provisioned_status == 2 ? 'true' : 'false',
+                $server_deployed_status == 2 ? 'true' : 'false',
+                $server_manager_required,
+                $server_deployed_status_connection == 2 ? 'true' : 'false',
+                $server_provisioned_status_script_execution == 2 ? 'true' : 'false',
+                $server_provisioned_status_script_installation == 2 ? 'true' : 'false',
+                $server_provisioned_status_firewall_rules == 2 ? 'true' : 'false'
             ));
 
             // Fully provisioned and deployed
-            if ($is_provisioned && $is_deployed) {
+            if ($server_provisioned_status == 2 && $server_deployed_status == 2) {
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] Server setup is fine.');
                 update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'complete');
                 error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker status updated to complete.');
@@ -60,9 +69,9 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             }
 
             // Provisioned but not deployed
-            if (!$is_provisioned && !$is_deployed || $is_provisioned && !$is_deployed ) {
+            if ($server_provisioned_status != 2 && $server_deployed_status != 2 || $server_provisioned_status == 2 && $server_deployed_status != 2 ) {
                 
-                if ( $is_provisioned && !$is_deployed && $requires_server_manager === 'no') {
+                if ( $server_provisioned_status == 2 && $server_deployed_status != 2 && $server_manager_required === 'no') {
                     update_post_meta($this->server_post_id, 'arsol_server_circuit_breaker_status', 'okay');
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server circuit breaker status updated to okay.');
                     error_log('[SIYA Server Manager - ServerCircuitBreaker] Server provisioned but deployment not required. No action needed.');
