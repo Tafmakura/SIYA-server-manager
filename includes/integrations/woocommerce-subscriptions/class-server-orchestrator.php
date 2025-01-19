@@ -627,6 +627,7 @@ class ServerOrchestrator {
     
             // If both script installation and connection are successful, proceed to schedule the next event
             $subscription_id = $args['subscription_id'];
+            $subscription = wcs_get_subscription($subscription_id);
             $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
 
             error_log  ('[SIYA Server Manager - ServerOrchestrator] Server manager connected to server post ID ' . $server_post_id);
