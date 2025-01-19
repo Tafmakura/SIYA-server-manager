@@ -362,6 +362,8 @@ class ServerOrchestrator {
     
                             $subscription->add_order_note($success_message);
                             error_log($success_message);
+
+                            break; // Exit the loop after acquiring the IP addresses
                         }
                         
                     } 
