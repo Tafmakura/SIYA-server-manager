@@ -135,7 +135,7 @@ class ServerOrchestrator {
                 'task_id' => $task_id
             ]);
             $subscription->add_order_note(
-                'Scheduled background server provision.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                'Scheduled background server provisioning.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
@@ -608,13 +608,13 @@ class ServerOrchestrator {
                 $open_ports_result = $this->assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id);
                 
                 if (!$open_ports_result) {
-                    update_post_meta($server_post_id, '_arsol_state_10_provisioning_firewall_rules', -1);
+                    update_post_meta($server_post_id, '_arsol_state_40_firewall_rules', -1);
                     error_log('Failed to open ports for server.');
                     $subscription->add_order_note('Failed to open ports for server.');
                     return; // Exit on failure
                 }
     
-                update_post_meta($server_post_id, '_arsol_state_10_provisioning_firewall_rules', 2);
+                update_post_meta($server_post_id, '_arsol_state_40_firewall_rules', 2);
     
             } catch (\Exception $e) {
                 error_log('Error occurred while opening ports: ' . $e->getMessage());
@@ -624,7 +624,7 @@ class ServerOrchestrator {
         }
     
         // Execute RunCloud script if it hasn't been successfully executed before
-        $script_execution_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning_script_execution', true);
+        $script_execution_status = get_post_meta($server_post_id, '_arsol_state_50_script_execution', true);
         if ($script_execution_status != 2) {
             $this->runcloud = new Runcloud();
             
@@ -643,7 +643,7 @@ class ServerOrchestrator {
             }
     
             // Success: update metadata
-            update_post_meta($server_post_id, '_arsol_state_10_provisioning_script_execution', 2);
+            update_post_meta($server_post_id, '_arsol_state_50_script_execution', 2);
 
             // Success message
             $message = 'Successfully executed agent installation script on server.';
@@ -1230,7 +1230,7 @@ class ServerOrchestrator {
             // Get the URL for the subscription/order
             $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
-                'Server post for ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view</a>',
+                'Server post for server ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view</a>',
                 $this->subscription_id,
                 $this->server_post_id,
                 esc_url($server_post_url) // Ensure the URL is properly escaped
