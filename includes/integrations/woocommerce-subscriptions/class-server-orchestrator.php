@@ -528,7 +528,7 @@ class ServerOrchestrator {
         if ($firewall_status != 2) {
             try {
 
-                // Intentional fault
+                // TO DELETE Intentional fault
                 $server_provisioned_id = 0;
 
                 $open_ports_result = $this->assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id);
@@ -1066,7 +1066,7 @@ class ServerOrchestrator {
                     );
 
                     return;
-                    
+
                 } else {
                     error_log('#062 [SIYA Server Manager - ServerOrchestrator] Maximum retry attempts reached. RunCloud server deletion failed.');
                     return;
@@ -1225,24 +1225,41 @@ class ServerOrchestrator {
 
             $subscription->update_status('active');
 
+            // Update subscription notes with the provisioned server data
+
             $success_message = sprintf(
                 "Server provisioned successfully! %s" .
                 "Server Provider: %s%s" .
+                "Server ID: %s%s" .
                 "Server Name: %s%s" .
-                "IP: %s%s" .
-                "Memory: %s%s" .
+                "OS: %s%s" .
+                "OS Version: %s%s" .
+                "Provisioned Date: %s%s" .
+                "IPv4: %s%s" .
+                "IPv6: %s%s" .
                 "CPU Cores: %s%s" .
+                "Memory: %s%s" .
+                "Storage: %s%s" .
                 "Region: %s",
                 PHP_EOL,
-                $server_provider_slug, PHP_EOL,
-                $server_data['provisioned_name'], PHP_EOL,
-                $server_data['provisioned_ipv4'], PHP_EOL,
-                $server_data['provisioned_memory'], PHP_EOL,
-                $server_data['provisioned_vcpu_count'], PHP_EOL,
-                $server_data['provisioned_region_slug']
+                $server_provider_slug ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_id'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_name'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_os'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_os_version'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_date'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_ipv4'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_ipv6'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_vcpu_count'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_memory'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_storage'] ?: 'Not provided', PHP_EOL,
+                $server_data['provisioned_region_slug'] ?: 'Not provided'
             );
-            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
+
             $subscription->add_order_note($success_message);
+
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $success_message));
+      
 
             // Update server post metadata using the standardized data
             $server_post_instance = new ServerPost;
