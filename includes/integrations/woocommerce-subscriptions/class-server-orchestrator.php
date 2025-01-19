@@ -645,7 +645,7 @@ class ServerOrchestrator {
             update_post_meta($server_post_id, 'arsol_server_provisioned_status_script_execution', 2);
 
             // Success message
-            $message = 'Successfully executed script on server.';
+            $message = 'Successfully executed agent installation script on server.';
 
             // Update server note
             $subscription->add_order_note(
