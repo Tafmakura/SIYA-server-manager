@@ -19,6 +19,13 @@ $siyaServerManager = new Setup();
 // Include the Composer autoload to load phpseclib classes
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
+
+
+
+
+
+
+
 function register_custom_subscription_status() {
     register_post_status('wc-custom-status', [
         'label'                     => _x('Custom Status', 'Subscription status', 'text-domain'),
@@ -30,3 +37,17 @@ function register_custom_subscription_status() {
     ]);
 }
 add_action('init', 'register_custom_subscription_status');
+
+function add_custom_subscription_status($statuses) {
+    $statuses['wc-custom-status'] = _x('Custom Status', 'Subscription status', 'text-domain');
+    return $statuses;
+}
+add_filter('woocommerce_subscription_statuses', 'add_custom_subscription_status');
+
+function add_custom_subscription_status_to_admin($order_statuses) {
+    $order_statuses['wc-custom-status'] = _x('Custom Status', 'Subscription status', 'text-domain');
+    return $order_statuses;
+}
+add_filter('wc_order_statuses', 'add_custom_subscription_status_to_admin');
+
+
