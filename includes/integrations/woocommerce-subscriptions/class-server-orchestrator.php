@@ -241,7 +241,6 @@ class ServerOrchestrator {
                 'connect_server_manager'    => $this->connect_server_manager,
                 'server_manager'            => $this->server_manager,
                 'server_provisioned_id'     => $this->server_provisioned_id,
-                'subscription'              => $this->subscription,
                 'target_status'             => 'active',
                 'server_post_id'            => $this->server_post_id,
                 'poll_interval'             => 10,
@@ -344,7 +343,6 @@ class ServerOrchestrator {
                     'connect_server_manager' => $connect_server_manager,
                     'server_manager' => $server_manager,
                     'server_provisioned_id' => $server_provisioned_id,
-                    'subscription' => $subscription,
                     'target_status' => $target_status,
                     'server_post_id' => $server_post_id,
                     'poll_interval' => $poll_interval,
@@ -497,6 +495,8 @@ class ServerOrchestrator {
     
         $server_deployed_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
         $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
     
         if (!$server_deployed_id || !$server_ip) {
             error_log('Missing server ID or IP address for connection.');
@@ -508,7 +508,7 @@ class ServerOrchestrator {
         $firewall_status = get_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', true);
         if ($firewall_status != 2) {
             try {
-                $open_ports_result = $this->assign_firewall_rules_to_server($this->server_provider_slug, $this->server_provisioned_id);
+                $open_ports_result = $this->assign_firewall_rules_to_server($server_provider_slug, $server_provisioned_id);
                 
                 if (!$open_ports_result) {
                     update_post_meta($server_post_id, 'arsol_server_provisioned_status_firewall_rules', -1);
