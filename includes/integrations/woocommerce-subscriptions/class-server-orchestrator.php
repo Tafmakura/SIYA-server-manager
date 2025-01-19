@@ -412,43 +412,41 @@ class ServerOrchestrator {
                 sleep($poll_interval);
             }
            
+        } 
+
+        // If IP status is already 2, skip the status check and proceed with server manager or marking subscription as active
+        error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is 2. Skipping IP validation and status check.');
+    
+    
+        // Proceed with RunCloud deployment or mark as active
+        if ($connect_server_manager === 'yes') {
+            error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment after IP validation.');
+
+            // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
+            as_schedule_single_action(
+                time(),
+                'arsol_start_server_manager_connection_hook',
+                [[
+                    'server_post_id' => $server_post_id,
+                    'task_id' => $task_id
+                ]],
+                'arsol_class_server_orchestrator'
+            );
+
+            // Add order note to inform the user about scheduling
+            $subscription->add_order_note(
+                'Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+            );
+
         } else {
-    
-            // If IP status is already 2, skip the status check and proceed with server manager or marking subscription as active
-            error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is 2. Skipping IP validation and status check.');
-        
-        
-            // Proceed with RunCloud deployment or mark as active
-            if ($connect_server_manager === 'yes') {
-                error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment after IP validation.');
+            // No server manager required, mark the subscription as active
+            error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server manager is not required. Marking subscription as active.');
 
-                // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
-                as_schedule_single_action(
-                    time(),
-                    'arsol_start_server_manager_connection_hook',
-                    [[
-                        'server_post_id' => $server_post_id,
-                        'task_id' => $task_id
-                    ]],
-                    'arsol_class_server_orchestrator'
-                );
-
-                // Add order note to inform the user about scheduling
-                $subscription->add_order_note(
-                    'Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
-                );
-
-            } else {
-                // No server manager required, mark the subscription as active
-                error_log('#020 [SIYA Server Manager - ServerOrchestrator] Server manager is not required. Marking subscription as active.');
-
-                $success_message = 'Server is ready, no server manager needed. Turning subscription status to active.';
-                $subscription->add_order_note($success_message);
-                $subscription->update_status('active');
-            }
-
+            $success_message = 'Server is ready, no server manager needed. Turning subscription status to active.';
+            $subscription->add_order_note($success_message);
+            $subscription->update_status('active');
         }
-    
+
     }
     
     // Step 4 (Optional): Create server in Runcloud
