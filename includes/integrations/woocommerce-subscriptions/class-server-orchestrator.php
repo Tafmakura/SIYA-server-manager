@@ -435,7 +435,7 @@ class ServerOrchestrator {
 
             // Add order note to inform the user about scheduling
             $subscription->add_order_note(
-                'Scheduled RunCloud deployment.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
 
         } else {
@@ -498,9 +498,7 @@ class ServerOrchestrator {
             ));
 
             if ($runcloud_response['status'] == 200 || $runcloud_response['status'] == 201) {
-                // Successful Log
-                error_log('#028 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment successful');
-
+            
                 // Update server metadata
                 $metadata = [
                     'arsol_server_deployed_id' => json_decode($runcloud_response['body'], true)['id'] ?? null,
@@ -511,11 +509,26 @@ class ServerOrchestrator {
                 ];
                 $server_post_instance->update_meta_data($server_post_id, $metadata);
 
-                error_log(sprintf('#029 [SIYA Server Manager - ServerOrchestrator] Step 5: Deployment to RunCloud completed for subscription %d', $subscription_id));
-                $deployment_status = true; // Mark deployment as successful
+                // Add message for successful deployment
+                $success_message = sprintf(
+                    'Server deployed on server manager successfully!%sProvider: %s%sDeployed ID: %s',
+                    PHP_EOL,
+                    'RunCloud',
+                    PHP_EOL,
+                    $metadata['arsol_server_deployed_id']
+                );
+
+                // Add order note for successful deployment
+                $subscription->add_order_note($success_message);
+
+                // Log the success message
+                error_log($success_message);
+
             } else {
+
                 // Failure condition
                 error_log('#030 [SIYA Server Manager - ServerOrchestrator] RunCloud deployment failed with status: ' . $runcloud_response['status']);
+                
                 $subscription->add_order_note(sprintf(
                     "RunCloud deployment failed.\nStatus: %s\nResponse body: %s\nFull response: %s",
                     $runcloud_response['status'],
@@ -531,11 +544,12 @@ class ServerOrchestrator {
         } else {
             // If the server has already been deployed (status == 2), skip deployment
             error_log('#024 [SIYA Server Manager - ServerOrchestrator] Server already deployed, skipping deployment.');
-            $deployment_status = true; // Set deployment status to successful
         }
     
-        // Now schedule the next step if deployment was successful or if server is already deployed
-        if (isset($deployment_status) && $deployment_status !== null) {
+        // Check server_deployed_status to avoid redundant deployment
+        $server_deployed_status = get_post_meta($server_post_id, 'arsol_server_deployed_status', true);
+
+        if ($server_deployed_status == 2) {
            
             // Schedule finish_server_manager_connection using Action Scheduler
             as_schedule_single_action(time(), 
@@ -550,7 +564,8 @@ class ServerOrchestrator {
             $subscription->add_order_note(
                 'Scheduled the completion of the server manager connection.' . PHP_EOL . '(Task ID: ' . $args['task_id'] . ')'
             );
-    
+            
+            // Log the scheduling
             error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
         }
     }
