@@ -105,7 +105,7 @@ class ServerOrchestrator {
             }
 
             // Place subscription on hold until deployment is done 
-            $subscription->update_status('on-hold');
+            $subscription->update_status('pending');
            
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
