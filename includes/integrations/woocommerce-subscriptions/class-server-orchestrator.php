@@ -800,6 +800,7 @@ class ServerOrchestrator {
                 while ((time() - $startTime) < $installationTimeout) {
                     
                     try {
+                        
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
                         if (isset($status['status']) && $status['status'] === 'running') {
@@ -812,13 +813,18 @@ class ServerOrchestrator {
                             error_log($message);
 
                             break; // Exit on success
+
                         } elseif (get_installation_status($server_post_id) === 'failed') {
+
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
+                        
                         }
 
                     } catch (\Exception $e) {
+
                         // Centralize exception handling for retries
                         $this->throw_exception($e, $subscription, 'Error during script installation');
+                    
                     }
 
                     sleep(30); // Retry after 30 seconds
