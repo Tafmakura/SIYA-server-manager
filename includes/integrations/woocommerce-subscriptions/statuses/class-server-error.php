@@ -20,6 +20,7 @@ class ServerError {
      */
     public function __construct() {
         $this->init();
+        $this->initBulkAction();
     }
 
     /**
@@ -31,6 +32,19 @@ class ServerError {
         add_filter('wc_subscription_bulk_actions', [$this, 'addBulkAction']);
         add_action('wcs_subscription_status_server-error', [$this, 'handleStatusChange']);
         add_filter('woocommerce_can_subscription_be_updated_to_server-error', [$this, 'canUpdateStatus'], 10, 2);
+    }
+
+    /**
+     * Initialize bulk action hooks
+     * @return void
+     */
+    private function initBulkAction() {
+        add_filter(
+            'handle_bulk_actions-woocommerce_page_wc-orders--shop_subscription',
+            [ $this, 'handleBulkActions' ],
+            10,
+            3
+        );
     }
 
     /**
@@ -51,6 +65,32 @@ class ServerError {
     public function addBulkAction($actions) {
         $actions['server-error'] = __('Change to Server Error', 'woocommerce-subscriptions');
         return $actions;
+    }
+
+    /**
+     * Handle bulk actions for server error status
+     * @param string $redirect_to URL to redirect to
+     * @param string $action Action being performed
+     * @param array $subscription_ids Array of subscription IDs
+     * @return string Modified redirect URL
+     */
+    public function handleBulkActions( $redirect_to, $action, $subscription_ids ) {
+        if ( 'server-error' === $action ) {
+            foreach ( $subscription_ids as $id ) {
+                $subscription = wcs_get_subscription( $id );
+                if ( $subscription ) {
+                    $subscription->update_status( self::STATUS_KEY );
+                }
+            }
+            $redirect_to = add_query_arg(
+                [
+                    'bulk_action' => 'marked_server_error',
+                    'changed'     => count( $subscription_ids ),
+                ],
+                $redirect_to
+            );
+        }
+        return $redirect_to;
     }
 
     /**
