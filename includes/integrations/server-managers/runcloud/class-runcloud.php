@@ -117,6 +117,8 @@ class Runcloud /*implements ServerManager*/ {
 
             while ($attempt <= $max_attempts) {
 
+                set_time_limit(0);
+
                 try {
 
                     error_log("SSH Connection attempt {$attempt} of {$max_attempts} to {$ssh_host}:{$ssh_port}");
@@ -208,9 +210,6 @@ class Runcloud /*implements ServerManager*/ {
         
         error_log('[SIYA Server Manager][RunCloud] Checking installation status via SSH...');
         
-        // Disable PHP time limit to ensure the script can run as long as needed
-        set_time_limit(0);
-        
         $ssh_host = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
         $ssh_username = 'root';
         $ssh_private_key = get_option('arsol_global_ssh_private_key');
@@ -220,6 +219,7 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud][DEBUG] SSH Port: ' . $ssh_port);
         
         try {
+
             error_log('[SIYA Server Manager][RunCloud] Initializing SSH connection...');
             
             // Initialize SSH connection
@@ -271,6 +271,7 @@ class Runcloud /*implements ServerManager*/ {
                     'message' => 'Unexpected status output: ' . $status_output,
                 ];
             }
+
         } catch (\Exception $e) {
 
             // Log exception details
@@ -396,6 +397,9 @@ class Runcloud /*implements ServerManager*/ {
         $attempt = 1;
         
         while ($attempt <= $max_attempts) {
+
+            set_time_limit(0);
+
             try {
                 error_log("SSH Connection attempt {$attempt} of {$max_attempts} to {$ssh_host}:{$ssh_port}");
                 

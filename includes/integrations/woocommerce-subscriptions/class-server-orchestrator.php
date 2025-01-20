@@ -778,6 +778,7 @@ class ServerOrchestrator {
     }    
     
     // Verify server manager connection to provisioned server
+    
     public function verify_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
         $subscription_id = $args['subscription_id'];
@@ -816,7 +817,7 @@ class ServerOrchestrator {
 
                         } elseif (get_installation_status($server_post_id) === 'failed') {
 
-                          //  $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
                         
                         }
 
@@ -828,11 +829,12 @@ class ServerOrchestrator {
                     }
 
                     sleep(30); // Retry after 30 seconds
-
+                    
                 }
 
                 // Timeout Handling for script installation
                 if ((time() - $startTime) >= $installationTimeout) {
+                   
                     $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Script installation timeout exceeded for server post ID: ' . $server_post_id;
                     error_log($timeout_message);
                     $subscription->add_order_note($timeout_message);
@@ -1766,8 +1768,6 @@ class ServerOrchestrator {
         if ($rethraw) {
             throw $e;
         }
-
-        //return false; // Add fallback return false
 
     }
 
