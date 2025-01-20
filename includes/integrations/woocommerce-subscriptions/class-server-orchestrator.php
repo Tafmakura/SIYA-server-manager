@@ -819,12 +819,10 @@ class ServerOrchestrator {
                             error_log($message);
     
                             break;
-                        }
+                        } elseif(get_installation_status($server_post_id) === 'failed') {
+    
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
 
-                        if ($status['status'] !== 'running') {
-
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script is not running.');
-                        
                         }
 
                     } catch (\Exception $e) {
@@ -896,13 +894,16 @@ class ServerOrchestrator {
 
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
 
-                        }
+                            error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
 
+                        }
 
                     } catch (\Exception $e) {
 
                         // Handle the exception and exit
                         $this->handle_exception($e, $subscription, 'Error fetching connection status');
+
+                        error_log ('#031 [SIYA Server Manager - ServerOrchestrator] Error fetching connection status');
 
                     }
 
@@ -944,9 +945,9 @@ class ServerOrchestrator {
             return false; // Add fallback return false
 
         }
+
     }
     
-
     public function start_server_shutdown($subscription) {
         // Early validation of required parameters
         $subscription_id = $subscription->get_id();
