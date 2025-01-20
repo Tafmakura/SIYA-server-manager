@@ -631,7 +631,7 @@ class ServerOrchestrator {
         if ($firewall_status != 2) {
           
             // TO DELETE Intentional fault
-            // $server_provisioned_id = 0;
+            $server_provisioned_id = 0;
 
             try {
                 
