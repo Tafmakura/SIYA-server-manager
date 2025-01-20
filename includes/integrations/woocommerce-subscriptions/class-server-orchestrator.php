@@ -158,6 +158,7 @@ class ServerOrchestrator {
 
             // Handle the exception
             $this->handle_exception($e, $subscription, $error_definition);
+
             return false; // Add fallback return false
 
         }
@@ -288,6 +289,7 @@ class ServerOrchestrator {
 
             // Update server metadata on failed provisioning
             $this->handle_exception($e, $this->subscription, $error_definition);
+            
             return false; // Add fallback return false
 
         }
@@ -894,7 +896,7 @@ class ServerOrchestrator {
 
                         // Trigger the circuit breaker
                         ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-                        
+
                         return false; // Add fallback return false
 
                     }
