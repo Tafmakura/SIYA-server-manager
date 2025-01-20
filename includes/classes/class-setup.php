@@ -43,7 +43,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/integrations/server-providers/vultr/class-vultr.php';
  
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
-      // DELETE  require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
+        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
 
         // require_once plugin_dir_path(__DIR__) . '/libraries/phpseclib/autoload.php';
@@ -62,16 +62,16 @@ class Setup {
      * Initialize classes onstart.
      */
     private function initialize_classes_on_startup() {
-        
+       
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
+            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
+        }
         if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
             $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
         }
        // if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
             $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
       //  }
-        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
-            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
-        }
 
     }
 

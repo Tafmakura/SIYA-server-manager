@@ -71,7 +71,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nyc1';
-        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20-04-x64';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-24-04-x64';  // Default must support Runcloud
         $ssh_key_id = '9b:e9:7b:2f:16:df:a5:1b:b4:a6:e5:8c:f3:39:14:27';
 
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
@@ -87,7 +87,7 @@ class DigitalOcean /*implements ServerProvider*/ {
         }
 
         // Check if we need to connect to RunCloud
-        $connect_server_manager = get_post_meta($server_post_id, 'arsol_connect_server_manager', true);
+        $connect_server_manager = get_post_meta($server_post_id, '_arsol_server_manager_required', true);
         $runcloud_script = '';
 
         if ($connect_server_manager === 'yes') {
@@ -201,7 +201,6 @@ EOD;
             'rebooting' => 'rebooting'
         ];
         $mapped_status = $status_map[$raw_status] ?? $raw_status;
-        error_log(sprintf('[SIYA Server Manager] DigitalOcean: Mapping status from "%s" to "%s"', $raw_status, $mapped_status));
         error_log(sprintf('[SIYA Server Manager][DigitalOcean] Full status mapping details:%sFrom: %s%sTo: %s', 
             PHP_EOL, var_export($raw_status, true), 
             PHP_EOL, var_export($mapped_status, true)
@@ -461,7 +460,9 @@ EOD;
         return $response_code === 201;
     }
 
-    public function get_server_status($server_provisioned_id) {
+    public function get_server_status($server_post_id) {
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+
         $response = wp_remote_get($this->api_endpoint . '/droplets/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
@@ -527,7 +528,7 @@ EOD;
         ];
     }
 
-    public function open_server_ports($server_provisioned_id) {
+    public function assign_firewall_rules_to_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][DigitalOcean] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = 'e08f1e94-778d-4184-97ea-8091b3b64a83'; // Replace with your actual firewall group ID
@@ -543,8 +544,11 @@ EOD;
         ]);
 
         if (is_wp_error($response)) {
-            error_log('DigitalOcean open ports error: ' . $response->get_error_message());
-            return false;
+            throw new \RuntimeException('Failed to assign firewall rules to server: ' . $response->get_error_message());
+        }
+
+        if (wp_remote_retrieve_response_code($response) !== 204) {
+            throw new \Exception('Failed to assign firewall rules to server. Response code: ' . wp_remote_retrieve_response_code($response));
         }
 
         $response_code = wp_remote_retrieve_response_code($response);

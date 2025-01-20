@@ -21,7 +21,7 @@ class Vultr /*implements ServerProvider*/ {
         $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'ewr';
-        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2465;
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 2284;  // Default must support Runcloud
         $ssh_key_id = '86125daf-08ed-4950-9052-fc6eb9eb9207';
 
         error_log(sprintf('[SIYA Server Manager] Vultr: Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
@@ -123,19 +123,33 @@ class Vultr /*implements ServerProvider*/ {
         return $user_script;
     }
 
-    private function map_statuses($raw_status) {
-        $status_map = [
-            'pending' => 'starting',
-            'installing' => 'starting',
-            'active' => 'active',
-            'stopped' => 'off',
-            'rebooting' => 'rebooting'
-        ];
-        $mapped_status = $status_map[$raw_status] ?? $raw_status;
-        error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sFrom: %s%sTo: %s', 
-            PHP_EOL, var_export($raw_status, true), 
-            PHP_EOL, var_export($mapped_status, true)
+    private function map_statuses($raw_power_status, $raw_status, $raw_server_status) {
+
+        error_log (sprintf('[SIYA Server Manager] Vultr: Mapping statuses with raw power status: %s, raw status: %s, raw server status: %s', 
+            $raw_power_status, $raw_status, $raw_server_status )
+        );
+
+        if ($raw_power_status == 'stopped') {
+            $mapped_status = 'off';
+            
+        } elseif ($raw_power_status == 'running') {
+            $status_map = [
+                'active' => 'active',
+                'active (running)' => 'active',
+                'pending' => 'starting',
+                'resizing' => 'upgrading'
+            ];
+            $mapped_status = $status_map[$raw_status] ?? $raw_status;
+
+        } else {
+
+            $mapped_status = $raw_power_status;
+        }
+
+        error_log(sprintf('[SIYA Server Manager] Vultr: Full status mapping details:%sRaw Status From: %s%sTo: %s', 
+            PHP_EOL, var_export($raw_status, true), PHP_EOL, var_export($mapped_status, true)
         ));
+
         return $mapped_status;
     }
 
@@ -143,8 +157,9 @@ class Vultr /*implements ServerProvider*/ {
         
         error_log(var_export($api_response, true)); // DELETE THIS IN PRODUCTION
 
+        $raw_power_status = $api_response['instance']['power_status'] ?? '';
         $raw_status = $api_response['instance']['status'] ?? '';
-        $power_status = $api_response['instance']['power_status'] ?? '';
+        $raw_server_status = $api_response['instance']['server_status'] ?? '';
         $os_name = $api_response['instance']['os'] ?? '';
         $os_version = $api_response['instance']['os_version'] ?? '';
 
@@ -163,8 +178,8 @@ class Vultr /*implements ServerProvider*/ {
             'provisioned_date' => $api_response['instance']['date_created'] ?? '',
             'provisioned_add_ons' => '',
             'provisioned_root_password' => $api_response['instance']['default_password'] ?? '',
-            'provisioned_remote_status' => $this->map_statuses($raw_status),
-            'provisioned_remote_raw_status' => "$raw_status ($power_status)"
+            'provisioned_remote_status' => $this->map_statuses($raw_power_status, $raw_status, $raw_server_status),
+            'provisioned_remote_raw_status' => $raw_status,
         ];
     }
 
@@ -353,7 +368,9 @@ class Vultr /*implements ServerProvider*/ {
         return $response_code === 204;
     }
 
-    public function get_server_status($server_provisioned_id) {
+    public function get_server_status($server_post_id) {
+
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         $response = wp_remote_get($this->api_endpoint . '/instances/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
@@ -371,12 +388,13 @@ class Vultr /*implements ServerProvider*/ {
         }
 
         $api_response = json_decode(wp_remote_retrieve_body($response), true);
+        $raw_power_status = $api_response['instance']['power_status'] ?? '';
         $raw_status = $api_response['instance']['status'] ?? '';
-        $power_status = $api_response['instance']['power_status'] ?? '';
+        $raw_server_status = $api_response['instance']['server_status'] ?? '';
 
         return [
-            'provisioned_remote_status' => $this->map_statuses($raw_status),
-            'provisioned_remote_raw_status' => "$raw_status ($power_status)"
+            'provisioned_remote_status' => $this->map_statuses($raw_power_status, $raw_status, $raw_server_status),
+            'provisioned_remote_raw_status' => $raw_status,
         ];
     }
 
@@ -403,7 +421,7 @@ class Vultr /*implements ServerProvider*/ {
         ];
     }
 
-    public function open_server_ports($server_provisioned_id) {
+    public function assign_firewall_rules_to_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][Vultr] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = '1d93959e-06c7-43d0-9f87-85e91b6d27ac'; // Replace with your actual firewall group ID
@@ -420,8 +438,11 @@ class Vultr /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Vultr open ports error: ' . $response->get_error_message());
-            return false;
+            throw new \RuntimeException('Failed to assign firewall rules to server: ' . $response->get_error_message());
+        }
+
+        if (wp_remote_retrieve_response_code($response) !== 202) {
+            throw new \Exception('Failed to assign firewall rules to server. Response code: ' . wp_remote_retrieve_response_code($response));
         }
 
         $response_code = wp_remote_retrieve_response_code($response);

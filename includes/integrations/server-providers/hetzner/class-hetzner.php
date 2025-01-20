@@ -72,7 +72,7 @@ class Hetzner /*implements ServerProvider*/ {
         $server_name = get_post_meta($server_post_id, 'arsol_server_post_name', true);
         $server_plan = get_post_meta($server_post_id, 'arsol_server_plan_slug', true);
         $server_region = get_post_meta($server_post_id, 'arsol_server_region_slug', true) ?: 'nbg1';
-        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-20.04';
+        $server_image = get_post_meta($server_post_id, 'arsol_server_image_slug', true) ?: 'ubuntu-24.04'; // Default must support Runcloud
         $ssh_key_id = 26338453;
 
         error_log(sprintf('[SIYA Server Manager][Hetzner] Starting server provisioning with params:%sName: %s%sPlan: %s%sRegion: %s%sImage: %s', 
@@ -120,7 +120,7 @@ class Hetzner /*implements ServerProvider*/ {
         $response_code = wp_remote_retrieve_response_code($response);
         $response_body = wp_remote_retrieve_body($response);
         if ($response_code !== 201) {
-            throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . $response_body);
+            throw new \Exception('Failed to provision server. Response code: ' . $response_code . ', Body: ' . json_encode($response_body));
         }
 
         $api_response = json_decode($response_body, true);
@@ -377,7 +377,9 @@ class Hetzner /*implements ServerProvider*/ {
         
     }
 
-    public function get_server_status($server_provisioned_id) {
+    public function get_server_status($server_post_id) {
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+
         $response = wp_remote_get($this->api_endpoint . '/servers/' . $server_provisioned_id, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->api_key
@@ -475,7 +477,7 @@ class Hetzner /*implements ServerProvider*/ {
         ];
     }
 
-    public function open_server_ports($server_provisioned_id) {
+    public function assign_firewall_rules_to_server($server_provisioned_id) {
         error_log('[SIYA Server Manager][Hetzner] Assigning firewall group to server: ' . $server_provisioned_id);
 
         $firewall_id = 1841021;
@@ -495,8 +497,11 @@ class Hetzner /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Hetzner open ports error: ' . $response->get_error_message());
-            return false;
+            throw new \RuntimeException('Failed to assign firewall rules to server: ' . $response->get_error_message());
+        }
+
+        if (wp_remote_retrieve_response_code($response) !== 201) {
+            throw new \Exception('Failed to assign firewall rules to server. Response: ' . wp_remote_retrieve_body($response));
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
