@@ -13,17 +13,8 @@ class ServerError {
      * Add custom column to subscriptions list
      */
     public function add_custom_column($columns) {
-        $new_columns = array();
-        
-        foreach ($columns as $key => $column) {
-            $new_columns[$key] = $column;
-            // Add custom column after order title
-            if ($key === 'order_title') {
-                $new_columns['server_error_status'] = __('Server Error Status', 'siya-text-domain');
-            }
-        }
-        
-        return $new_columns;
+        $columns['server_error_status'] = __('Server Error Status', 'siya-text-domain');
+        return $columns;
     }
 
     /**
