@@ -752,6 +752,7 @@ class ServerOrchestrator {
                 while ((time() - $startTime) < $installationTimeout) {
                     
                     try {
+                        
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
                         if (isset($status['status']) && $status['status'] === 'running') {
@@ -897,8 +898,8 @@ class ServerOrchestrator {
 
         // Check circuit breaker status for shutdown
         $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-        if ($this->server_circuit_breaker_position == -1 ) {
-            error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping shutdown.');
+        if ($this->server_circuit_breaker_position == -1 || $this->server_circuit_breaker_position == 1) {
+            error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped or in progress. Skipping shutdown.');
             return;
         }
 
@@ -1018,8 +1019,8 @@ class ServerOrchestrator {
 
         // Check circuit breaker status for power-up
         $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-        if ($this->server_circuit_breaker_position == -1) {
-            error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped. Skipping power-up.');
+        if ($this->server_circuit_breaker_position == -1 || $this->server_circuit_breaker_position == 1) {
+            error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped or in progress. Skipping power-up.');
             return;
         }
 
