@@ -7,6 +7,7 @@ class ServerError {
     public function __construct() {
         add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
+        add_action('admin_head', array($this, 'add_status_styles'));
     }
 
     /**
@@ -17,7 +18,7 @@ class ServerError {
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
             if ('status' === $key) {
-                $new_columns['server_error_status'] = __('Server Error Status', 'siya-text-domain');
+                $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
             }
         }
         return $new_columns;
@@ -50,11 +51,48 @@ class ServerError {
             return;
         }
 
-        if ('server_error_status' === $column) {
-            // Example: Fetch server error status from meta
-            $server_error_status = $the_subscription->get_meta('_server_error_status', true);
-            echo esc_html($server_error_status ? $server_error_status : __('No Error', 'siya-text-domain'));
+        if ('arsol-server-status' === $column) {
+            $subscription = wcs_get_subscription($subscription_id);
+            if (!$subscription) return;
+
+            $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+            if (!$server_post_id) {
+                echo '<span class="server-status no-server">No Server</span>';
+                return;
+            }
+
+            $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+            $provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
+            $deployment_status = get_post_meta($server_post_id, '_arsol_state_30_deployment', true);
+
+            if ($circuit_breaker == -1) {
+                echo '<span class="server-status error">Error</span>';
+            } elseif ($circuit_breaker == 1) {
+                echo '<span class="server-status in-progress">In Progress</span>';
+            } elseif ($provision_status == 2 && $deployment_status == 2) {
+                echo '<span class="server-status active">Active</span>';
+            } else {
+                echo '<span class="server-status pending">Pending</span>';
+            }
         }
+    }
+
+    public function add_status_styles() {
+        ?>
+        <style>
+            .server-status {
+                padding: 2px 8px;
+                border-radius: 3px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            .server-status.active { background: #c6e1c6; color: #5b841b; }
+            .server-status.pending { background: #f8dda7; color: #94660c; }
+            .server-status.error { background: #eba3a3; color: #761919; }
+            .server-status.in-progress { background: #c8d7e1; color: #2e4453; }
+            .server-status.no-server { background: #e5e5e5; color: #777; }
+        </style>
+        <?php
     }
 }
 
