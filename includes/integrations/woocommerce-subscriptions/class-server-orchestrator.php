@@ -816,7 +816,7 @@ class ServerOrchestrator {
 
                         } elseif (get_installation_status($server_post_id) === 'failed') {
 
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
+                          //  $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
                         
                         }
 
@@ -828,6 +828,7 @@ class ServerOrchestrator {
                     }
 
                     sleep(30); // Retry after 30 seconds
+
                 }
 
                 // Timeout Handling for script installation
@@ -894,7 +895,7 @@ class ServerOrchestrator {
 
                         // Centralize exception handling for retries
                         $this->handle_exception($e, $subscription, 'Error fetching connection status');
-                        
+
                     }
 
                     sleep(15); // Retry after 15 seconds
