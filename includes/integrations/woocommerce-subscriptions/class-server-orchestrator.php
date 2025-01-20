@@ -783,95 +783,84 @@ class ServerOrchestrator {
         $subscription_id = $args['subscription_id'];
         $subscription = wcs_get_subscription($subscription_id);
         $server_manager_instance = new Runcloud();
-    
+
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
-    
+
         // Prevent PHP from timing out
         set_time_limit(0);
-    
+
         try {
-            
             // Check script installation status if not already successful (status 2)
             $scriptInstallationStatus = get_post_meta($server_post_id, '_arsol_state_60_script_installation', true);
-            
+
             if ($scriptInstallationStatus != 2) {
-
                 $installationTimeout = apply_filters('arsol_server_manager_script_installation_timeout', 5 * 60);
-
                 $startTime = time();
 
                 while ((time() - $startTime) < $installationTimeout) {
                     
                     try {
-                        
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
                         if (isset($status['status']) && $status['status'] === 'running') {
-                        
                             update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
                             update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
-    
+
                             // Success message
                             $message = 'Script installation completed successfully.';
-    
-                            // Update server note
-                            $subscription->add_order_note(
-                                $message
-                            );
-    
-                            // Log the success message
+                            $subscription->add_order_note($message);
                             error_log($message);
-    
-                            break;
-                        } elseif(get_installation_status($server_post_id) === 'failed') {
-    
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
 
+                            break; // Exit on success
+                        } elseif (get_installation_status($server_post_id) === 'failed') {
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation returned failed.');
                         }
 
                     } catch (\Exception $e) {
-
-                        // Update server metadata on failed provisioning and trip CB
-                        update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
-
-                        // Handle the exception and exit
-                        $error_definition = 'Error fetching installation status';
-                        
-                        $this->handle_exception($e, $subscription, $error_definition);
-
-                        // Trigger the circuit breaker
-                        ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
-                        return false; // Add fallback return false
-
+                        // Centralize exception handling for retries
+                        $this->throw_exception($e, $subscription, 'Error during script installation');
                     }
-     
-                    sleep(30); // Retry after 30 seconds
 
+                    sleep(30); // Retry after 30 seconds
                 }
 
+                // Timeout Handling for script installation
+                if ((time() - $startTime) >= $installationTimeout) {
+                    $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Script installation timeout exceeded for server post ID: ' . $server_post_id;
+                    error_log($timeout_message);
+                    $subscription->add_order_note($timeout_message);
+
+                    // Update server metadata on failed installation and trip CB
+                    update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
+
+                    // Handle the exception and exit on timeout
+                    $this->handle_exception(new \Exception('Timeout while installing script'), $subscription, 'Timeout while installing script');
+
+                    // Trigger the circuit breaker on timeout
+                    ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                    return false; // Return false after timeout handling
+                }
             }
-    
+
             // Check connection status if not already successful (status 2)
             $connectionStatus = get_post_meta($server_post_id, '_arsol_state_70_manager_connection', true);
 
             if ($connectionStatus != 2) {
-
                 $connectTimeout = apply_filters('siya_server_connection_timeout', 60);
                 $connectStart = time();
 
                 while ((time() - $connectStart) < $connectTimeout) {
-                    
+
                     try {
                         $connStatus = $server_manager_instance->get_connection_status($server_post_id);
 
                         if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
-
                             update_post_meta($server_post_id, '_arsol_state_70_manager_connection', 2);
                             update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
                             update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
                             update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
-                            
+
                             // Success message
                             $success_message = sprintf(
                                 'Server manager connected to server successfully!%sConnected: %s%sOnline: %s%sAgent Version: %s',
@@ -882,75 +871,61 @@ class ServerOrchestrator {
                                 PHP_EOL,
                                 get_post_meta($server_post_id, 'arsol_server_manager_agent_version', true) ?: 'Unknown'
                             );
-    
+
                             // Update server note
-                            $subscription->add_order_note(
-                                $success_message
-                            );
-    
-                            // Log the success message
+                            $subscription->add_order_note($success_message);
                             error_log($success_message);
 
                             break; // Exit the loop on success
                         }
 
                         if (empty($connStatus['connected']) || empty($connStatus['online'])) {
-
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
-
                             error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
-
                         }
 
                     } catch (\Exception $e) {
-
-                        // Handle the exception and exit
-                        $this->handle_exception($e, $subscription, 'Error fetching connection status');
-
-                        error_log ('#031 [SIYA Server Manager - ServerOrchestrator] Error fetching connection status');
-
+                        // Centralize exception handling for retries
+                        $this->throw_exception($e, $subscription, 'Error fetching connection status');
                     }
 
                     sleep(15); // Retry after 15 seconds
-
                 }
 
-                // Update server metadata on failed connection and trip CB
-                update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
+                // Timeout Handling for connection
+                if ((time() - $connectStart) >= $connectTimeout) {
+                    $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Connection status timeout exceeded for server post ID: ' . $server_post_id;
+                    error_log($timeout_message);
+                    $subscription->add_order_note($timeout_message);
 
-                // Handle the exception and exit
-                $this->handle_exception($e, $subscription, 'Timeout while fetching connection status');
+                    // Update server metadata on failed connection and trip CB
+                    update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
 
-                // Trigger the circuit breaker
-                ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+                    // Handle the exception and exit on timeout
+                    $this->handle_exception(new \Exception('Timeout while fetching connection status'), $subscription, 'Timeout while fetching connection status');
 
-                return false; // Add fallback return false
-    
+                    // Trigger the circuit breaker on timeout
+                    ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                    return false; // Return false after timeout handling
+                }
             }
 
-            // Success message
-            $success_message = 'Server manager connected to server successfully! Activating subscripton to active... Good day and good luck!';
-
-            // Update server note
-            $subscription->add_order_note(
-                $success_message
-            );
-
-            // Log the success message
+            // Success message after verifying both installation and connection
+            $success_message = 'Server manager connected to server successfully! Activating subscription to active... Good day and good luck!';
+            $subscription->add_order_note($success_message);
             error_log($success_message);
 
+            // Activate the subscription
             $subscription->update_status('active');
 
         } catch (\Exception $e) {
-
             // Handle the exception and exit
             $this->handle_exception($e, $subscription, 'Error verifying server manager connection');
-            
             return false; // Add fallback return false
-
         }
-
     }
+
     
     public function start_server_shutdown($subscription) {
         // Early validation of required parameters

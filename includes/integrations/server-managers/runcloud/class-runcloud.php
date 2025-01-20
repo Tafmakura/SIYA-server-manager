@@ -281,6 +281,7 @@ class Runcloud /*implements ServerManager*/ {
     
 
     public function get_connection_status($server_post_id) {
+       
         error_log('[SIYA Server Manager][RunCloud][DEBUG] Called get_connection_status with server_post_id: ' . $server_post_id);
         
         error_log('[SIYA Server Manager][RunCloud] Checking connection status via API...');
@@ -342,6 +343,7 @@ class Runcloud /*implements ServerManager*/ {
             'online'        => $online,
             'agentVersion'  => $agentVersion,
         ];
+    
     }    
 
     public function update_server_post_status($server_post_id, $status)
