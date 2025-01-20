@@ -663,9 +663,6 @@ class ServerOrchestrator {
         $firewall_status = get_post_meta($server_post_id, '_arsol_state_40_firewall_rules', true);
         
         if ($firewall_status != 2) {
-          
-            // TO DELETE Intentional fault
-            $server_provisioned_id = 0;
 
             try {
                 
