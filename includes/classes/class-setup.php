@@ -72,7 +72,7 @@ class Setup {
         if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
             $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
         }
-        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\Statuses')) {
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\Statuses\ServerError')) {
             $statuses = new \Siya\Integrations\WooCommerceSubscriptions\Statuses\ServerError();
         }
         if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
