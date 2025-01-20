@@ -800,7 +800,7 @@ class ServerOrchestrator {
                 while ((time() - $startTime) < $installationTimeout) {
                     
                     try {
-                        
+
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
                         if (isset($status['status']) && $status['status'] === 'running') {
@@ -823,7 +823,7 @@ class ServerOrchestrator {
                     } catch (\Exception $e) {
 
                         // Centralize exception handling for retries
-                        $this->throw_exception($e, $subscription, 'Error during script installation');
+                        $this->handle_exception($e, $subscription, 'Error during script installation');
                     
                     }
 
@@ -891,8 +891,10 @@ class ServerOrchestrator {
                         }
 
                     } catch (\Exception $e) {
+
                         // Centralize exception handling for retries
-                        $this->throw_exception($e, $subscription, 'Error fetching connection status');
+                        $this->handle_exception($e, $subscription, 'Error fetching connection status');
+                        
                     }
 
                     sleep(15); // Retry after 15 seconds
