@@ -207,7 +207,9 @@ class ServerOrchestrator {
             $this->server_provisioned_status = get_post_meta($this->server_post_id, '_arsol_state_10_provisioning', true); 
             
             // If the server has not been provisioned or has failed before, proceed with provisioning
+
             if (!$this->server_provisioned_status || $this->server_provisioned_status != 2) {
+                
                 try {
                     // Initialize the appropriate server provider with the slug
                     $this->initialize_server_provider($this->server_provider_slug);
@@ -289,7 +291,7 @@ class ServerOrchestrator {
 
             // Update server metadata on failed provisioning
             $this->handle_exception($e, $this->subscription, $error_definition);
-            
+
             return false; // Add fallback return false
 
         }
