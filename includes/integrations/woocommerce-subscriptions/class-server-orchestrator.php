@@ -452,8 +452,6 @@ class ServerOrchestrator {
         // Proceed with RunCloud deployment or mark as active
         if ($connect_server_manager === 'yes') {
            
-            error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment after IP validation.');
-
             // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
             as_schedule_single_action(
                 time(),
@@ -466,9 +464,15 @@ class ServerOrchestrator {
             );
 
             // Add order note to inform the user about scheduling
+            $message = 'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+            
+            // Add order note for the scheduled action
             $subscription->add_order_note(
-                'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                $message
             );
+
+            // Log the message
+            error_log($message);
 
         } else {
 
