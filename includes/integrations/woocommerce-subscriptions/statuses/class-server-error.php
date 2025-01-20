@@ -27,7 +27,7 @@ class ServerError {
     }
 
     // Register the custom subscription status
-    public function register_new_post_status($registered_statuses) {
+    public function register_new_status($registered_statuses) {
         $registered_statuses['wc-like-on-hold'] = _nx_noop('Like On Hold <span class="count">(%s)</span>', 'Like On Hold <span class="count">(%s)</span>', 'post status label including post count', 'custom-wcs-status-texts');
         return $registered_statuses;
     }
@@ -126,7 +126,7 @@ class ServerError {
 
     // Register the custom status for orders
     public function register_like_on_hold_order_statuses() {
-        register_post_status('wc-like-on-hold', array(
+        register_status('wc-like-on-hold', array(
             'label' => _x('Like On Hold', 'Order status', 'custom-wcs-status-texts'),
             'public' => true,
             'exclude_from_search' => false,
