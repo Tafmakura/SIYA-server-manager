@@ -15,8 +15,6 @@ class Runcloud /*implements ServerManager*/ {
     public function __construct() {
         $this->api_key = get_option('runcloud_api_key');
         $this->ssh_log_file = plugin_dir_path(__DIR__) . 'logs/ssh_log.txt'; // Set the log file path
-        
-      
     }
 
     public function create_server_in_server_manager(
