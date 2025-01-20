@@ -812,7 +812,7 @@ class ServerOrchestrator {
 
                             break; // Exit on success
 
-                        } elseif (get_installation_status($server_post_id) === 'failed') {
+                        } elseif ( $status['status'] === 'failed') {
 
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
                         
@@ -861,6 +861,7 @@ class ServerOrchestrator {
                 while ((time() - $connectStart) < $connectTimeout) {
 
                     try {
+
                         $connStatus = $server_manager_instance->get_connection_status($server_post_id);
 
                         if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
@@ -902,7 +903,7 @@ class ServerOrchestrator {
                     error_log('[SIYA Server Manager - ServerOrchestrator] Retrying connection status after 15 seconds.');
 
                     sleep(15); // Retry after 15 seconds
-                    
+
                 }
 
                 // Timeout Handling for connection
