@@ -6,7 +6,7 @@ class ServerError {
 
     public function __construct() {
         add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
-        add_action('manage_shop_subscription_posts_custom_column', array($this, 'render_custom_column'), 10, 2);
+        add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
     }
 
     /**
