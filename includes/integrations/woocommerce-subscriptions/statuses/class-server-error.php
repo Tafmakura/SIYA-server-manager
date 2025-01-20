@@ -3,7 +3,9 @@
 namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 
 class ServerError {
+
     public function __construct() {
+        error_log('ServerError class instantiated');
         add_filter('woocommerce_subscriptions_registered_statuses', array($this, 'register_hoyo_status'), 100, 1);
         add_filter('wcs_subscription_statuses', array($this, 'add_hoyo_subscription_status'), 100, 1);
         add_filter('woocommerce_can_subscription_be_updated_to', array($this, 'allow_hoyo_status_update'), 100, 3);
