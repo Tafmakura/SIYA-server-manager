@@ -321,7 +321,7 @@ class ServerOrchestrator {
         $server_ip_status = get_post_meta($server_post_id, '_arsol_state_20_ip_address', true);
     
         // If IP status is not 2, we want to check and update the server status
-        if ($server_ip_status != '2') {
+        if ($server_ip_status != 2) {
             error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is not 2. Checking and updating server status.');
     
             // Start the polling loop only if the IPs are not validated yet
@@ -443,11 +443,10 @@ class ServerOrchestrator {
                 sleep($poll_interval);
             }
            
-        } 
+        } else {
 
-        // If IP status is already 2, skip the status check and proceed with server manager or marking subscription as active
-        error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is ready proceeding with connecting server manager.');
-    
+            error_log ('STATE CHECK (20): IP status is okay.');
+        }    
     
         // Proceed with RunCloud deployment or mark as active
         if ($connect_server_manager === 'yes') {
@@ -602,8 +601,7 @@ class ServerOrchestrator {
         
         } else {
 
-            // If the server has already been deployed (status == 2), skip deployment
-            error_log('#024 [SIYA Server Manager - ServerOrchestrator] Server already deployed, skipping deployment.');
+            error_log('STATE CHECK (30): Server deployment status is okay.');
         
         }
     
@@ -628,7 +626,8 @@ class ServerOrchestrator {
             
             // Log the scheduling
             error_log('[SIYA Server Manager - ServerOrchestrator] Scheduled the completion of the server manager connection.');
-        }
+        } 
+    
     }
 
     // Install Runcloud agent script on provisioned server to connect server to Runcloud
@@ -692,6 +691,10 @@ class ServerOrchestrator {
 
             }
     
+        } else {
+
+            error_log('STATE CHECK (40): Firewall rules are okay.');
+        
         }
     
         // Execute RunCloud script if it hasn't been successfully executed before
@@ -741,6 +744,10 @@ class ServerOrchestrator {
               
             }  
 
+        } else {
+
+            error_log('STATE CHECK (50): Script execution okay.');
+        
         }
 
         // Schedule server manager connection verification
@@ -815,6 +822,18 @@ class ServerOrchestrator {
                         } elseif ( $status['status'] === 'failed') {
 
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
+                            
+                            return false; // Exit on failure
+
+
+                        } elseif ($status['status'] === 'not-installed') {
+
+                            // Reset the previous flag so that a script reinstall can be initiated
+                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
+
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
+                            
+                            return false; // Exit on failure
                         
                         }
 
@@ -849,12 +868,18 @@ class ServerOrchestrator {
 
                     return false; // Return false after timeout handling
                 }
+
+            } else {
+
+                error_log('STATE CHECK (60): Script installation is okay.');
+            
             }
 
             // Check connection status if not already successful (status 2)
             $connectionStatus = get_post_meta($server_post_id, '_arsol_state_70_manager_connection', true);
 
             if ($connectionStatus != 2) {
+
                 $connectTimeout = apply_filters('siya_server_connection_timeout', 60);
                 $connectStart = time();
 
@@ -923,6 +948,11 @@ class ServerOrchestrator {
 
                     return false; // Return false after timeout handling
                 }
+
+            } else {
+
+                error_log('STATE CHECK (70): Server manager connection status is okay.');
+            
             }
 
             // Success message after verifying both installation and connection
@@ -934,6 +964,7 @@ class ServerOrchestrator {
             $subscription->update_status('active');
 
         } catch (\Exception $e) {
+
             // Handle the exception and exit
             $this->handle_exception($e, $subscription, 'Error verifying server manager connection');
             return false; // Add fallback return false
