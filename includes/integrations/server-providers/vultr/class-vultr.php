@@ -438,8 +438,11 @@ class Vultr /*implements ServerProvider*/ {
         ]);
 
         if (is_wp_error($response)) {
-            error_log('Vultr open ports error: ' . $response->get_error_message());
-            return false;
+            throw new \RuntimeException('Failed to assign firewall rules to server: ' . $response->get_error_message());
+        }
+
+        if (wp_remote_retrieve_response_code($response) !== 202) {
+            throw new \Exception('Failed to assign firewall rules to server. Response code: ' . wp_remote_retrieve_response_code($response));
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
