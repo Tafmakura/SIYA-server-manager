@@ -796,27 +796,36 @@ class ServerOrchestrator {
                 $startTime = time();
 
                 while ((time() - $startTime) < $installationTimeout) {
-        
-                    $status = $server_manager_instance->get_installation_status($server_post_id);
+                    
+                    try {
 
-                    if (isset($status['status']) && $status['status'] === 'running') {
-                        update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
-                        update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
+                        $status = $server_manager_instance->get_installation_status($server_post_id);
 
-                        // Success message
-                        $message = 'Script installation completed successfully.';
-                        $subscription->add_order_note($message);
-                        error_log($message);
+                        if (isset($status['status']) && $status['status'] === 'running') {
+                            update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
+                            update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
 
-                        break; // Exit on success
+                            // Success message
+                            $message = 'Script installation completed successfully.';
+                            $subscription->add_order_note($message);
+                            error_log($message);
 
-                    } elseif (get_installation_status($server_post_id) === 'failed') {
+                            break; // Exit on success
 
-                        $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
+                        } elseif (get_installation_status($server_post_id) === 'failed') {
+
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
+                        
+                        }
+
+                    } catch (\Exception $e) {
+
+                        // Centralize exception handling for retries
+                        $this->handle_exception($e, $subscription, 'Error during script installation');
                     
                     }
 
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Script installation not yet successful. Retrying...');
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation after 30 seconds.');
 
                     sleep(30); // Retry after 30 seconds
                     
@@ -851,44 +860,49 @@ class ServerOrchestrator {
 
                 while ((time() - $connectStart) < $connectTimeout) {
 
-                    
-                    $connStatus = $server_manager_instance->get_connection_status($server_post_id);
+                    try {
+                        $connStatus = $server_manager_instance->get_connection_status($server_post_id);
 
-                    if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
-                        update_post_meta($server_post_id, '_arsol_state_70_manager_connection', 2);
-                        update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
-                        update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
-                        update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
+                        if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
+                            update_post_meta($server_post_id, '_arsol_state_70_manager_connection', 2);
+                            update_post_meta($server_post_id, 'arsol_server_manager_connected', $connStatus['connected']);
+                            update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
+                            update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
 
-                        // Success message
-                        $success_message = sprintf(
-                            'Server manager connected to server successfully!%sConnected: %s%sOnline: %s%sAgent Version: %s',
-                            PHP_EOL,
-                            get_post_meta($server_post_id, 'arsol_server_manager_connected', true) ?: 'Not provided',
-                            PHP_EOL,
-                            get_post_meta($server_post_id, 'arsol_server_manager_online', true) ?: 'Not provided',
-                            PHP_EOL,
-                            get_post_meta($server_post_id, 'arsol_server_manager_agent_version', true) ?: 'Unknown'
-                        );
+                            // Success message
+                            $success_message = sprintf(
+                                'Server manager connected to server successfully!%sConnected: %s%sOnline: %s%sAgent Version: %s',
+                                PHP_EOL,
+                                get_post_meta($server_post_id, 'arsol_server_manager_connected', true) ?: 'Not provided',
+                                PHP_EOL,
+                                get_post_meta($server_post_id, 'arsol_server_manager_online', true) ?: 'Not provided',
+                                PHP_EOL,
+                                get_post_meta($server_post_id, 'arsol_server_manager_agent_version', true) ?: 'Unknown'
+                            );
 
-                        // Update server note
-                        $subscription->add_order_note($success_message);
-                        error_log($success_message);
+                            // Update server note
+                            $subscription->add_order_note($success_message);
+                            error_log($success_message);
 
-                        break; // Exit the loop on success
+                            break; // Exit the loop on success
+                        }
+
+                        if (empty($connStatus['connected']) || empty($connStatus['online'])) {
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
+                            error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
+                        }
+
+                    } catch (\Exception $e) {
+
+                        // Centralize exception handling for retries
+                        $this->handle_exception($e, $subscription, 'Error fetching connection status');
+
                     }
 
-                    if (empty($connStatus['connected']) || empty($connStatus['online'])) {
-
-                        $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
-                        error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
-                    
-                    }
-
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Connection status not yet successful. Retrying...');
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Retrying connection status after 15 seconds.');
 
                     sleep(15); // Retry after 15 seconds
-
+                    
                 }
 
                 // Timeout Handling for connection
