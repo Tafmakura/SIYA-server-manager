@@ -86,7 +86,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         }
     }
 
-    public function trip_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
+    public static function trip_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         
         if ($server_post_id) {
@@ -97,7 +97,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         }
     }
 
-    public function reset_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
+    public static function reset_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         
         if ($server_post_id) {

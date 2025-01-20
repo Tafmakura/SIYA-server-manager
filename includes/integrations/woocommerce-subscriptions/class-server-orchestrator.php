@@ -158,6 +158,7 @@ class ServerOrchestrator {
 
             // Handle the exception
             $this->handle_exception($e, $subscription, $error_definition);
+            return false; // Add fallback return false
 
         }
     }
@@ -230,6 +231,11 @@ class ServerOrchestrator {
 
                     // Handle the exception and exit
                     $this->handle_exception($e, $this->subscription, 'Error occurred during server provisioning');
+
+                    // Trigger the circuit breaker
+                    ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+                    
+                    return false; // Add fallback return false
    
                 }
             }
@@ -282,6 +288,7 @@ class ServerOrchestrator {
 
             // Update server metadata on failed provisioning
             $this->handle_exception($e, $this->subscription, $error_definition);
+            return false; // Add fallback return false
 
         }
     }
@@ -344,6 +351,11 @@ class ServerOrchestrator {
                             // Handle the exception and exit
                             $this->handle_exception($e, $this->subscription, $error_definition);
 
+                            // Trigger the circuit breaker
+                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                            return false; // Add fallback return false
+
                         }
 
                         // Get the IPv6 address to add to metadata if available
@@ -376,6 +388,7 @@ class ServerOrchestrator {
 
                     // Handle the exception and exit
                     $this->handle_exception($e, $subscription, $error_definition);
+                    return false; // Add fallback return false
 
                 }
             
@@ -514,6 +527,7 @@ class ServerOrchestrator {
                 
                 // Handle the exception
                 $this->handle_exception($e, $this->subscription, $error_definition);
+                return false; // Add fallback return false
             
             }
 
@@ -566,6 +580,12 @@ class ServerOrchestrator {
 
                 // Handle the exception
                 $this->handle_exception($e, $this->subscription, $error_message);
+
+
+                // Trigger the circuit breaker
+                ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                return false; // Add fallback return false
 
             }
         
@@ -650,6 +670,12 @@ class ServerOrchestrator {
                 // Handle the exception and exit
                 $this->handle_exception($e, $this->subscription, true);
 
+
+                // Trigger the circuit breaker
+                ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                return false; // Add fallback return false
+
             }
     
         }
@@ -691,6 +717,12 @@ class ServerOrchestrator {
 
                 // Handle the exception and exit
                 $this->handle_exception($e, $subscription, $error_definition);
+
+
+                // Trigger the circuit breaker
+                ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                return false; // Add fallback return false
               
             }  
 
@@ -790,6 +822,11 @@ class ServerOrchestrator {
                         
                         $this->handle_exception($e, $subscription, $error_definition);
 
+                        // Trigger the circuit breaker
+                        ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                        return false; // Add fallback return false
+
                     }
      
                     sleep(30); // Retry after 30 seconds
@@ -855,6 +892,11 @@ class ServerOrchestrator {
                         // Handle the exception and exit
                         $this->handle_exception($e, $subscription, 'Error fetching connection status');
 
+                        // Trigger the circuit breaker
+                        ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+                        
+                        return false; // Add fallback return false
+
                     }
 
                     sleep(15); // Retry after 15 seconds
@@ -880,6 +922,7 @@ class ServerOrchestrator {
 
             // Handle the exception and exit
             $this->handle_exception($e, $subscription, 'Error verifying server manager connection');
+            return false; // Add fallback return false
 
         }
     }
@@ -1519,6 +1562,7 @@ class ServerOrchestrator {
 
             // Logging error if the server IP fetching fails
             $this->handle_exception($e, $this->subscription, 'Error fetching provisioned server IP');
+            return false; // Add fallback return false
 
         }
     
@@ -1715,7 +1759,7 @@ class ServerOrchestrator {
             throw $e;
         }
 
-        return false; // Add fallback return false
+        //return false; // Add fallback return false
 
     }
 
@@ -1753,6 +1797,7 @@ class ServerOrchestrator {
 
             // Handle the exception
             $this->handle_exception($e, $this->subscription, $error_definition);
+            return false; // Add fallback return false
 
         }
 
