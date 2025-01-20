@@ -230,7 +230,7 @@ class ServerOrchestrator {
 
                     // Handle the exception and exit
                     $this->handle_exception($e, $this->subscription, 'Error occurred during server provisioning');
-
+   
                 }
             }
 
@@ -282,9 +282,6 @@ class ServerOrchestrator {
 
             // Update server metadata on failed provisioning
             $this->handle_exception($e, $this->subscription, $error_definition);
-                       
-            // Throw Exception
-            throw new \Exception('Server provisioning failed at line ' . __LINE__ . '. Circuit breaker tripped. Error: ' . $e->getMessage());
 
         }
     }
@@ -361,9 +358,9 @@ class ServerOrchestrator {
                         $success_message = sprintf(
                             'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
                             PHP_EOL,
-                            $ipv4 ?: 'Not provided',
+                            $server_ipv4 ?: 'Not provided',
                             PHP_EOL,
-                            $ipv6 ?: 'Not provided'
+                            $server_ipv6 ?: 'Not provided'
                         );
 
                         $subscription->add_order_note($success_message);
@@ -374,7 +371,12 @@ class ServerOrchestrator {
                     } 
 
                 } catch (\Exception $e) {
-                    error_log("#022 [SIYA Server Manager - ServerOrchestrator] Error fetching server status: " . $e->getMessage());
+                   
+                    $error_definition = 'Error checking server status';
+
+                    // Handle the exception and exit
+                    $this->handle_exception($e, $subscription, $error_definition);
+
                 }
             
                 // Timeout check inside the loop
@@ -564,9 +566,6 @@ class ServerOrchestrator {
 
                 // Handle the exception
                 $this->handle_exception($e, $this->subscription, $error_message);
-
-                // Exit the process for this server provisioning
-                return false;
 
             }
         
@@ -776,7 +775,7 @@ class ServerOrchestrator {
 
                         if ($status['status'] !== 'running') {
 
-                            throw new \Exception('[SIYA Server Manager - ServerOrchestrator] Script is not running.');
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script is not running.');
                         
                         }
 
@@ -789,8 +788,6 @@ class ServerOrchestrator {
                         $error_definition = 'Error fetching installation status';
                         
                         $this->handle_exception($e, $subscription, $error_definition);
-                        
-                        return false; // Return false on failure if rethrow is disabled in the exception handler
 
                     }
      
@@ -844,7 +841,7 @@ class ServerOrchestrator {
 
                         if (empty($connStatus['connected']) || empty($connStatus['online'])) {
 
-                            throw new \Exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
+                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
 
                         }
 
@@ -856,8 +853,6 @@ class ServerOrchestrator {
 
                         // Handle the exception and exit
                         $this->handle_exception($e, $subscription, 'Error fetching connection status');
-
-                        return false; // Return false on failure if rethrow is disabled in the exception handler
 
                     }
 
@@ -885,7 +880,6 @@ class ServerOrchestrator {
             // Handle the exception and exit
             $this->handle_exception($e, $subscription, 'Error verifying server manager connection');
 
-            return false; // Return false on failure if rethrow is disabled in the exception handler
         }
     }
     
@@ -1383,7 +1377,7 @@ class ServerOrchestrator {
                 'Failed to create server post. Error: ' . $post_id->get_error_message()
             );
         
-            throw new \Exception('Failed to create server post');
+            $this->throw_exception('Failed to create server post');
         }
     }
 
@@ -1448,7 +1442,7 @@ class ServerOrchestrator {
                 $error_message = "Failed to provision server";
                 error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s', $error_message));
                 $subscription->add_order_note($error_message);
-                throw new \Exception($error_message);
+                $this->throw_exception($error_message);
             }
 
             // Update server post metadata using the standardized data
@@ -1508,7 +1502,7 @@ class ServerOrchestrator {
 
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Exception caught: %s', $e->getMessage()));
-            throw $e;
+            $this->throw_exception($e->getMessage(), 'Error provisioning server');
         }
     }
 
@@ -1521,11 +1515,10 @@ class ServerOrchestrator {
             $server_ips = $this->server_provider->get_server_ip($server_provisioned_id);
             
         } catch (\Exception $e) {
-            // Logging error if the server IP fetching fails
-            error_log('Error fetching provisioned server IP: ' . $e->getMessage());
-            throw $e;  // Re-throw the exception
 
-            return false; // Return false if the IP fetching fails
+            // Logging error if the server IP fetching fails
+            $this->handle_exception($e, $this->subscription, 'Error fetching provisioned server IP');
+
         }
     
         // Extract IPv4 and IPv6 addresses
@@ -1535,9 +1528,7 @@ class ServerOrchestrator {
         // Handle cases where IPv4 and/or IPv6 are missing
         if (empty($ipv4) && empty($ipv6)) {
             
-            throw new \Exception('No IP address found for the provisioned server');
-
-            return false; // Return false if both IP addresses are missing
+            $this->throw_exception('No IP address found for the provisioned server');
         
         }
     
@@ -1674,7 +1665,7 @@ class ServerOrchestrator {
                 $this->server_provider = $this->vultr;
                 break;
             default:
-                throw new \Exception('Unknown server provider: ' . $this->server_provider_slug);
+                $this->throw_exception('Unknown server provider: ' . $this->server_provider_slug);
         }
     }
 
@@ -1688,7 +1679,7 @@ class ServerOrchestrator {
         
         if (!$remote_status || !isset($remote_status['provisioned_remote_status']) || !isset($remote_status['provisioned_remote_raw_status'])) {
             error_log ('Failed to retrieve valid server status from provider.');
-            throw new \Exception('Failed to retrieve valid server status from provider.');
+            $this->throw_exception('Failed to retrieve valid server status from provider.');
         }
 
         $provisioned_remote_status = $remote_status['provisioned_remote_status'];
@@ -1723,6 +1714,25 @@ class ServerOrchestrator {
             throw $e;
         }
 
+        return false; // Add fallback return false
+
+    }
+
+    // New helper method to throw exceptions
+    private function throw_exception($error_message, $error_definition = null, $line_number = false) {
+        
+        $class_name = __CLASS__;
+        
+        // Constructing the error message
+        $exception_message = "SIYA Server Manager - [$class_name]: " . ($error_definition ?: 'Undefined error') . ": $error_message";
+        
+        // Include line number if $line_number is true
+        if ($line_number === true) {
+            $exception_message .= " on line " . __LINE__;
+        }
+    
+        // Throw the exception with the constructed message
+        throw new \Exception($exception_message);
     }
 
     // New method to open ports at the provider
@@ -1738,6 +1748,8 @@ class ServerOrchestrator {
 
         } catch (\Exception $e) {
             
+            $error_definition = 'Error assigning firewall rules to the server';
+
             // Handle the exception
             $this->handle_exception($e, $this->subscription, $error_definition);
 
@@ -1746,6 +1758,8 @@ class ServerOrchestrator {
         return true; // Return true if the firewall rules are successfully assigned
 
     }
+
+    
 
 }
 
