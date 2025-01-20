@@ -26,7 +26,7 @@ class ServerError {
 
     // Step 3: Allow specific subscriptions to be updated to the new status
     public function allow_server_error_status_update($can_be_updated, $new_status, $subscription) {
-        if ($new_status == 'server-error') {
+        if ($new_status == 'wc-server-error') {
             if ($subscription->has_status(array('active', 'on-hold', 'pending'))) {
                 $can_be_updated = true;
             } else {
@@ -38,7 +38,7 @@ class ServerError {
 
     // Step 4: Perform an action when the status is updated to Server Error
     public function handle_server_error_status_update($subscription, $new_status, $old_status) {
-        if ($new_status == 'server-error') {
+        if ($new_status == 'wc-server-error') {
             $subscription->add_order_note(__('Subscription status updated to Server Error.', 'custom-wcs-status-texts'));
             // You can add custom logic here, such as sending notifications
         }
@@ -46,7 +46,7 @@ class ServerError {
 
     // Step 5: Add the status to the bulk actions drop-down
     public function add_server_error_bulk_action($bulk_actions) {
-        $bulk_actions['server-error'] = _x('Mark as Server Error', 'an action on a subscription', 'custom-wcs-status-texts');
+        $bulk_actions['wc-server-error'] = _x('Mark as Server Error', 'an action on a subscription', 'custom-wcs-status-texts');
         return $bulk_actions;
     }
 
@@ -57,7 +57,7 @@ class ServerError {
         }
 
         $action = isset($_REQUEST['action']) && $_REQUEST['action'] !== '-1' ? $_REQUEST['action'] : $_REQUEST['action2'];
-        if ($action !== 'server-error') {
+        if ($action !== 'wc-server-error') {
             return;
         }
 
@@ -65,7 +65,7 @@ class ServerError {
         foreach ($subscription_ids as $subscription_id) {
             $subscription = wcs_get_subscription($subscription_id);
             if ($subscription && !$subscription->has_status(wcs_get_subscription_ended_statuses())) {
-                $subscription->update_status('server-error');
+                $subscription->update_status('wc-server-error');
             }
         }
 
