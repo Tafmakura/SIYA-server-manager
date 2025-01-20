@@ -132,7 +132,7 @@ class ServerOrchestrator {
                 error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
                 $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
             } else {
-                error_log('#003 [SIYA Server Manager - ServerOrchestrator] Server post already exists, skipping Step 1');
+                error_log('#003 [SIYA Server Manager - ServerOrchestrator] Server post already exists, skipping step');
                 $this->server_post_id = $existing_server_post->post_id;
             }
             
@@ -1017,7 +1017,7 @@ class ServerOrchestrator {
             return;
         }
 
-        // Check circuit breaker status for power-up
+        // Check circuit breaker status for power-up (added rule to allow power up when circuit breaker is testing circuit but not when it is off)
         $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
         if ($this->server_circuit_breaker_position == -1) {
             error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped or in progress. Skipping power-up.');
@@ -1703,7 +1703,7 @@ class ServerOrchestrator {
     }
 
     // New helper method to handle exceptions
-    private function handle_exception($e, $subscription, $error_definition = 'Undefined error:', $rethraw = true) {
+    private function handle_exception($e, $subscription, $error_definition = 'Undefined error:', $rethraw = false) {
         
         // Use $error_definition instead of $message
         error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s: %s', $error_definition, $e->getMessage()));
