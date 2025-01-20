@@ -665,7 +665,7 @@ class ServerOrchestrator {
         if ($firewall_status != 2) {
           
             // TO DELETE Intentional fault
-            //$server_provisioned_id = 0;
+            $server_provisioned_id = 0;
 
             try {
                 
@@ -735,7 +735,6 @@ class ServerOrchestrator {
 
                 // Handle the exception and exit
                 $this->handle_exception($e, $subscription, $error_definition);
-
 
                 // Trigger the circuit breaker
                 ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -821,8 +820,14 @@ class ServerOrchestrator {
 
                         } elseif ( $status['status'] === 'failed') {
 
+                            // Update server metadata on failed installation and trip CB
+                            update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
+
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
                             
+                            // Trigger the circuit breaker
+                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
                             return false; // Exit on failure
 
 
@@ -832,6 +837,9 @@ class ServerOrchestrator {
                             update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
 
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
+                            
+                            // Trigger the circuit breaker
+                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
                             
                             return false; // Exit on failure
                         
