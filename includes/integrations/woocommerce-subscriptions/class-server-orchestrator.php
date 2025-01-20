@@ -209,7 +209,7 @@ class ServerOrchestrator {
             // If the server has not been provisioned or has failed before, proceed with provisioning
 
             if (!$this->server_provisioned_status || $this->server_provisioned_status != 2) {
-                
+
                 try {
                     // Initialize the appropriate server provider with the slug
                     $this->initialize_server_provider($this->server_provider_slug);
@@ -328,6 +328,7 @@ class ServerOrchestrator {
             $start_time = time();
 
             while ((time() - $start_time) < $time_out) {
+
                 try {
                     // Fetch the current server status
                     $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
@@ -392,6 +393,7 @@ class ServerOrchestrator {
 
                     // Handle the exception and exit
                     $this->handle_exception($e, $subscription, $error_definition);
+                    
                     return false; // Add fallback return false
 
                 }
@@ -444,11 +446,12 @@ class ServerOrchestrator {
         } 
 
         // If IP status is already 2, skip the status check and proceed with server manager or marking subscription as active
-        error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is 2. Skipping IP validation and status check.');
+        error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is ready proceeding with connecting server manager.');
     
     
         // Proceed with RunCloud deployment or mark as active
         if ($connect_server_manager === 'yes') {
+           
             error_log('#019 [SIYA Server Manager - ServerOrchestrator] Scheduling RunCloud deployment after IP validation.');
 
             // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
@@ -468,6 +471,7 @@ class ServerOrchestrator {
             );
 
         } else {
+
             // No server manager required, mark the subscription as active
             $success_message = 'Server is ready, no server manager required. Activating subscription... Good day and good luck!';
             
@@ -517,6 +521,7 @@ class ServerOrchestrator {
             }
             
             try {
+
                 // Deploy server to RunCloud
                 $runcloud_response = $this->runcloud->create_server_in_server_manager(
                     $server_name,
@@ -525,12 +530,14 @@ class ServerOrchestrator {
                     $installation_type, 
                     $provider
                 );
+
             } catch (\Exception $e) {
 
                 $error_definition = 'Error deploying server to Servermanager';
                 
                 // Handle the exception
                 $this->handle_exception($e, $this->subscription, $error_definition);
+
                 return false; // Add fallback return false
             
             }
@@ -585,7 +592,6 @@ class ServerOrchestrator {
                 // Handle the exception
                 $this->handle_exception($e, $this->subscription, $error_message);
 
-
                 // Trigger the circuit breaker
                 ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
 
@@ -594,8 +600,10 @@ class ServerOrchestrator {
             }
         
         } else {
+
             // If the server has already been deployed (status == 2), skip deployment
             error_log('#024 [SIYA Server Manager - ServerOrchestrator] Server already deployed, skipping deployment.');
+        
         }
     
         // Check server_deployed_status to avoid redundant deployment
@@ -646,7 +654,9 @@ class ServerOrchestrator {
         if (!$server_deployed_id || !$server_ip) {
             error_log('Missing server ID or IP address for connection.');
             $subscription->add_order_note('Missing server ID or IP address for connection.');
+
             return; // Exit on failure
+
         }
     
         // Open ports if they haven't been successfully opened before
@@ -674,7 +684,6 @@ class ServerOrchestrator {
                 // Handle the exception and exit
                 $this->handle_exception($e, $this->subscription, true);
 
-
                 // Trigger the circuit breaker
                 ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
 
@@ -688,6 +697,7 @@ class ServerOrchestrator {
         $script_execution_status = get_post_meta($server_post_id, '_arsol_state_50_script_execution', true);
 
         if ($script_execution_status != 2) {
+            
             $this->runcloud = new Runcloud();
             
             try {
@@ -776,6 +786,7 @@ class ServerOrchestrator {
         set_time_limit(0);
     
         try {
+            
             // Check script installation status if not already successful (status 2)
             $scriptInstallationStatus = get_post_meta($server_post_id, '_arsol_state_60_script_installation', true);
             
@@ -889,23 +900,26 @@ class ServerOrchestrator {
 
 
                     } catch (\Exception $e) {
-                        
-                        // Update server metadata on failed connection and trip CB
-                        update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
 
                         // Handle the exception and exit
                         $this->handle_exception($e, $subscription, 'Error fetching connection status');
-
-                        // Trigger the circuit breaker
-                        ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
-                        return false; // Add fallback return false
 
                     }
 
                     sleep(15); // Retry after 15 seconds
 
                 }
+
+                // Update server metadata on failed connection and trip CB
+                update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
+
+                // Handle the exception and exit
+                $this->handle_exception($e, $subscription, 'Timeout while fetching connection status');
+
+                // Trigger the circuit breaker
+                ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                return false; // Add fallback return false
     
             }
 
