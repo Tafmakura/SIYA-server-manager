@@ -940,6 +940,7 @@ class ServerOrchestrator {
 
             // Handle the exception and exit
             $this->handle_exception($e, $subscription, 'Error verifying server manager connection');
+            
             return false; // Add fallback return false
 
         }
