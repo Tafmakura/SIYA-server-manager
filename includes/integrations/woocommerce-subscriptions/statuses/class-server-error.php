@@ -10,6 +10,9 @@ class ServerError {
         add_action('woocommerce_subscription_status_updated', array($this, 'handle_server_error_status_update'), 100, 3);
         add_filter('woocommerce_subscription_bulk_actions', array($this, 'add_server_error_bulk_action'), 100, 1);
         add_action('load-edit.php', array($this, 'process_server_error_bulk_action'));
+        
+        // Ensure the custom status shows on the subscription page
+        add_filter('woocommerce_subscription_status', array($this, 'display_custom_subscription_status'), 100, 2);
     }
 
     // Step 1: Register the new status in WooCommerce Subscriptions
@@ -71,5 +74,16 @@ class ServerError {
 
         wp_safe_redirect(esc_url_raw(remove_query_arg(array('action', 'action2', '_wpnonce', 'post'), wp_get_referer())));
         exit;
+    }
+
+    // Step 7: Display the custom status on the subscription page
+    public function display_custom_subscription_status($status, $subscription) {
+        // Check if the subscription has the 'wc-server-error' status
+        if ($subscription->has_status('wc-server-error')) {
+            // Return a custom status message
+            return __('Server Error', 'custom-wcs-status-texts');
+        }
+        
+        return $status; // Return the default status if it's not 'wc-server-error'
     }
 }
