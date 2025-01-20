@@ -1019,7 +1019,7 @@ class ServerOrchestrator {
 
         // Check circuit breaker status for power-up
         $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-        if ($this->server_circuit_breaker_position == -1 || $this->server_circuit_breaker_position == 1) {
+        if ($this->server_circuit_breaker_position == -1) {
             error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped or in progress. Skipping power-up.');
             return;
         }
