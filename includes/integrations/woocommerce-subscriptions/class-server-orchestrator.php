@@ -122,7 +122,7 @@ class ServerOrchestrator {
                 'Server provisioning started. Subscription will be placed on hold until provisioning is complete. Instruction from payment gateway to change status from Pending to Active will be noted but ignored. '
             );
 
-            $subscription->update_status('on-hold');
+            $subscription->update_status('like-on-hold');
            
             // Step 1: Create server post only if it doesn't exist
             $server_post_instance = new ServerPost();
