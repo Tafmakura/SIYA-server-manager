@@ -5,7 +5,7 @@ namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 class ServerError {
 
     public function __construct() {
-        add_filter('manage_edit-shop_subscription_columns', array($this, 'add_custom_column'), 20);
+        add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
         add_action('manage_shop_subscription_posts_custom_column', array($this, 'render_custom_column'), 10, 2);
     }
 
