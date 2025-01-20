@@ -13,8 +13,14 @@ class ServerError {
      * Add custom column to subscriptions list
      */
     public function add_custom_column($columns) {
-        $columns['server_error_status'] = __('Server Error Status', 'siya-text-domain');
-        return $columns;
+        $new_columns = array();
+        foreach ($columns as $key => $value) {
+            $new_columns[$key] = $value;
+            if ('status' === $key) {
+                $new_columns['server_error_status'] = __('Server Error Status', 'siya-text-domain');
+            }
+        }
+        return $new_columns;
     }
 
     /**
