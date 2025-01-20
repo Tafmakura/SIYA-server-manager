@@ -44,7 +44,7 @@ class Setup {
  
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
-        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-subscription-statuses.php';
+        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-statuses.php';
 
 
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
