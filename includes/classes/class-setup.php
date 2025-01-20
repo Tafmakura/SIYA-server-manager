@@ -48,8 +48,6 @@ class Setup {
 
 
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
-
-        require_once plugin_dir_path(__DIR__) . '/libraries/phpseclib/autoload.php';
     }
 
     /**
