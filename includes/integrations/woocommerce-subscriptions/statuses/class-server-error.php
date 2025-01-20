@@ -4,10 +4,15 @@ namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 
 class ServerError {
 
+    /**
+     * Get examples from here: plugins/woocommerce-subscriptions/vendor/woocommerce/subscriptions-core/includes/admin/class-wcs-admin-post-types.php
+     */
+
     public function __construct() {
         add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
         add_action('admin_head', array($this, 'add_status_styles'));
+        add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
     }
 
     /**
@@ -93,6 +98,13 @@ class ServerError {
             .server-status.no-server { background: #e5e5e5; color: #777; }
         </style>
         <?php
+    }
+
+    /**
+     * Add server widget to order details
+     */
+    public function add_server_widget($order) {
+        echo '<div class="server-widget">HELLO WORLD</div>';
     }
 }
 
