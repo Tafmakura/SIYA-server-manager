@@ -3,34 +3,45 @@
 namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 
 class ServerError {
+
     public function __construct() {
-        add_filter('woocommerce_subscriptions_registered_statuses', array($this, 'register_server_error_status'), 100, 1);
-        add_filter('wcs_subscription_statuses', array($this, 'add_server_error_subscription_status'), 100, 1);
-        add_filter('woocommerce_can_subscription_be_updated_to', array($this, 'allow_server_error_status_update'), 100, 3);
-        add_action('woocommerce_subscription_status_updated', array($this, 'handle_server_error_status_update'), 100, 3);
-        add_filter('woocommerce_subscription_bulk_actions', array($this, 'add_server_error_bulk_action'), 100, 1);
-        add_action('load-edit.php', array($this, 'process_server_error_bulk_action'));
-        
-        // Ensure the custom status shows on the subscription page
-        add_filter('woocommerce_subscription_status', array($this, 'display_custom_subscription_status'), 100, 2);
+        // Register the custom status for subscriptions
+        add_filter('woocommerce_subscriptions_registered_statuses', array($this, 'register_new_post_status'), 100, 1);
+
+        // Add the custom status to the subscription status list
+        add_filter('wcs_subscription_statuses', array($this, 'add_new_subscription_statuses'), 100, 1);
+
+        // Handle updates to custom status
+        add_filter('woocommerce_can_subscription_be_updated_to', array($this, 'extends_can_be_updated'), 100, 3);
+        add_action('woocommerce_subscription_status_updated', array($this, 'extends_update_status'), 100, 3);
+
+        // Add the custom status to bulk actions
+        add_filter('woocommerce_subscription_bulk_actions', array($this, 'add_new_status_bulk_actions'), 100, 1);
+        add_action('load-edit.php', array($this, 'parse_bulk_actions'));
+
+        // Register the custom status for WooCommerce orders
+        add_action('init', array($this, 'register_like_on_hold_order_statuses'));
+
+        // Sync order status change with subscriptions
+        add_action('woocommerce_order_status_like-on-hold', array($this, 'put_subscription_on_like_on_hold_for_order'), 100);
     }
 
-    // Step 1: Register the new status in WooCommerce Subscriptions
-    public function register_server_error_status($registered_statuses) {
-        $registered_statuses['wc-server-error'] = _nx_noop('Server Error <span class="count">(%s)</span>', 'Server Error <span class="count">(%s)</span>', 'post status label including post count', 'custom-wcs-status-texts');
+    // Register the custom subscription status
+    public function register_new_post_status($registered_statuses) {
+        $registered_statuses['wc-like-on-hold'] = _nx_noop('Like On Hold <span class="count">(%s)</span>', 'Like On Hold <span class="count">(%s)</span>', 'post status label including post count', 'custom-wcs-status-texts');
         return $registered_statuses;
     }
 
-    // Step 2: Add the status to the subscription statuses list
-    public function add_server_error_subscription_status($subscription_statuses) {
-        $subscription_statuses['wc-server-error'] = _x('Server Error', 'Subscription status', 'custom-wcs-status-texts');
+    // Add the custom status to the subscription status list
+    public function add_new_subscription_statuses($subscription_statuses) {
+        $subscription_statuses['wc-like-on-hold'] = _x('Like On Hold', 'Subscription status', 'custom-wcs-status-texts');
         return $subscription_statuses;
     }
 
-    // Step 3: Allow specific subscriptions to be updated to the new status
-    public function allow_server_error_status_update($can_be_updated, $new_status, $subscription) {
-        if ($new_status == 'wc-server-error') {
-            if ($subscription->has_status(array('active', 'on-hold', 'pending'))) {
+    // Determine if a subscription can be updated to the custom status
+    public function extends_can_be_updated($can_be_updated, $new_status, $subscription) {
+        if ($new_status == 'like-on-hold') {
+            if ($subscription->payment_method_supports('subscription_suspension') && $subscription->has_status(array('active', 'pending', 'on-hold'))) {
                 $can_be_updated = true;
             } else {
                 $can_be_updated = false;
@@ -39,51 +50,107 @@ class ServerError {
         return $can_be_updated;
     }
 
-    // Step 4: Perform an action when the status is updated to Server Error
-    public function handle_server_error_status_update($subscription, $new_status, $old_status) {
-        if ($new_status == 'wc-server-error') {
-            $subscription->add_order_note(__('Subscription status updated to Server Error.', 'custom-wcs-status-texts'));
-            // You can add custom logic here, such as sending notifications
+    // Perform actions when the subscription status is updated
+    public function extends_update_status($subscription, $new_status, $old_status) {
+        if ($new_status == 'like-on-hold') {
+            $subscription->update_suspension_count($subscription->suspension_count + 1);
+            wcs_maybe_make_user_inactive($subscription->customer_user);
         }
     }
 
-    // Step 5: Add the status to the bulk actions drop-down
-    public function add_server_error_bulk_action($bulk_actions) {
-        $bulk_actions['wc-server-error'] = _x('Mark as Server Error', 'an action on a subscription', 'custom-wcs-status-texts');
+    // Add the custom status to bulk actions
+    public function add_new_status_bulk_actions($bulk_actions) {
+        $bulk_actions['like-on-hold'] = _x('Mark Like On Hold', 'an action on a subscription', 'custom-wcs-status-texts');
         return $bulk_actions;
     }
 
-    // Step 6: Handle the bulk actions logic
-    public function process_server_error_bulk_action() {
-        if (!isset($_REQUEST['post_type']) || $_REQUEST['post_type'] !== 'shop_subscription') {
+    // Handle the bulk actions for subscriptions
+    public function parse_bulk_actions() {
+        if (!isset($_REQUEST['post_type']) || 'shop_subscription' !== $_REQUEST['post_type'] || !isset($_REQUEST['post'])) {
             return;
         }
 
-        $action = isset($_REQUEST['action']) && $_REQUEST['action'] !== '-1' ? $_REQUEST['action'] : $_REQUEST['action2'];
-        if ($action !== 'wc-server-error') {
-            return;
+        $action = '';
+        if (isset($_REQUEST['action']) && -1 != $_REQUEST['action']) {
+            $action = $_REQUEST['action'];
+        } elseif (isset($_REQUEST['action2']) && -1 != $_REQUEST['action2']) {
+            $action = $_REQUEST['action2'];
         }
 
+        switch ($action) {
+            case 'active':
+            case 'on-hold':
+            case 'cancelled':
+            case 'like-on-hold':
+                $new_status = $action;
+                break;
+            default:
+                return;
+        }
+
+        $report_action = 'marked_' . $new_status;
+        $changed = 0;
         $subscription_ids = array_map('absint', (array) $_REQUEST['post']);
+        $sendback_args = array(
+            'post_type' => 'shop_subscription',
+            $report_action => true,
+            'ids' => join(',', $subscription_ids),
+            'error_count' => 0,
+        );
+
         foreach ($subscription_ids as $subscription_id) {
             $subscription = wcs_get_subscription($subscription_id);
-            if ($subscription && !$subscription->has_status(wcs_get_subscription_ended_statuses())) {
-                $subscription->update_status('wc-server-error');
+            $order_note = _x('Subscription status changed by bulk edit:', 'Used in order note. Reason why status changed.', 'woocommerce-subscriptions');
+
+            try {
+                if ('cancelled' == $action) {
+                    $subscription->cancel_order($order_note);
+                } else {
+                    $subscription->update_status($new_status, $order_note, true);
+                }
+
+                do_action('woocommerce_admin_changed_subscription_to_' . $action, $subscription_id);
+                $changed++;
+            } catch (Exception $e) {
+                $sendback_args['error'] = urlencode($e->getMessage());
+                $sendback_args['error_count']++;
             }
         }
 
-        wp_safe_redirect(esc_url_raw(remove_query_arg(array('action', 'action2', '_wpnonce', 'post'), wp_get_referer())));
-        exit;
+        $sendback_args['changed'] = $changed;
+        $sendback = add_query_arg($sendback_args, wp_get_referer() ? wp_get_referer() : '');
+        wp_safe_redirect(esc_url_raw($sendback));
+
+        exit();
     }
 
-    // Step 7: Display the custom status on the subscription page
-    public function display_custom_subscription_status($status, $subscription) {
-        // Check if the subscription has the 'wc-server-error' status
-        if ($subscription->has_status('wc-server-error')) {
-            // Return a custom status message
-            return __('Server Error', 'custom-wcs-status-texts');
+    // Register the custom status for orders
+    public function register_like_on_hold_order_statuses() {
+        register_post_status('wc-like-on-hold', array(
+            'label' => _x('Like On Hold', 'Order status', 'custom-wcs-status-texts'),
+            'public' => true,
+            'exclude_from_search' => false,
+            'show_in_admin_all_list' => true,
+            'show_in_admin_status_list' => true,
+            'label_count' => _n_noop('Like On Hold <span class="count">(%s)</span>', 'Like On Hold<span class="count">(%s)</span>', 'woocommerce'),
+        ));
+    }
+
+    // Sync order status with subscription status
+    public function put_subscription_on_like_on_hold_for_order($order) {
+        $subscriptions = wcs_get_subscriptions_for_order($order, array('order_type' => 'parent'));
+
+        if (!empty($subscriptions)) {
+            foreach ($subscriptions as $subscription) {
+                try {
+                    if (!$subscription->has_status(wcs_get_subscription_ended_statuses())) {
+                        $subscription->update_status('like-on-hold');
+                    }
+                } catch (Exception $e) {
+                    $subscription->add_order_note(sprintf(__('Failed to update subscription status after order #%1$s was put to like-on-hold: %2$s', 'woocommerce-subscriptions'), is_object($order) ? $order->get_order_number() : $order, $e->getMessage()));
+                }
+            }
+            do_action('subscriptions_put_to_like_on_hold_for_order', $order);
         }
-        
-        return $status; // Return the default status if it's not 'wc-server-error'
     }
 }
