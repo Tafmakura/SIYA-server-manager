@@ -816,6 +816,8 @@ class ServerOrchestrator {
                     
                     }
 
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Script installation not yet successful. Retrying...');
+
                     sleep(30); // Retry after 30 seconds
                     
                 }
@@ -877,11 +879,16 @@ class ServerOrchestrator {
                     }
 
                     if (empty($connStatus['connected']) || empty($connStatus['online'])) {
+
                         $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
                         error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
+                    
                     }
 
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Connection status not yet successful. Retrying...');
+
                     sleep(15); // Retry after 15 seconds
+
                 }
 
                 // Timeout Handling for connection
