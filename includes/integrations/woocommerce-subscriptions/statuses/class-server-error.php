@@ -4,12 +4,7 @@ namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 
 class ServerError {
 
-
-
     public function __construct() {
-
-        echo "Hello World";
-
         add_filter('manage_shop_subscription_posts_columns', array($this, 'add_custom_column'), 20);
         add_action('manage_shop_subscription_posts_custom_column', array($this, 'render_custom_column'), 10, 2);
     }
@@ -24,7 +19,7 @@ class ServerError {
             $new_columns[$key] = $column;
             // Add custom column after order title
             if ($key === 'order_title') {
-                $new_columns['my_custom_column'] = __('Custom Column', 'your-text-domain');
+                $new_columns['server_error_status'] = __('Server Error Status', 'siya-text-domain');
             }
         }
         
@@ -35,11 +30,12 @@ class ServerError {
      * Render custom column content
      */
     public function render_custom_column($column, $subscription_id) {
-        if ('my_custom_column' === $column) {
+        if ('server_error_status' === $column) {
             $subscription = wcs_get_subscription($subscription_id);
             if ($subscription) {
-                // Add your custom column logic here
-                echo esc_html('Your custom data');
+                // Example: Fetch server error status from meta
+                $server_error_status = $subscription->get_meta('_server_error_status', true);
+                echo esc_html($server_error_status ? $server_error_status : __('No Error', 'siya-text-domain'));
             }
         }
     }
