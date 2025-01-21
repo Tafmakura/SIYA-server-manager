@@ -159,7 +159,7 @@
         $selected_additional_groups = get_post_meta($post->ID, '_arsol_additional_server_groups', true);
         $selected_additional_groups = is_array($selected_additional_groups) ? $selected_additional_groups : [];
         $server_groups_terms = get_terms([
-            'taxonomy'   => 'server_groups',
+            'taxonomy'   => 'arsol_server_groups',
             'hide_empty' => false,
         ]);
         ?>
