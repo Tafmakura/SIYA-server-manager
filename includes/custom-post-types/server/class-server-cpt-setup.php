@@ -1,8 +1,9 @@
-<?php 
+<?php
 
-namespace Siya\Setup;
+namespace SIYA\CustomPostTypes;
 
-class CustomPostTypes {
+class ServerPostSetup {
+    
     public function __construct() {
         $this->create_server_post_type();
 
@@ -46,24 +47,4 @@ class CustomPostTypes {
     }
 
 
-    /**
-     * Remove unwanted actions from server post type list table
-     */
-    public function remove_post_table_actions($actions, $post) {
-        if ($post->post_type === 'server') {
-            $allowed_actions = array();
-            
-            if (isset($actions['edit'])) {
-                $allowed_actions['edit'] = $actions['edit'];
-            }
-            
-            if (isset($actions['view'])) {
-                $allowed_actions['view'] = $actions['view'];
-            }
-            
-            return $allowed_actions;
-        }
-        return $actions;
-    }
-    
 }
