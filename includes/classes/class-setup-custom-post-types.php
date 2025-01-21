@@ -5,6 +5,8 @@ namespace Siya\Setup;
 class CustomPostTypes {
     public function __construct() {
         $this->create_server_post_type();
+
+        echo 'AHA!';
         add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10, 2);
     }
 
