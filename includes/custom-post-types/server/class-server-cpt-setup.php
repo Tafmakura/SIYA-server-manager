@@ -22,6 +22,11 @@ class ServerPostSetup {
         add_action('edit_form_top', array($this, 'display_custom_title'));
         add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
         add_action('admin_head', array($this, 'remove_preview_button'));
+
+
+        // Add new filters
+        add_action('restrict_manage_posts', array($this, 'add_server_filters'));
+        add_filter('pre_get_posts', array($this, 'filter_servers_by_taxonomy'));
     }
 
     /**
@@ -275,5 +280,65 @@ class ServerPostSetup {
             </style>';
         }
     }
+
+    public function add_server_filters() {
+        global $typenow;
+
+        if ($typenow === 'server') {
+            $this->render_taxonomy_dropdown('arsol_server_group', __('Filter by Server Group', 'your-text-domain'));
+            $this->render_taxonomy_dropdown('arsol_server_tags', __('Filter by Server Tags', 'your-text-domain'));
+        }
+    }
+
+    private function render_taxonomy_dropdown($taxonomy, $label) {
+        $taxonomy_obj = get_taxonomy($taxonomy);
+        if (!$taxonomy_obj) {
+            return;
+        }
+
+        $selected = isset($_GET[$taxonomy]) ? $_GET[$taxonomy] : '';
+        $terms = get_terms(array(
+            'taxonomy' => $taxonomy,
+            'hide_empty' => false,
+        ));
+
+        if (!empty($terms)) {
+            echo '<select name="' . esc_attr($taxonomy) . '" id="' . esc_attr($taxonomy) . '" class="postform">';
+            echo '<option value="">' . esc_html($label) . '</option>';
+            foreach ($terms as $term) {
+                printf(
+                    '<option value="%s" %s>%s</option>',
+                    esc_attr($term->slug),
+                    selected($selected, $term->slug, false),
+                    esc_html($term->name)
+                );
+            }
+            echo '</select>';
+        }
+    }
+
+    public function filter_servers_by_taxonomy($query) {
+        global $pagenow;
+
+        if ($pagenow === 'edit.php' && isset($query->query_vars['post_type']) && $query->query_vars['post_type'] === 'server') {
+            if (!empty($_GET['arsol_server_group'])) {
+                $query->query_vars['tax_query'][] = array(
+                    'taxonomy' => 'arsol_server_group',
+                    'field' => 'slug',
+                    'terms' => sanitize_text_field($_GET['arsol_server_group']),
+                );
+            }
+
+            if (!empty($_GET['arsol_server_tags'])) {
+                $query->query_vars['tax_query'][] = array(
+                    'taxonomy' => 'arsol_server_tags',
+                    'field' => 'slug',
+                    'terms' => sanitize_text_field($_GET['arsol_server_tags']),
+                );
+            }
+        }
+    }
+
+    // Other methods remain unchanged
 
 }
