@@ -55,7 +55,8 @@ class ServerPostSetup {
             'supports'           => array('author','custom-fields','comments'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
-                'delete_post' => 'do_not_allow',
+                'delete_post' => 'delete_posts',
+                'delete_posts' => 'delete_posts',
             ),
             'map_meta_cap'       => true,
             'publicly_queryable' => false,
@@ -85,10 +86,8 @@ class ServerPostSetup {
     }
 
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
-        if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') {
-            if (!current_user_can('administrator')) {
-                $caps[] = 'do_not_allow';
-            }
+        if (($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') && !current_user_can('administrator')) {
+            $caps[] = 'do_not_allow';
         }
         return $caps;
     }
