@@ -1436,7 +1436,7 @@ class ServerOrchestrator {
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
                 '_arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
-                'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_group_slug', true),
+                'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_plan_group_slug', true),
                 'arsol_server_plan_slug' => $server_product->get_meta('_arsol_server_plan_slug', true),
                 'arsol_server_region_slug' => $server_product->get_meta('_arsol_server_region', true),
                 'arsol_server_image_slug' => $server_product->get_meta('_arsol_server_image', true),
