@@ -169,11 +169,13 @@ class ServerPostSetup {
         if ($column === 'details') {
             // Get the associated subscription ID
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
-            $customer_id = $subscription->get_customer_id();
     
             if ($subscription_id) {
                 // Get the subscription object
                 $subscription = wcs_get_subscription($subscription_id);
+
+                // Get the customer ID
+                $customer_id = $subscription->get_customer_id();
     
                 if ($subscription) {
                     // Get billing name (first and last)
