@@ -21,6 +21,7 @@ class ServerPostSetup {
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
         add_action('edit_form_top', array($this, 'display_custom_title'));
         add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
+        add_action('admin_head', array($this, 'remove_preview_button'));
     }
 
     /**
@@ -263,6 +264,15 @@ class ServerPostSetup {
     public function display_custom_title($post) {
         if ($post->post_type === 'server') {
             echo '<div id="order_data"><h2> Server:' . esc_html($post->post_title) . '</h2></div>';
+        }
+    }
+
+    public function remove_preview_button() {
+        global $post_type;
+        if ($post_type == 'server') {
+            echo '<style>
+                #post-preview, .misc-pub-section.misc-pub-post-status { display: none; }
+            </style>';
         }
     }
 
