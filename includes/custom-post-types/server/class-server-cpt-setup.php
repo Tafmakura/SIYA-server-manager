@@ -96,7 +96,7 @@ class ServerPostSetup {
     public function customize_columns($columns) {
         unset($columns['cb']);
         unset($columns['author']);
-        unset($columns['comments']);
+        // Do not unset the comments column
         $new_columns = array();
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
@@ -139,7 +139,8 @@ class ServerPostSetup {
     
                     // Render the column content
                     echo sprintf(
-                        __('Associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
+                        __('This server was assigned Server Post ID: %d and is associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
+                        $post_id,
                         esc_url($subscription_link),
                         esc_html($subscription_id),
                         esc_url($customer_wc_link),
