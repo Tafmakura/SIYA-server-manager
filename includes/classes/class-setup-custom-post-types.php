@@ -5,6 +5,7 @@ namespace Siya\Setup;
 class CustomPostTypes {
     public function __construct() {
         $this->create_server_post_type();
+        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10, 2);
     }
 
     /**
@@ -41,4 +42,26 @@ class CustomPostTypes {
 
         register_post_type('server', $args);
     }
+
+
+    /**
+     * Remove unwanted actions from server post type list table
+     */
+    public function remove_post_table_actions($actions, $post) {
+        if ($post->post_type === 'server') {
+            $allowed_actions = array();
+            
+            if (isset($actions['edit'])) {
+                $allowed_actions['edit'] = $actions['edit'];
+            }
+            
+            if (isset($actions['view'])) {
+                $allowed_actions['view'] = $actions['view'];
+            }
+            
+            return $allowed_actions;
+        }
+        return $actions;
+    }
+    
 }

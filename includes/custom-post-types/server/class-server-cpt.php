@@ -68,7 +68,7 @@ class ServerPost {
             $this->post_id = $post_id;
             $this->load_meta_data();
         }
-        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10, 2);
+       
     }
 
     private function load_meta_data() {
@@ -246,24 +246,4 @@ class ServerPost {
         return $meta_data;
     }
 
-    /**
-     * Remove unwanted actions from server post type list table
-     */
-    public function remove_post_table_actions($actions, $post) {
-        if ($post->post_type === 'server') {
-            $allowed_actions = array();
-            
-            if (isset($actions['edit'])) {
-                $allowed_actions['edit'] = $actions['edit'];
-            }
-            
-            if (isset($actions['view'])) {
-                $allowed_actions['view'] = $actions['view'];
-            }
-            
-            return $allowed_actions;
-        }
-        return $actions;
-    }
-    
 }
