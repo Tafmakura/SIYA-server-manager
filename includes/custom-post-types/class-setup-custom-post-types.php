@@ -12,7 +12,7 @@ class CustomPostTypes {
 
     private function require_files() {
         // Custom Post Types
-        require_once plugin_dir_path(__DIR__) . 'custom-post-types/server/class-server-cpt.php';
+        require_once plugin_dir_path(__FILE__) . 'server/class-server-cpt.php';
     }
 
     private function instatiate_classes() {
