@@ -1425,6 +1425,17 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
+            // Load assigned server groups and tags
+            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
+            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
+
+            // Log assigned server groups and tags
+            error_log('[SIYA Server Manager] Assigned server groups: ' . json_encode($server_groups));
+            error_log('[SIYA Server Manager] Assigned server tags: ' . json_encode($server_tags));
+
+            error_log('[SIYA Server Manager] Server product metadata: ' . json_encode($server_product->get_meta_data()));
+    
+
             // Update server post metadata with correct meta keys
             $metadata = [
                 'arsol_server_subscription_id' => $this->subscription_id,
@@ -1452,14 +1463,7 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
-            // Load assigned server groups and tags
-            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
-            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
-
-            // Log assigned server groups and tags
-            error_log('[SIYA Server Manager] Assigned server groups: ' . json_encode($server_groups));
-            error_log('[SIYA Server Manager] Assigned server tags: ' . json_encode($server_tags));
-
+        
 
             // Assign server groups and tags to the server post
             if ($server_groups && is_array($server_groups)) {
