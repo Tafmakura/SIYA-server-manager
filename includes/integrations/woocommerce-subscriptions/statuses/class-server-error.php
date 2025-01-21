@@ -82,7 +82,7 @@ class ServerError {
             } elseif ($circuit_breaker == 0) {
                 echo '<span class="server-status active">Okay</span>';
             } else {
-                echo '<span class="server-status pending">N/A</span>';
+                echo '<span class="server-status pending">Setup</span>';
             }
         }
     }
