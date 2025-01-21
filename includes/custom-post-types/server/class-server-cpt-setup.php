@@ -296,7 +296,7 @@ class ServerPostSetup {
             $this->render_taxonomy_dropdown(
                 'arsol_server_tags',
                 __('Filter by Server Tags', 'your-text-domain'),
-                __('All Tags', 'your-text-domain')
+                __('All Server Tags', 'your-text-domain')
             );
         }
     }
