@@ -97,8 +97,12 @@ class ServerPostSetup {
         unset($columns['cb']);
         unset($columns['author']);
         unset($columns['comments']);
-        $columns['details'] = __('Details', 'your-text-domain');
-        return $columns;
+        $new_columns = array();
+        $new_columns['details'] = __('Details', 'your-text-domain');
+        foreach ($columns as $key => $value) {
+            $new_columns[$key] = $value;
+        }
+        return $new_columns;
     }
 
     public function populate_custom_columns($column, $post_id) {
@@ -106,9 +110,10 @@ class ServerPostSetup {
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
             if ($subscription_id) {
                 $subscription_link = get_edit_post_link($subscription_id);
-                $customer_name = get_post_meta($subscription_id, 'customer_name', true);
-                $customer_profile_link = get_edit_post_link($customer_name);
-                echo '<a href="' . esc_url($subscription_link) . '">' . esc_html($subscription_id) . '</a> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
+                $customer_id = get_post_meta($subscription_id, 'customer_id', true);
+                $customer_name = get_the_title($customer_id);
+                $customer_profile_link = get_edit_post_link($customer_id);
+                echo '<strong>#<a href="' . esc_url($subscription_link) . '">' . esc_html($subscription_id) . '</a></strong> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
             } else {
                 echo __('No subscription found', 'your-text-domain');
             }
