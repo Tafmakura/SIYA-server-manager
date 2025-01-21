@@ -80,19 +80,19 @@ class ServerPostSetup {
             )
         );
 
-        // Non-hierarchical taxonomy: Label
+        // Non-hierarchical taxonomy: Server Tags
         register_taxonomy(
-            'arsol_server_label',
-            'server',
+            'arsol_server_tags', 
+            'server', 
             array(
                 'labels' => array(
-                    'name' => __('Labels', 'your-text-domain'),
-                    'singular_name' => __('Label', 'your-text-domain'),
+                    'name' => __('Server Tags', 'your-text-domain'),
+                    'singular_name' => __('Server Tag', 'your-text-domain'),
                 ),
                 'hierarchical' => false,
                 'public' => false,
                 'show_ui' => true,
-                'rewrite' => array('slug' => 'server-label'),
+                'rewrite' => array('slug' => 'server-tag'),
             )
         );
     }
