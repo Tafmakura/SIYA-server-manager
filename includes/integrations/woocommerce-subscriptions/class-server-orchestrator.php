@@ -1437,6 +1437,8 @@ class ServerOrchestrator {
             var_dump($server_groups);
             var_dump($server_tags);
 
+            error_log ('[HOOOOOHOOOOOOOOOOOOOOYOOOOOOOOOOOOOO' . json_encode($server_groups));
+
             // Update server post metadata with correct meta keys
             $metadata = [
                 'arsol_server_subscription_id' => $this->subscription_id,
