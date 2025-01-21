@@ -149,10 +149,9 @@ class ServerPostSetup {
         }
         return $new_columns;
     }
-
     public function change_published_to_provisioned($translated_text, $text, $domain) {
-        global $post;
-        if ($domain === 'default' && $text === 'Published' && $post->post_type === 'server') {
+        global $post, $pagenow;
+        if ($domain === 'default' && $text === 'Published' && $post->post_type === 'server' && ($pagenow === 'edit.php' || $pagenow === 'post.php')) {
             $translated_text = __('Provisioned', 'your-text-domain');
         }
         return $translated_text;

@@ -1429,11 +1429,9 @@ class ServerOrchestrator {
             $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
             $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
 
-            // Output the arrays for debugging
-            var_dump($server_groups);
-            var_dump($server_tags);
 
-            error_log ('[HOOOOOHOOOOOOOOOOOOOOYOOOOOOOOOOOOOO');
+
+            error_log ('[HOOOfghfghfgh2837270348729873498279384792874982793847928374982739847928734OOHOOOOOOOOOOOOOOYOOOOOOOOOOOOOO');
 
             // Update server post metadata with correct meta keys
             $metadata = [
