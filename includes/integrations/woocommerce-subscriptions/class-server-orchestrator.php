@@ -1458,7 +1458,7 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
-        
+
 
             // Assign server groups and tags to the server post
             if ($server_groups && is_array($server_groups)) {
