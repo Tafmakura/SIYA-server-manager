@@ -1425,7 +1425,7 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
-            error_log('[SIYA Server Manager] Server product metadata: ' . json_encode($server_product->get_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->meta(), true));
 
             // Update server post metadata with correct meta keys
             $metadata = [
@@ -1457,8 +1457,8 @@ class ServerOrchestrator {
             $subscription->save();
 
             // Get server groups and tags
-            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true) ?: [];
-            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true) ?: [];
+            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true) ;
+            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true) ;
 
             error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
 
