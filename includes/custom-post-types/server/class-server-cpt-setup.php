@@ -155,8 +155,6 @@ class ServerPostSetup {
         }
     }
         
-    
-
     public function disable_title_editing() {
         global $post_type;
         if ($post_type == 'server') {
