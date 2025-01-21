@@ -61,6 +61,12 @@ class ServerError {
             $subscription = wcs_get_subscription($subscription_id);
             if (!$subscription) return;
 
+            $status = $subscription->get_status();
+            if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
+                echo '&mdash;';
+                return;
+            }
+
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             if (!$server_post_id) {
                 echo '<span class="server-status no-server">No Server</span>';
