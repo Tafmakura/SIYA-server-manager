@@ -295,19 +295,23 @@ class ServerPostSetup {
         global $typenow;
     
         if ($typenow === 'server') {
-            // Dropdown for Server Groups
-            $this->render_taxonomy_dropdown(
-                'arsol_server_group',
-                __('Filter by Server Group', 'your-text-domain'),
-                __('All Server Groups', 'your-text-domain')
-            );
+            // Check if there is at least one post of the 'server' post type
+            $server_count = wp_count_posts('server')->publish;
+            if ($server_count > 0) {
+                // Dropdown for Server Groups
+                $this->render_taxonomy_dropdown(
+                    'arsol_server_group',
+                    __('Filter by Server Group', 'your-text-domain'),
+                    __('All Server Groups', 'your-text-domain')
+                );
     
-            // Dropdown for Server Tags
-            $this->render_taxonomy_dropdown(
-                'arsol_server_tag',
-                __('Filter by Server Tags', 'your-text-domain'),
-                __('All Server Tags', 'your-text-domain')
-            );
+                // Dropdown for Server Tags
+                $this->render_taxonomy_dropdown(
+                    'arsol_server_tag',
+                    __('Filter by Server Tags', 'your-text-domain'),
+                    __('All Server Tags', 'your-text-domain')
+                );
+            }
         }
     }
     
