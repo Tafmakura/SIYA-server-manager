@@ -1430,8 +1430,8 @@ class ServerOrchestrator {
             $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
 
             // Log assigned server groups and tags
-            error_log('[SIYA Server Manager] Assigned server groups: ' . json_encode($server_groups));
-            error_log('[SIYA Server Manager] Assigned server tags: ' . json_encode($server_tags));
+            error_log('[SIYA Server Manager] Assigned server groups: ' . $server_groups);
+            error_log('[SIYA Server Manager] Assigned server tags: ' . $server_tags);
 
             error_log('[SIYA Server Manager] Server product metadata: ' . json_encode($server_product->get_meta_data()));
     
