@@ -115,7 +115,7 @@ class ServerPostSetup {
                 $customer_id = get_post_meta($subscription_id, 'customer_id', true);
                 $customer_name = get_the_title($customer_id);
                 $customer_profile_link = get_edit_post_link($customer_id);
-                echo 'Subscrption <strong><a href="' . esc_url($subscription_link) . '">#' . esc_html($subscription_id) . '</a></strong> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
+                echo 'Subscription <strong><a href="' . esc_url($subscription_link) . '">#' . esc_html($subscription_id) . '</a></strong> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
             } else {
                 echo __('No subscription found', 'your-text-domain');
             }
