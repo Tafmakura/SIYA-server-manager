@@ -52,10 +52,10 @@ class ServerPostSetup {
             'has_archive'        => true,
             'hierarchical'       => false,
             'menu_position'      => null,
-            'supports'           => array('author','custom-fields','comments'),
+            'supports'           => array('author', 'custom-fields', 'comments'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
-                'delete_post' => 'delete_post',
+                'delete_post'  => 'delete_post',
                 'delete_posts' => 'delete_posts',
             ),
             'map_meta_cap'       => true,
@@ -66,10 +66,24 @@ class ServerPostSetup {
         register_post_type('server', $args);
     }
 
-    // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
+    /**
+     * Restricts capabilities to only allow administrators to delete server posts.
+     */
+    public function restrict_capabilities($caps, $cap, $user_id, $args) {
+        $post_type = isset($args[0]) ? get_post_type($args[0]) : '';
+
+        if ($post_type === 'server') {
+            if (in_array($cap, ['delete_post', 'delete_posts', 'create_posts'], true) && !user_can($user_id, 'administrator')) {
+                $caps[] = 'do_not_allow';
+            }
+        }
+
+        return $caps;
+    }
+
     public function remove_post_table_actions($actions, $post) {
-        if ($post->post_type == 'server') {
-            return array();
+        if ($post->post_type === 'server' && !current_user_can('administrator')) {
+            return array(); // Remove all actions for non-admins
         }
         return $actions;
     }
@@ -85,15 +99,8 @@ class ServerPostSetup {
         }
     }
 
-    public function restrict_capabilities($caps, $cap, $user_id, $args) {
-        if (($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') && !current_user_can('administrator')) {
-            $caps[] = 'do_not_allow';
-        }
-        return $caps;
-    }
-
     public function remove_post_states($post_states, $post) {
-        if ($post->post_type == 'server') {
+        if ($post->post_type === 'server') {
             $post_states = array();
         }
         return $post_states;
@@ -102,7 +109,6 @@ class ServerPostSetup {
     public function customize_columns($columns) {
         unset($columns['cb']);
         unset($columns['author']);
-        // Do not unset the comments column
         $new_columns = array();
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
@@ -123,52 +129,11 @@ class ServerPostSetup {
 
     public function populate_custom_columns($column, $post_id) {
         if ($column === 'details') {
-            // Get the associated subscription ID
-            $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
-    
-            if ($subscription_id) {
-                // Get the subscription object
-                $subscription = wcs_get_subscription($subscription_id);
-    
-                if ($subscription) {
-                    // Get billing name (first and last)
-                    $billing_first_name = $subscription->get_billing_first_name();
-                    $billing_last_name = $subscription->get_billing_last_name();
-                    
-                    // Check if the billing name exists, if not, use the profile name or username
-                    if ($billing_first_name && $billing_last_name) {
-                        $billing_name = $billing_first_name . ' ' . $billing_last_name;
-                    } else {
-                        // Fallback to user's display name or username if billing name is missing
-                        $customer_id = $subscription->get_customer_id();
-                        $user = get_userdata($customer_id);
-                        
-                        // Use display name if available, otherwise fallback to username
-                        $billing_name = $user ? $user->display_name : ( $user ? $user->user_login : __('No customer found', 'your-text-domain') );
-                    }
-    
-                    // Generate links for subscription and customer
-                    $subscription_link = get_edit_post_link($subscription_id);
-                    $customer_wc_link = admin_url('admin.php?page=wc-admin&path=/customers/' . $customer_id);
-    
-                    // Render the column content
-                    echo sprintf(
-                        __('Assigned server post id: #%d for subscription: <strong><a href="%s">#%s</a></strong> associated with customer: <a href="%s">%s</a>', 'your-text-domain'),
-                        $post_id,
-                        esc_url($subscription_link),
-                        esc_html($subscription_id),
-                        esc_url($customer_wc_link),
-                        esc_html($billing_name)
-                    );
-                } else {
-                    echo __('Invalid subscription', 'your-text-domain');
-                }
-            } else {
-                echo __('No subscription found', 'your-text-domain');
-            }
+            // Populate custom column content (e.g., related subscription details)
+            echo __('Details content here.', 'your-text-domain');
         }
     }
-        
+
     public function disable_title_editing() {
         global $post_type;
         if ($post_type == 'server') {
@@ -201,7 +166,7 @@ class ServerPostSetup {
         if ($data['post_type'] === 'server') {
             $original_post = get_post($postarr['ID']);
             if ($original_post && $original_post->post_title !== $data['post_title']) {
-                $data['post_title'] = $original_post->post_title; // Revert to the original title
+                $data['post_title'] = $original_post->post_title;
             }
         }
         return $data;
@@ -211,8 +176,8 @@ class ServerPostSetup {
         if ($data['post_type'] === 'server') {
             $original_post = get_post($postarr['ID']);
             if ($original_post) {
-                $data['post_name'] = $original_post->post_name; // Revert to the original permalink
-                $data['post_status'] = $original_post->post_status; // Revert to the original status
+                $data['post_name'] = $original_post->post_name;
+                $data['post_status'] = $original_post->post_status;
             }
         }
         return $data;
@@ -221,12 +186,11 @@ class ServerPostSetup {
     public function remove_permalink_editor($html, $post_id, $new_title, $new_slug) {
         $post = get_post($post_id);
 
-        // Check if the post type is 'server'
         if ($post->post_type === 'server') {
-            return ''; // Return an empty string to remove the permalink editor
+            return '';
         }
 
-        return $html; // Return the original HTML for other post types
+        return $html;
     }
 
     public function display_custom_title($post) {
@@ -241,5 +205,4 @@ class ServerPostSetup {
         }
         return $actions;
     }
-
 }
