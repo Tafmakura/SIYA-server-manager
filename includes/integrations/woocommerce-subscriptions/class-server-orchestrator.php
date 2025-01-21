@@ -1429,10 +1429,6 @@ class ServerOrchestrator {
             $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
             $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
 
-            // Debug the server groups and tags
-            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
-            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
-
             // Output the arrays for debugging
             var_dump($server_groups);
             var_dump($server_tags);
