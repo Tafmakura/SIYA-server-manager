@@ -112,10 +112,11 @@ class ServerPostSetup {
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
             if ($subscription_id) {
                 $subscription_link = get_edit_post_link($subscription_id);
-                $customer_id = get_post_meta($subscription_id, 'customer_id', true);
+                $subscription = wcs_get_subscription($subscription_id);
+                $customer_id = $subscription->get_customer_id();
                 $customer_name = get_the_title($customer_id);
                 $customer_profile_link = get_edit_post_link($customer_id);
-                echo 'Subscription <strong><a href="' . esc_url($subscription_link) . '">#' . esc_html($subscription_id) . '</a></strong> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
+                echo 'Associated with subscription <strong><a href="' . esc_url($subscription_link) . '">#' . esc_html($subscription_id) . '</a></strong> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
             } else {
                 echo __('No subscription found', 'your-text-domain');
             }
