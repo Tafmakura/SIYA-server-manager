@@ -55,7 +55,7 @@ class ServerPostSetup {
             'supports'           => array('author','custom-fields','comments'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
-                'delete_post' => 'delete_posts',
+                'delete_post' => 'delete_post',
                 'delete_posts' => 'delete_posts',
             ),
             'map_meta_cap'       => true,
