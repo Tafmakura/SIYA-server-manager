@@ -123,8 +123,13 @@ class ServerPostSetup {
     }
 
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
-        if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') {
-            $caps[] = 'do_not_allow';
+        if (in_array($cap, ['delete_post', 'create_posts', 'delete_posts'])) {
+            if (isset($args[0])) {
+                $post = get_post($args[0]);
+                if ($post && $post->post_type === 'server') {
+                    $caps[] = 'do_not_allow';
+                }
+            }
         }
         return $caps;
     }
@@ -151,7 +156,7 @@ class ServerPostSetup {
     }
     public function change_published_to_provisioned($translated_text, $text, $domain) {
         global $post, $pagenow;
-        if ($domain === 'default' && $text === 'Published' && $post->post_type === 'server' && ($pagenow === 'edit.php' || $pagenow === 'post.php')) {
+        if ($domain === 'default' && $text === 'Published' && isset($post) && $post->post_type === 'server' && ($pagenow === 'edit.php' || $pagenow === 'post.php')) {
             $translated_text = __('Provisioned', 'your-text-domain');
         }
         return $translated_text;
