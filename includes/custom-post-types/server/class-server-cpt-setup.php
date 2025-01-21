@@ -12,7 +12,6 @@ class ServerPostSetup {
         add_filter('bulk_actions-edit-server', array($this, 'remove_bulk_actions'));
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
         add_filter('manage_server_posts_columns', array($this, 'customize_columns'));
-        add_action('admin_head', array($this, 'disable_title_and_permalink_editing'));
     }
 
     /**
@@ -44,7 +43,7 @@ class ServerPostSetup {
             'has_archive'        => true,
             'hierarchical'       => false,
             'menu_position'      => null,
-            'supports'           => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+            'supports'           => array('custom-fields'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
                 'delete_post' => 'do_not_allow',
@@ -93,13 +92,6 @@ class ServerPostSetup {
         unset($columns['author']);
         unset($columns['comments']);
         return $columns;
-    }
-
-    public function disable_title_and_permalink_editing() {
-        global $post_type;
-        if ($post_type == 'server') {
-            echo '<style>#titlediv, #edit-slug-box { display: none; }</style>';
-        }
     }
 
 }
