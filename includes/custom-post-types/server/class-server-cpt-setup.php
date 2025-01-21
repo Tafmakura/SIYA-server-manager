@@ -12,7 +12,7 @@ class ServerPostSetup {
         add_filter('bulk_actions-edit-server', array($this, 'remove_bulk_actions'));
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
         add_filter('manage_server_posts_columns', array($this, 'customize_columns'));
-        add_action('manage_server_posts_custom_column', array($this, 'customize_column_content'), 10, 2);
+    
     }
 
     /**
@@ -58,8 +58,7 @@ class ServerPostSetup {
     // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
-            unset($actions['trash']);
-            unset($actions['inline hide-if-no-js']);
+            return array();
         }
         return $actions;
     }
@@ -92,20 +91,10 @@ class ServerPostSetup {
     public function customize_columns($columns) {
         unset($columns['cb']);
         unset($columns['author']);
+        unset($columns['comments']);
         return $columns;
     }
 
-    public function customize_column_content($column, $post_id) {
-        if ($column === 'date') {
-            $post = get_post($post_id);
-            $time = get_post_time('G', true, $post);
-            $time_diff = time() - $time;
-            if ($time_diff > 0 && $time_diff < DAY_IN_SECONDS) {
-                $h_time = sprintf(__('%s ago'), human_time_diff($time));
-            } else {
-                $h_time = mysql2date(__('Y/m/d'), $post->post_date);
-            }
-            echo '<strong>' . __('Created') . '</strong> ' . $h_time;
-        }
+  
     }
 }
