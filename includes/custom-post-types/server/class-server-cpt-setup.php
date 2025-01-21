@@ -227,7 +227,7 @@ class ServerPostSetup {
 
     public function display_custom_title($post) {
         if ($post->post_type === 'server') {
-            echo '<div id="order_data"><h2>' . esc_html($post->post_title) . '</h2></div>';
+            echo '<div id="order_data"><h2> Server: ' . esc_html($post->post_title) . '</h2></div>';
         }
     }
 
