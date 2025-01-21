@@ -285,12 +285,24 @@ class ServerPostSetup {
         global $typenow;
     
         if ($typenow === 'server') {
-            $this->render_taxonomy_dropdown('arsol_server_group', __('Filter by Server Group', 'your-text-domain'));
-            $this->render_taxonomy_dropdown('arsol_server_tags', __('Filter by Server Tags', 'your-text-domain'));
+            // Dropdown for Server Groups
+            $this->render_taxonomy_dropdown(
+                'arsol_server_group',
+                __('Filter by Server Group', 'your-text-domain'),
+                __('All Server Groups', 'your-text-domain')
+            );
+    
+            // Dropdown for Server Tags
+            $this->render_taxonomy_dropdown(
+                'arsol_server_tags',
+                __('Filter by Server Tags', 'your-text-domain'),
+                __('All Tags', 'your-text-domain')
+            );
         }
     }
+    
 
-    private function render_taxonomy_dropdown($taxonomy, $label) {
+    private function render_taxonomy_dropdown($taxonomy, $default_label, $reset_label) {
         $taxonomy_obj = get_taxonomy($taxonomy);
         if (!$taxonomy_obj) {
             return;
@@ -303,9 +315,8 @@ class ServerPostSetup {
         ));
     
         echo '<select name="' . esc_attr($taxonomy) . '" id="' . esc_attr($taxonomy) . '" class="postform">';
-        // Add "All" option to reset the filter
-        echo '<option value="">' . esc_html($label) . '</option>';
-        echo '<option value="" ' . selected($selected, '', false) . '>' . __('All', 'your-text-domain') . '</option>';
+        // Add custom reset option to reset the filter
+        echo '<option value="">' . esc_html($reset_label) . '</option>';
     
         if (!empty($terms)) {
             foreach ($terms as $term) {
@@ -319,6 +330,7 @@ class ServerPostSetup {
         }
         echo '</select>';
     }
+    
     
 
     public function filter_servers_by_taxonomy($query) {
