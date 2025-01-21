@@ -20,6 +20,8 @@ class ServerPostSetup {
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
         add_action('edit_form_top', array($this, 'display_custom_title'));
         add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
+        add_action('post_submitbox_misc_actions', array($this, 'remove_published_date_field'), 10, 2);
+        add_action('save_post', array($this, 'prevent_published_date_change'), 10, 3);
     }
 
     /**
@@ -230,6 +232,37 @@ class ServerPostSetup {
     public function display_custom_title($post) {
         if ($post->post_type === 'server') {
             echo '<div id="order_data"><h2> Server: ' . esc_html($post->post_title) . '</h2></div>';
+        }
+    }
+
+    public function remove_published_date_field($post) {
+        if ('server' === $post->post_type) {
+            ?>
+            <style>
+                #publish .misc-pub-post-status,
+                #publish .misc-pub-visibility,
+                #publish .misc-pub-date {
+                    display: none;
+                }
+            </style>
+            <?php
+        }
+    }
+
+    public function prevent_published_date_change($post_id, $post, $update) {
+        if ('server' !== $post->post_type) {
+            return;
+        }
+
+        if ($update) {
+            $original_date = get_the_date('Y-m-d H:i:s', $post_id);
+            if ($post->post_date !== $original_date) {
+                wp_update_post(array(
+                    'ID' => $post_id,
+                    'post_date' => $original_date,
+                    'post_date_gmt' => get_gmt_from_date($original_date),
+                ));
+            }
         }
     }
 
