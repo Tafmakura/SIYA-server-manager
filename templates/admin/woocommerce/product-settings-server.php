@@ -175,8 +175,8 @@
             >
                 <?php foreach ($server_groups_terms as $term) : ?>
                     <option
-                        value="<?php echo esc_attr($term->slug); ?>"
-                        <?php selected(in_array($term->slug, $selected_assigned_server_groups), true); ?>
+                        value="<?php echo esc_attr($term->term_id); ?>"
+                        <?php selected(in_array($term->term_id, $selected_assigned_server_groups), true); ?>
                     >
                         <?php echo esc_html($term->name); ?>
                     </option>
@@ -203,8 +203,8 @@
             >
                 <?php foreach ($server_tags_terms as $term) : ?>
                     <option
-                        value="<?php echo esc_attr($term->slug); ?>"
-                        <?php selected(in_array($term->slug, $selected_assigned_server_tags), true); ?>
+                        value="<?php echo esc_attr($term->term_id); ?>"
+                        <?php selected(in_array($term->term_id, $selected_assigned_server_tags), true); ?>
                     >
                         <?php echo esc_html($term->name); ?>
                     </option>
