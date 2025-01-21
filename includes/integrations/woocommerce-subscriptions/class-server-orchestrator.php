@@ -1426,12 +1426,13 @@ class ServerOrchestrator {
             $server_product = wc_get_product($this->server_product_id);
 
             $manager_required = $server_product->get_meta('_arsol_server_manager_required', true);
-            $groups =  $server_product->get_meta('_arsol_assigned_server_groups', true);
-
+            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true) ;
+            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true) ;
 
             error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->get_meta(), true));
             error_log('[SIYA Server Manager] Server product manager required: ' . $manager_required);
-            error_log('[SIYA Server Manager] Server product groups: ' . print_r($groups, true));
+            error_log('[SIYA Server Manager] Server product groups: ' . $server_groups);
+
             error_log('[SIYA Server Manager] Server product tags: ' . print_r($server_product->get_meta('_arsol_assigned_server_tags', true), true));
 
 
@@ -1464,9 +1465,6 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
-            // Get server groups and tags
-            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true) ;
-            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true) ;
 
             error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
 
