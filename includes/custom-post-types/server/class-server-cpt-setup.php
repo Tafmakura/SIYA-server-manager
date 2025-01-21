@@ -169,6 +169,7 @@ class ServerPostSetup {
         if ($column === 'details') {
             // Get the associated subscription ID
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
+            $customer_id = $subscription->get_customer_id();
     
             if ($subscription_id) {
                 // Get the subscription object
@@ -184,7 +185,6 @@ class ServerPostSetup {
                         $billing_name = $billing_first_name . ' ' . $billing_last_name;
                     } else {
                         // Fallback to user's display name or username if billing name is missing
-                        $customer_id = $subscription->get_customer_id();
                         $user = get_userdata($customer_id);
                         
                         // Use display name if available, otherwise fallback to username
