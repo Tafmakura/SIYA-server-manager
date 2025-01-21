@@ -70,8 +70,8 @@ class ServerPostSetup {
             'server',
             array(
                 'labels' => array(
-                    'name' => __('Groups', 'your-text-domain'),
-                    'singular_name' => __('Group', 'your-text-domain'),
+                    'name' => __('Server Groups', 'your-text-domain'),
+                    'singular_name' => __('Server Group', 'your-text-domain'),
                 ),
                 'hierarchical' => true,
                 'public' => false,
