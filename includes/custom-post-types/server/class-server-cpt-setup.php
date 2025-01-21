@@ -171,7 +171,7 @@ class ServerPostSetup {
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
     
             if ($subscription_id) {
-                
+
                 // Get the subscription object
                 $subscription = wcs_get_subscription($subscription_id);
 
@@ -196,7 +196,7 @@ class ServerPostSetup {
     
                     // Generate links for subscription and customer
                     $subscription_link = get_edit_post_link($subscription_id);
-                    $customer_wc_link = admin_url('admin.php?page=wc-admin&path=/customers/' . $customer_id);
+                    $customer_wc_link = admin_url('user-edit.php?user_id=' . $customer_id);
     
                     // Render the column content
                     echo sprintf(
