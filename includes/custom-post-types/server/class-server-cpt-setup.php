@@ -6,6 +6,7 @@ class ServerPostSetup {
 
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
+        add_action('init', array($this, 'register_server_taxonomies'));
         add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
         add_action('admin_menu', array($this, 'remove_add_new_button'));
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
@@ -60,6 +61,40 @@ class ServerPostSetup {
         );
 
         register_post_type('server', $args);
+    }
+
+    public function register_server_taxonomies() {
+        // Hierarchical taxonomy: Group
+        register_taxonomy(
+            'arsol_server_group',
+            'server',
+            array(
+                'labels' => array(
+                    'name' => __('Groups', 'your-text-domain'),
+                    'singular_name' => __('Group', 'your-text-domain'),
+                ),
+                'hierarchical' => true,
+                'public' => false,
+                'show_ui' => true,
+                'rewrite' => array('slug' => 'server-group'),
+            )
+        );
+
+        // Non-hierarchical taxonomy: Label
+        register_taxonomy(
+            'arsol_server_label',
+            'server',
+            array(
+                'labels' => array(
+                    'name' => __('Labels', 'your-text-domain'),
+                    'singular_name' => __('Label', 'your-text-domain'),
+                ),
+                'hierarchical' => false,
+                'public' => false,
+                'show_ui' => true,
+                'rewrite' => array('slug' => 'server-label'),
+            )
+        );
     }
 
     // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
