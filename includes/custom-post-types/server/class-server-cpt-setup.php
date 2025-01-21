@@ -109,19 +109,43 @@ class ServerPostSetup {
 
     public function populate_custom_columns($column, $post_id) {
         if ($column === 'details') {
+            // Get the associated subscription ID
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
+    
             if ($subscription_id) {
-                $subscription_link = get_edit_post_link($subscription_id);
+                // Get the subscription object
                 $subscription = wcs_get_subscription($subscription_id);
-                $customer_id = $subscription->get_customer_id();
-                $customer_name = get_the_title($customer_id);
-                $customer_profile_link = get_edit_post_link($customer_id);
-                echo 'Associated with subscription <strong><a href="' . esc_url($subscription_link) . '">#' . esc_html($subscription_id) . '</a></strong> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
+    
+                if ($subscription) {
+                    // Get customer ID and name
+                    $customer_id = $subscription->get_customer_id();
+                    $customer = get_userdata($customer_id);
+    
+                    if ($customer) {
+                        $customer_name = $customer->display_name; // Get customer's display name
+                        $subscription_link = get_edit_post_link($subscription_id);
+                        $customer_profile_link = admin_url('user-edit.php?user_id=' . $customer_id);
+    
+                        // Render the column content
+                        echo sprintf(
+                            __('Associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
+                            esc_url($subscription_link),
+                            esc_html($subscription_id),
+                            esc_url($customer_profile_link),
+                            esc_html($customer_name)
+                        );
+                    } else {
+                        echo __('Customer not found', 'your-text-domain');
+                    }
+                } else {
+                    echo __('Invalid subscription', 'your-text-domain');
+                }
             } else {
                 echo __('No subscription found', 'your-text-domain');
             }
         }
     }
+    
 
     public function disable_title_editing() {
         global $post_type;
