@@ -139,7 +139,7 @@ class ServerPostSetup {
     
                     // Render the column content
                     echo sprintf(
-                        __('This server was assigned Server Post ID: %d and is associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
+                        __('This server was assigned Server Post ID: %d and is associated with subscription <strong><a href="%s">#%s</a></strong> belonging to <a href="%s">%s</a>', 'your-text-domain'),
                         $post_id,
                         esc_url($subscription_link),
                         esc_html($subscription_id),
