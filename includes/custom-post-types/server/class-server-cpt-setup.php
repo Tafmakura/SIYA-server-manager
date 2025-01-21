@@ -27,6 +27,21 @@ class ServerPostSetup {
         // Add new filters
         add_action('restrict_manage_posts', array($this, 'add_server_filters'));
         add_filter('pre_get_posts', array($this, 'filter_servers_by_taxonomy'));
+
+
+
+
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+        add_action('restrict_manage_posts', array($this, 'add_customer_filter'));
+        add_action('wp_ajax_server_customer_autocomplete', array($this, 'handle_customer_autocomplete'));
+        add_action('pre_get_posts', array($this, 'filter_by_customer'));
+        add_action('admin_head', array($this, 'add_customer_filter_js'));
+
+
+
+
+
+
     }
 
     /**
@@ -364,5 +379,139 @@ class ServerPostSetup {
     }
     
     // Other methods remain unchanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function enqueue_admin_scripts($hook) {
+        global $typenow;
+    
+        if ($typenow === 'server' && $hook === 'edit.php') {
+            wp_enqueue_script('jquery-ui-autocomplete');
+            wp_enqueue_style('jquery-ui', '//code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css');
+            wp_enqueue_script(
+                'server-customer-filter',
+                plugins_url('js/server-customer-filter.js', __FILE__),
+                array('jquery', 'jquery-ui-autocomplete'),
+                '1.0',
+                true
+            );
+    
+            wp_localize_script('server-customer-filter', 'ServerFilterAjax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('server_customer_filter_nonce'),
+            ));
+        }
+    }
+
+    public function add_customer_filter() {
+        global $typenow;
+    
+        if ($typenow === 'server') {
+            $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : '';
+            $customer_name = $customer_id ? get_userdata($customer_id)->display_name : '';
+    
+            echo '<input 
+                    type="text" 
+                    id="customer-filter" 
+                    name="customer_name" 
+                    value="' . esc_attr($customer_name) . '" 
+                    placeholder="' . esc_attr__('Filter by Customer', 'your-text-domain') . '" 
+                    style="margin-right: 10px;" 
+                />';
+            echo '<input type="hidden" name="customer_id" id="customer-id" value="' . esc_attr($customer_id) . '">';
+        }
+    }
+
+    public function handle_customer_autocomplete() {
+        check_ajax_referer('server_customer_filter_nonce', 'nonce');
+    
+        $search_query = isset($_GET['term']) ? sanitize_text_field($_GET['term']) : '';
+    
+        $args = array(
+            'search'         => '*' . esc_attr($search_query) . '*',
+            'search_columns' => array('user_login', 'user_nicename', 'display_name'),
+            'number'         => 10,
+        );
+    
+        $users = get_users($args);
+        $results = array();
+    
+        foreach ($users as $user) {
+            $results[] = array(
+                'id'   => $user->ID,
+                'label' => $user->display_name . ' (' . $user->user_email . ')',
+                'value' => $user->display_name,
+            );
+        }
+    
+        wp_send_json($results);
+    }
+
+    public function filter_by_customer($query) {
+        global $pagenow, $typenow;
+    
+        if ($typenow === 'server' && $pagenow === 'edit.php' && isset($_GET['customer_id'])) {
+            $customer_id = intval($_GET['customer_id']);
+            $query->query_vars['meta_query'][] = array(
+                'key'   => 'arsol_server_subscription_id',
+                'value' => $customer_id,
+                'compare' => '=',
+            );
+        }
+    }
+
+     /**
+     * Add the JavaScript for customer autocomplete.
+     */
+    public function add_customer_filter_js() {
+        global $typenow;
+
+        if ($typenow === 'server') {
+            ?>
+            <script type="text/javascript">
+                jQuery(document).ready(function($) {
+                    $("#customer-filter").autocomplete({
+                        source: function(request, response) {
+                            $.ajax({
+                                url: "<?php echo admin_url('admin-ajax.php'); ?>",
+                                dataType: "json",
+                                data: {
+                                    action: "server_customer_autocomplete",
+                                    nonce: "<?php echo wp_create_nonce('server_customer_filter_nonce'); ?>",
+                                    term: request.term,
+                                },
+                                success: function(data) {
+                                    response(data);
+                                },
+                            });
+                        },
+                        select: function(event, ui) {
+                            $("#customer-filter").val(ui.item.label);
+                            $("#customer-id").val(ui.item.id);
+                            return false;
+                        },
+                    });
+                });
+            </script>
+            <?php
+        }
+    }
+    
+    
+    
+    
+    
 
 }
