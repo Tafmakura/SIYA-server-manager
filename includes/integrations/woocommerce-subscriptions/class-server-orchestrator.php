@@ -1425,7 +1425,7 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
-            error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->meta(), true));
+            error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->get_meta(), true));
 
             // Update server post metadata with correct meta keys
             $metadata = [
