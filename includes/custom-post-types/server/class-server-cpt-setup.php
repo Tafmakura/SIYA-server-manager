@@ -226,7 +226,7 @@ class ServerPostSetup {
             return ''; // Return an empty string to remove the permalink editor
         }
 
-        return $html; // Return the original HTML for other post types
+        return $html; // Return  the original HTML for other post types
     }
 
     public function display_custom_title($post) {
