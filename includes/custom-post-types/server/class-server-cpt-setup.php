@@ -98,9 +98,11 @@ class ServerPostSetup {
         unset($columns['author']);
         unset($columns['comments']);
         $new_columns = array();
-        $new_columns['details'] = __('Details', 'your-text-domain');
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
+            if ($key === 'title') {
+                $new_columns['details'] = __('Details', 'your-text-domain');
+            }
         }
         return $new_columns;
     }
