@@ -6,7 +6,9 @@ class ServerPostSetup {
 
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
-        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10000, 2);
+        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
+        add_action('admin_menu', array($this, 'remove_add_new_button'));
+        add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
     }
 
     /**
@@ -39,11 +41,17 @@ class ServerPostSetup {
             'hierarchical'       => false,
             'menu_position'      => null,
             'supports'           => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+            'capabilities' => array(
+                'create_posts' => 'do_not_allow',
+                'delete_post' => 'do_not_allow',
+            ),
+            'map_meta_cap' => true,
         );
 
         register_post_type('server', $args);
     }
 
+    // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
             $actions = array();
@@ -51,5 +59,17 @@ class ServerPostSetup {
         return $actions;
     }
 
+    public function remove_add_new_button() {
+        global $submenu;
+        if (isset($submenu['edit.php?post_type=server'])) {
+            unset($submenu['edit.php?post_type=server'][10]); // Removes 'Add New'
+        }
+    }
 
+    public function restrict_capabilities($caps, $cap, $user_id, $args) {
+        if ($cap === 'delete_post' || $cap === 'create_posts') {
+            $caps[] = 'do_not_allow';
+        }
+        return $caps;
+    }
 }
