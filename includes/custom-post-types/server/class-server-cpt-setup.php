@@ -19,6 +19,8 @@ class ServerPostSetup {
         add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
         add_action('edit_form_top', array($this, 'display_custom_title'));
+        add_filter('manage_server_posts_columns', array($this, 'change_published_column_title'));
+        add_action('manage_server_posts_custom_column', array($this, 'display_provisioned_date'), 10, 2);
     }
 
     /**
@@ -106,6 +108,29 @@ class ServerPostSetup {
             }
         }
         return $new_columns;
+    }
+
+    public function change_published_column_title($columns) {
+        // Check if the column for date exists and change the title
+        if (isset($columns['date'])) {
+            $columns['date'] = __('Provisioned', 'your-text-domain');
+        }
+        return $columns;
+    }
+
+    public function display_provisioned_date($column, $post_id) {
+        if ($column === 'date') {
+            // You can display the 'Provisioned' date or any custom date you want here
+            // For example, if you want to show a custom meta value for 'provisioned_date':
+            $provisioned_date = get_post_meta($post_id, '_provisioned_date', true);
+            
+            // If the 'provisioned_date' meta is not set, fall back to the published date
+            if ($provisioned_date) {
+                echo esc_html(date('F j, Y', strtotime($provisioned_date)));
+            } else {
+                echo esc_html(get_the_date('F j, Y', $post_id)); // Fallback to the default publish date
+            }
+        }
     }
 
     public function populate_custom_columns($column, $post_id) {
@@ -218,7 +243,7 @@ class ServerPostSetup {
 
     public function display_custom_title($post) {
         if ($post->post_type === 'server') {
-            echo '<h2>' . esc_html($post->post_title) . '</h2>';
+            echo '<div id="order_data"><h2>' . esc_html($post->post_title) . '</h2></div>';
         }
     }
 
