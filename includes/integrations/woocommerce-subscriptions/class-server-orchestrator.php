@@ -113,6 +113,7 @@ class ServerOrchestrator {
 
             if (!$this->server_product_id) {
                 error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
+                
                 return;
             }
 
@@ -125,15 +126,55 @@ class ServerOrchestrator {
             $subscription->update_status('on-hold');
            
             // Step 1: Create server post only if it doesn't exist
-            $server_post_instance = new ServerPost();
-            $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
 
-            if (!$existing_server_post) {
-                error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
-                $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
+            // Check if the server post already exists
+            $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
+            $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
+
+            if ($this->server_post_status != 2) {
+
+                error_log('#002 [SIYA Server Manager - ServerOrchestrator] Creating new server post');
+                $server_post_instance = new ServerPost();
+                $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
+
+                if (!$existing_server_post) {
+                    
+                    try {
+
+                        error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
+
+                        $server_post_instance = new ServerPost();
+                        $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
+
+                        $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
+
+                        // Update State meta
+                        update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
+
+                    
+                    } catch (\Exception $e) {
+
+                        $error_definition = 'Error creating and updating server post';
+                        $this->handle_exception($e, $subscription, $error_definition);
+                    
+                        // Update State meta
+                        update_post_meta($this->server_post_id, '_arsol_state_05_server_post', -1);
+
+                        $this->handle_exception($e, $subscription, $error_definition);
+
+                        // Trigger the circuit breaker
+                        ServerCircuitBreaker::trip_circuit_breaker($subscription);
+
+                        return false; // Add fallback return false
+
+                    }
+                
+                }
+           
             } else {
-                error_log('#003 [SIYA Server Manager - ServerOrchestrator] Server post already exists, skipping step');
-                $this->server_post_id = $existing_server_post->post_id;
+               
+                error_log('STATE CHECK (05): Server post already exists.');
+
             }
             
             // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
@@ -151,21 +192,27 @@ class ServerOrchestrator {
             );
 
             error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
-
+     
+      
         } catch (\Exception $e) {
 
             $error_definition = 'Error starting server provisioning';
 
-            // Handle the exception
+            // Update State meta
+            update_post_meta($this->server_post_id, '_arsol_state_05_server_post', -1);
+
             $this->handle_exception($e, $subscription, $error_definition);
 
             return false; // Add fallback return false
 
         }
+
     }
 
     // Step 2: Finish server provisioning process (Provision server)
+
     public function finish_server_provision($args) {
+
         try {
             error_log('#006 [SIYA Server Manager - ServerOrchestrator] Starting server completion');
             
@@ -227,10 +274,11 @@ class ServerOrchestrator {
     
                 } catch (\Exception $e) {
 
-                    $error_definition = 'Error provisioning server';
+                    $error_definition = 'Error creating and updating server post';
+                    $this->handle_exception($e, $subscription, $error_definition);
                     
-                    // Update server metadata on failed provisioning
-                    update_post_meta($this->server_post_id, $error_definition, -1);
+                    // Update server metadata on failed provisioning and trip CB
+                    update_post_meta($this->server_post_id, '_arsol_state_10_provisioning', -1);
 
                     // Handle the exception and exit
                     $this->handle_exception($e, $this->subscription, 'Error occurred during server provisioning');
@@ -295,6 +343,7 @@ class ServerOrchestrator {
             return false; // Add fallback return false
 
         }
+
     }
     
     // Step 3: Wait for server active state (Check server status) 
@@ -1425,9 +1474,9 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
-            $manager_required = $server_product->get_meta('_arsol_server_manager_required', true);
-            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true) ;
-            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true) ;
+            $manager_required = $server_product->get_meta('arsol_server_manager_required', true);
+            $server_groups = $server_product->get_meta('arsol_assigned_server_groups', true) ;
+            $server_tags = $server_product->get_meta('arsol_assigned_server_tags', true) ;
 
             error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->get_meta(), true));
             error_log('[SIYA Server Manager] Server product manager required: ' . $manager_required);
@@ -1457,10 +1506,19 @@ class ServerOrchestrator {
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
                 'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
-                'arsol_assigned_server_groups' => $server_product->get_meta('_arsol_assigned_server_groups', true),
-                'arsol_assigned_server_tags' => $server_product->get_meta('_arsol_assigned_server_tags', true),
+                'arsol_assigned_server_groups' => $server_product->get_meta('arsol_assigned_server_groups', true) ?: [],
+                'arsol_assigned_server_tags' => $server_product->get_meta('arsol_assigned_server_tags', true) ?: [],
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
+
+           // $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
+           // $subscription->save();
+
+
+            error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
+
+            error_log('[SIYA Server Manager] Server tags: ' . print_r($server_tags, true));
+            error_log('[SIYA Server Manager] Server groups: ' . print_r($server_groups, true));
 
             // Assign server groups and tags to the server post
             if ($server_groups && is_array($server_groups)) {

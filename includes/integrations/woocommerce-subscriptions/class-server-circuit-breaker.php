@@ -46,6 +46,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
             // Define metadata keys for server-related operations
             $server_metadata_keys = [
+                '_arsol_state_05_server_post',
                 '_arsol_state_10_provisioning',
                 '_arsol_state_20_ip_address',
                 '_arsol_state_30_deployment',
@@ -75,7 +76,17 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                     }
                 }
             } else {
-                $all_status_complete = ($server_metadata['_arsol_state_10_provisioning'] ?? null) == 2;
+                $required_keys = [
+                    '_arsol_state_05_server_post',
+                    '_arsol_state_10_provisioning',
+                    '_arsol_state_20_ip_address',
+                ];
+                foreach ($required_keys as $key) {
+                    if (($server_metadata[$key] ?? null) != 2) {
+                        $all_status_complete = false;
+                        break;
+                    }
+                }
             }
 
             if ($all_status_complete) {
