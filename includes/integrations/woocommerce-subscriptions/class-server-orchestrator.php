@@ -1453,12 +1453,13 @@ class ServerOrchestrator {
             $subscription->save();
 
             // Get server groups and tags
-            $server_groups = $server_product->get_meta('_arsol_server_group', true);
-            $server_tags = $server_product->get_meta('_arsol_server_tag', true);
+            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
+            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
 
             error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
 
             error_log('[SIYA Server Manager] Server tags: ' . json_encode($server_tags));
+            error_log('[SIYA Server Manager] Server groups: ' . json_encode($server_groups));
 
             // Assign server groups and tags to the server post
             if ($server_groups && is_array($server_groups)) {
