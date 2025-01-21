@@ -1425,12 +1425,6 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
-            // Load assigned server groups and tags
-           // $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
-            //$server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
-
-            error_log ('[HOOOfghfghfgh2837270348729873498279384792874982793847928374982739847928734OOHOOOOOOOOOOOOOOYOOOOOOOOOOOOOO');
-
             // Update server post metadata with correct meta keys
             $metadata = [
                 'arsol_server_subscription_id' => $this->subscription_id,
@@ -1458,13 +1452,19 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
+            // Get server groups and tags
+            $server_groups = $server_product->get_meta('_arsol_server_group', true);
+            $server_tags = $server_product->get_meta('_arsol_server_tag', true);
+
+            error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
+
 
 
             // Assign server groups and tags to the server post
             if ($server_groups && is_array($server_groups)) {
                 $server_groups = array_merge(...$server_groups); // Flatten the array
                 wp_set_object_terms($this->server_post_id, $server_groups, 'arsol_server_group');
-            }
+            } else
 
             if ($server_tags && is_array($server_tags)) {
                 $server_tags = array_merge(...$server_tags); // Flatten the array
