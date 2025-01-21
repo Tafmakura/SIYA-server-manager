@@ -12,6 +12,8 @@ class ServerPostSetup {
         add_filter('bulk_actions-edit-server', array($this, 'remove_bulk_actions'));
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
         add_filter('manage_server_posts_columns', array($this, 'customize_columns'));
+        add_action('admin_head', array($this, 'disable_title_editing'));
+        add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
     }
 
     /**
@@ -92,6 +94,30 @@ class ServerPostSetup {
         unset($columns['author']);
         unset($columns['comments']);
         return $columns;
+    }
+
+    public function disable_title_editing() {
+        global $post_type;
+        if ($post_type == 'server') {
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const titleField = document.getElementById("title");
+                    if (titleField) {
+                        titleField.setAttribute("readonly", "readonly");
+                    }
+                });
+            </script>';
+        }
+    }
+
+    public function prevent_title_editing($data, $postarr) {
+        if ($data['post_type'] === 'server') {
+            $original_post = get_post($postarr['ID']);
+            if ($original_post && $original_post->post_title !== $data['post_title']) {
+                $data['post_title'] = $original_post->post_title; // Revert to the original title
+            }
+        }
+        return $data;
     }
 
 }
