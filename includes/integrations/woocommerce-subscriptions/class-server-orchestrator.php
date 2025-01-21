@@ -1460,8 +1460,8 @@ class ServerOrchestrator {
 
             error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
 
-            error_log('[SIYA Server Manager] Server tags: ' . print_r($server_tags[], true));
-            error_log('[SIYA Server Manager] Server groups: ' . print_r($server_groups[], true));
+            error_log('[SIYA Server Manager] Server tags: ' . print_r($server_tags[0], true));
+            error_log('[SIYA Server Manager] Server groups: ' . print_r($server_groups[0], true));
 
             // Assign server groups and tags to the server post
             if ($server_groups && is_array($server_groups)) {
