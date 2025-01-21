@@ -1445,12 +1445,27 @@ class ServerOrchestrator {
                 'arsol_server_suspension' => 'no', // Add suspension status
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
-                'arsol_ssh_username' => 'ARSOL' . $this->subscription_id // Add SSH username
+                'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
+
+            // Load assigned server groups and tags
+            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
+            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
+
+            // Assign server groups and tags to the server post
+            if ($server_groups && is_array($server_groups)) {
+                $server_groups = array_merge(...$server_groups); // Flatten the array
+                wp_set_object_terms($this->server_post_id, $server_groups, 'arsol_server_group');
+            }
+
+            if ($server_tags && is_array($server_tags)) {
+                $server_tags = array_merge(...$server_tags); // Flatten the array
+                wp_set_object_terms($this->server_post_id, $server_tags, 'arsol_server_tag');
+            }
 
             // Check if we need to connect to the server manager
             /*
