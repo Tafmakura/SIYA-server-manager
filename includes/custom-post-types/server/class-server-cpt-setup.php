@@ -46,8 +46,7 @@ class ServerPostSetup {
 
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
-            unset($actions['view']);
-            unset($actions['inline hide-if-no-js']);
+            $actions = array();
         }
         return $actions;
     }
