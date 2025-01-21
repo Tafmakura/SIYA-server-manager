@@ -27,8 +27,6 @@ class ServerPostSetup {
         // Add new filters
         add_action('restrict_manage_posts', array($this, 'add_server_filters'));
         add_filter('pre_get_posts', array($this, 'filter_servers_by_taxonomy'));
-        add_filter('display_post_states', array($this, 'change_post_states_text'));
-        add_filter('gettext', array($this, 'translate_post_states'), 10, 3);
     }
 
     /**
@@ -160,27 +158,7 @@ class ServerPostSetup {
         return $translated_text;
     }
 
-    public function change_post_states_text($post_states) {
-        global $post;
-        if ($post->post_type === 'server') {
-            if (isset($post_states['publish'])) {
-                $post_states['publish'] = __('Provisioned', 'your-text-domain');
-            }
-        }
-        return $post_states;
-    }
-
-    public function translate_post_states($translated_text, $text, $domain) {
-        global $pagenow, $typenow;
-
-        if ($pagenow === 'edit.php' && $typenow === 'server' && $domain === 'default') {
-            if ($text === 'Published') {
-                return __('Provisioned', 'your-text-domain');
-            }
-        }
-
-        return $translated_text;
-    }
+ 
 
     public function populate_custom_columns($column, $post_id) {
         if ($column === 'details') {
