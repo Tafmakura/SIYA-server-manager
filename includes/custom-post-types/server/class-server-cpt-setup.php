@@ -200,8 +200,21 @@ class ServerPostSetup {
     }
 
     public function add_delete_action_for_admins($actions, $post) {
-        if ($post->post_type == 'server' && current_user_can('administrator')) {
-            $actions['delete'] = '<a href="' . get_delete_post_link($post->ID) . '">' . __('Delete') . '</a>';
+        if ($post->post_type === 'server' && current_user_can('administrator')) {
+            $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
+            
+            // If there's no subscription, allow delete.
+            if (!$subscription_id) {
+                $actions['delete'] = '<a href="' . get_delete_post_link($post->ID) . '">' . __('Delete') . '</a>';
+                return $actions;
+            }
+
+            $subscription = wcs_get_subscription($subscription_id);
+            
+            // If subscription not found or has certain statuses, allow delete.
+            if (!$subscription || in_array($subscription->get_status(), ['cancelled', 'expired', 'trash'], true)) {
+                $actions['delete'] = '<a href="' . get_delete_post_link($post->ID) . '">' . __('Delete') . '</a>';
+            }
         }
         return $actions;
     }
