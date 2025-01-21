@@ -10,6 +10,7 @@ class ServerPostSetup {
         add_action('admin_menu', array($this, 'remove_add_new_button'));
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
         add_filter('bulk_actions-edit-server', array($this, 'remove_bulk_actions'));
+        add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
     }
 
     /**
@@ -56,13 +57,13 @@ class ServerPostSetup {
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
             unset($actions['trash']);
+            unset($actions['inline hide-if-no-js']);
         }
         return $actions;
     }
 
     public function remove_bulk_actions($actions) {
-        unset($actions['trash']);
-        return $actions;
+        return array();
     }
 
     public function remove_add_new_button() {
@@ -77,5 +78,12 @@ class ServerPostSetup {
             $caps[] = 'do_not_allow';
         }
         return $caps;
+    }
+
+    public function remove_post_states($post_states, $post) {
+        if ($post->post_type == 'server') {
+            $post_states = array();
+        }
+        return $post_states;
     }
 }
