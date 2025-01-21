@@ -159,7 +159,7 @@
         $selected_assigned_server_groups = get_post_meta($post->ID, '_arsol_assigned_server_groups', true);
         $selected_assigned_server_groups = is_array($selected_assigned_server_groups) ? $selected_assigned_server_groups : [];
         $server_groups_terms = get_terms([
-            'taxonomy'   => 'arsol_server_groups',
+            'taxonomy'   => 'arsol_server_group',
             'hide_empty' => false,
         ]);
         ?>

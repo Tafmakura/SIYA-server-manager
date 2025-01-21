@@ -88,7 +88,7 @@ class ServerPostSetup {
 
         // Non-hierarchical taxonomy: Server Tags
         register_taxonomy(
-            'arsol_server_tags', 
+            'arsol_server_tag', 
             'server', 
             array(
                 'labels' => array(
@@ -296,7 +296,7 @@ class ServerPostSetup {
     
             // Dropdown for Server Tags
             $this->render_taxonomy_dropdown(
-                'arsol_server_tags',
+                'arsol_server_tag',
                 __('Filter by Server Tags', 'your-text-domain'),
                 __('All Server Tags', 'your-text-domain')
             );
@@ -349,11 +349,11 @@ class ServerPostSetup {
                 );
             }
     
-            if (!empty($_GET['arsol_server_tags'])) {
+            if (!empty($_GET['arsol_server_tag'])) {
                 $tax_query[] = array(
-                    'taxonomy' => 'arsol_server_tags',
+                    'taxonomy' => 'arsol_server_tag',
                     'field'    => 'slug',
-                    'terms'    => sanitize_text_field($_GET['arsol_server_tags']),
+                    'terms'    => sanitize_text_field($_GET['arsol_server_tag']),
                 );
             }
     
