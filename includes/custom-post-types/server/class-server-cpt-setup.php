@@ -17,6 +17,7 @@ class ServerPostSetup {
         add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
         add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
         add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
+        add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
     }
 
     /**
@@ -96,7 +97,22 @@ class ServerPostSetup {
         unset($columns['cb']);
         unset($columns['author']);
         unset($columns['comments']);
+        $columns['details'] = __('Details', 'your-text-domain');
         return $columns;
+    }
+
+    public function populate_custom_columns($column, $post_id) {
+        if ($column === 'details') {
+            $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
+            if ($subscription_id) {
+                $subscription_link = get_edit_post_link($subscription_id);
+                $customer_name = get_post_meta($subscription_id, 'customer_name', true);
+                $customer_profile_link = get_edit_post_link($customer_name);
+                echo '<a href="' . esc_url($subscription_link) . '">' . esc_html($subscription_id) . '</a> for <a href="' . esc_url($customer_profile_link) . '">' . esc_html($customer_name) . '</a>';
+            } else {
+                echo __('No subscription found', 'your-text-domain');
+            }
+        }
     }
 
     public function disable_title_editing() {
