@@ -1425,9 +1425,9 @@ class ServerOrchestrator {
             // Get server product metadata
             $server_product = wc_get_product($this->server_product_id);
 
-            $manager_required = $server_product->get_meta('arsol_server_manager_required', true);
-            $server_groups = $server_product->get_meta('arsol_assigned_server_groups', true) ;
-            $server_tags = $server_product->get_meta('arsol_assigned_server_tags', true) ;
+            $manager_required = $server_product->get_meta('_arsol_server_manager_required', true);
+            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true) ;
+            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true) ;
 
             error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->get_meta(), true));
             error_log('[SIYA Server Manager] Server product manager required: ' . $manager_required);
