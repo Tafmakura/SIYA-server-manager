@@ -175,10 +175,10 @@ class ServerPostSetup {
                 // Get the subscription object
                 $subscription = wcs_get_subscription($subscription_id);
 
-                // Get the customer ID
-                $customer_id = $subscription->get_customer_id();
-    
                 if ($subscription) {
+                    // Get the customer ID
+                    $customer_id = $subscription->get_customer_id();
+    
                     // Get billing name (first and last)
                     $billing_first_name = $subscription->get_billing_first_name();
                     $billing_last_name = $subscription->get_billing_last_name();
