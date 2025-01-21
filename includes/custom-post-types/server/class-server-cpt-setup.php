@@ -9,6 +9,7 @@ class ServerPostSetup {
         add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
         add_action('admin_menu', array($this, 'remove_add_new_button'));
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
+        add_filter('bulk_actions-edit-server', array($this, 'remove_bulk_actions'));
     }
 
     /**
@@ -54,8 +55,13 @@ class ServerPostSetup {
     // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
-            $actions = array();
+            unset($actions['trash']);
         }
+        return $actions;
+    }
+
+    public function remove_bulk_actions($actions) {
+        unset($actions['trash']);
         return $actions;
     }
 
@@ -67,7 +73,7 @@ class ServerPostSetup {
     }
 
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
-        if ($cap === 'delete_post' || $cap === 'create_posts') {
+        if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') {
             $caps[] = 'do_not_allow';
         }
         return $caps;
