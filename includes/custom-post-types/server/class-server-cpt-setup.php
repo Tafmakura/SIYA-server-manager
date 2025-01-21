@@ -124,14 +124,14 @@ class ServerPostSetup {
                     if ($customer) {
                         $customer_name = $customer->display_name; // Get customer's display name
                         $subscription_link = get_edit_post_link($subscription_id);
-                        $customer_profile_link = admin_url('user-edit.php?user_id=' . $customer_id);
+                        $customer_wc_link = admin_url('admin.php?page=wc-admin&path=/customers/' . $customer_id);
     
                         // Render the column content
                         echo sprintf(
                             __('Associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
                             esc_url($subscription_link),
                             esc_html($subscription_id),
-                            esc_url($customer_profile_link),
+                            esc_url($customer_wc_link),
                             esc_html($customer_name)
                         );
                     } else {
@@ -145,6 +145,7 @@ class ServerPostSetup {
             }
         }
     }
+    
     
 
     public function disable_title_editing() {
