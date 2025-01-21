@@ -171,6 +171,7 @@ class ServerPostSetup {
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
     
             if ($subscription_id) {
+                
                 // Get the subscription object
                 $subscription = wcs_get_subscription($subscription_id);
 
