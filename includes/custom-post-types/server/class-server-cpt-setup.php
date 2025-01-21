@@ -6,7 +6,7 @@ class ServerPostSetup {
 
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
-        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10, 2);
+        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10000, 2);
     }
 
     /**
