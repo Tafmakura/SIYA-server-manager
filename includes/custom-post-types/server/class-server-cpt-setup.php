@@ -45,7 +45,7 @@ class ServerPostSetup {
             'has_archive'        => true,
             'hierarchical'       => false,
             'menu_position'      => null,
-            'supports'           => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'trackbacks', 'custom-fields', 'comments', 'revisions', 'page-attributes', 'post-formats'),
+            'supports'           => array('title', 'author','custom-fields'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
                 'delete_post' => 'do_not_allow',
