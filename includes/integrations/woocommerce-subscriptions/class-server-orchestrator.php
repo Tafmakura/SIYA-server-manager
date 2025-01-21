@@ -1426,12 +1426,8 @@ class ServerOrchestrator {
             $server_product = wc_get_product($this->server_product_id);
 
             // Load assigned server groups and tags
-            $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
-            $server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
-
-            // Output the arrays for debugging
-            var_dump($server_groups);
-            var_dump($server_tags);
+           // $server_groups = $server_product->get_meta('_arsol_assigned_server_groups', true);
+            //$server_tags = $server_product->get_meta('_arsol_assigned_server_tags', true);
 
             error_log ('[HOOOfghfghfgh2837270348729873498279384792874982793847928374982739847928734OOHOOOOOOOOOOOOOOYOOOOOOOOOOOOOO');
 
