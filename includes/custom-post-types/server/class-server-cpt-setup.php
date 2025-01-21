@@ -13,7 +13,10 @@ class ServerPostSetup {
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
         add_filter('manage_server_posts_columns', array($this, 'customize_columns'));
         add_action('admin_head', array($this, 'disable_title_editing'));
+        add_action('admin_head', array($this, 'disable_permalink_and_status_editing'));
         add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
+        add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
+        add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
     }
 
     /**
@@ -110,6 +113,24 @@ class ServerPostSetup {
         }
     }
 
+    public function disable_permalink_and_status_editing() {
+        global $post_type;
+        if ($post_type == 'server') {
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const permalinkField = document.getElementById("editable-post-name-full");
+                    if (permalinkField) {
+                        permalinkField.setAttribute("readonly", "readonly");
+                    }
+                    const statusField = document.getElementById("post_status");
+                    if (statusField) {
+                        statusField.setAttribute("disabled", "disabled");
+                    }
+                });
+            </script>';
+        }
+    }
+
     public function prevent_title_editing($data, $postarr) {
         if ($data['post_type'] === 'server') {
             $original_post = get_post($postarr['ID']);
@@ -118,6 +139,28 @@ class ServerPostSetup {
             }
         }
         return $data;
+    }
+
+    public function prevent_permalink_and_status_editing($data, $postarr) {
+        if ($data['post_type'] === 'server') {
+            $original_post = get_post($postarr['ID']);
+            if ($original_post) {
+                $data['post_name'] = $original_post->post_name; // Revert to the original permalink
+                $data['post_status'] = $original_post->post_status; // Revert to the original status
+            }
+        }
+        return $data;
+    }
+
+    public function remove_permalink_editor($html, $post_id, $new_title, $new_slug) {
+        $post = get_post($post_id);
+
+        // Check if the post type is 'server'
+        if ($post->post_type === 'server') {
+            return ''; // Return an empty string to remove the permalink editor
+        }
+
+        return $html; // Return the original HTML for other post types
     }
 
 }
