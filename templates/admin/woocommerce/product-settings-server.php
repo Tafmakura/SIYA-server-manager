@@ -156,6 +156,33 @@
             ?>
         </div>
         <?php
+        $selected_additional_groups = get_post_meta($post->ID, '_arsol_additional_server_groups', true);
+        $selected_additional_groups = is_array($selected_additional_groups) ? $selected_additional_groups : [];
+        $server_groups_terms = get_terms([
+            'taxonomy'   => 'server_groups',
+            'hide_empty' => false,
+        ]);
+        ?>
+        <p class="form-field">
+            <label><?php _e('Additional Server Groups', 'woocommerce'); ?></label>
+            <select
+                id="_arsol_additional_server_groups"
+                name="_arsol_additional_server_groups[]"
+                class="wc-enhanced-select"
+                multiple="multiple"
+                style="width: 50%;"
+            >
+                <?php foreach ($server_groups_terms as $term) : ?>
+                    <option
+                        value="<?php echo esc_attr($term->slug); ?>"
+                        <?php selected(in_array($term->slug, $selected_additional_groups), true); ?>
+                    >
+                        <?php echo esc_html($term->name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <?php
         ?>
     </div>
 </div>
