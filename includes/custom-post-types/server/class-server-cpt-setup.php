@@ -20,6 +20,7 @@ class ServerPostSetup {
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
         add_action('edit_form_top', array($this, 'display_custom_title'));
         add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
+        add_filter('post_row_actions', array($this, 'add_delete_action_for_admins'), 1000010, 2);
     }
 
     /**
@@ -233,6 +234,13 @@ class ServerPostSetup {
         if ($post->post_type === 'server') {
             echo '<div id="order_data"><h2> Server: ' . esc_html($post->post_title) . '</h2></div>';
         }
+    }
+
+    public function add_delete_action_for_admins($actions, $post) {
+        if ($post->post_type == 'server' && current_user_can('administrator')) {
+            $actions['delete'] = '<a href="' . get_delete_post_link($post->ID) . '">' . __('Delete') . '</a>';
+        }
+        return $actions;
     }
 
 }
