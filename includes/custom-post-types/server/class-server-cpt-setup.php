@@ -56,7 +56,9 @@ class ServerPostSetup {
                 'create_posts' => 'do_not_allow',
                 'delete_post' => 'do_not_allow',
             ),
-            'map_meta_cap' => true,
+            'map_meta_cap'       => true,
+            'publicly_queryable' => false,
+            'exclude_from_search'=> true,
         );
 
         register_post_type('server', $args);
