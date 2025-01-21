@@ -163,15 +163,15 @@
             'hide_empty' => false,
         ]);
         ?>
-        <p class="form-field">
-            <label><?php _e('Add server to groups', 'woocommerce'); ?></label>
+       <p class="form-field">
+            <label for="_arsol_assigned_server_groups"><?php _e('Add server to groups', 'woocommerce'); ?></label>
             <select
                 id="_arsol_assigned_server_groups"
                 name="_arsol_assigned_server_groups[]"
                 class="wc-enhanced-select"
                 multiple="multiple"
                 style="width: 50%;"
-                data-tip="<?php _e('Select the groups to which this server should be added after it\'s created.', 'woocommerce'); ?>"
+                aria-describedby="_arsol_assigned_server_groups_desc"
             >
                 <?php foreach ($server_groups_terms as $term) : ?>
                     <option
@@ -182,6 +182,7 @@
                     </option>
                 <?php endforeach; ?>
             </select>
+            <span class="description" id="_arsol_assigned_server_groups_desc"><?php _e('Select the groups to which this server should be added after it\'s created.', 'woocommerce'); ?></span>
         </p>
         <?php
         $selected_assigned_server_tags = get_post_meta($post->ID, '_arsol_assigned_server_tags', true);
