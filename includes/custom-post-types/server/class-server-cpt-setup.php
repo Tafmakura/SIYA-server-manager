@@ -85,7 +85,9 @@ class ServerPostSetup {
 
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
         if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') {
-            $caps[] = 'do_not_allow';
+            if (!current_user_can('administrator')) {
+                $caps[] = 'do_not_allow';
+            }
         }
         return $caps;
     }
