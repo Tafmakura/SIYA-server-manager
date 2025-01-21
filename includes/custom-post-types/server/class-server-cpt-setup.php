@@ -13,7 +13,7 @@ class ServerPostSetup {
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
         add_filter('manage_server_posts_columns', array($this, 'customize_columns'));
         add_action('admin_head', array($this, 'disable_title_editing'));
-        add_action('admin_head', array($this, 'disable_permalink_and_status_editing'));
+        add_action('admin_head', array($this, 'disable_status_editing'));
         add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
         add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
         add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
@@ -113,15 +113,11 @@ class ServerPostSetup {
         }
     }
 
-    public function disable_permalink_and_status_editing() {
+    public function disable_status_editing() {
         global $post_type;
         if ($post_type == 'server') {
             echo '<script>
                 document.addEventListener("DOMContentLoaded", function() {
-                    const permalinkField = document.getElementById("editable-post-name-full");
-                    if (permalinkField) {
-                        permalinkField.setAttribute("readonly", "readonly");
-                    }
                     const statusField = document.getElementById("post_status");
                     if (statusField) {
                         statusField.setAttribute("disabled", "disabled");
