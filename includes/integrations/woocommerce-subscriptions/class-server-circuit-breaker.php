@@ -34,6 +34,16 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 return;
             }
 
+            // Initialise the circuit breaker state if it does not exist
+            $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+
+            if ($circuit_breaker === '') {
+                // If the meta key does not exist, add it with the value 0 (closed state)
+                update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_CLOSED);
+                error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker state initialized to closed for server post ID {$server_post_id}.");
+            }
+
+
             // Define metadata keys for server-related operations
             $server_metadata_keys = [
                 '_arsol_state_10_provisioning',

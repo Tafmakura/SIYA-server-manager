@@ -19,12 +19,13 @@ class Setup {
 
         // Core Classes
         require_once plugin_dir_path(__DIR__) . '/classes/class-setup.php';
-        require_once plugin_dir_path(__DIR__) . '/classes/class-setup-custom-post-types.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-menus.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-general.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-slugs.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-api.php';
         require_once plugin_dir_path(__DIR__) . '/classes/class-admin-settings-ssh.php';
+
+        require_once plugin_dir_path(__DIR__) . '/custom-post-types/class-setup-custom-post-types.php';
 
         
         // Interfaces
@@ -33,8 +34,7 @@ class Setup {
         //require_once plugin_dir_path(__DIR__) . '/interfaces/interface-server-manager.php';
         
 
-        // Custom Post Types
-        require_once plugin_dir_path(__DIR__) . '/custom-post-types/server/class-server-cpt.php';
+       
         
         // Integrations
         require_once plugin_dir_path(__DIR__) . '/integrations/server-managers/runcloud/class-runcloud.php';
@@ -44,16 +44,16 @@ class Setup {
  
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
-        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
+        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce-subscriptions/statuses/class-server-error.php';
 
-        // require_once plugin_dir_path(__DIR__) . '/libraries/phpseclib/autoload.php';
+
+        require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
     }
 
     /**
      * Initialize WordPress hooks.
      */
     private function initialize_hooks() {
-        add_action('init', array($this, 'initialize_custom_post_types'));
         add_action('admin_init', array($this, 'initialize_admin_settings'));
         add_action('admin_menu', array($this, 'initialize_admin_menus'));
     }
@@ -69,9 +69,15 @@ class Setup {
         if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
             $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
         }
-       // if (class_exists(' Siya\Integrations\WooCommerce\Product')) {
+        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\Statuses\ServerError')) {
+           $statuses = new \Siya\Integrations\WooCommerceSubscriptions\Statuses\ServerError();
+        }
+        if (class_exists('Siya\Integrations\WooCommerce\Product')) {
             $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
-      //  }
+        }
+        if (class_exists('Siya\Setup\CustomPostTypes')) {
+            $custom_post_types = new \Siya\Setup\CustomPostTypes();
+        }
 
     }
 
