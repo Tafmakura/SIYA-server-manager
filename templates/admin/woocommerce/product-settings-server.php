@@ -164,7 +164,7 @@
         ]);
         ?>
         <p class="form-field">
-            <label><?php _e('Assign to groups', 'woocommerce'); ?></label>
+            <label><?php _e('Add server to groups', 'woocommerce'); ?></label>
             <select
                 id="_arsol_assigned_server_groups"
                 name="_arsol_assigned_server_groups[]"
@@ -176,6 +176,33 @@
                     <option
                         value="<?php echo esc_attr($term->slug); ?>"
                         <?php selected(in_array($term->slug, $selected_assigned_server_groups), true); ?>
+                    >
+                        <?php echo esc_html($term->name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <?php
+        $selected_assigned_server_tags = get_post_meta($post->ID, '_arsol_assigned_server_tags', true);
+        $selected_assigned_server_tags = is_array($selected_assigned_server_tags) ? $selected_assigned_server_tags : [];
+        $server_tags_terms = get_terms([
+            'taxonomy'   => 'arsol_server_tag',
+            'hide_empty' => false,
+        ]);
+        ?>
+        <p class="form-field">
+            <label><?php _e('AAdd tags to server', 'woocommerce'); ?></label>
+            <select
+                id="_arsol_assigned_server_tags"
+                name="_arsol_assigned_server_tags[]"
+                class="wc-enhanced-select"
+                multiple="multiple"
+                style="width: 50%;"
+            >
+                <?php foreach ($server_tags_terms as $term) : ?>
+                    <option
+                        value="<?php echo esc_attr($term->slug); ?>"
+                        <?php selected(in_array($term->slug, $selected_assigned_server_tags), true); ?>
                     >
                         <?php echo esc_html($term->name); ?>
                     </option>
