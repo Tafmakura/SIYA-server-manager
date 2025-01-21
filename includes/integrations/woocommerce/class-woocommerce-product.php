@@ -134,6 +134,16 @@ class Product {
             ? array_map('sanitize_text_field', $_POST['_arsol_additional_server_groups'])
             : [];
         update_post_meta($post_id, '_arsol_additional_server_groups', $additional_groups);
+
+        $server_groups = isset($_POST['_arsol_server_groups'])
+            ? array_map('sanitize_text_field', $_POST['_arsol_server_groups'])
+            : [];
+        update_post_meta($post_id, '_arsol_server_groups', $server_groups);
+
+        $assigned_server_groups = isset($_POST['_arsol_assigned_server_groups'])
+            ? array_map('sanitize_text_field', $_POST['_arsol_assigned_server_groups'])
+            : [];
+        update_post_meta($post_id, '_arsol_assigned_server_groups', $assigned_server_groups);
     }
 
     public function add_admin_footer_script() {
