@@ -5,7 +5,8 @@ namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 class ServerError {
 
     /**
-     * Get examples from here: plugins/woocommerce-subscriptions/vendor/woocommerce/subscriptions-core/includes/admin/class-wcs-admin-post-types.php
+     * Get examples from here for subs table : plugins/woocommerce-subscriptions/vendor/woocommerce/subscriptions-core/includes/admin/class-wcs-admin-post-types.php
+     * Get examples from here for subs details : plugins/woocommerce-subscriptions/vendor/woocommerce/subscriptions-core/includes/admin/meta-boxes/class-wcs-meta-box-subscription-data.php
      */
 
     public function __construct() {
@@ -67,17 +68,15 @@ class ServerError {
             }
 
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-            $provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
-            $deployment_status = get_post_meta($server_post_id, '_arsol_state_30_deployment', true);
 
             if ($circuit_breaker == -1) {
                 echo '<span class="server-status error">Error</span>';
             } elseif ($circuit_breaker == 1) {
-                echo '<span class="server-status in-progress">In Progress</span>';
-            } elseif ($provision_status == 2 && $deployment_status == 2) {
-                echo '<span class="server-status active">Active</span>';
+                echo '<span class="server-status in-progress">Maintenance</span>';
+            } elseif ($circuit_breaker == 0) {
+                echo '<span class="server-status active">Okay</span>';
             } else {
-                echo '<span class="server-status pending">Pending</span>';
+                echo '<span class="server-status pending">N/A</span>';
             }
         }
     }
