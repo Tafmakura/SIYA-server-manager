@@ -18,7 +18,7 @@ class ServerPostSetup {
         add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
         add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
-        add_action('edit_form_top', array($this, 'display_content_above_title'));
+        add_action('edit_form_top', array($this, 'display_custom_title'));
     }
 
     /**
@@ -50,7 +50,7 @@ class ServerPostSetup {
             'has_archive'        => true,
             'hierarchical'       => false,
             'menu_position'      => null,
-            'supports'           => array('title', 'author','custom-fields','comments'),
+            'supports'           => array('author','custom-fields','comments'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
                 'delete_post' => 'do_not_allow',
@@ -216,8 +216,10 @@ class ServerPostSetup {
         return $html; // Return the original HTML for other post types
     }
 
-    public function display_content_above_title() {
-        echo '<div class="your-custom-class">Content above the post title</div>';
+    public function display_custom_title($post) {
+        if ($post->post_type === 'server') {
+            echo '<h2>' . esc_html($post->post_title) . '</h2>';
+        }
     }
 
 }
