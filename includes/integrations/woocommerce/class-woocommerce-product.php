@@ -129,6 +129,11 @@ class Product {
         foreach ($fields as $meta_key => $value) {
             update_post_meta($post_id, $meta_key, $value);
         }
+
+        $additional_groups = isset($_POST['_arsol_additional_server_groups'])
+            ? array_map('sanitize_text_field', $_POST['_arsol_additional_server_groups'])
+            : [];
+        update_post_meta($post_id, '_arsol_additional_server_groups', $additional_groups);
     }
 
     public function add_admin_footer_script() {
