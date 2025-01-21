@@ -141,13 +141,13 @@ class Product {
         update_post_meta($post_id, '_arsol_server_groups', $server_groups);
 
         $assigned_server_groups = isset($_POST['_arsol_assigned_server_groups'])
-            ? array_map('sanitize_text_field', $_POST['_arsol_assigned_server_groups'])
+            ? array_map('intval', $_POST['_arsol_assigned_server_groups'])
             : [];
         update_post_meta($post_id, '_arsol_assigned_server_groups', $assigned_server_groups);
 
         // Save assigned server tags
         $assigned_server_tags = isset($_POST['_arsol_assigned_server_tags'])
-            ? array_map('sanitize_text_field', $_POST['_arsol_assigned_server_tags'])
+            ? array_map('intval', $_POST['_arsol_assigned_server_tags'])
             : [];
         update_post_meta($post_id, '_arsol_assigned_server_tags', $assigned_server_tags);
     }
