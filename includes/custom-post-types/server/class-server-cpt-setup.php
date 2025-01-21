@@ -6,7 +6,7 @@ class ServerPostSetup {
 
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
-       // add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10, 2);
+        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 10, 2);
     }
 
     /**
@@ -42,6 +42,14 @@ class ServerPostSetup {
         );
 
         register_post_type('server', $args);
+    }
+
+    public function remove_post_table_actions($actions, $post) {
+        if ($post->post_type == 'server') {
+            unset($actions['view']);
+            unset($actions['inline hide-if-no-js']);
+        }
+        return $actions;
     }
 
 
