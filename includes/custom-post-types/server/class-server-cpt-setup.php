@@ -11,7 +11,8 @@ class ServerPostSetup {
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
         add_filter('bulk_actions-edit-server', array($this, 'remove_bulk_actions'));
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
-        add_filter('manage_server_posts_columns', array($this, 'remove_checkbox_column'));
+        add_filter('manage_server_posts_columns', array($this, 'customize_columns'));
+        add_action('manage_server_posts_custom_column', array($this, 'customize_column_content'), 10, 2);
     }
 
     /**
@@ -75,7 +76,7 @@ class ServerPostSetup {
     }
 
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
-        if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts' || $cap === 'edit_post') {
+        if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') {
             $caps[] = 'do_not_allow';
         }
         return $caps;
@@ -88,8 +89,23 @@ class ServerPostSetup {
         return $post_states;
     }
 
-    public function remove_checkbox_column($columns) {
+    public function customize_columns($columns) {
         unset($columns['cb']);
+        unset($columns['author']);
         return $columns;
+    }
+
+    public function customize_column_content($column, $post_id) {
+        if ($column === 'date') {
+            $post = get_post($post_id);
+            $time = get_post_time('G', true, $post);
+            $time_diff = time() - $time;
+            if ($time_diff > 0 && $time_diff < DAY_IN_SECONDS) {
+                $h_time = sprintf(__('%s ago'), human_time_diff($time));
+            } else {
+                $h_time = mysql2date(__('Y/m/d'), $post->post_date);
+            }
+            echo '<strong>' . __('Created') . '</strong> ' . $h_time;
+        }
     }
 }
