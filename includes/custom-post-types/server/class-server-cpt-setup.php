@@ -117,26 +117,34 @@ class ServerPostSetup {
                 $subscription = wcs_get_subscription($subscription_id);
     
                 if ($subscription) {
-                    // Get customer ID and name
-                    $customer_id = $subscription->get_customer_id();
-                    $customer = get_userdata($customer_id);
-    
-                    if ($customer) {
-                        $customer_name = $customer->display_name; // Get customer's display name
-                        $subscription_link = get_edit_post_link($subscription_id);
-                        $customer_profile_link = admin_url('user-edit.php?user_id=' . $customer_id);
-    
-                        // Render the column content
-                        echo sprintf(
-                            __('Associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
-                            esc_url($subscription_link),
-                            esc_html($subscription_id),
-                            esc_url($customer_profile_link),
-                            esc_html($customer_name)
-                        );
+                    // Get billing name (first and last)
+                    $billing_first_name = $subscription->get_billing_first_name();
+                    $billing_last_name = $subscription->get_billing_last_name();
+                    
+                    // Check if the billing name exists, if not, use the profile name or username
+                    if ($billing_first_name && $billing_last_name) {
+                        $billing_name = $billing_first_name . ' ' . $billing_last_name;
                     } else {
-                        echo __('Customer not found', 'your-text-domain');
+                        // Fallback to user's display name or username if billing name is missing
+                        $customer_id = $subscription->get_customer_id();
+                        $user = get_userdata($customer_id);
+                        
+                        // Use display name if available, otherwise fallback to username
+                        $billing_name = $user ? $user->display_name : ( $user ? $user->user_login : __('No customer found', 'your-text-domain') );
                     }
+    
+                    // Generate links for subscription and customer
+                    $subscription_link = get_edit_post_link($subscription_id);
+                    $customer_wc_link = admin_url('admin.php?page=wc-admin&path=/customers/' . $customer_id);
+    
+                    // Render the column content
+                    echo sprintf(
+                        __('Associated with subscription <strong><a href="%s">#%s</a></strong> for <a href="%s">%s</a>', 'your-text-domain'),
+                        esc_url($subscription_link),
+                        esc_html($subscription_id),
+                        esc_url($customer_wc_link),
+                        esc_html($billing_name)
+                    );
                 } else {
                     echo __('Invalid subscription', 'your-text-domain');
                 }
@@ -145,6 +153,7 @@ class ServerPostSetup {
             }
         }
     }
+        
     
 
     public function disable_title_editing() {
