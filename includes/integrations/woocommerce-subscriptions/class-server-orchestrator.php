@@ -1432,7 +1432,8 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->get_meta(), true));
             error_log('[SIYA Server Manager] Server product manager required: ' . $manager_required);
             error_log('[SIYA Server Manager] Server product groups: ' . print_r($server_groups, true));
-            error_log('[SIYA Server Manager] Server product tags: ' . print_r($server_product->get_meta('_arsol_assigned_server_tags', true), true));
+            error_log('[SIYA Server Manager] Serialized server groups: ' . serialize($server_groups));
+            error_log('[SIYA Server Manager] Server product tags: ' . print_r($server_tags, true));
 
 
             // Update server post metadata with correct meta keys
