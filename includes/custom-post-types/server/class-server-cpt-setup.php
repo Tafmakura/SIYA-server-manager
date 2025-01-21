@@ -283,7 +283,7 @@ class ServerPostSetup {
 
     public function add_server_filters() {
         global $typenow;
-
+    
         if ($typenow === 'server') {
             $this->render_taxonomy_dropdown('arsol_server_group', __('Filter by Server Group', 'your-text-domain'));
             $this->render_taxonomy_dropdown('arsol_server_tags', __('Filter by Server Tags', 'your-text-domain'));
@@ -295,16 +295,19 @@ class ServerPostSetup {
         if (!$taxonomy_obj) {
             return;
         }
-
+    
         $selected = isset($_GET[$taxonomy]) ? $_GET[$taxonomy] : '';
         $terms = get_terms(array(
             'taxonomy' => $taxonomy,
             'hide_empty' => false,
         ));
-
+    
+        echo '<select name="' . esc_attr($taxonomy) . '" id="' . esc_attr($taxonomy) . '" class="postform">';
+        // Add "All" option to reset the filter
+        echo '<option value="">' . esc_html($label) . '</option>';
+        echo '<option value="" ' . selected($selected, '', false) . '>' . __('All', 'your-text-domain') . '</option>';
+    
         if (!empty($terms)) {
-            echo '<select name="' . esc_attr($taxonomy) . '" id="' . esc_attr($taxonomy) . '" class="postform">';
-            echo '<option value="">' . esc_html($label) . '</option>';
             foreach ($terms as $term) {
                 printf(
                     '<option value="%s" %s>%s</option>',
@@ -313,32 +316,39 @@ class ServerPostSetup {
                     esc_html($term->name)
                 );
             }
-            echo '</select>';
         }
+        echo '</select>';
     }
+    
 
     public function filter_servers_by_taxonomy($query) {
         global $pagenow;
-
+    
         if ($pagenow === 'edit.php' && isset($query->query_vars['post_type']) && $query->query_vars['post_type'] === 'server') {
+            $tax_query = array();
+    
             if (!empty($_GET['arsol_server_group'])) {
-                $query->query_vars['tax_query'][] = array(
+                $tax_query[] = array(
                     'taxonomy' => 'arsol_server_group',
-                    'field' => 'slug',
-                    'terms' => sanitize_text_field($_GET['arsol_server_group']),
+                    'field'    => 'slug',
+                    'terms'    => sanitize_text_field($_GET['arsol_server_group']),
                 );
             }
-
+    
             if (!empty($_GET['arsol_server_tags'])) {
-                $query->query_vars['tax_query'][] = array(
+                $tax_query[] = array(
                     'taxonomy' => 'arsol_server_tags',
-                    'field' => 'slug',
-                    'terms' => sanitize_text_field($_GET['arsol_server_tags']),
+                    'field'    => 'slug',
+                    'terms'    => sanitize_text_field($_GET['arsol_server_tags']),
                 );
+            }
+    
+            if (!empty($tax_query)) {
+                $query->set('tax_query', $tax_query);
             }
         }
     }
-
+    
     // Other methods remain unchanged
 
 }
