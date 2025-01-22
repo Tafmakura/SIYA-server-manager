@@ -110,9 +110,10 @@ class ServerPostSetup {
     // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
-            // Remove all actions except delete if allowed and no subscription is associated
+            // Remove all actions except delete if allowed and no valid subscription is associated
             $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
-            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && !$subscription_id) {
+            $subscription = $subscription_id ? wcs_get_subscription($subscription_id) : false;
+            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && (!$subscription_id || !$subscription)) {
                 return array('delete' => $actions['delete']);
             }
             return array();
@@ -136,9 +137,10 @@ class ServerPostSetup {
             if (isset($args[0])) {
                 $post = get_post($args[0]);
                 if ($post && $post->post_type === 'server') {
-                    // Allow delete capability for administrators if the option is enabled and no subscription is associated
+                    // Allow delete capability for administrators if the option is enabled and no valid subscription is associated
                     $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
-                    if ($cap === 'delete_post' && current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && !$subscription_id) {
+                    $subscription = $subscription_id ? wcs_get_subscription($subscription_id) : false;
+                    if ($cap === 'delete_post' && current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && (!$subscription_id || !$subscription)) {
                         return $caps;
                     }
                     $caps[] = 'do_not_allow';
@@ -393,9 +395,10 @@ class ServerPostSetup {
             // Remove existing delete action
             unset($actions['delete']);
             
-            // Check if user is admin, deletion is allowed, and no subscription is associated
+            // Check if user is admin, deletion is allowed, and no valid subscription is associated
             $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
-            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && !$subscription_id) {
+            $subscription = $subscription_id ? wcs_get_subscription($subscription_id) : false;
+            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && (!$subscription_id || !$subscription)) {
                 $delete_url = get_delete_post_link($post->ID, '', true);
                 $actions['delete'] = sprintf(
                     '<a href="%s" class="submitdelete" onclick="return confirm(\'Are you sure?\');">%s</a>',
