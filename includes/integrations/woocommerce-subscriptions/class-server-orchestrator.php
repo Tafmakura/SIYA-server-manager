@@ -1524,22 +1524,31 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 4932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
-            error_log($server_product_id);
-            $red = get_post_meta($server_product_id, false);
-        
-            if (!empty($red)) {
-                if (is_serialized($red)) {
-                    error_log('[SIYA Server Manager] The variable $red is serialized.');
-                } else {
-                    error_log(print_r($red));
+            $product_id = $server_product_id;
+            $meta_key = '_arsol_assigned_server_groups'; 
+            $meta_value = get_post_meta($product_id, $meta_key, true);
+
+            if ($meta_value) {
+                $unserialized_value = maybe_unserialize($meta_value);
+                
+                if (is_array($unserialized_value)) {
+                    // Loop through nested arrays
+                    foreach ($unserialized_value as $key => $value) {
+                        error_log('Key: ' . $key . ' Value: ' . $value);
+                        
+                        // If there are nested arrays
+                        if (is_array($value)) {
+                            foreach ($value as $nested_key => $nested_value) {
+                                error_log('Nested Key: ' . $nested_key . ' Nested Value: ' . $nested_value);
+                            }
+                        }
+                    }
                 }
-            } else {
-                error_log('[SIYA Server Manager] The variable $red is empty or null.');
             }
-
-            
+        
+  
 
 
 
