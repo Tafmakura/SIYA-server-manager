@@ -1524,11 +1524,12 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 7932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 9932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             $product_id = $server_product_id;
             $meta_key = '_arsol_assigned_server_groups'; 
             $meta_value = get_post_meta($product_id, $meta_key, true);
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
 
             if ($meta_value) {
                 $unserialized_value = maybe_unserialize($meta_value);
