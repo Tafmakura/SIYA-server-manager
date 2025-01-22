@@ -1493,12 +1493,6 @@ class ServerOrchestrator {
             $server_groups = $server_product->get_meta('arsol_assigned_server_groups', true) ;
             $server_tags = $server_product->get_meta('arsol_assigned_server_tags', true) ;
 
-            error_log('[SIYA Server Manager] Server product metadata: ' . print_r($server_product->get_meta(), true));
-            error_log('[SIYA Server Manager] Server product manager required: ' . $manager_required);
-            error_log('[SIYA Server Manager] Server product groups: ' . print_r($server_groups, true));
-            error_log('[SIYA Server Manager] Serialized server groups: ' . serialize($server_groups));
-            error_log('[SIYA Server Manager] Server product tags: ' . print_r($server_tags, true));
-
 
             // Update server post metadata with correct meta keys
             $metadata = [
@@ -1532,6 +1526,64 @@ class ServerOrchestrator {
             $red = $server_product->get_meta();
 
             error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
+
+
+
+
+            // Get and process assigned groups
+            $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true) ?: [];
+            $formatted_groups = [];
+            if (is_array($assigned_groups)) {
+                foreach ($assigned_groups as $group_id) {
+                    $term = get_term($group_id, 'arsol_server_group');
+                    if ($term && !is_wp_error($term)) {
+                        $formatted_groups[] = [
+                            'id' => $term->term_id,
+                            'name' => $term->name,
+                            'slug' => $term->slug
+                        ];
+                    }
+                }
+            }
+
+            // Get and process assigned tags
+            $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true) ?: [];
+            $formatted_tags = [];
+            if (is_array($assigned_tags)) {
+                foreach ($assigned_tags as $tag_id) {
+                    $term = get_term($tag_id, 'arsol_server_tag');
+                    if ($term && !is_wp_error($term)) {
+                        $formatted_tags[] = [
+                            'id' => $term->term_id,
+                            'name' => $term->name,
+                            'slug' => $term->slug
+                        ];
+                    }
+                }
+            }
+
+            // ...existing code...
+
+            // Log formatted groups and tags
+            error_log('[SIYA Server Manager] Assigned Server Groups: ' . print_r($formatted_groups, true));
+            error_log('[SIYA Server Manager] Assigned Server Tags: ' . print_r($formatted_tags, true));
+
+            // Debug counts
+            error_log(sprintf(
+                '[SIYA Server Manager] Found %d groups and %d tags', 
+                count($formatted_groups), 
+                count($formatted_tags)
+            ));
+
+            // ...existing code...
+
+
+
+
+
+
+
+
 
             // Check if we need to connect to the server manager
             /*
