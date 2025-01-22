@@ -1530,14 +1530,7 @@ class ServerOrchestrator {
 
             if (!empty($red)) {
                 // Unserialize the outer structure if needed
-                $data = maybe_unserialize($red);
-            
-                // Traverse the structure to reach the desired value
-                if (is_array($data) && isset($data['61']['key']) && $data['61']['key'] === '_arsol_assigned_server_tags') {
-                    // Unserialize the "value" field if necessary
-                    $value = maybe_unserialize($data['61']['value']);
-                    $data['61']['value'] = $value; // Replace with unserialized value
-                }
+                $data = unserialize($red);
             
                 // Log the processed structure
                 error_log(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
