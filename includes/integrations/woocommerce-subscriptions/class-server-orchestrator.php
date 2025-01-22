@@ -1573,6 +1573,31 @@ class ServerOrchestrator {
                     error_log('Unserialized value is not an array: ' . print_r($unserialized_value, true));
                 }
             }
+
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
+            $post_id = $this->server_post_id;
+            $taxonomy = 'arsol_server_group';
+
+            if ($meta_value) {
+                $unserialized_value = maybe_unserialize($meta_value);
+
+                if (is_array($unserialized_value)) {
+                    // Loop through nested arrays
+                    foreach ($unserialized_value as $key => $value) {
+                        error_log('Key: ' . $key . ' Value: ' . print_r($value, true));
+                        
+                        // If there are nested arrays
+                        if (is_array($value)) {
+                            foreach ($value as $nested_key => $nested_value) {
+                                error_log('Nested Key: ' . $nested_key . ' Nested Value: ' . print_r($nested_value, true));
+                            }
+                        }
+                    }
+                } else {
+                    error_log('Unserialized value is not an array: ' . print_r($unserialized_value, true));
+                }
+            }
+
             
 
 
