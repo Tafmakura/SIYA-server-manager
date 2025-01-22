@@ -1533,14 +1533,13 @@ class ServerOrchestrator {
 
 
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', false);
-            error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
-
-
-            echo '<pre>';
-            var_dump($meta_value);
-            echo '</pre>';
-
-
+            if (is_array($meta_value)) {
+                foreach ($meta_value as $key => $value) {
+                    error_log("Key: $key, Value: " . json_encode($value, JSON_PRETTY_PRINT));
+                }
+            } else {
+                error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
+            }
 
             // Check if we need to connect to the server manager
             /*
