@@ -336,28 +336,18 @@ class ServerPostSetup {
         if (!$taxonomy_obj) {
             return;
         }
-    
         $selected = isset($_GET[$taxonomy]) ? $_GET[$taxonomy] : '';
-        $terms = get_terms(array(
-            'taxonomy' => $taxonomy,
-            'hide_empty' => false,
+        wp_dropdown_categories(array(
+            'taxonomy'         => $taxonomy,
+            'hide_empty'       => false,
+            'name'             => $taxonomy,
+            'orderby'          => 'name',
+            'selected'         => $selected,
+            'hierarchical'     => true,
+            'show_option_none' => $reset_label,
+            'option_none_value'=> '',
+            'value_field'      => 'slug',
         ));
-    
-        echo '<select name="' . esc_attr($taxonomy) . '" id="' . esc_attr($taxonomy) . '" class="postform">';
-        // Add custom reset option to reset the filter
-        echo '<option value="">' . esc_html($reset_label) . '</option>';
-    
-        if (!empty($terms)) {
-            foreach ($terms as $term) {
-                printf(
-                    '<option value="%s" %s>%s</option>',
-                    esc_attr($term->slug),
-                    selected($selected, $term->slug, false),
-                    esc_html($term->name)
-                );
-            }
-        }
-        echo '</select>';
     }
     
     

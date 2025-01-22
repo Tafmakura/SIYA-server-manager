@@ -1459,6 +1459,7 @@ class ServerOrchestrator {
     // Helper Methods
 
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
+        
         $post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
@@ -1523,112 +1524,46 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            // Assign tags to the server post
-            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
-            $post_id = $this->server_post_id;
-            $taxonomy = 'arsol_server_tag';
-            $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
-            if ($success) {
-                error_log('Tags successfully assigned to server post.');
-            } else {
-                error_log('Failed to assign tags to server post.');
-            }
+            try {
 
-            // Assign server groups to the server post
-            $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
-            $post_id = $this->server_post_id;
-            $taxonomy = 'arsol_server_group';
-            $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
-            if ($success) {
-                error_log('Groups successfully assigned to server post.');
-            } else {
-                error_log('Failed to assign groups to server post.');
-            }
-
-
-
-            error_log('[SIYA Server Manager]8888OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
-
-            
-            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
-            $post_id = $this->server_post_id;
-            $taxonomy = 'arsol_server_tag';
-            
-            if ($meta_value) {
-                $unserialized_value = maybe_unserialize($meta_value);
-                
-                if (is_array($unserialized_value)) {
-                    // Loop through nested arrays
-                    foreach ($unserialized_value as $key => $value) {
-                        error_log('Key: ' . $key . ' Value: ' . print_r($value, true));
-                        
-                        // If there are nested arrays
-                        if (is_array($value)) {
-                            foreach ($value as $nested_key => $nested_value) {
-                                error_log('Nested Key: ' . $nested_key . ' Nested Value: ' . print_r($nested_value, true));
-                            }
-                        }
-                    }
-                } else {
-                    error_log('Unserialized value is not an array: ' . print_r($unserialized_value, true));
+                // Assign tags to the server post
+                $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
+                $post_id = $this->server_post_id;
+                $taxonomy = 'arsol_server_tag';
+                $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
+                if (!$success) {
+                    $this->throw_exception('Failed to assign tags to server post.');
                 }
-            }
 
-            $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
-            $post_id = $this->server_post_id;
-            $taxonomy = 'arsol_server_group';
-
-            if ($meta_value) {
-                $unserialized_value = maybe_unserialize($meta_value);
-
-                if (is_array($unserialized_value)) {
-                    // Loop through nested arrays
-                    foreach ($unserialized_value as $key => $value) {
-                        error_log('Key: ' . $key . ' Value: ' . print_r($value, true));
-                        
-                        // If there are nested arrays
-                        if (is_array($value)) {
-                            foreach ($value as $nested_key => $nested_value) {
-                                error_log('Nested Key: ' . $nested_key . ' Nested Value: ' . print_r($nested_value, true));
-                            }
-                        }
-                    }
-                } else {
-                    error_log('Unserialized value is not an array: ' . print_r($unserialized_value, true));
+                // Assign server groups to the server post
+                $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
+                $post_id = $this->server_post_id;
+                $taxonomy = 'arsol_server_group';
+                $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
+                if (!$success) {
+                    $this->throw_exception('Failed to assign groups to server post.');
                 }
+
+                Error_log('Server post created and updated successfully');
+
+
+            } catch (\Exception $e) {
+
+               // Centralize exception handling for retries
+               $this->handle_exception($e,true);
+
             }
-
-            
-
-
-  
-  
-
-
-
-
-
-
-
-            // Check if we need to connect to the server manager
-            /*
-            $this->connect_server_manager = $server_product->get_meta('_arsol_server_manager_required', true);
-            if ($this->connect_server_manager === 'yes') {
-                $this->runcloud = new Runcloud();
-                $installation_script = $this->runcloud->get_installation_script($this->server_provisioned_id);
-                update_post_meta($this->server_post_id, 'arsol_server_manager_installation_script', $installation_script);
-            }
-                */
-
-            error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
             return true;
+
         } elseif ($post_id instanceof \WP_Error) {
+            
             $subscription->add_order_note(
                 'Failed to create server post. Error: ' . $post_id->get_error_message()
             );
         
             $this->throw_exception('Failed to create server post');
+
         }
     }
 
