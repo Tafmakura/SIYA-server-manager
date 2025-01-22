@@ -135,13 +135,16 @@ class ServerPostSetup {
             if (isset($args[0])) {
                 $post = get_post($args[0]);
                 if ($post && $post->post_type === 'server') {
+                    // Allow delete capability for administrators if the option is enabled
+                    if ($cap === 'delete_post' && current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false)) {
+                        return $caps;
+                    }
                     $caps[] = 'do_not_allow';
                 }
             }
         }
         return $caps;
     }
-
 
     public function remove_post_states($post_states, $post) {
         if ($post->post_type == 'server') {
