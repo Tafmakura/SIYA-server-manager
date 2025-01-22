@@ -1530,7 +1530,7 @@ class ServerOrchestrator {
 
             if (!empty($red)) {
                 // Unserialize the outer structure if needed
-                $data = unserialize($red);
+                $data = maybe_unserialize($red);
             
                 // Log the processed structure
                 error_log(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
