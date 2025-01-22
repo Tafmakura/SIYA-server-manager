@@ -1533,10 +1533,7 @@ class ServerOrchestrator {
             if (is_null($red)) {
                 error_log('Meta value is null');
             } else {
-                error_log(print_r($red, true)); // Use `true` to return the output as a string
-                
-                
-                error_log(json_encode($red));
+                error_log(json_encode($red, JSON_PRETTY_PRINT));
             }
 
          
