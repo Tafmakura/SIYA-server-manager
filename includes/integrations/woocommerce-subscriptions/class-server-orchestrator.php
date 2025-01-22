@@ -1529,6 +1529,9 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
+            $red = $server_product->get_meta();
+
+            error_log('[SIYA Server Manager] HOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
 
             // Check if we need to connect to the server manager
             /*
