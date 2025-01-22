@@ -1874,68 +1874,87 @@ class ServerOrchestrator {
     }
 
     /**
-     * Handle exceptions with optional rethrowing and stack trace.
-     *
-     * @param Throwable $e The exception object.
-     * @param bool $rethrow Whether to rethrow the exception or not.
-     * @param bool $stack_trace Whether to log the stack trace (default is true).
-     */
-    private function handle_exception(Throwable $e, bool $rethrow = false, bool $stack_trace = true) {
-        // Get the error code from the exception and include it in the log if available
-        $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
+         * Handle exceptions with optional rethrowing and stack trace.
+         *
+         * @param Throwable $e The exception object.
+         * @param bool $rethrow Whether to rethrow the exception or not.
+         * @param bool $stack_trace Whether to log the stack trace (default is true).
+         */
+        private function handle_exception($e, bool $rethrow = false, bool $stack_trace = true) {
+            // Get the error code from the exception and include it in the log if available
+            $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
 
-        // Capture the stack trace of the exception
-        $trace = $stack_trace ? $e->getTraceAsString() : '';
-
-        // If not rethrowing, log the exception message with appropriate format
-        if (!$rethrow) {
-            // Log with stack trace if requested
+            // Capture the stack trace of the exception
+            $trace = '';
             if ($stack_trace) {
-                error_log(sprintf(
-                    "%sFunction/Method: %s::%s\nException: %s\n\n-----------------------------------\nStack trace:\n%s\n-----------------------------------",
-                    $error_code_msg,
-                    __CLASS__,
-                    __FUNCTION__,
-                    $e->getMessage(),
-                    $trace
+                // Format the stack trace
+                $trace_array = $e->getTrace();
+                $formatted_trace = [];
+
+                foreach ($trace_array as $trace_entry) {
+                    $entry = "File: " . (isset($trace_entry['file']) ? $trace_entry['file'] : 'Unknown file') . "\n";
+                    $entry .= "Line: " . (isset($trace_entry['line']) ? $trace_entry['line'] : 'Unknown line') . "\n";
+                    $entry .= "Function/Method: " . (isset($trace_entry['function']) ? $trace_entry['function'] : 'Unknown function') . "\n";
+
+                    if (isset($trace_entry['class'])) {
+                        $entry .= "Class: " . $trace_entry['class'] . "\n";
+                    }
+
+                    // Add a separator between stack trace entries
+                    $formatted_trace[] = $entry . "\n";
+                }
+
+                $trace = implode("", $formatted_trace);
+            }
+
+            // If not rethrowing, log the exception message with appropriate format
+            if (!$rethrow) {
+                // Log with stack trace if requested
+                if ($stack_trace) {
+                    error_log(sprintf(
+                        "%sFunction/Method: %s::%s\nException: %s\n\nStack trace:\n%s",
+                        $error_code_msg,
+                        __CLASS__,
+                        __FUNCTION__,
+                        $e->getMessage(),
+                        $trace
+                    ));
+                } else {
+                    // Log without stack trace, with file and line number details
+                    error_log(sprintf(
+                        "%sFunction/Method: %s::%s\nException: %s\n\nCaught at: %s (Line %d)\n",
+                        $error_code_msg,
+                        __CLASS__,
+                        __FUNCTION__,
+                        $e->getMessage(),
+                        __FILE__,
+                        __LINE__
+                    ));
+                }
+            }
+
+            // If rethrowing, log that the exception was rethrown and rethrow the original exception as-is
+            if ($rethrow) {
+                // Get the caller's file, line number, and class name (the location where handle_exception was called)
+                $backtrace = debug_backtrace();
+                $caller = $backtrace[1]; // The caller is at index 1
+
+                // Get the caller class name, if available
+                $caller_class = isset($caller['class']) ? $caller['class'] : 'Unknown Class';
+
+                // Log that the exception was rethrown, including the calling class, method, file, and line number
+                error_log(sprintf('%s::%s Rethrew an exception at line %d in %s',
+                    $caller_class,
+                    $caller['function'],
+                    $caller['line'],
+                    $caller['file']
                 ));
-            } else {
-                // Log without stack trace, with file and line number details
-                error_log(sprintf(
-                    "%sFunction/Method: %s::%s\nException: %s\n\n-----------------------------------\nThrown at: %s (Line %d)\n-----------------------------------\nCaught at: %s (Line %d)\n-----------------------------------",
-                    $error_code_msg,
-                    __CLASS__,
-                    __FUNCTION__,
-                    $e->getMessage(),
-                    $e->getFile(),
-                    $e->getLine(),
-                    __FILE__,
-                    __LINE__
-                ));
+
+                // Rethrow the original exception without modifying it
+                throw $e;
             }
         }
 
-        // If rethrowing, log that the exception was rethrown and rethrow the original exception as-is
-        if ($rethrow) {
-            // Get the caller's file, line number, and class name (the location where handle_exception was called)
-            $backtrace = debug_backtrace();
-            $caller = $backtrace[1]; // The caller is at index 1
-
-            // Get the caller class name, if available
-            $caller_class = isset($caller['class']) ? $caller['class'] : 'Unknown Class';
-
-            // Log that the exception was rethrown, including the calling class, method, file, and line number
-            error_log(sprintf('%s::%s Rethrew an exception at line %d in %s',
-                $caller_class,
-                $caller['function'],
-                $caller['line'],
-                $caller['file']
-            ));
-
-            // Rethrow the original exception without modifying it
-            throw $e;
-        }
-    }
 
 
 
