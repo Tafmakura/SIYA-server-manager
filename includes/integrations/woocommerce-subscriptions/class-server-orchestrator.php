@@ -1528,7 +1528,7 @@ class ServerOrchestrator {
 
             $red = $server_product->get_meta('_arsol_assigned_server_tags', false);
 
-            error_log(print_r($red, false));
+            error_log(print_r($red));
          
 
 
