@@ -1541,6 +1541,39 @@ class ServerOrchestrator {
                 error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
             }
 
+
+
+
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', false);
+
+            if (is_serialized($meta_value)) {
+                $meta_value = unserialize($meta_value);
+            }
+
+            // Log decoded data
+            error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
+
+
+
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', false);
+
+            if (empty($meta_value)) {
+                error_log('No meta value found for "_arsol_assigned_server_tags".');
+            } else {
+                if (is_serialized($meta_value)) {
+                    $meta_value = unserialize($meta_value);
+                }
+                
+                if (is_array($meta_value)) {
+                    foreach ($meta_value as $key => $value) {
+                        error_log("Key: $key, Value: " . json_encode($value, JSON_PRETTY_PRINT));
+                    }
+                } else {
+                    error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
+                }
+            }
+
+
             // Check if we need to connect to the server manager
             /*
             $this->connect_server_manager = $server_product->get_meta('_arsol_server_manager_required', true);
