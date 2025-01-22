@@ -9,14 +9,18 @@
 
     <form method="post" action="options.php">
         <?php settings_fields('siya_settings_general'); ?>
+        <?php do_settings_sections('siya_settings_general'); ?>
         <label for="arsol_allow_admin_server_delition">
-            Allow server delition by admin
+            Allow server deletion by admin
         </label>
         <input
             type="checkbox"
             name="arsol_allow_admin_server_delition"
+            id="arsol_allow_admin_server_delition"
             value="1"
             <?php checked(get_option('arsol_allow_admin_server_delition'), 1); ?>
+            class="toggle"
         />
+        <?php submit_button(); ?>
     </form>
 </div>
