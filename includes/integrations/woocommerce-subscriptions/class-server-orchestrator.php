@@ -1530,27 +1530,34 @@ class ServerOrchestrator {
             $meta_key = '_arsol_assigned_server_groups'; 
             $meta_value = get_post_meta($product_id, $meta_key, true);
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
-
+            
+            $simple_array = [];
+            
             if ($meta_value) {
                 $unserialized_value = maybe_unserialize($meta_value);
-                
+            
                 if (is_array($unserialized_value)) {
-                    // Loop through nested arrays
+                    // Loop through nested arrays and flatten them into the simple array
                     foreach ($unserialized_value as $key => $value) {
-                        error_log('Key: ' . $key . ' Value: ' . $value);
+                        // Add the key and value to the simple array
+                        $simple_array[$key] = $value;
                         
-                        // If there are nested arrays
+                        // If the value is an array, flatten it further
                         if (is_array($value)) {
                             foreach ($value as $nested_key => $nested_value) {
-                                error_log('Nested Key: ' . $nested_key . ' Nested Value: ' . $nested_value);
+                                $simple_array[$nested_key] = $nested_value;
                             }
                         }
                     }
+                } else {
+                    // If the value is not an array, just add it directly
+                    $simple_array['meta_value'] = $unserialized_value;
                 }
             }
-
-           error_log(print_r($unserialized_value, true));
-        
+            
+            // Return the simple array
+            error_log ($simple_array);
+  
   
 
 
