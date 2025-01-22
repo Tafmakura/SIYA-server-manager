@@ -1542,6 +1542,13 @@ class ServerOrchestrator {
 
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
+            // After creating/updating server post
+            $groups = $this->get_product_assigned_groups($server_product_id);
+            $tags = $this->get_product_assigned_tags($server_product_id);
+
+            $this->sync_server_groups($post_id, $groups);
+            $this->sync_server_tags($post_id, $tags);
+
             return true;
         } elseif ($post_id instanceof \WP_Error) {
             $subscription->add_order_note(
@@ -2002,7 +2009,25 @@ class ServerOrchestrator {
 
     }
 
-    
+    private function get_product_assigned_groups($product_id) {
+        $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true);
+        return is_array($assigned_groups) ? $assigned_groups : [];
+    }
+
+    private function get_product_assigned_tags($product_id) {
+        $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true);
+        return is_array($assigned_tags) ? $assigned_tags : [];
+    }
+
+    private function sync_server_groups($server_post_id, $group_ids) {
+        if (empty($group_ids)) return true;
+        return wp_set_object_terms($server_post_id, $group_ids, 'arsol_server_group');
+    }
+
+    private function sync_server_tags($server_post_id, $tag_ids) {
+        if (empty($tag_ids)) return true;
+        return wp_set_object_terms($server_post_id, $tag_ids, 'arsol_server_tag');
+    }
 
 }
 
