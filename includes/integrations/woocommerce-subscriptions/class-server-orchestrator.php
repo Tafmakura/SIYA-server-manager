@@ -1529,8 +1529,8 @@ class ServerOrchestrator {
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
-           // $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
-           // $subscription->save();
+            $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
+            $subscription->save();
 
 
             error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
