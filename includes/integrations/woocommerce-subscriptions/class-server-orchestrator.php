@@ -1524,7 +1524,7 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 5932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 6932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             $product_id = $server_product_id;
             $meta_key = '_arsol_assigned_server_groups'; 
