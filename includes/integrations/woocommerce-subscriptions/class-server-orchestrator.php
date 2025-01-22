@@ -1533,6 +1533,12 @@ class ServerOrchestrator {
 
 
 
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', false);
+            error_log(var_dump($meta_value));
+
+
+
+
 
             // Check if we need to connect to the server manager
             /*
