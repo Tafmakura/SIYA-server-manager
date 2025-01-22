@@ -2011,22 +2011,36 @@ class ServerOrchestrator {
 
     private function get_product_assigned_groups($product_id) {
         $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true);
-        return is_array($assigned_groups) ? $assigned_groups : [];
+        error_log('Got assigned groups from product: ' . print_r($assigned_groups, true));
+        return !empty($assigned_groups) ? $assigned_groups : [];
     }
 
     private function get_product_assigned_tags($product_id) {
         $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true);
-        return is_array($assigned_tags) ? $assigned_tags : [];
+        error_log('Got assigned tags from product: ' . print_r($assigned_tags, true));
+        return !empty($assigned_tags) ? $assigned_tags : [];
     }
 
     private function sync_server_groups($server_post_id, $group_ids) {
         if (empty($group_ids)) return true;
-        return wp_set_object_terms($server_post_id, $group_ids, 'arsol_server_group');
+        error_log('Syncing server groups: ' . print_r($group_ids, true));
+        $result = wp_set_object_terms($server_post_id, $group_ids, 'arsol_server_group');
+        if (is_wp_error($result)) {
+            error_log('Error syncing groups: ' . $result->get_error_message());
+            return false;
+        }
+        return true;
     }
 
     private function sync_server_tags($server_post_id, $tag_ids) {
         if (empty($tag_ids)) return true;
-        return wp_set_object_terms($server_post_id, $tag_ids, 'arsol_server_tag');
+        error_log('Syncing server tags: ' . print_r($tag_ids, true));
+        $result = wp_set_object_terms($server_post_id, $tag_ids, 'arsol_server_tag');
+        if (is_wp_error($result)) {
+            error_log('Error syncing tags: ' . $result->get_error_message());
+            return false;
+        }
+        return true;
     }
 
 }
