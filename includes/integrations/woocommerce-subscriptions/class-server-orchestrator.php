@@ -1524,19 +1524,16 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 52OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 62OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             $red = $server_product->get_meta('_arsol_assigned_server_tags', false );
 
             if (!empty($red)) {
-                $data = maybe_unserialize($red);
-            
-                // Convert the data to JSON for readability
-                $json_data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            
-                // Save to a file
-                file_put_contents('/path/to/debug.log', $json_data);
-                error_log('[SIYA Server Manager] Data written to /path/to/debug.log');
+                if (is_serialized($red)) {
+                    error_log('[SIYA Server Manager] The variable $red is serialized.');
+                } else {
+                    error_log('[SIYA Server Manager] The variable $red is not serialized.');
+                }
             } else {
                 error_log('[SIYA Server Manager] The variable $red is empty or null.');
             }
