@@ -1529,25 +1529,16 @@ class ServerOrchestrator {
 
 
             $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', false);
-            $meta_value = $server_product->get_meta('_arsol_server_plan_slug', false);
-            if (empty($meta_value)) {
-                echo 'No values found!';
-            } else {
-                echo '<pre>';
-                print_r($meta_value);
-                echo '</pre>';
-            }
+            error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
 
 
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', false);
-            $meta_value = $server_product->get_meta('_arsol_server_plan_slug', false);
-            if (empty($meta_value)) {
-                echo 'No values found!';
-            } else {
-                echo '<pre>';
-                print_r($meta_value);
-                echo '</pre>';
-            }
+            error_log(json_encode($meta_value, JSON_PRETTY_PRINT));
+
+
+            echo '<pre>';
+            var_dump($meta_value);
+            echo '</pre>';
 
 
 
