@@ -110,6 +110,10 @@ class ServerPostSetup {
     // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
+            // Remove all actions except delete if allowed
+            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false)) {
+                return array('delete' => $actions['delete']);
+            }
             return array();
         }
         return $actions;
