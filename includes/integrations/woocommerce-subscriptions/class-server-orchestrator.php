@@ -1515,8 +1515,8 @@ class ServerOrchestrator {
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
                 'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
-                'arsol_assigned_server_groups' => $server_product->get_meta('arsol_assigned_server_groups'),
-                'arsol_assigned_server_tags' => $server_product->get_meta('arsol_assigned_server_tags' ), 
+                'arsol_assigned_server_groups' => $server_product->get_meta('arsol_assigned_server_groups', false),
+                'arsol_assigned_server_tags' => $server_product->get_meta('arsol_assigned_server_tags', false ), 
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
