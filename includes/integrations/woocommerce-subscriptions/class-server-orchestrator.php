@@ -1966,7 +1966,7 @@ class ServerOrchestrator {
         }
 
     // New helper method to throw exceptions
-    private function throw_exception($error_message, $error_definition = null, $line_number = false) {
+    private function throw_exception($error_message) {
         
         $class_name = __CLASS__;
         
