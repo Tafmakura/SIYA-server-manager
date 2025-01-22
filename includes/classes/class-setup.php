@@ -94,6 +94,9 @@ class Setup {
      * Initialize admin settings.
      */
     public function initialize_admin_settings() {
+        if (class_exists('Siya\AdminSettings\General')) {
+            new \Siya\AdminSettings\General();
+        }
         if (class_exists('Siya\AdminSettings\API')) {
             new \Siya\AdminSettings\API();
         }
@@ -102,9 +105,6 @@ class Setup {
         }
         if (class_exists('Siya\AdminSettings\SSH')) {
             new \Siya\AdminSettings\SSH();
-        }
-        if (class_exists('Siya\AdminSettings\Server')) {
-            new \Siya\AdminSettings\Server();
         }
     }
 

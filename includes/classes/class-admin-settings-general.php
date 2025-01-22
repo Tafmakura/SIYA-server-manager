@@ -3,6 +3,7 @@
 namespace Siya\AdminSettings;
 
 class General {
+    
     public function __construct() {
         $this->register_general_settings();
     }
@@ -17,7 +18,7 @@ class General {
             null,
             'siya_settings_general'
         );
-        
+
         add_settings_field(
             'arsol_allow_admin_server_delition',
             'Allow server deletion by admin',
