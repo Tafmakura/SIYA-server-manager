@@ -1524,6 +1524,12 @@ class ServerOrchestrator {
             $subscription->save();
 
 
+            error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+
+            $red = $server_product->get_meta('_arsol_assigned_server_tags', false);
+
+            error_log(print_r($red));
+         
 
 
 
@@ -1957,20 +1963,10 @@ class ServerOrchestrator {
         }
 
     // New helper method to throw exceptions
-    private function throw_exception($error_message) {
-        
-        $class_name = __CLASS__;
-        
-        // Constructing the error message
-        $exception_message = "SIYA Server Manager - [$class_name]: " . ($error_definition ?: 'Undefined error') . ": $error_message";
-        
-        // Include line number if $line_number is true
-        if ($line_number === true) {
-            $exception_message .= " on line " . __LINE__;
-        }
+    private function throw_exception($e) {
     
         // Throw the exception with the constructed message
-        throw new \Exception($exception_message);
+        throw new \Exception($e);
     }
 
     // New method to open ports at the provider
