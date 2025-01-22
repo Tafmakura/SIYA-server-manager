@@ -123,9 +123,8 @@ class ServerOrchestrator {
             );
 
             $subscription->update_status('on-hold');
-            
-            $this->subscription_id = $subscription->get_id();
-            $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
+    
+            $this->server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
            
             if ($this->server_post_status != 2) {
