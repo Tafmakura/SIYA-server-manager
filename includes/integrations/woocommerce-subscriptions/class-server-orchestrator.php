@@ -1529,7 +1529,7 @@ class ServerOrchestrator {
 
 
             $meta_values = get_post_meta($this->server_product_id, '_arsol_assigned_server_groups', false);
-            error_log(var_dump($meta_value));
+            error_log(printr($meta_values));
 
 
 
