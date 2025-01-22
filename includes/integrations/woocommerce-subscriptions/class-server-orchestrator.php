@@ -1515,8 +1515,8 @@ class ServerOrchestrator {
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
                 'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
-                'arsol_assigned_server_groups' => $server_product->get_meta('_arsol_assigned_server_groups', false),
-                'arsol_assigned_server_tags' => $server_product->get_meta('_arsol_assigned_server_tags', false),
+                'arsol_assigned_server_groups' => $server_product->get_meta('_arsol_assigned_server_groups', true),
+                'arsol_assigned_server_tags' => $server_product->get_meta('_arsol_assigned_server_tags', true),
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
@@ -1531,32 +1531,26 @@ class ServerOrchestrator {
             $meta_value = get_post_meta($product_id, $meta_key, true);
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
             
-            $simple_array = [];
-            
             if ($meta_value) {
                 $unserialized_value = maybe_unserialize($meta_value);
-            
+                
                 if (is_array($unserialized_value)) {
-                    // Loop through nested arrays and flatten them into the simple array
+                    // Loop through nested arrays
                     foreach ($unserialized_value as $key => $value) {
-                        // Add the key and value to the simple array
-                        $simple_array[$key] = $value;
+                        error_log('Key: ' . $key . ' Value: ' . print_r($value, true));
                         
-                        // If the value is an array, flatten it further
+                        // If there are nested arrays
                         if (is_array($value)) {
                             foreach ($value as $nested_key => $nested_value) {
-                                $simple_array[$nested_key] = $nested_value;
+                                error_log('Nested Key: ' . $nested_key . ' Nested Value: ' . print_r($nested_value, true));
                             }
                         }
                     }
                 } else {
-                    // If the value is not an array, just add it directly
-                    $simple_array['meta_value'] = $unserialized_value;
+                    error_log('Unserialized value is not an array: ' . print_r($unserialized_value, true));
                 }
             }
             
-            // Return the simple array
-            error_log (print_r($simple_array, true));
   
   
 
