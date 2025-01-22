@@ -1676,11 +1676,11 @@ class ServerOrchestrator {
             // Check if the terms were successfully assigned
             if ($assigned_terms !== false) {
                 // Log for debugging
-                error_log('Assigned term IDs: ' . print_r($term_ids, true));
+                error_log('Assigned multiple trms');
                 return true; // Return true on success
             } else {
                 // Log error
-                error_log('Failed to assign terms: ' . print_r($term_ids, true));
+                error_log('Failed to assign multiple terms');
                 return false; // Return false on failure
             }
         } else {
@@ -1693,11 +1693,11 @@ class ServerOrchestrator {
             // Check if the term was successfully assigned
             if ($assigned_terms !== false) {
                 // Log for debugging
-                error_log('Assigned single term ID: ' . print_r($term_ids, true));
+                error_log('Assigned single term');
                 return true; // Return true on success
             } else {
                 // Log error
-                error_log('Failed to assign single term: ' . print_r($term_ids, true));
+                error_log('Failed to assign single term');
                 return false; // Return false on failure
             }
         }
