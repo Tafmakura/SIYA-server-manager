@@ -346,7 +346,6 @@ class ServerOrchestrator {
     
         } catch (\Exception $e) {
 
-            $error_definition = 'Error creating and updating server post';
             $this->handle_exception($e);
             
             // Update server metadata on failed provisioning and trip CB
@@ -1532,22 +1531,6 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
-
-            error_log('[SIYA Server Manager] Server groups: HOUYOOOOOOOOOOOOOOOOOOOOOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUOIUIOUOIUOIUOIUOIUOIUOIUOIUOIOIUOIU');
-
-            error_log('[SIYA Server Manager] Server tags: ' . print_r($server_tags, true));
-            error_log('[SIYA Server Manager] Server groups: ' . print_r($server_groups, true));
-
-            // Assign server groups and tags to the server post
-            if ($server_groups && is_array($server_groups)) {
-                $server_groups = array_merge(...$server_groups); // Flatten the array
-                wp_set_object_terms($this->server_post_id, $server_groups, 'arsol_server_group');
-            } else
-
-            if ($server_tags && is_array($server_tags)) {
-                $server_tags = array_merge(...$server_tags); // Flatten the array
-                wp_set_object_terms($this->server_post_id, $server_tags, 'arsol_server_tag');
-            }
 
             // Check if we need to connect to the server manager
             /*
