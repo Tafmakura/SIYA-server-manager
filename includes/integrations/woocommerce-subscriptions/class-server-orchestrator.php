@@ -1528,7 +1528,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
 
          
-            $meta_values = get_post_meta($server_product_id, '_arsol_assigned_server_groups', false);
+            $meta_values = get_post_meta( 2956 , '_arsol_assigned_server_groups', false);
             
             error_log(print_r($meta_values));
             
