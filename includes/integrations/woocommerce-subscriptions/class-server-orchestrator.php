@@ -409,6 +409,12 @@ class ServerOrchestrator {
 
                             // Fetch the provisioned server IPs
                             $server_ipv4 = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id, 'ipv4');
+                            
+                            // Check if the IP threw WP errors
+                            if (is_wp_error($server_ipv4)) {
+                                $error_message = $server_ipv4->get_error_message();
+                                $this->throw_exception($error_message);
+                            }
                         
                         } catch (\Exception $e) {
 
