@@ -68,6 +68,7 @@ class ServerPost {
             $this->post_id = $post_id;
             $this->load_meta_data();
         }
+       
     }
 
     private function load_meta_data() {
@@ -244,5 +245,5 @@ class ServerPost {
         
         return $meta_data;
     }
-    
+
 }

@@ -91,13 +91,13 @@
         ));
 
         // Group Dropdown
-        $selected_group = get_post_meta($post->ID, '_arsol_server_group_slug', true);
+        $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
-            'id'          => '_arsol_server_group_slug',
-            'label'       => __('Server group', 'woocommerce'),
-            'description' => __('Select the server group.', 'woocommerce'),
+            'id'          => '_arsol_server_plan_group_slug',
+            'label'       => __('Server plan group', 'woocommerce'),
+            'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
             'value'       => $selected_group
@@ -156,6 +156,62 @@
             ?>
         </div>
         <?php
+        $selected_assigned_server_groups = get_post_meta($post->ID, '_arsol_assigned_server_groups', true);
+        $selected_assigned_server_groups = is_array($selected_assigned_server_groups) ? $selected_assigned_server_groups : [];
+        $server_groups_terms = get_terms([
+            'taxonomy'   => 'arsol_server_group',
+            'hide_empty' => false,
+        ]);
+        ?>
+        <p class="form-field">
+            <label><?php _e('Add server to groups', 'woocommerce'); ?></label>
+            <select
+                id="_arsol_assigned_server_groups"
+                name="_arsol_assigned_server_groups[]"
+                class="wc-enhanced-select"
+                multiple="multiple"
+                style="width: 50%;"
+                data-tip="<?php _e('Select the groups to which this server should be added after it\'s created.', 'woocommerce'); ?>"
+            >
+                <?php foreach ($server_groups_terms as $term) : ?>
+                    <option
+                        value="<?php echo esc_attr($term->term_id); ?>"
+                        <?php selected(in_array($term->term_id, $selected_assigned_server_groups), true); ?>
+                    >
+                        <?php echo esc_html($term->name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <?php
+        $selected_assigned_server_tags = get_post_meta($post->ID, '_arsol_assigned_server_tags', true);
+        $selected_assigned_server_tags = is_array($selected_assigned_server_tags) ? $selected_assigned_server_tags : [];
+        $server_tags_terms = get_terms([
+            'taxonomy'   => 'arsol_server_tag',
+            'hide_empty' => false,
+        ]);
+        ?>
+        <p class="form-field">
+            <label><?php _e('Add tags to server', 'woocommerce'); ?></label>
+            <select
+                id="_arsol_assigned_server_tags"
+                name="_arsol_assigned_server_tags[]"
+                class="wc-enhanced-select"
+                multiple="multiple"
+                style="width: 50%;"
+                data-tip="<?php _e('Select the tags to assign to this server after it\'s created.', 'woocommerce'); ?>"
+            >
+                <?php foreach ($server_tags_terms as $term) : ?>
+                    <option
+                        value="<?php echo esc_attr($term->term_id); ?>"
+                        <?php selected(in_array($term->term_id, $selected_assigned_server_tags), true); ?>
+                    >
+                        <?php echo esc_html($term->name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <?php
         ?>
     </div>
 </div>
@@ -173,7 +229,7 @@
 jQuery(document).ready(function($) {
     $('#post').on('submit', function(e) {
         var provider = $('#_arsol_server_provider_slug').val();
-        var group = $('#_arsol_server_group_slug').val();
+        var group = $('#_arsol_server_plan_group_slug').val();
         var plan = $('#_arsol_server_plan_slug').val();
 
         if (!provider || !group || !plan) {
@@ -190,7 +246,7 @@ jQuery(document).ready(function($) {
                 provider: provider
             },
             success: function(groups) {
-                var $groupSelect = $('#_arsol_server_group_slug');
+                var $groupSelect = $('#_arsol_server_plan_group_slug');
                 $groupSelect.empty();
                 
                 if (groups.length === 0) {
@@ -202,7 +258,7 @@ jQuery(document).ready(function($) {
                     });
 
                     // Set the selected group
-                    var selectedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_group_slug', true)); ?>';
+                    var selectedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_group_slug', true)); ?>';
                     $groupSelect.val(selectedGroup);
                 }
                 
@@ -267,7 +323,7 @@ jQuery(document).ready(function($) {
         $('#_arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
         updateGroups(wpProvider, function(groups) {
             if (groups.includes(wpGroup)) {
-                $('#_arsol_server_group_slug').val(wpGroup).prop('disabled', true);
+                $('#_arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
                 updatePlans(wpProvider, wpGroup);
             }
         });
@@ -284,14 +340,14 @@ jQuery(document).ready(function($) {
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
         updateGroups(provider, function(groups) {
-            var selectedGroup = $('#_arsol_server_group_slug').val();
+            var selectedGroup = $('#_arsol_server_plan_group_slug').val();
             if (selectedGroup) {
                 updatePlans(provider, selectedGroup);
             }
         });
     });
 
-    $('#_arsol_server_group_slug').on('change', function() {
+    $('#_arsol_server_plan_group_slug').on('change', function() {
         var provider = $('#_arsol_server_provider_slug').val();
         var group = $(this).val();
         updatePlans(provider, group);
@@ -303,7 +359,7 @@ jQuery(document).ready(function($) {
             toggleWordPressFields();
         } else {
             $('#_arsol_server_provider_slug').prop('disabled', false);
-            $('#_arsol_server_group_slug').prop('disabled', false);
+            $('#_arsol_server_plan_group_slug').prop('disabled', false);
             toggleWordPressFields();
         }
     });
@@ -312,7 +368,7 @@ jQuery(document).ready(function($) {
     var initialProvider = $('#_arsol_server_provider_slug').val();
     if (initialProvider) {
         updateGroups(initialProvider, function(groups) {
-            var selectedGroup = $('#_arsol_server_group_slug').val();
+            var selectedGroup = $('#_arsol_server_plan_group_slug').val();
             if (selectedGroup) {
                 updatePlans(initialProvider, selectedGroup);
             }
