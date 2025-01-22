@@ -103,9 +103,7 @@ class ServerOrchestrator {
 
     // Step 1: Start server provisioning process (Create server post)
     public function start_server_provision($subscription) {
-
         try {
-
             $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id();
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
@@ -113,7 +111,7 @@ class ServerOrchestrator {
             $this->server_provider_slug = $this->server_product
                 ? $this->server_product->get_meta('_arsol_server_provider_slug', true)
                 : null;
-
+                
             if (!$this->server_product_id) {
                 error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
                 
