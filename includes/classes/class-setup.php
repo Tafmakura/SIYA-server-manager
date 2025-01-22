@@ -103,6 +103,9 @@ class Setup {
         if (class_exists('Siya\AdminSettings\SSH')) {
             new \Siya\AdminSettings\SSH();
         }
+        if (class_exists('Siya\AdminSettings\Server')) {
+            new \Siya\AdminSettings\Server();
+        }
     }
 
     /**
