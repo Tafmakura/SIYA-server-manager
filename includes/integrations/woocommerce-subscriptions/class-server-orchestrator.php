@@ -1547,7 +1547,7 @@ class ServerOrchestrator {
 
 
 
-            error_log('[SIYA Server Manager]55555OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager]8888OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
