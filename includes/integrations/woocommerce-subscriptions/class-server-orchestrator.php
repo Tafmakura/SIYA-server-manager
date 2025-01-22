@@ -2011,14 +2011,28 @@ class ServerOrchestrator {
 
     private function get_product_assigned_groups($product_id) {
         $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true);
-        error_log('Got assigned groups from product: ' . print_r($assigned_groups, true));
-        return !empty($assigned_groups) ? $assigned_groups : [];
+        error_log('Raw assigned groups from product ' . $product_id . ': ' . print_r($assigned_groups, true));
+        
+        // Ensure we have an array, even if empty
+        if (!is_array($assigned_groups)) {
+            $assigned_groups = $assigned_groups ? array($assigned_groups) : array();
+        }
+        
+        error_log('Processed assigned groups: ' . print_r($assigned_groups, true));
+        return $assigned_groups;
     }
 
     private function get_product_assigned_tags($product_id) {
         $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true);
-        error_log('Got assigned tags from product: ' . print_r($assigned_tags, true));
-        return !empty($assigned_tags) ? $assigned_tags : [];
+        error_log('Raw assigned tags from product ' . $product_id . ': ' . print_r($assigned_tags, true));
+        
+        // Ensure we have an array, even if empty
+        if (!is_array($assigned_tags)) {
+            $assigned_tags = $assigned_tags ? array($assigned_tags) : array();
+        }
+        
+        error_log('Processed assigned tags: ' . print_r($assigned_tags, true));
+        return $assigned_tags;
     }
 
     private function sync_server_groups($server_post_id, $group_ids) {
