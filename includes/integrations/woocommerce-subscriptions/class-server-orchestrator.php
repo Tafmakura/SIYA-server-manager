@@ -1531,7 +1531,7 @@ class ServerOrchestrator {
 
 
             // Get and process assigned groups
-            $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true) ?: [];
+            $assigned_groups = get_post_meta($this->server_post_id, '_arsol_assigned_server_groups', true) ?: [];
             $formatted_groups = [];
             if (is_array($assigned_groups)) {
                 foreach ($assigned_groups as $group_id) {
@@ -1547,7 +1547,7 @@ class ServerOrchestrator {
             }
 
             // Get and process assigned tags
-            $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true) ?: [];
+            $assigned_tags = get_post_meta($this->server_post_id, '_arsol_assigned_server_tags', true) ?: [];
             $formatted_tags = [];
             if (is_array($assigned_tags)) {
                 foreach ($assigned_tags as $tag_id) {
