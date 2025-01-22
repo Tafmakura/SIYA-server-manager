@@ -1515,23 +1515,21 @@ class ServerOrchestrator {
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
                 'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
-                'arsol_assigned_server_groups' => $server_product->get_meta('arsol_assigned_server_groups', true) ?: [],
-                'arsol_assigned_server_tags' => $server_product->get_meta('arsol_assigned_server_tags', true) ?: [],
+                'arsol_assigned_server_groups' => $server_product->get_meta('_arsol_assigned_server_groups', false),
+                'arsol_assigned_server_tags' => $server_product->get_meta('_arsol_assigned_server_tags', false),
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
-            $red = $server_product->get_meta();
 
             error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
 
+            $red = $server_product->get_meta('_arsol_assigned_server_tags', false);
+
+            error_log(print_r($red, false));
          
-            $meta_values = get_post_meta( 2956 , '_arsol_assigned_server_groups', false);
-            
-            error_log($meta_values);
-            
 
 
 
