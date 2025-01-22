@@ -1556,7 +1556,7 @@ class ServerOrchestrator {
             }
             
             // Return the simple array
-            error_log ($simple_array);
+            error_log (print_r($simple_array, true));
   
   
 
