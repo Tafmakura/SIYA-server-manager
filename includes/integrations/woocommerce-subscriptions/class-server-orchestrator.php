@@ -1523,13 +1523,34 @@ class ServerOrchestrator {
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
-
-            error_log('[SIYA Server Manager] 9932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
-
-            $product_id = $server_product_id;
-            $meta_key = '_arsol_assigned_server_groups'; 
-            $meta_value = get_post_meta($product_id, $meta_key, true);
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
+            $post_id = $this->server_post_id;
+            $taxonomy = 'arsol_server_tag';
+            $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
+            if ($success) {
+                error_log('Terms were successfully assigned.');
+            } else {
+                error_log('Failed to assign terms.');
+            }
+
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
+            $post_id = $this->server_post_id;
+            $taxonomy = 'arsol_server_group';
+            $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
+            if ($success) {
+                error_log('Terms were successfully assigned.');
+            } else {
+                error_log('Failed to assign terms.');
+            }
+
+
+
+            error_log('[SIYA Server Manager] 7777932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+
+            
+            $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
+            $post_id = $this->server_post_id;
+            $taxonomy = 'arsol_server_tag';
             
             if ($meta_value) {
                 $unserialized_value = maybe_unserialize($meta_value);
@@ -1551,6 +1572,8 @@ class ServerOrchestrator {
                 }
             }
             
+
+
   
   
 
@@ -1581,6 +1604,79 @@ class ServerOrchestrator {
             $this->throw_exception('Failed to create server post');
         }
     }
+
+    /**
+     * Assigns taxonomy terms by term IDs to a server post based on the meta value.
+     * Returns true if successful, false if it fails.
+     *
+     * @param int    $post_id The post ID to assign terms to.
+     * @param mixed  $meta_value The meta value containing term IDs.
+     * @param string $taxonomy The taxonomy to assign the terms to.
+     * @return bool True if terms are assigned successfully, false otherwise.
+     */
+    function assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy) {
+        if (!$post_id || !$meta_value) {
+            return false; // No post ID or meta value, return false
+        }
+
+        // Unserialize the meta value if it's serialized
+        $unserialized_value = maybe_unserialize($meta_value);
+
+        // Initialize an array to collect term IDs
+        $term_ids = [];
+
+        // Check if the value is an array (which it should be in your case)
+        if (is_array($unserialized_value)) {
+            // Loop through the outer array
+            foreach ($unserialized_value as $key => $value) {
+                // Check if the value is a nested array
+                if (is_array($value)) {
+                    // Loop through the nested array and add term IDs to the collection
+                    foreach ($value as $nested_value) {
+                        $term_ids[] = (int) $nested_value; // Treat as term ID
+                    }
+                } else {
+                    $term_ids[] = (int) $value; // Treat as term ID
+                }
+            }
+
+            // Ensure term IDs are unique
+            $term_ids = array_unique($term_ids);
+
+            // Attempt to assign term IDs to the post
+            $assigned_terms = wp_set_object_terms($post_id, $term_ids, $taxonomy);
+
+            // Check if the terms were successfully assigned
+            if ($assigned_terms !== false) {
+                // Log for debugging
+                error_log('Assigned term IDs: ' . print_r($term_ids, true));
+                return true; // Return true on success
+            } else {
+                // Log error
+                error_log('Failed to assign terms: ' . print_r($term_ids, true));
+                return false; // Return false on failure
+            }
+        } else {
+            // If the meta value is not an array, handle it as a single term ID
+            $term_ids = [(int) $unserialized_value]; // Treat as term ID
+
+            // Attempt to assign the term ID to the post
+            $assigned_terms = wp_set_object_terms($post_id, $term_ids, $taxonomy);
+
+            // Check if the term was successfully assigned
+            if ($assigned_terms !== false) {
+                // Log for debugging
+                error_log('Assigned single term ID: ' . print_r($term_ids, true));
+                return true; // Return true on success
+            } else {
+                // Log error
+                error_log('Failed to assign single term: ' . print_r($term_ids, true));
+                return false; // Return false on failure
+            }
+        }
+    }
+
+
 
     private function generate_key_pair() {
         $res = openssl_pkey_new([
