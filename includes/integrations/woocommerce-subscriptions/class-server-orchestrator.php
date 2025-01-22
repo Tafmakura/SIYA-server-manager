@@ -1963,10 +1963,11 @@ class ServerOrchestrator {
         }
 
     // New helper method to throw exceptions
-    private function throw_exception($e) {
+    private function throw_exception($message) {
     
         // Throw the exception with the constructed message
-        throw new \Exception($e);
+        throw new \Exception($message);
+    
     }
 
     // New method to open ports at the provider
