@@ -1524,7 +1524,7 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] HOOfgdfgdfgOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             $red = $server_product->get_meta('_arsol_assigned_server_tags', false );
 
