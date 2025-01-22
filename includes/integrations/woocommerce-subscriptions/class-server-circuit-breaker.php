@@ -23,10 +23,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
      * @param \WC_Subscription $subscription The subscription object.
      */
     public function test_circuit($subscription) {
+
         try {
             // Retrieve the subscription ID and linked server post ID
             $subscription_id = $subscription->get_id();
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+
+            error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Testing circuit breaker for subscription {$subscription_id} and server post ID {$server_post_id}.");
 
             if (!$server_post_id) {
                 // Log and exit if no linked server post ID is found
@@ -34,8 +37,19 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 return;
             }
 
+            // Initialise the circuit breaker state if it does not exist
+            $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+
+            if ($circuit_breaker === '') {
+                // If the meta key does not exist, add it with the value 0 (closed state)
+                update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_CLOSED);
+                error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker state initialized to closed for server post ID {$server_post_id}.");
+            }
+
+
             // Define metadata keys for server-related operations
             $server_metadata_keys = [
+                '_arsol_state_05_server_post',
                 '_arsol_state_10_provisioning',
                 '_arsol_state_20_ip_address',
                 '_arsol_state_30_deployment',
@@ -65,7 +79,17 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                     }
                 }
             } else {
-                $all_status_complete = ($server_metadata['_arsol_state_10_provisioning'] ?? null) == 2;
+                $required_keys = [
+                    '_arsol_state_05_server_post',
+                    '_arsol_state_10_provisioning',
+                    '_arsol_state_20_ip_address',
+                ];
+                foreach ($required_keys as $key) {
+                    if (($server_metadata[$key] ?? null) != 2) {
+                        $all_status_complete = false;
+                        break;
+                    }
+                }
             }
 
             if ($all_status_complete) {
@@ -81,8 +105,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             }
 
         } catch (\Exception $e) {
-            // Trip the circuit breaker if an error occurs
-            $this->trip_circuit_breaker($subscription, ["An error occurred" => $e->getMessage()]);
+            // Replaced direct circuit breaker call with handle_exception
+            $this->handle_exception($e);
         }
     }
 
