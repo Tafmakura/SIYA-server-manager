@@ -1524,7 +1524,7 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 33OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 344OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             if (!empty($red)) {
                 $data = maybe_unserialize($red);
@@ -1532,16 +1532,14 @@ class ServerOrchestrator {
                 // Convert the data to JSON for readability
                 $json_data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             
-                // Log in chunks
-                $chunk_size = 1000; // Adjust chunk size as needed
-                $chunks = str_split($json_data, $chunk_size);
-            
-                foreach ($chunks as $index => $chunk) {
-                    error_log("[SIYA Server Manager] Chunk {$index}: {$chunk}");
-                }
+                // Save to a file
+                file_put_contents('/hooooooooooooyo/debug.log', $json_data);
+                error_log('[SIYA Server Manager] Data written to /path/to/debug.log');
             } else {
                 error_log('[SIYA Server Manager] The variable $red is empty or null.');
             }
+            
+            
 
 
 
