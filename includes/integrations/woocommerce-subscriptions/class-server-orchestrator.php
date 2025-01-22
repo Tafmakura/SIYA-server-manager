@@ -159,7 +159,7 @@ class ServerOrchestrator {
                     $error_definition = 'Error creating and updating server post';
 
                     // Capture and rethrow the exception
-                    $this->handle_exception($e, $subscription, $error_definition, $rethrow = true);
+                    $this->handle_exception($e);
                 
                 }
             
@@ -190,7 +190,7 @@ class ServerOrchestrator {
                 $error_definition = 'Error scheduling background server provisioning';
 
                 // Capture and rethrow the exception
-                $this->handle_exception($e, $subscription, $error_definition, $rethrow = true);
+                $this->handle_exception($e);
 
             }
      
@@ -198,12 +198,12 @@ class ServerOrchestrator {
         } catch (\Exception $e) {
 
             $error_definition = 'Error creating and updating server post > ';
-            $this->handle_exception($e, $subscription, $error_definition);
+            $this->handle_exception($e);
         
             // Update State meta
             update_post_meta($this->server_post_id, '_arsol_state_05_server_post', -1);
 
-            $this->handle_exception($e, $subscription, $error_definition);
+            $this->handle_exception($e);
 
             // Trigger the circuit breaker
             ServerCircuitBreaker::trip_circuit_breaker($subscription);
@@ -278,7 +278,7 @@ class ServerOrchestrator {
                     $error_definition = 'Error creating and updating server post';
 
                     // Capture and rethrow the exception
-                    $this->handle_exception($e, $this->subscription, $error_definition, $rethrow = true);
+                    $this->handle_exception($e);
 
                 }
 
@@ -309,7 +309,7 @@ class ServerOrchestrator {
                 } catch (\Exception $e) {
 
                     $error_definition = 'Error loading server post metadata';
-                    $this->handle_exception($e, $this->subscription, $error_definition, $rethrow = true);
+                    $this->handle_exception($e);
 
                 }
 
@@ -340,20 +340,20 @@ class ServerOrchestrator {
             } catch (\Exception $e) {
 
                 $error_definition = 'Error scheduling background server status update';
-                $this->handle_exception($e, $this->subscription, $error_definition, $rethrow = true);
+                $this->handle_exception($e);
 
             }
     
         } catch (\Exception $e) {
 
             $error_definition = 'Error creating and updating server post';
-            $this->handle_exception($e, $subscription, $error_definition);
+            $this->handle_exception($e);
             
             // Update server metadata on failed provisioning and trip CB
             update_post_meta($this->server_post_id, '_arsol_state_10_provisioning', -1);
 
             // Handle the exception and exit
-            $this->handle_exception($e, $this->subscription, 'Error occurred during server provisioning');
+            $this->handle_exception($e);
 
             // Trigger the circuit breaker
             ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -421,7 +421,7 @@ class ServerOrchestrator {
                             update_post_meta($this->server_post_id, '_arsol_state_20_ip_addres', -1);
 
                             // Handle the exception and exit
-                            $this->handle_exception($e, $this->subscription, $error_definition);
+                            $this->handle_exception($e);
 
                             // Trigger the circuit breaker
                             ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -459,7 +459,7 @@ class ServerOrchestrator {
                     $error_definition = 'Error checking server status';
 
                     // Handle the exception and exit
-                    $this->handle_exception($e, $subscription, $error_definition);
+                    $this->handle_exception($e);
                     
                     return false; // Add fallback return false
 
@@ -606,7 +606,7 @@ class ServerOrchestrator {
                 $error_definition = 'Error deploying server to Servermanager';
                 
                 // Handle the exception
-                $this->handle_exception($e, $this->subscription, $error_definition);
+                $this->handle_exception($e);
 
                 return false; // Add fallback return false
             
@@ -746,7 +746,7 @@ class ServerOrchestrator {
                 update_post_meta($server_post_id, '_arsol_state_40_firewall_rules', -1);
 
                 // Handle the exception and exit
-                $this->handle_exception($e, $this->subscription, true);
+                $this->handle_exception($e);
 
                 // Trigger the circuit breaker
                 ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -798,7 +798,7 @@ class ServerOrchestrator {
                 update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
 
                 // Handle the exception and exit
-                $this->handle_exception($e, $subscription, $error_definition);
+                $this->handle_exception($e);
 
                 // Trigger the circuit breaker
                 ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -912,7 +912,7 @@ class ServerOrchestrator {
                     } catch (\Exception $e) {
 
                         // Centralize exception handling for retries
-                        $this->handle_exception($e, $subscription, 'Error during script installation');
+                        $this->handle_exception($e);
                     
                     }
 
@@ -933,7 +933,7 @@ class ServerOrchestrator {
                     update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
 
                     // Handle the exception and exit on timeout
-                    $this->handle_exception(new \Exception('Timeout while installing script'), $subscription, 'Timeout while installing script');
+                    $this->handle_exception(new \Exception('Timeout while installing script'));
 
                     // Trigger the circuit breaker on timeout
                     ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -993,7 +993,7 @@ class ServerOrchestrator {
                     } catch (\Exception $e) {
 
                         // Centralize exception handling for retries
-                        $this->handle_exception($e, $subscription, 'Error fetching connection status');
+                        $this->handle_exception($e);
 
                     }
 
@@ -1013,7 +1013,7 @@ class ServerOrchestrator {
                     update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
 
                     // Handle the exception and exit on timeout
-                    $this->handle_exception(new \Exception('Timeout while fetching connection status'), $subscription, 'Timeout while fetching connection status');
+                    $this->handle_exception(new \Exception('Timeout while fetching connection status'));
 
                     // Trigger the circuit breaker on timeout
                     ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
@@ -1038,7 +1038,7 @@ class ServerOrchestrator {
         } catch (\Exception $e) {
 
             // Handle the exception and exit
-            $this->handle_exception($e, $subscription, 'Error verifying server manager connection');
+            $this->handle_exception($e);
             return false; // Add fallback return false
         }
     }
@@ -1707,7 +1707,7 @@ class ServerOrchestrator {
         } catch (\Exception $e) {
 
             // Logging error if the server IP fetching fails
-            $this->handle_exception($e, $this->subscription, 'Error fetching provisioned server IP');
+            $this->handle_exception($e);
             return false; // Add fallback return false
 
         }
@@ -1892,20 +1892,73 @@ class ServerOrchestrator {
         as_schedule_single_action(time(), $hook, [$args], 'arsol_class_server_orchestrator');
     }
 
-    // New helper method to handle exceptions
-    private function handle_exception($e, $subscription, $error_definition = 'Undefined error:', $rethraw = false) {
-        
-        // Use $error_definition instead of $message
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] %s: %s', $error_definition, $e->getMessage()));
-        
-        $subscription->add_order_note(sprintf("%s:%s%s", $error_definition, PHP_EOL, $e->getMessage()));
-    
-        // Rethrow the exception if rethraw is true
-        if ($rethraw) {
-            throw $e;
+    /**
+     * Handle exceptions with optional rethrowing and stack trace.
+     *
+     * @param Throwable $e The exception object.
+     * @param bool $rethrow Whether to rethrow the exception or not.
+     * @param bool $stack_trace Whether to log the stack trace (default is true).
+     */
+    private function handle_exception(Throwable $e, bool $rethrow = false, bool $stack_trace = true) {
+        // Get the error code from the exception and include it in the log if available
+        $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
+
+        // Capture the stack trace of the exception
+        $trace = $stack_trace ? $e->getTraceAsString() : '';
+
+        // If not rethrowing, log the exception message with appropriate format
+        if (!$rethrow) {
+            // Log with stack trace if requested
+            if ($stack_trace) {
+                error_log(sprintf(
+                    "%sFunction/Method: %s::%s\nException: %s\n\n-----------------------------------\nStack trace:\n%s\n-----------------------------------",
+                    $error_code_msg,
+                    __CLASS__,
+                    __FUNCTION__,
+                    $e->getMessage(),
+                    $trace
+                ));
+            } else {
+                // Log without stack trace, with file and line number details
+                error_log(sprintf(
+                    "%sFunction/Method: %s::%s\nException: %s\n\n-----------------------------------\nThrown at: %s (Line %d)\n-----------------------------------\nCaught at: %s (Line %d)\n-----------------------------------",
+                    $error_code_msg,
+                    __CLASS__,
+                    __FUNCTION__,
+                    $e->getMessage(),
+                    $e->getFile(),
+                    $e->getLine(),
+                    __FILE__,
+                    __LINE__
+                ));
+            }
         }
 
+        // If rethrowing, log that the exception was rethrown and rethrow the original exception as-is
+        if ($rethrow) {
+            // Get the caller's file, line number, and class name (the location where handle_exception was called)
+            $backtrace = debug_backtrace();
+            $caller = $backtrace[1]; // The caller is at index 1
+
+            // Get the caller class name, if available
+            $caller_class = isset($caller['class']) ? $caller['class'] : 'Unknown Class';
+
+            // Log that the exception was rethrown, including the calling class, method, file, and line number
+            error_log(sprintf('%s::%s Rethrew an exception at line %d in %s',
+                $caller_class,
+                $caller['function'],
+                $caller['line'],
+                $caller['file']
+            ));
+
+            // Rethrow the original exception without modifying it
+            throw $e;
+        }
     }
+
+
+
+
 
     // New helper method to throw exceptions
     private function throw_exception($error_message, $error_definition = null, $line_number = false) {
@@ -1940,7 +1993,7 @@ class ServerOrchestrator {
             $error_definition = 'Error assigning firewall rules to the server';
 
             // Handle the exception
-            $this->handle_exception($e, $this->subscription, $error_definition);
+            $this->handle_exception($e);
             return false; // Add fallback return false
 
         }

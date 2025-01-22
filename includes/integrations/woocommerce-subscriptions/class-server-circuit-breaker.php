@@ -102,8 +102,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             }
 
         } catch (\Exception $e) {
-            // Trip the circuit breaker if an error occurs
-            $this->trip_circuit_breaker($subscription, ["An error occurred" => $e->getMessage()]);
+            // Replaced direct circuit breaker call with handle_exception
+            $this->handle_exception($e);
         }
     }
 
