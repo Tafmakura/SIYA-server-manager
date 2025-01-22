@@ -1531,7 +1531,7 @@ class ServerOrchestrator {
 
             $red = $server_product->get_meta();
 
-            error_log('[SIYA Server Manager] HOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
+            error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
 
             // Check if we need to connect to the server manager
             /*
