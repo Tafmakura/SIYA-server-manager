@@ -1515,8 +1515,8 @@ class ServerOrchestrator {
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
                 'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
-                'arsol_assigned_server_groups' => $server_product->get_meta('arsol_assigned_server_groups', false),
-                'arsol_assigned_server_tags' => $server_product->get_meta('arsol_assigned_server_tags', false ), 
+                'arsol_assigned_server_groups' => $server_product->get_meta('arsol_assigned_server_groups', true) ?: [],
+                'arsol_assigned_server_tags' => $server_product->get_meta('arsol_assigned_server_tags', true) ?: [],
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
@@ -1529,6 +1529,46 @@ class ServerOrchestrator {
 
 
 
+
+            // Get and process assigned groups
+            $assigned_groups = get_post_meta($this->server_post_id, '_arsol_assigned_server_groups', false);
+            $assigned_groups = maybe_unserialize($assigned_groups);
+            $group_ids = !empty($assigned_groups[0]) ? $assigned_groups[0] : [];
+
+            $formatted_groups = [];
+            foreach ($group_ids as $group_id) {
+                $term = get_term($group_id, 'arsol_server_group');
+                if ($term && !is_wp_error($term)) {
+                    $formatted_groups[] = [
+                        'id' => $term->term_id,
+                        'name' => $term->name,
+                        'slug' => $term->slug
+                    ];
+                }
+            }
+
+            // Get and process assigned tags
+            $assigned_tags = get_post_meta($this->server_post_id, '_arsol_assigned_server_tags', false);
+            $assigned_tags = maybe_unserialize($assigned_tags);
+            $tag_ids = !empty($assigned_tags[0]) ? $assigned_tags[0] : [];
+
+            $formatted_tags = [];
+            foreach ($tag_ids as $tag_id) {
+                $term = get_term($tag_id, 'arsol_server_tag');
+                if ($term && !is_wp_error($term)) {
+                    $formatted_tags[] = [
+                        'id' => $term->term_id,
+                        'name' => $term->name,
+                        'slug' => $term->slug
+                    ];
+                }
+            }
+
+            // Log results
+            error_log('[SIYA Server Manager] Raw Groups IDs: ' . print_r($group_ids, true));
+            error_log('[SIYA Server Manager] Raw Tags IDs: ' . print_r($tag_ids, true));
+            error_log('[SIYA Server Manager] Formatted Groups: ' . print_r($formatted_groups, true));
+            error_log('[SIYA Server Manager] Formatted Tags: ' . print_r($formatted_tags, true));
 
 
 
