@@ -27,6 +27,10 @@ class ServerPostSetup {
         // Add new filters
         add_action('restrict_manage_posts', array($this, 'add_server_filters'));
         add_filter('pre_get_posts', array($this, 'filter_servers_by_taxonomy'));
+
+        // Add new actions and filters
+        add_filter('post_row_actions', array($this, 'modify_server_actions'), 10, 2);
+        add_action('init', array($this, 'modify_server_capabilities'));
     }
 
     /**
@@ -372,6 +376,32 @@ class ServerPostSetup {
             if (!empty($tax_query)) {
                 $query->set('tax_query', $tax_query);
             }
+        }
+    }
+
+    public function modify_server_actions($actions, $post) {
+        if ($post->post_type === 'server') {
+            // Remove existing delete action
+            unset($actions['delete']);
+            
+            // Check if user is admin and deletion is allowed
+            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false)) {
+                $delete_url = get_delete_post_link($post->ID, '', true);
+                $actions['delete'] = sprintf(
+                    '<a href="%s" class="submitdelete" onclick="return confirm(\'Are you sure?\');">%s</a>',
+                    $delete_url,
+                    __('Delete', 'your-text-domain')
+                );
+            }
+        }
+        return $actions;
+    }
+
+    public function modify_server_capabilities() {
+        if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false)) {
+            $role = get_role('administrator');
+            $role->add_cap('delete_servers');
+            $role->add_cap('delete_published_servers');
         }
     }
     
