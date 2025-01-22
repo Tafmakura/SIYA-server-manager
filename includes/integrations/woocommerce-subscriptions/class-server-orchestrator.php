@@ -1524,19 +1524,21 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 62OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 92OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
-            $red = $server_product->get_meta('_arsol_assigned_server_tags', false );
-
+            $red = get_post_meta($server_product_id);
+        
             if (!empty($red)) {
                 if (is_serialized($red)) {
                     error_log('[SIYA Server Manager] The variable $red is serialized.');
                 } else {
-                    error_log('[SIYA Server Manager] The variable $red is not serialized.');
+                    error_log(print_r($red));
                 }
             } else {
                 error_log('[SIYA Server Manager] The variable $red is empty or null.');
             }
+
+            
 
 
 
