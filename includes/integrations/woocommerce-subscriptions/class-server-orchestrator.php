@@ -2010,41 +2010,47 @@ class ServerOrchestrator {
     }
 
     private function get_product_assigned_groups($product_id) {
-        $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true);
+        $assigned_groups = maybe_unserialize(get_post_meta($product_id, '_arsol_assigned_server_groups', true));
         error_log('Raw assigned groups from product ' . $product_id . ': ' . print_r($assigned_groups, true));
         
-        // Convert term slugs to term IDs
-        $term_ids = [];
-        if (!empty($assigned_groups)) {
-            foreach ((array)$assigned_groups as $group_slug) {
-                $term = get_term_by('slug', $group_slug, 'arsol_server_group');
-                if ($term) {
-                    $term_ids[] = $term->term_id;
-                }
-            }
+        if (empty($assigned_groups)) {
+            error_log('No groups assigned to product ' . $product_id);
+            return [];
         }
+
+        // Ensure we have an array
+        $assigned_groups = (array)$assigned_groups;
         
-        error_log('Converted group term IDs: ' . print_r($term_ids, true));
-        return $term_ids;
+        // Get the term IDs
+        $term_ids = array_filter(array_map(function($group_id) {
+            $term = get_term($group_id, 'arsol_server_group');
+            return $term && !is_wp_error($term) ? $term->term_id : null;
+        }, $assigned_groups));
+        
+        error_log('Mapped group term IDs: ' . print_r($term_ids, true));
+        return array_values($term_ids); // Reindex array
     }
 
     private function get_product_assigned_tags($product_id) {
-        $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true);
-        error_log('Raw assigned tags from product ' . $id . ': ' . print_r($assigned_tags, true));
+        $assigned_tags = maybe_unserialize(get_post_meta($product_id, '_arsol_assigned_server_tags', true));
+        error_log('Raw assigned tags from product ' . $product_id . ': ' . print_r($assigned_tags, true));
         
-        // Convert term slugs to term IDs
-        $term_ids = [];
-        if (!empty($assigned_tags)) {
-            foreach ((array)$assigned_tags as $tag_slug) {
-                $term = get_term_by('slug', $tag_slug, 'arsol_server_tag');
-                if ($term) {
-                    $term_ids[] = $term->term_id;
-                }
-            }
+        if (empty($assigned_tags)) {
+            error_log('No tags assigned to product ' . $product_id);
+            return [];
         }
+
+        // Ensure we have an array
+        $assigned_tags = (array)$assigned_tags;
         
-        error_log('Converted tag term IDs: ' . print_r($term_ids, true));
-        return $term_ids;
+        // Get the term IDs
+        $term_ids = array_filter(array_map(function($tag_id) {
+            $term = get_term($tag_id, 'arsol_server_tag');
+            return $term && !is_wp_error($term) ? $term->term_id : null;
+        }, $assigned_tags));
+        
+        error_log('Mapped tag term IDs: ' . print_r($term_ids, true));
+        return array_values($term_ids); // Reindex array
     }
 
     private function sync_server_groups($server_post_id, $group_ids) {
@@ -2052,12 +2058,20 @@ class ServerOrchestrator {
             error_log('No group IDs to sync for server ' . $server_post_id);
             return true;
         }
-        error_log('Syncing server groups: ' . print_r($group_ids, true));
+
+        error_log('Attempting to sync groups for server ' . $server_post_id . ': ' . print_r($group_ids, true));
+        
+        // Clear existing terms first
+        wp_delete_object_term_relationships($server_post_id, 'arsol_server_group');
+        
+        // Set new terms
         $result = wp_set_object_terms($server_post_id, $group_ids, 'arsol_server_group');
+        
         if (is_wp_error($result)) {
             error_log('Error syncing groups: ' . $result->get_error_message());
             return false;
         }
+        
         error_log('Successfully synced groups for server ' . $server_post_id);
         return true;
     }
@@ -2067,12 +2081,20 @@ class ServerOrchestrator {
             error_log('No tag IDs to sync for server ' . $server_post_id);
             return true;
         }
-        error_log('Syncing server tags: ' . print_r($tag_ids, true));
+
+        error_log('Attempting to sync tags for server ' . $server_post_id . ': ' . print_r($tag_ids, true));
+        
+        // Clear existing terms first
+        wp_delete_object_term_relationships($server_post_id, 'arsol_server_tag');
+        
+        // Set new terms
         $result = wp_set_object_terms($server_post_id, $tag_ids, 'arsol_server_tag');
+        
         if (is_wp_error($result)) {
             error_log('Error syncing tags: ' . $result->get_error_message());
             return false;
         }
+        
         error_log('Successfully synced tags for server ' . $server_post_id);
         return true;
     }
