@@ -27,6 +27,10 @@ class ServerPostSetup {
         // Add new filters
         add_action('restrict_manage_posts', array($this, 'add_server_filters'));
         add_filter('pre_get_posts', array($this, 'filter_servers_by_taxonomy'));
+
+        // Add new actions and filters
+        add_filter('post_row_actions', array($this, 'modify_server_actions'), 10, 2);
+        add_action('init', array($this, 'modify_server_capabilities'));
     }
 
     /**
@@ -61,7 +65,7 @@ class ServerPostSetup {
             'supports'           => array('author','custom-fields','comments'),
             'capabilities' => array(
                 'create_posts' => 'do_not_allow',
-                'delete_post' => 'do_not_allow',
+           //     'delete_post' => 'do_not_allow',
             ),
             'map_meta_cap' => true,
         );
@@ -88,7 +92,7 @@ class ServerPostSetup {
 
         // Non-hierarchical taxonomy: Server Tags
         register_taxonomy(
-            'arsol_server_tags', 
+            'arsol_server_tag', 
             'server', 
             array(
                 'labels' => array(
@@ -106,6 +110,12 @@ class ServerPostSetup {
     // Remove post table actions priority set to 999999 to make sure it runs last after other plugins
     public function remove_post_table_actions($actions, $post) {
         if ($post->post_type == 'server') {
+            // Remove all actions except delete if allowed and no valid subscription is associated
+            $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
+            $subscription = $subscription_id ? wcs_get_subscription($subscription_id) : false;
+            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && (!$subscription_id || !$subscription)) {
+                return array('delete' => $actions['delete']);
+            }
             return array();
         }
         return $actions;
@@ -123,8 +133,19 @@ class ServerPostSetup {
     }
 
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
-        if ($cap === 'delete_post' || $cap === 'create_posts' || $cap === 'delete_posts') {
-            $caps[] = 'do_not_allow';
+        if (in_array($cap, ['delete_post', 'create_posts', 'delete_posts'])) {
+            if (isset($args[0])) {
+                $post = get_post($args[0]);
+                if ($post && $post->post_type === 'server') {
+                    // Allow delete capability for administrators if the option is enabled and no valid subscription is associated
+                    $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
+                    $subscription = $subscription_id ? wcs_get_subscription($subscription_id) : false;
+                    if ($cap === 'delete_post' && current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && (!$subscription_id || !$subscription)) {
+                        return $caps;
+                    }
+                    $caps[] = 'do_not_allow';
+                }
+            }
         }
         return $caps;
     }
@@ -149,10 +170,9 @@ class ServerPostSetup {
         }
         return $new_columns;
     }
-
     public function change_published_to_provisioned($translated_text, $text, $domain) {
-        global $post;
-        if ($domain === 'default' && $text === 'Published' && $post->post_type === 'server') {
+        global $post, $pagenow;
+        if ($domain === 'default' && $text === 'Published' && isset($post) && $post->post_type === 'server' && ($pagenow === 'edit.php' || $pagenow === 'post.php')) {
             $translated_text = __('Provisioned', 'your-text-domain');
         }
         return $translated_text;
@@ -166,10 +186,14 @@ class ServerPostSetup {
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
     
             if ($subscription_id) {
+
                 // Get the subscription object
                 $subscription = wcs_get_subscription($subscription_id);
-    
+
                 if ($subscription) {
+                    // Get the customer ID
+                    $customer_id = $subscription->get_customer_id();
+    
                     // Get billing name (first and last)
                     $billing_first_name = $subscription->get_billing_first_name();
                     $billing_last_name = $subscription->get_billing_last_name();
@@ -179,7 +203,6 @@ class ServerPostSetup {
                         $billing_name = $billing_first_name . ' ' . $billing_last_name;
                     } else {
                         // Fallback to user's display name or username if billing name is missing
-                        $customer_id = $subscription->get_customer_id();
                         $user = get_userdata($customer_id);
                         
                         // Use display name if available, otherwise fallback to username
@@ -188,7 +211,7 @@ class ServerPostSetup {
     
                     // Generate links for subscription and customer
                     $subscription_link = get_edit_post_link($subscription_id);
-                    $customer_wc_link = admin_url('admin.php?page=wc-admin&path=/customers/' . $customer_id);
+                    $customer_wc_link = admin_url('user-edit.php?user_id=' . $customer_id);
     
                     // Render the column content
                     echo sprintf(
@@ -287,19 +310,23 @@ class ServerPostSetup {
         global $typenow;
     
         if ($typenow === 'server') {
-            // Dropdown for Server Groups
-            $this->render_taxonomy_dropdown(
-                'arsol_server_group',
-                __('Filter by Server Group', 'your-text-domain'),
-                __('All Server Groups', 'your-text-domain')
-            );
+            // Check if there is at least one post of the 'server' post type
+            $server_count = wp_count_posts('server')->publish;
+            if ($server_count > 0) {
+                // Dropdown for Server Groups
+                $this->render_taxonomy_dropdown(
+                    'arsol_server_group',
+                    __('Filter by Server Group', 'your-text-domain'),
+                    __('All Server Groups', 'your-text-domain')
+                );
     
-            // Dropdown for Server Tags
-            $this->render_taxonomy_dropdown(
-                'arsol_server_tags',
-                __('Filter by Server Tags', 'your-text-domain'),
-                __('All Server Tags', 'your-text-domain')
-            );
+                // Dropdown for Server Tags
+                $this->render_taxonomy_dropdown(
+                    'arsol_server_tag',
+                    __('Filter by Server Tags', 'your-text-domain'),
+                    __('All Server Tags', 'your-text-domain')
+                );
+            }
         }
     }
     
@@ -309,28 +336,18 @@ class ServerPostSetup {
         if (!$taxonomy_obj) {
             return;
         }
-    
         $selected = isset($_GET[$taxonomy]) ? $_GET[$taxonomy] : '';
-        $terms = get_terms(array(
-            'taxonomy' => $taxonomy,
-            'hide_empty' => false,
+        wp_dropdown_categories(array(
+            'taxonomy'         => $taxonomy,
+            'hide_empty'       => false,
+            'name'             => $taxonomy,
+            'orderby'          => 'name',
+            'selected'         => $selected,
+            'hierarchical'     => true,
+            'show_option_none' => $reset_label,
+            'option_none_value'=> '',
+            'value_field'      => 'slug',
         ));
-    
-        echo '<select name="' . esc_attr($taxonomy) . '" id="' . esc_attr($taxonomy) . '" class="postform">';
-        // Add custom reset option to reset the filter
-        echo '<option value="">' . esc_html($reset_label) . '</option>';
-    
-        if (!empty($terms)) {
-            foreach ($terms as $term) {
-                printf(
-                    '<option value="%s" %s>%s</option>',
-                    esc_attr($term->slug),
-                    selected($selected, $term->slug, false),
-                    esc_html($term->name)
-                );
-            }
-        }
-        echo '</select>';
     }
     
     
@@ -349,17 +366,45 @@ class ServerPostSetup {
                 );
             }
     
-            if (!empty($_GET['arsol_server_tags'])) {
+            if (!empty($_GET['arsol_server_tag'])) {
                 $tax_query[] = array(
-                    'taxonomy' => 'arsol_server_tags',
+                    'taxonomy' => 'arsol_server_tag',
                     'field'    => 'slug',
-                    'terms'    => sanitize_text_field($_GET['arsol_server_tags']),
+                    'terms'    => sanitize_text_field($_GET['arsol_server_tag']),
                 );
             }
     
             if (!empty($tax_query)) {
                 $query->set('tax_query', $tax_query);
             }
+        }
+    }
+
+    public function modify_server_actions($actions, $post) {
+        if ($post->post_type === 'server') {
+            // Remove existing delete action
+            unset($actions['delete']);
+            
+            // Check if user is admin, deletion is allowed, and no valid subscription is associated
+            $subscription_id = get_post_meta($post->ID, 'arsol_server_subscription_id', true);
+            $subscription = $subscription_id ? wcs_get_subscription($subscription_id) : false;
+            if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false) && (!$subscription_id || !$subscription)) {
+                $delete_url = get_delete_post_link($post->ID, '', true);
+                $actions['delete'] = sprintf(
+                    '<a href="%s" class="submitdelete" onclick="return confirm(\'Are you sure?\');">%s</a>',
+                    $delete_url,
+                    __('Delete', 'your-text-domain')
+                );
+            }
+        }
+        return $actions;
+    }
+
+    public function modify_server_capabilities() {
+        if (current_user_can('administrator') && get_option('arsol_allow_admin_server_delition', false)) {
+            $role = get_role('administrator');
+            $role->add_cap('delete_servers');
+            $role->add_cap('delete_published_servers');
         }
     }
     

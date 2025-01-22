@@ -83,7 +83,7 @@ class Product {
         // Define and sanitize basic fields
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
-            '_arsol_server_group_slug'    => sanitize_text_field($_POST['_arsol_server_group_slug'] ?? ''),
+            '_arsol_server_plan_group_slug'    => sanitize_text_field($_POST['_arsol_server_plan_group_slug'] ?? ''),
             '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
             '_arsol_max_applications'     => absint($_POST['_arsol_max_applications'] ?? 0),
             '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
@@ -129,6 +129,27 @@ class Product {
         foreach ($fields as $meta_key => $value) {
             update_post_meta($post_id, $meta_key, $value);
         }
+
+        $additional_groups = isset($_POST['_arsol_additional_server_groups'])
+            ? array_map('sanitize_text_field', $_POST['_arsol_additional_server_groups'])
+            : [];
+        update_post_meta($post_id, '_arsol_additional_server_groups', $additional_groups);
+
+        $server_groups = isset($_POST['_arsol_server_groups'])
+            ? array_map('sanitize_text_field', $_POST['_arsol_server_groups'])
+            : [];
+        update_post_meta($post_id, '_arsol_server_groups', $server_groups);
+
+        $assigned_server_groups = isset($_POST['_arsol_assigned_server_groups'])
+            ? array_map('intval', $_POST['_arsol_assigned_server_groups'])
+            : [];
+        update_post_meta($post_id, '_arsol_assigned_server_groups', $assigned_server_groups);
+
+        // Save assigned server tags
+        $assigned_server_tags = isset($_POST['_arsol_assigned_server_tags'])
+            ? array_map('intval', $_POST['_arsol_assigned_server_tags'])
+            : [];
+        update_post_meta($post_id, '_arsol_assigned_server_tags', $assigned_server_tags);
     }
 
     public function add_admin_footer_script() {
@@ -188,7 +209,7 @@ class Product {
                     toggleWordPressFields();
                 } else {
                     $('#_arsol_server_provider_slug').prop('disabled', false);
-                    $('#_arsol_server_group_slug').prop('disabled', false);
+                    $('#_arsol_server_plan_group_slug').prop('disabled', false);
                     toggleWordPressFields();
                 }
             });
@@ -203,7 +224,7 @@ class Product {
                 }
                 // Enable provider and group fields before submitting
                 $('#_arsol_server_provider_slug').prop('disabled', false);
-                $('#_arsol_server_group_slug').prop('disabled', false);
+                $('#_arsol_server_plan_group_slug').prop('disabled', false);
             });
         });
         </script>
@@ -231,7 +252,7 @@ class Product {
 
         // Validate and sanitize input
         $provider = isset($_POST['_arsol_server_provider_slug']) ? sanitize_text_field($_POST['_arsol_server_provider_slug']) : '';
-        $group_slug = isset($_POST['_arsol_server_group_slug']) ? sanitize_text_field($_POST['_arsol_server_group_slug']) : '';
+        $group_slug = isset($_POST['_arsol_server_plan_group_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_group_slug']) : '';
         $plan_slug = isset($_POST['_arsol_server_plan_slug']) ? sanitize_text_field($_POST['_arsol_server_plan_slug']) : '';
 
         // Perform validation
@@ -242,7 +263,7 @@ class Product {
 
         // Save validated data
         update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
-        update_post_meta($post_id, '_arsol_server_group_slug', $group_slug);
+        update_post_meta($post_id, '_arsol_server_plan_group_slug', $group_slug);
         update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
     }
 }
