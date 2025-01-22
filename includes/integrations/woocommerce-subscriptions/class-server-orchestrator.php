@@ -1529,26 +1529,21 @@ class ServerOrchestrator {
             $red = $server_product->get_meta('_arsol_assigned_server_tags', false );
 
             if (!empty($red)) {
-                // Unserialize if serialized
+                // Unserialize the outer structure if needed
                 $data = maybe_unserialize($red);
             
-                // If the value is JSON encoded, decode it
-                if (is_string($data) && is_json($data)) {
-                    $data = json_decode($data, true);
+                // Traverse the structure to reach the desired value
+                if (is_array($data) && isset($data['61']['key']) && $data['61']['key'] === '_arsol_assigned_server_tags') {
+                    // Unserialize the "value" field if necessary
+                    $value = maybe_unserialize($data['61']['value']);
+                    $data['61']['value'] = $value; // Replace with unserialized value
                 }
             
-                // Log the processed value in a readable format
+                // Log the processed structure
                 error_log(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             } else {
                 error_log('The variable $red is empty or null.');
             }
-            
-            // Helper function to check if a string is JSON
-            function is_json($string) {
-                json_decode($string);
-                return (json_last_error() === JSON_ERROR_NONE);
-            }
-            
          
 
 
