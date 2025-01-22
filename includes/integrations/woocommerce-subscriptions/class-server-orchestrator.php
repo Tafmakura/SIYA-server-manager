@@ -1528,14 +1528,27 @@ class ServerOrchestrator {
 
             $red = $server_product->get_meta('_arsol_assigned_server_tags', false );
 
-            error_log('HEYY:'.$red);
-
-            if (is_null($red)) {
-                error_log('Meta value is null');
+            if (!empty($red)) {
+                // Unserialize if serialized
+                $data = maybe_unserialize($red);
+            
+                // If the value is JSON encoded, decode it
+                if (is_string($data) && is_json($data)) {
+                    $data = json_decode($data, true);
+                }
+            
+                // Log the processed value in a readable format
+                error_log(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             } else {
-                error_log(json_encode($red, JSON_PRETTY_PRINT));
+                error_log('The variable $red is empty or null.');
             }
-
+            
+            // Helper function to check if a string is JSON
+            function is_json($string) {
+                json_decode($string);
+                return (json_last_error() === JSON_ERROR_NONE);
+            }
+            
          
 
 
