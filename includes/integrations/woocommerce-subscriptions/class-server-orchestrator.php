@@ -130,7 +130,6 @@ class ServerOrchestrator {
             if ($this->server_post_status != 2) {
 
                 // Check if the server post already exists
-                $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
 
                 error_log( 'server post id:' . $this->server_post_id);
 
