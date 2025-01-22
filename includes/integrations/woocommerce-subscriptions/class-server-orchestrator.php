@@ -1524,8 +1524,9 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            error_log('[SIYA Server Manager] 32OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager] 932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
+            error_log($server_product_id);
             $red = get_post_meta($server_product_id, false);
         
             if (!empty($red)) {
