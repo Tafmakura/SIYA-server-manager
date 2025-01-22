@@ -23,10 +23,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
      * @param \WC_Subscription $subscription The subscription object.
      */
     public function test_circuit($subscription) {
+
         try {
             // Retrieve the subscription ID and linked server post ID
             $subscription_id = $subscription->get_id();
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+
+            error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Testing circuit breaker for subscription {$subscription_id} and server post ID {$server_post_id}.");
 
             if (!$server_post_id) {
                 // Log and exit if no linked server post ID is found
