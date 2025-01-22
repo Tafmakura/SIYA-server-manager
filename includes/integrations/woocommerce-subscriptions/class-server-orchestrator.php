@@ -105,7 +105,6 @@ class ServerOrchestrator {
     public function start_server_provision($subscription) {
         try {
             $this->subscription = $subscription;
-            $this->subscription_id = $subscription->get_id();
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
             $this->server_product = wc_get_product($this->server_product_id); 
             $this->server_provider_slug = $this->server_product
@@ -124,8 +123,11 @@ class ServerOrchestrator {
             );
 
             $subscription->update_status('on-hold');
-           
+            
+            $this->subscription_id = $subscription->get_id();
+            $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
+           
             if ($this->server_post_status != 2) {
 
                 // Check if the server post already exists
