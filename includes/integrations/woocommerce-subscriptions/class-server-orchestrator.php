@@ -1487,7 +1487,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] Generated SSH key pair for server post ID: ' . $this->server_post_id);
 
             // Get server product metadata
-            $server_product = wc_get_product($this->server_product_id);
+            $server_product = wc_get_product($server_product_id);
 
             $manager_required = $server_product->get_meta('arsol_server_manager_required', true);
             $server_groups = $server_product->get_meta('arsol_assigned_server_groups', true) ;
@@ -1500,7 +1500,7 @@ class ServerOrchestrator {
                 'arsol_server_post_name' => 'ARSOL' . $this->subscription_id,
                 'arsol_server_post_creation_date' => current_time('mysql'),
                 'arsol_server_post_status' => 2,
-                'arsol_server_product_id' => $this->server_product_id,
+                'arsol_server_product_id' => $server_product_id,
                 'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
                 '_arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
@@ -1528,7 +1528,7 @@ class ServerOrchestrator {
             error_log('[SIYA Server Manager] HOOOOOOO0OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata: ' . print_r($red, true));
 
          
-            $meta_values = get_post_meta($this->server_product_id, '_arsol_assigned_server_groups', false);
+            $meta_values = get_post_meta($server_product_id, '_arsol_assigned_server_groups', false);
             
             error_log(print_r($meta_values));
             
