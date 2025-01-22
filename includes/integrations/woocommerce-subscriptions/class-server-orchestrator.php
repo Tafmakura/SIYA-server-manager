@@ -125,15 +125,14 @@ class ServerOrchestrator {
 
             $subscription->update_status('on-hold');
            
-            // Check if the server post already exists
-            $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
-
             if ($this->server_post_status != 2) {
-                
-                try { // Step 1: Create server post only if it doesn't exist
 
-                    error_log('#002 [SIYA Server Manager - ServerOrchestrator] Creating new server post');
+                // Check if the server post already exists
+                $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
+                if (!$this->server_post_id) {
+
+                    // Secondary check for server post
                     $server_post_instance = new ServerPost();
                     $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
 
@@ -141,34 +140,56 @@ class ServerOrchestrator {
 
                         error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
 
-                        $server_post_instance = new ServerPost();
-                        $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
+                        try {
+                            
+                            $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
 
-                        $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
+                            if (is_wp_error($server_post)) {
+                                throw new Exception($server_post->get_error_message(), $server_post->get_error_code());
+                            } 
+                            
+                            $this->server_post_id = $server_post->ID;
+                            $subscription->add_order_note('Server post created and updated successfully.');
 
-                        // Update State meta
-                        update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
-                    
+
+                        } catch (\Exception $e) {
+                            
+                            // Rethrow
+                            $this->handle_exception($e, true);
+                            
+                            // TO DELETE IN PRODUCTION
+                            trigger_error('Fatal Error: Skipped error handler ', E_USER_WARNING);
+
+                        }
+
+
                     }
 
-                       
-                } catch (\Exception $e) {
-                        
-                    $error_definition = 'Error creating and updating server post';
-
-                    // Capture and rethrow the exception
-                    $this->handle_exception($e);
-                
                 }
-            
+
+                // Update server metadata
+                update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
+
+                // Define the message
+                $message = 'Server post exists. Server post ID: ' . $this->server_post_id;
+
+                // Add order note
+                $subscription->add_order_note(
+                    $message
+                );
+
+                // Add log
+                error_log('#003 [SIYA Server Manager - ServerOrchestrator] ' . $message);
+
+                    
             } else {
-               
+                
                 error_log('STATE CHECK (05): Server post okay.');
 
             }
-            
-            try { // Step 2: Schedule asynchronous action with predefined parameters to complete server provisioning
 
+            if ($this->server_post_id && $this->server_product_id && $this->subscription_id) {
+                
                 $task_id = uniqid();
                 $this->schedule_action('arsol_finish_server_provision', [
                     'subscription_id' => $this->subscription_id,
@@ -181,27 +202,29 @@ class ServerOrchestrator {
                     'Scheduled background server provisioning.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                 );
 
-                error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
-            
-            } catch (\Exception $e) {
+            } else {
 
-                $error_definition = 'Error scheduling background server provisioning';
-
-                // Capture and rethrow the exception
-                $this->handle_exception($e);
+                throw new Exception('Missing required parameters for scheduled action: ' . 
+                (!$this->server_post_id ? 'server_post_id, ' : '') . 
+                (!$this->server_product_id ? 'server_product_id, ' : '') . 
+                (!$this->subscription_id ? 'subscription_id' : ''));
 
             }
-     
-      
+
+            error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
+
+    
         } catch (\Exception $e) {
 
-            $error_definition = 'Error creating and updating server post > ';
-            $this->handle_exception($e);
-        
             // Update State meta
             update_post_meta($this->server_post_id, '_arsol_state_05_server_post', -1);
 
+            // Handle the exception and continue
             $this->handle_exception($e);
+
+            $subscription->add_order_note(
+                'Circuit breaker triggered due to server provisioning failure. Please review the logs for details.'
+            );
 
             // Trigger the circuit breaker
             ServerCircuitBreaker::trip_circuit_breaker($subscription);
