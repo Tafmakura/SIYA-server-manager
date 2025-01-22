@@ -2013,47 +2013,67 @@ class ServerOrchestrator {
         $assigned_groups = get_post_meta($product_id, '_arsol_assigned_server_groups', true);
         error_log('Raw assigned groups from product ' . $product_id . ': ' . print_r($assigned_groups, true));
         
-        // Ensure we have an array, even if empty
-        if (!is_array($assigned_groups)) {
-            $assigned_groups = $assigned_groups ? array($assigned_groups) : array();
+        // Convert term slugs to term IDs
+        $term_ids = [];
+        if (!empty($assigned_groups)) {
+            foreach ((array)$assigned_groups as $group_slug) {
+                $term = get_term_by('slug', $group_slug, 'arsol_server_group');
+                if ($term) {
+                    $term_ids[] = $term->term_id;
+                }
+            }
         }
         
-        error_log('Processed assigned groups: ' . print_r($assigned_groups, true));
-        return $assigned_groups;
+        error_log('Converted group term IDs: ' . print_r($term_ids, true));
+        return $term_ids;
     }
 
     private function get_product_assigned_tags($product_id) {
         $assigned_tags = get_post_meta($product_id, '_arsol_assigned_server_tags', true);
-        error_log('Raw assigned tags from product ' . $product_id . ': ' . print_r($assigned_tags, true));
+        error_log('Raw assigned tags from product ' . $id . ': ' . print_r($assigned_tags, true));
         
-        // Ensure we have an array, even if empty
-        if (!is_array($assigned_tags)) {
-            $assigned_tags = $assigned_tags ? array($assigned_tags) : array();
+        // Convert term slugs to term IDs
+        $term_ids = [];
+        if (!empty($assigned_tags)) {
+            foreach ((array)$assigned_tags as $tag_slug) {
+                $term = get_term_by('slug', $tag_slug, 'arsol_server_tag');
+                if ($term) {
+                    $term_ids[] = $term->term_id;
+                }
+            }
         }
         
-        error_log('Processed assigned tags: ' . print_r($assigned_tags, true));
-        return $assigned_tags;
+        error_log('Converted tag term IDs: ' . print_r($term_ids, true));
+        return $term_ids;
     }
 
     private function sync_server_groups($server_post_id, $group_ids) {
-        if (empty($group_ids)) return true;
+        if (empty($group_ids)) {
+            error_log('No group IDs to sync for server ' . $server_post_id);
+            return true;
+        }
         error_log('Syncing server groups: ' . print_r($group_ids, true));
         $result = wp_set_object_terms($server_post_id, $group_ids, 'arsol_server_group');
         if (is_wp_error($result)) {
             error_log('Error syncing groups: ' . $result->get_error_message());
             return false;
         }
+        error_log('Successfully synced groups for server ' . $server_post_id);
         return true;
     }
 
     private function sync_server_tags($server_post_id, $tag_ids) {
-        if (empty($tag_ids)) return true;
+        if (empty($tag_ids)) {
+            error_log('No tag IDs to sync for server ' . $server_post_id);
+            return true;
+        }
         error_log('Syncing server tags: ' . print_r($tag_ids, true));
         $result = wp_set_object_terms($server_post_id, $tag_ids, 'arsol_server_tag');
         if (is_wp_error($result)) {
             error_log('Error syncing tags: ' . $result->get_error_message());
             return false;
         }
+        error_log('Successfully synced tags for server ' . $server_post_id);
         return true;
     }
 
