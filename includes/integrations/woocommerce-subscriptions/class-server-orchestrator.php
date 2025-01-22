@@ -1542,13 +1542,6 @@ class ServerOrchestrator {
 
             error_log('[SIYA Server Manager] Updated server post meta data ' . $this->server_post_id);
 
-            // After creating/updating server post
-            $groups = $this->get_product_assigned_groups($server_product_id);
-            $tags = $this->get_product_assigned_tags($server_product_id);
-
-            $this->sync_server_groups($post_id, $groups);
-            $this->sync_server_tags($post_id, $tags);
-
             return true;
         } elseif ($post_id instanceof \WP_Error) {
             $subscription->add_order_note(
@@ -1962,11 +1955,6 @@ class ServerOrchestrator {
             }
         }
 
-
-
-
-
-
     // New helper method to throw exceptions
     private function throw_exception($error_message, $error_definition = null, $line_number = false) {
         
@@ -2007,96 +1995,6 @@ class ServerOrchestrator {
 
         return true; // Return true if the firewall rules are successfully assigned
 
-    }
-
-    private function get_product_assigned_groups($product_id) {
-        $assigned_groups = maybe_unserialize(get_post_meta($product_id, '_arsol_assigned_server_groups', true));
-        error_log('Raw assigned groups from product ' . $product_id . ': ' . print_r($assigned_groups, true));
-        
-        if (empty($assigned_groups)) {
-            error_log('No groups assigned to product ' . $product_id);
-            return [];
-        }
-
-        // Ensure we have an array
-        $assigned_groups = (array)$assigned_groups;
-        
-        // Get the term IDs
-        $term_ids = array_filter(array_map(function($group_id) {
-            $term = get_term($group_id, 'arsol_server_group');
-            return $term && !is_wp_error($term) ? $term->term_id : null;
-        }, $assigned_groups));
-        
-        error_log('Mapped group term IDs: ' . print_r($term_ids, true));
-        return array_values($term_ids); // Reindex array
-    }
-
-    private function get_product_assigned_tags($product_id) {
-        $assigned_tags = maybe_unserialize(get_post_meta($product_id, '_arsol_assigned_server_tags', true));
-        error_log('Raw assigned tags from product ' . $product_id . ': ' . print_r($assigned_tags, true));
-        
-        if (empty($assigned_tags)) {
-            error_log('No tags assigned to product ' . $product_id);
-            return [];
-        }
-
-        // Ensure we have an array
-        $assigned_tags = (array)$assigned_tags;
-        
-        // Get the term IDs
-        $term_ids = array_filter(array_map(function($tag_id) {
-            $term = get_term($tag_id, 'arsol_server_tag');
-            return $term && !is_wp_error($term) ? $term->term_id : null;
-        }, $assigned_tags));
-        
-        error_log('Mapped tag term IDs: ' . print_r($term_ids, true));
-        return array_values($term_ids); // Reindex array
-    }
-
-    private function sync_server_groups($server_post_id, $group_ids) {
-        if (empty($group_ids)) {
-            error_log('No group IDs to sync for server ' . $server_post_id);
-            return true;
-        }
-
-        error_log('Attempting to sync groups for server ' . $server_post_id . ': ' . print_r($group_ids, true));
-        
-        // Clear existing terms first
-        wp_delete_object_term_relationships($server_post_id, 'arsol_server_group');
-        
-        // Set new terms
-        $result = wp_set_object_terms($server_post_id, $group_ids, 'arsol_server_group');
-        
-        if (is_wp_error($result)) {
-            error_log('Error syncing groups: ' . $result->get_error_message());
-            return false;
-        }
-        
-        error_log('Successfully synced groups for server ' . $server_post_id);
-        return true;
-    }
-
-    private function sync_server_tags($server_post_id, $tag_ids) {
-        if (empty($tag_ids)) {
-            error_log('No tag IDs to sync for server ' . $server_post_id);
-            return true;
-        }
-
-        error_log('Attempting to sync tags for server ' . $server_post_id . ': ' . print_r($tag_ids, true));
-        
-        // Clear existing terms first
-        wp_delete_object_term_relationships($server_post_id, 'arsol_server_tag');
-        
-        // Set new terms
-        $result = wp_set_object_terms($server_post_id, $tag_ids, 'arsol_server_tag');
-        
-        if (is_wp_error($result)) {
-            error_log('Error syncing tags: ' . $result->get_error_message());
-            return false;
-        }
-        
-        error_log('Successfully synced tags for server ' . $server_post_id);
-        return true;
     }
 
 }
