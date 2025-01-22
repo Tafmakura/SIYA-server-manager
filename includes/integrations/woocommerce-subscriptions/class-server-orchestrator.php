@@ -204,7 +204,7 @@ class ServerOrchestrator {
 
             } else {
 
-                throw new Exception('Missing required parameters for scheduled action.');
+                throw new \Exception('Missing required parameters for scheduled action.');
 
             }
 
