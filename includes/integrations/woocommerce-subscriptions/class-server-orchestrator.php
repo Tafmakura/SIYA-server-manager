@@ -204,10 +204,7 @@ class ServerOrchestrator {
 
             } else {
 
-                throw new Exception('Missing required parameters for scheduled action: ' . 
-                (!$this->server_post_id ? 'server_post_id, ' : '') . 
-                (!$this->server_product_id ? 'server_product_id, ' : '') . 
-                (!$this->subscription_id ? 'subscription_id' : ''));
+                throw new Exception('Missing required parameters for scheduled action.');
 
             }
 
@@ -218,6 +215,7 @@ class ServerOrchestrator {
 
             // Update State meta
             update_post_meta($this->server_post_id, '_arsol_state_05_server_post', -1);
+
 
             // Handle the exception and continue
             $this->handle_exception($e);
