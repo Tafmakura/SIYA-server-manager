@@ -1515,37 +1515,39 @@ class ServerOrchestrator {
                 'arsol_ssh_private_key' => $ssh_keys['private_key'],
                 'arsol_ssh_public_key' => $ssh_keys['public_key'],
                 'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
-                'arsol_assigned_server_groups' => $server_product->get_meta('_arsol_assigned_server_groups', true),
-                'arsol_assigned_server_tags' => $server_product->get_meta('_arsol_assigned_server_tags', true),
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
+            // Update server post metadata and save
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
+
+            // Assign tags to the server post
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
             $post_id = $this->server_post_id;
             $taxonomy = 'arsol_server_tag';
             $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
             if ($success) {
-                error_log('Terms were successfully assigned.');
+                error_log('Tags successfully assigned to server post.');
             } else {
-                error_log('Failed to assign terms.');
+                error_log('Failed to assign tags to server post.');
             }
 
+            // Assign server groups to the server post
             $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
             $post_id = $this->server_post_id;
             $taxonomy = 'arsol_server_group';
             $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
             if ($success) {
-                error_log('Terms were successfully assigned.');
+                error_log('Groups successfully assigned to server post.');
             } else {
-                error_log('Failed to assign terms.');
+                error_log('Failed to assign groups to server post.');
             }
 
 
 
-            error_log('[SIYA Server Manager] 7777932OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
+            error_log('[SIYA Server Manager]55555OOOOOO00OOOOOOOOOOOOOOOOOOOOOOOOOOOO Server product metadata');
 
             
             $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
