@@ -165,7 +165,7 @@ class ServerOrchestrator {
                 } catch (\Exception $e) {
                     
                     // Rethrow
-                    $this->handle_exception($e,true);
+                    $this->handle_exception($e, true);
                     
             
 
@@ -2004,7 +2004,7 @@ class ServerOrchestrator {
  * @param bool $rethrow Whether to rethrow the exception or not (default is false).
  * @param bool $stack_trace Whether to log the stack trace (default is true).
  */
-private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = true) {
+private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = false) {
 
 
     // Get the error code from the exception (if available)
