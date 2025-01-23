@@ -1996,35 +1996,27 @@ class ServerOrchestrator {
         as_schedule_single_action(time(), $hook, [$args], 'arsol_class_server_orchestrator');
     }
 
-    /**
-     * Handle exceptions with optional rethrowing and stack trace logging.
-     *
-     * @param $e
-     * @param int $error_level The error level (default is E_USER_WARNING).
-     * @param bool $rethrow Whether to rethrow the exception or not (default is false).
-     * @param bool $stack_trace Whether to log the stack trace (default is true).
-     */
     private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = true) {
         // Get the error code from the exception (if available)
         $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
-
+    
         // Get error message from exception
         $error_message = $e->getMessage();
-
+    
         // Get the stack trace
         $trace_array = $e->getTrace();
         
         // Fetch the first trace entry for the file and line
         $first_trace = $trace_array[0] ?? null;
-
+    
         // Fetch the second trace entry for the function name (if available)
         $second_trace = $trace_array[1] ?? null;
         $function_name = $second_trace['function'] ?? 'Unknown function';
         $class_name = $second_trace['class'] ?? 'Unknown class'; // Get the parent class name
-
+    
         // Build the caller info message
         $caller_info = sprintf(
-            "[SIYA Error Handler says] -  %s - %s\n Exception triggered in %s function/method, called from class: %s, file: %s on line: %d\nError Message: %s",
+            "[SIYA Error Handler says] -  %s %s -\n Exception triggered in %s function/method, called from class: %s, file: %s on line: %d\nError Message: %s",
             $error_code_msg,    // Error Code (if available)
             $error_message,     // Error Message
             $function_name,     // Function name from second trace entry
@@ -2033,34 +2025,27 @@ class ServerOrchestrator {
             $first_trace['line'] ?? 'Unknown line', // First trace entry line
             $error_message
         );
-
+    
         // Add caller info to the error message
         $error_message = $caller_info;
-
+    
         // Add stack trace if requested
         if ($stack_trace) {
-            $formatted_trace = [];
-            $counter = 1; // Start numbering from 1 for the stack trace
-            foreach ($trace_array as $trace_entry) {
-                $entry = sprintf(
-                    "Stack Trace #%d:\nFile: %s\nLine: %s\nFunction: %s\nClass: %s\n",
-                    $counter++,
+            // Loop through each trace entry and append to the error message one at a time
+            foreach ($trace_array as $index => $trace_entry) {
+                $formatted_entry = sprintf(
+                    "Stack Trace #%d: File: %s, Line: %s, Function: %s, Class: %s",
+                    $index + 1, // Stack trace numbering starts from 1
                     $trace_entry['file'] ?? 'Unknown file',
                     $trace_entry['line'] ?? 'Unknown line',
                     $trace_entry['function'] ?? 'Unknown function',
                     $trace_entry['class'] ?? 'Unknown class'
                 );
-                $formatted_trace[] = $entry;
-                $formatted_trace[] = "---"; // Add horizontal rule between trace entries
+                // Append each formatted entry to the error message without horizontal rule
+                $error_message .= "\n" . $formatted_entry;
             }
-
-            // Join all formatted trace entries with line breaks
-            $error_message .= "\nStack trace:\n" . implode("\n", $formatted_trace);
         }
-
-        // Log the error with proper formatting using error_log
-        error_log($error_message);
-
+    
         // Optionally, trigger an error if not rethrowing
         if (!$rethrow) {
             trigger_error($error_message, $error_level);
@@ -2069,6 +2054,7 @@ class ServerOrchestrator {
             throw $e;
         }
     }
+    
 
 
 
