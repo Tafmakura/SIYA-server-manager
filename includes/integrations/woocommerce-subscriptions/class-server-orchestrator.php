@@ -1590,6 +1590,38 @@ class ServerOrchestrator {
             $subscription->save();
 
 
+            // Validate required variables for server provisioning
+            if (!$this->server_post_id) {
+                $this->throw_exception('Server post ID is missing');
+            }
+
+            if (!$this->subscription_id) {
+                $this->throw_exception('Subscription ID is missing');
+            }
+
+            if (!$server_product_id) {
+                $this->throw_exception('Server product ID is missing');
+            }
+
+            if (!$server_product) {
+                $this->throw_exception('Server product object is missing');
+            }
+
+            if (!$server_provider_slug) {
+                $this->throw_exception('Server provider slug is missing');
+            }
+
+            // Log validated metadata for debugging
+            error_log(sprintf('#003 [SIYA Server Manager - ServerOrchestrator] Validated server post metadata:%s%s',
+                PHP_EOL,
+                json_encode([
+                    'server_post_id' => $this->server_post_id,
+                    'subscription_id' => $this->subscription_id, 
+                    'server_product_id' => $server_product_id,
+                    'server_provider_slug' => $server_provider_slug
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+            ));
+
             try {
 
                 // Assign tags to the server post
@@ -2024,7 +2056,7 @@ class ServerOrchestrator {
 
             // Build the caller info message
             $caller_info = sprintf(
-                "SIYA Error Message: \"%s\" %s --\n Exception triggered in > %s > function/method, called from class: > %s > contained in the file > %s > on line: (%d)",
+                "SIYA Error Message: \"%s: %s\"--\n Exception triggered in > %s > function/method, called from class: > %s > contained in the file > %s > on line: (%d)",
                 $error_code_msg,    // Error Code (if available)
                 $error_message,     // Error Message
                 $function_name,     // Function name from second trace entry
