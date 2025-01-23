@@ -154,9 +154,6 @@ class ServerOrchestrator {
                     }
                     
                     $this->server_post_id = $server_post_id;
-                    $message = 'Server post created and updated successfully.';
-                    $subscription->add_order_note($message);
-                    error_log($message);
 
                     // Update server metadata
                     update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
