@@ -2000,12 +2000,12 @@ class ServerOrchestrator {
    /**
  * Handle exceptions with optional rethrowing and stack trace logging.
  *
- * @param Throwable $e The exception object.
+ * @param $e .
  * @param int $error_level The error level (default is E_USER_WARNING).
  * @param bool $rethrow Whether to rethrow the exception or not (default is false).
  * @param bool $stack_trace Whether to log the stack trace (default is true).
  */
-private function handle_exception(Throwable $e, int $error_level = E_USER_WARNING, bool $rethrow = false, bool $stack_trace = true) {
+private function handle_exception($e, int $error_level = E_USER_WARNING, bool $rethrow = false, bool $stack_trace = true) {
 
 
     // Get the error code from the exception (if available)
