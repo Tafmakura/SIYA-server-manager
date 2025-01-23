@@ -884,7 +884,7 @@ class ServerOrchestrator {
         );
         
         // Message
-        $message = 'Scheduled agent installation and server connection verification.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+        $message = 'Scheduled verification of server installation agent script on server.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
         
         
         // Update server note
@@ -968,7 +968,7 @@ class ServerOrchestrator {
 
             // Schedule server manager connection verification
             $task_id = uniqid();
-            as_schedule_single_action(time() + 120, 
+            as_schedule_single_action(time(), 
                 'arsol_verify_server_manager_connection_to_server_hook', 
                 [[
                     'subscription_id' => $subscription->get_id(),
