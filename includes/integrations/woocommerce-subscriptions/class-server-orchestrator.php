@@ -1541,6 +1541,7 @@ class ServerOrchestrator {
 
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
         
+        $this->subscription_id = $subscription->get_id();
         $post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
@@ -1590,9 +1591,6 @@ class ServerOrchestrator {
                 'arsol_server_max_applications' => $server_product->get_meta('_arsol_max_applications', true),
                 'arsol_server_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true),
                 'arsol_server_suspension' => 'no', // Add suspension status
-                'arsol_ssh_private_key' => $ssh_keys['private_key'],
-                'arsol_ssh_public_key' => $ssh_keys['public_key'],
-                'arsol_ssh_username' => 'ARSOL' . $this->subscription_id, // Add SSH username
             ];
             $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
