@@ -1591,20 +1591,11 @@ class ServerOrchestrator {
 
 
             try {
-
-                // Validate server product before assigning taxonomies
-                if (!$server_product || !is_object($server_product) || !method_exists($server_product, 'get_meta')) {
-                    $this->throw_exception('Invalid server product object');
-                }
-
-                // Validate server post ID
-                if (!$this->server_post_id || !is_numeric($this->server_post_id)) {
-                    $this->throw_exception('Invalid server post ID');
-                }
-
+                
                 // Assign tags to the server post
-                $tag_meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
                 $post_id = $this->server_post_id;
+
+                $tag_meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
                 $tag_taxonomy = 'arsol_server_tag';
 
                 // Only attempt to assign tags if meta value exists
