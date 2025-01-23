@@ -1538,10 +1538,11 @@ class ServerOrchestrator {
 
 
     // Helper Methods
+    
 
     private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
         
-        $this->subscription_id = $subscription->get_id();
+        $this->subscription_id = $subscription->get_id(); 
         $post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
