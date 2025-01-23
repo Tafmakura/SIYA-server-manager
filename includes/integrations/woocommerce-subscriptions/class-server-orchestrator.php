@@ -130,7 +130,8 @@ class ServerOrchestrator {
                 'Server provisioning started. Subscription will be placed on hold until provisioning is complete. Instruction from payment gateway to change status from Pending to Active will be noted but ignored. '
             );
 
-            $subscription->update_status('on-hold');
+            // TO RESTORE
+           // $subscription->update_status('on-hold');
     
             $this->server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
@@ -1562,10 +1563,6 @@ class ServerOrchestrator {
             // Log the message
             error_log('[SIYA Server Manager] ' . $message);
 
-            // Generate SSH key pair
-            $ssh_keys = $this->generate_key_pair();
-            error_log('[SIYA Server Manager] Generated SSH key pair for server post ID: ' . $this->server_post_id);
-
             // Get server product metadata
             $server_product = wc_get_product($server_product_id);
 
@@ -1717,27 +1714,6 @@ class ServerOrchestrator {
         }
     }
     
-
-
-
-    private function generate_key_pair() {
-        $res = openssl_pkey_new([
-            'private_key_bits' => 2048,
-            'private_key_type' => OPENSSL_KEYTYPE_RSA,
-        ]);
-
-        // Extract the private key from $res to $private_key
-        openssl_pkey_export($res, $private_key);
-
-        // Extract the public key from $res to $public_key
-        $public_key_details = openssl_pkey_get_details($res);
-        $public_key = $public_key_details['key'];
-
-        return [
-            'private_key' => $private_key,
-            'public_key' => $public_key
-        ];
-    }
 
     // Step 2: Provision server and update server post metadata
     protected function provision_server_at_provider($subscription) {
