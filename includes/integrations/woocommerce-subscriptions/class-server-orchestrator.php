@@ -171,9 +171,6 @@ class ServerOrchestrator {
 
                 }
 
-                $this->server_post_id = get_post_meta($this->subscription_id, 'arsol_linked_server_post_id', true);
-                error_log('HOYOOOOOO.'. $this->server_post_id);
-
                 // Update server metadata
                 update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
 
