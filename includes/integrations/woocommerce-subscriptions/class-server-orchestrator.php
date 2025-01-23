@@ -78,7 +78,7 @@ class ServerOrchestrator {
         add_action('arsol_server_shutdown', array($this, 'finish_server_shutdown'), 20, 1);
 
         // Add new action hook for the scheduled processes
-        add_action('arsol_finish_server_provision', array($this, 'finish_server_provision'), 20, 1);
+        add_action('arsol_provision_remote_server_hook', array($this, 'provision_remote_server'), 20, 1);
         add_action('arsol_wait_for_server_active_state_hook', array($this, 'wait_for_server_active_state'), 20, 1);
         add_action('arsol_provision_remote_server', array($this, 'provision_remote_server'), 20, 1);
 
@@ -184,7 +184,7 @@ class ServerOrchestrator {
                            
                     $server_post_id = $this->create_and_update_server_post($subscription);
 
-                    if (is_wp_error($server_post)) {
+                    if (is_wp_error($server_post_id)) {
                         throw new Exception($server_post->get_error_message(), $server_post->get_error_code());
                     }
                     
@@ -230,7 +230,7 @@ class ServerOrchestrator {
                 if ($this->server_post_id && $this->server_product_id && $this->subscription_id) {
                     
                     $task_id = uniqid();
-                    $this->schedule_action('arsol_finish_server_provision', [
+                    $this->schedule_action('arsol_provision_remote_server_hook', [
                         'subscription_id' => $this->subscription_id,
                         'server_post_id' => $this->server_post_id,
                         'server_product_id' => $this->server_product_id,
@@ -238,14 +238,15 @@ class ServerOrchestrator {
                         'task_id' => $task_id
                     ]);
 
-                    // Add order note for the scheduled action
-                    $subscription->add_order_note(
-                        'Scheduled background server provisioning.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
-                    );
+                    // Construct message
+                    $message = 'Scheduled background server provisioning for subscription #' . $this->subscription_id . PHP_EOL . '(Task ID: ' . $task_id . ')';
 
-                    // Log the scheduled action
-                    error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
-    
+                    // Add order note for the scheduled action
+                    $subscription->add_order_note($message);
+
+                    // Log the scheduled action 
+                    error_log($message);
+
                 } else {
     
                     throw new \Exception('Missing required parameters for scheduled action.');
