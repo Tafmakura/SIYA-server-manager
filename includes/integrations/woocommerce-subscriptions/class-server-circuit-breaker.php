@@ -14,7 +14,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
 
     public function __construct() {
         // Hook into WooCommerce subscription status change to active
-        add_action('woocommerce_subscription_status_active', [$this, 'test_circuit'], 15, 1);
+       // add_action('woocommerce_subscription_status_active', [$this, 'test_circuit'], 15, 1);
     }
 
     /**
