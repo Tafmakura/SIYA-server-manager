@@ -1991,73 +1991,81 @@ class ServerOrchestrator {
         return $remote_status;
     }
 
-    private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = true) {
-        // Get the error code from the exception (if available)
-        $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
-    
-        // Get error message from exception
-        $error_message = $e->getMessage();
-    
-        // Get the stack trace
-        $trace_array = $e->getTrace();
-        
-        // Fetch the first trace entry for the file and line
-        $first_trace = $trace_array[0] ?? null;
-    
-        // Fetch the second trace entry for the function name (if available)
-        $second_trace = $trace_array[1] ?? null;
-        $function_name = $second_trace['function'] ?? 'Unknown function';
-        $class_name = $second_trace['class'] ?? 'Unknown class'; // Get the parent class name
-    
-        // Build the caller info message
-        $caller_info = sprintf(
-            "[SIYA Error Handler says] -  %s %s -\n Exception triggered in %s function/method, called from class: %s, file: %s on line: %d\nError Message: %s",
-            $error_code_msg,    // Error Code (if available)
-            $error_message,     // Error Message
-            $function_name,     // Function name from second trace entry
-            $class_name,        // Parent class name from second trace entry
-            $first_trace['file'] ?? 'Unknown file', // First trace entry file
-            $first_trace['line'] ?? 'Unknown line', // First trace entry line
-            $error_message
-        );
-    
-        // Add caller info to the error message
-        $error_message = $caller_info;
-    
-        // Add stack trace if requested
-        if ($stack_trace) {
-            // Add a line to separate the stack trace from the error message
-            $error_message .= "\n--- Stack Trace ---\n";
-    
-            // Loop through each trace entry and append to the error message
-            $formatted_trace = [];
-            $counter = 1; // Stack trace numbering starts from 1
-            foreach ($trace_array as $trace_entry) {
-                $formatted_entry = sprintf(
-                    "Stack Trace #%d: File: %s, Line: %s, Function: %s, Class: %s",
-                    $counter++, // Stack trace numbering starts from 1
-                    $trace_entry['file'] ?? 'Unknown file',
-                    $trace_entry['line'] ?? 'Unknown line',
-                    $trace_entry['function'] ?? 'Unknown function',
-                    $trace_entry['class'] ?? 'Unknown class'
-                );
-                // Add the formatted trace entry and a separator line
-                $formatted_trace[] = $formatted_entry . "\n---"; // Add a separator line after each entry
-            }
-    
-            // Join all formatted trace entries with line breaks and append them to the error message
-            $error_message .= implode("\n", $formatted_trace);
-        }
-    
-        // Optionally, trigger an error if not rethrowing
-        if (!$rethrow) {
-            trigger_error($error_message, $error_level);
-        } else {
-            // If rethrowing, log it with a specific notice
-            throw $e;
-        }
+    // New helper method to schedule actions
+    private function schedule_action($hook, $args) {
+        as_schedule_single_action(time(), $hook, [$args], 'arsol_class_server_orchestrator');
     }
-    
+
+        /**
+         * Handle exceptions with optional rethrowing and stack trace logging.
+         *
+         * @param $e
+         * @param int $error_level The error level (default is E_USER_WARNING).
+         * @param bool $rethrow Whether to rethrow the exception or not (default is false).
+         * @param bool $stack_trace Whether to log the stack trace (default is true).
+         */
+        private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = false) {
+            // Get the error code from the exception (if available)
+            $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
+
+            // Get error message from exception
+            $error_message = $e->getMessage();
+
+            // Get the stack trace
+            $trace_array = $e->getTrace();
+            
+            // Fetch the first trace entry for the file and line
+            $first_trace = $trace_array[0] ?? null;
+
+            // Fetch the second trace entry for the function name (if available)
+            $second_trace = $trace_array[1] ?? null;
+            $function_name = $second_trace['function'] ?? 'Unknown function';
+            $class_name = $second_trace['class'] ?? 'Unknown class'; // Get the parent class name
+
+            // Build the caller info message
+            $caller_info = sprintf(
+                "[SIYA Error Handler says] --  %s %s --\n Exception triggered in -- %s -- function/method, called from class: -- %s --, contained in the file -- %s -- on line: (%d)",
+                $error_code_msg,    // Error Code (if available)
+                $error_message,     // Error Message
+                $function_name,     // Function name from second trace entry
+                $class_name,        // Parent class name from second trace entry
+                $first_trace['file'] ?? 'Unknown file', // First trace entry file
+                $first_trace['line'] ?? 'Unknown line', // First trace entry line
+            );
+
+            // Add caller info to the error message
+            $error_message = $caller_info;
+
+            // Add stack trace if requested
+            if ($stack_trace) {
+                $formatted_trace = [];
+                $counter = 1; // Start numbering from 1 for the stack trace
+                foreach ($trace_array as $trace_entry) {
+                    $entry = sprintf(
+                        "Stack Trace #%d:\nFile: %s\nLine: %s\nFunction: %s\nClass: %s\n",
+                        $counter++,
+                        $trace_entry['file'] ?? 'Unknown file',
+                        $trace_entry['line'] ?? 'Unknown line',
+                        $trace_entry['function'] ?? 'Unknown function',
+                        $trace_entry['class'] ?? 'Unknown class'
+                    );
+                    $formatted_trace[] = $entry;
+                    $formatted_trace[] = "---"; // Add horizontal rule between trace entries
+                }
+
+                // Join all formatted trace entries with line breaks
+                $error_message .= "\nStack trace:\n" . implode("\n", $formatted_trace);
+            }
+
+            // Optionally, trigger an error if not rethrowing
+            if (!$rethrow) {
+                trigger_error($error_message, $error_level);
+            } else {
+                // If rethrowing, log it with a specific notice
+                throw $e;
+            }
+        }
+
 
 
 
