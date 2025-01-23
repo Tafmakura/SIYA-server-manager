@@ -239,7 +239,7 @@ class ServerOrchestrator {
                     ]);
 
                     // Construct message
-                    $message = 'Scheduled background server provisioning for subscription #' . $this->subscription_id . PHP_EOL . '(Task ID: ' . $task_id . ')';
+                    $message = 'Scheduled remote server provisioning for subscription #' . $this->subscription_id . PHP_EOL . '(Task ID: ' . $task_id . ')';
 
                     // Add order note for the scheduled action
                     $subscription->add_order_note($message);
