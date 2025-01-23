@@ -2004,7 +2004,7 @@ class ServerOrchestrator {
      * @param bool $rethrow Whether to rethrow the exception or not (default is false).
      * @param bool $stack_trace Whether to log the stack trace (default is true).
      */
-    private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = false) {
+    private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = true) {
         // Get the error code from the exception (if available)
         $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
 
@@ -2033,17 +2033,21 @@ class ServerOrchestrator {
         if ($stack_trace) {
             $trace_array = $e->getTrace();
             $formatted_trace = [];
+            $counter = 1; // Start numbering from 1 for the stack trace
             foreach ($trace_array as $trace_entry) {
                 $entry = sprintf(
-                    "File: %s\nLine: %s\nFunction: %s\nClass: %s\n",
+                    "Stack Trace #%d:\nFile: %s\nLine: %s\nFunction: %s\nClass: %s\n",
+                    $counter++,
                     $trace_entry['file'] ?? 'Unknown file',
                     $trace_entry['line'] ?? 'Unknown line',
                     $trace_entry['function'] ?? 'Unknown function',
                     $trace_entry['class'] ?? 'Unknown class'
                 );
                 $formatted_trace[] = $entry;
+                $formatted_trace[] = "---"; // Add horizontal rule between trace entries
             }
 
+            // Join all formatted trace entries with line breaks
             $error_message .= "\nStack trace:\n" . implode("\n", $formatted_trace);
         }
 
@@ -2055,6 +2059,7 @@ class ServerOrchestrator {
             throw $e;
         }
     }
+
 
 
     // New helper method to throw exceptions
