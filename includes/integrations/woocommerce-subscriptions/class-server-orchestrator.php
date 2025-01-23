@@ -158,6 +158,9 @@ class ServerOrchestrator {
                     // Update server metadata
                     update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
 
+                    //Update poststatus variable to 2
+                    $this->server_post_status = 2;
+
 
                 } catch (\Exception $e) {
                     
@@ -172,6 +175,9 @@ class ServerOrchestrator {
                  $message = 'Server post exists. Server post ID: ' . $this->server_post_id;
 
             }
+
+            // Check latest server post status 
+
 
             if ($this->server_post_status == 2) {
 
