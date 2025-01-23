@@ -153,6 +153,7 @@ class ServerPost {
    
    
     public static function get_server_post_from_subscription($subscription) {
+        
         // Get the subscription ID
         $subscription_id = $subscription->get_id();
     

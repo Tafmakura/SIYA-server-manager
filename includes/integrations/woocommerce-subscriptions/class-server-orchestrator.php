@@ -83,7 +83,7 @@ class ServerOrchestrator {
         add_action('arsol_provision_remote_server', array($this, 'provision_remote_server'), 20, 1);
 
         // Add new action hooks for server powerup
-        add_action('woocommerce_subscription_status_active', array($this, 'start_server_powerup'), 20, 1);
+      //TODO DELETE add_action('woocommerce_subscription_status_active', array($this, 'start_server_powerup'), 20, 1);
         add_action('arsol_server_powerup', array($this, 'finish_server_powerup'), 20, 1);
 
         add_action('woocommerce_subscription_status_cancelled', array($this, 'start_server_deletion'), 10, 1);
@@ -102,6 +102,50 @@ class ServerOrchestrator {
         add_action('arsol_install_server_manager_agent_on_server_hook', [$this, 'install_server_manager_agent_on_server']);
         add_action('arsol_verify_server_manager_agent_installation_on_server_hook', [$this, 'verify_server_manager_agent_installation_on_server'], 10, 2);
         add_action('arsol_verify_server_manager_connection_to_server_hook', [$this, 'verify_server_manager_connection_to_server'], 10, 2);
+    }
+
+    // Prepare the on button
+    public function start_server_preflight_check($subscription) {
+        try {
+
+            // Primary Check: Look for linked server product
+            $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+
+            if (!$this->server_product_id) {
+                error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
+                return;
+            }
+
+            // Test the circuit
+            $circuit_breaker_instance = new ServerCircuitBreaker();
+            $circuit_breaker_instance->test_circuit($this->subscription);
+
+        } catch (\Exception $e) {
+
+            // Catch and handle the exception
+            $this->handle_exception($e, true);
+        
+        }
+        
+    }
+
+    // Prepare the on button
+    public function start_server_repair($subscription) {
+        try {
+            // Primary Check: Look for linked server product
+            $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+
+            if (!$this->server_product_id) {
+                error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
+                return;
+            }
+            // Test the circuit
+            $circuit_breaker_instance = new ServerCircuitBreaker();
+            $circuit_breaker_instance->test_circuit($this->subscription);
+        } catch (\Exception $e) {
+            // Catch and handle the exception
+            $this->handle_exception($e, true);
+        }
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -126,22 +170,13 @@ class ServerOrchestrator {
 
             error_log ('#001 [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
 
-            
-            /* TO RESTORE
-            // Place subscription on hold until deployment is done 
-            $subscription->add_order_note(
-                'Server provisioning started. Subscription will be placed on hold until provisioning is complete. Instruction from payment gateway to change status from Pending to Active will be noted but ignored. '
-            );
            
-         
-           $subscription->update_status('on-hold');
-            */
           
             // Check if the server post already exists
-            $server_post = ServerPost::get_server_post_from_subscription($subscription);
+            $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
 
             // If the server post does not exist, create it in the database
-            if (!$server_post) {
+            if (!$server_post_id) {
 
                 try {
 
@@ -394,198 +429,126 @@ class ServerOrchestrator {
     
     // Step 3: Wait for server active state (Check server status) 
     public function wait_for_server_active_state($server_post_id, $task_id = null) {
-        error_log('#015 [SIYA Server Manager - ServerOrchestrator] Scheduled server status update started');
-        
-        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-        $server_manager = get_post_meta($server_post_id, 'arsol_server_manager', true);
-        $connect_server_manager = get_post_meta($server_post_id, '_arsol_server_manager_required', true);
-        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-        $target_status = 'active';
-        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
-        $subscription = wcs_get_subscription($subscription_id);
-        $poll_interval = 10;
-        $time_out = 120;
-        $max_retries = 10;
-        $retry_count = 0;
-    
-        // Initialize task ID variable
-        $task_id = uniqid();
-    
-        // Fetch current IP status
-        $server_ip_status = get_post_meta($server_post_id, '_arsol_state_20_ip_address', true);
-    
-        // If IP status is not 2, we want to check and update the server status
-        if ($server_ip_status != 2) {
-            error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is not 2. Checking and updating server status.');
-    
-            // Start the polling loop only if the IPs are not validated yet
-            $start_time = time();
 
-            while ((time() - $start_time) < $time_out) {
+        try {
 
-                try {
-                    // Fetch the current server status
-                    $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
-                    
-                    error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking remote status: ' . json_encode($remote_status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    
-                    // If remote status matches the target status (e.g., "active")
-                    $target_status = 'active';
-
-                    if ($remote_status['provisioned_remote_status'] === $target_status) {
-                        error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
-                   
-                        try {
-
-                            // Fetch the provisioned server IPs
-                            $server_ipv4 = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id, 'ipv4');
-                            
-                            // Check if the IP threw WP errors
-                            if (is_wp_error($server_ipv4)) {
-                                $error_message = $server_ipv4->get_error_message();
-                                $this->throw_exception($error_message);
-                            }
-                        
-                        } catch (\Exception $e) {
-
-                            $error_definition = 'Error fetching provisioned server IP';
-
-                            // Update server metadata on failed provisioning and trip CB
-                            update_post_meta($this->server_post_id, '_arsol_state_20_ip_addres', -1);
-
-                            // Handle the exception and exit
-                            $this->handle_exception($e);
-
-                            // Trigger the circuit breaker
-                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
-                            return false; // Add fallback return false
-
-                        }
-
-                        // Get the IPv6 address to add to metadata if available
-                        $server_ipv6 = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id, 'ipv6');
-                        
-                        // Save IP addresses to post meta for RunCloud deployment
-                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $server_ipv4);
-                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $server_ipv6);
-                        update_post_meta($server_post_id, '_arsol_state_20_ip_address', 2);
-
-                        // Add order note with IP addresses
-                        $success_message = sprintf(
-                            'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
-                            PHP_EOL,
-                            $server_ipv4 ?: 'Not provided',
-                            PHP_EOL,
-                            $server_ipv6 ?: 'Not provided'
-                        );
-
-                        $subscription->add_order_note($success_message);
-                        error_log($success_message);
-
-                        break; // Exit the loop after acquiring the IP addresses
-                        
-                    } 
-
-                } catch (\Exception $e) {
-                   
-                    $error_definition = 'Error checking server status';
-
-                    // Handle the exception and exit
-                    $this->handle_exception($e);
-                    
-                    return false; // Add fallback return false
-
-                }
+            error_log('#015 [SIYA Server Manager - ServerOrchestrator] Scheduled server status update started');
             
-                // Timeout check inside the loop
-                if ((time() - $start_time) >= $time_out) {
-                    // Timeout reached without acquiring the target status
-                    error_log("#023 [SIYA Server Manager] Timeout reached for server post ID: " . $server_post_id);
-                    $subscription->add_order_note('Server provisioning failed: Timeout reached.');
+            $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+            $server_manager = get_post_meta($server_post_id, 'arsol_server_manager', true);
+            $connect_server_manager = get_post_meta($server_post_id, '_arsol_server_manager_required', true);
+            $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+            $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+            $subscription = wcs_get_subscription($subscription_id);
+            $poll_interval = 10;
+            $time_out = 120;
+        
+        
+            // Initialize task ID variable
+            $task_id = uniqid();
+        
+        
+            // Fetch current IP status
+            $server_ip_status = get_post_meta($server_post_id, '_arsol_state_20_ip_address', true);
+        
+        
+            // If IP status is not 2, we want to check and update the server status
+            if ($server_ip_status != 2) {
+
+                error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is not 2. Checking and updating server status.');
+        
+                // Use the new wait_for_remote_server_status method
+                try {
+
+                    $status_check = $this->wait_for_remote_server_status($server_post_id, 'active', $poll_interval, $time_out);
                     
-                    // Check if the retry count is within the allowed maximum
-                    if ($retry_count < $max_retries) {
-                        error_log(sprintf('#024 [SIYA Server Manager] Retrying server status update. Attempt: %d', $retry_count + 1));
+                    if (!$status_check) {
 
-                        // Increment retry count and schedule next retry
-                        $task_id = uniqid(); // New task ID for retry
-                        as_schedule_single_action(
-                            time() + 10, // Retry after 10 seconds
-                            'arsol_wait_for_server_active_state_hook',
-                            [[
-                                'server_provider' => $server_provider_slug,
-                                'connect_server_manager' => $connect_server_manager,
-                                'server_manager' => $server_manager,
-                                'server_provisioned_id' => $server_provisioned_id,
-                                'target_status' => $target_status,
-                                'server_post_id' => $server_post_id,
-                                'poll_interval' => $poll_interval,
-                                'time_out' => $time_out,
-                                'retry_count' => $retry_count + 1,
-                                'task_id' => $task_id
-                            ]],
-                            'arsol_class_server_orchestrator'
-                        );
-
-                        // Add order note for retry
-                        $subscription->add_order_note('Could not get a server status. Scheduled a retry.' . PHP_EOL . '(Task ID: ' . $task_id . ')');
-                        
-                        return false; // Retry
-
+                        $this->throw_exception('Server status check failed');
+                    
                     }
 
-                    // If max retries have been reached, stop the process
-                    return false; // Max retries reached or timeout
+                } catch (\Exception $e) {
+                    
+                    // Handle the exception and exit
+                    $this->handle_exception($e, true);
+                    return false;
+                
                 }
+        
+        
+                // Get the IPv6 address to add to metadata if available
+                $server_ipv6 = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id, 'ipv6');
+        
+                // Save IP addresses to post meta for RunCloud deployment
+                update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $server_ipv4);
+                update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $server_ipv6);
+                update_post_meta($server_post_id, '_arsol_state_20_ip_address', 2);
+        
+                // Add order note with IP addresses
+                $success_message = sprintf(
+                    'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
+                    PHP_EOL,
+                    $server_ipv4 ?: 'Not provided',
+                    PHP_EOL,
+                    $server_ipv6 ?: 'Not provided'
+                );
+        
+                $subscription->add_order_note($success_message);
+                error_log($success_message);
 
-                // Wait for the next polling interval before retrying
-                sleep($poll_interval);
+            } else {
+
+                error_log('STATE CHECK (20): IP status is okay.');
             }
-           
-        } else {
+        
+            // Proceed with RunCloud deployment or mark as active
+            if ($connect_server_manager === 'yes') {
+                // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
+                $task_id = uniqid();
+                as_schedule_single_action(
+                    time(),
+                    'arsol_start_server_manager_connection_hook',
+                    [$server_post_id, $task_id ?: uniqid()],
+                    'arsol_class_server_orchestrator'
+                );
+        
+                // Add order note to inform the user about scheduling
+                $message = 'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')';
+        
+                // Add order note for the scheduled action
+                $subscription->add_order_note($message);
+        
+                // Log the message
+                error_log($message);
 
-            error_log ('STATE CHECK (20): IP status is okay.');
-        }    
-    
-        // Proceed with RunCloud deployment or mark as active
-        if ($connect_server_manager === 'yes') {
-           
-            // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
-            $task_id = uniqid(); 
-            as_schedule_single_action(
-                time(),
-                'arsol_start_server_manager_connection_hook',
-                [$server_post_id, $task_id ?: uniqid()],
-                'arsol_class_server_orchestrator'
-            );
+            } else {
 
-            // Add order note to inform the user about scheduling
-            $message = 'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')';
-            
-            // Add order note for the scheduled action
-            $subscription->add_order_note(
-                $message
-            );
+                // No server manager required, mark the subscription as active
+                $success_message = 'Server is ready, no server manager required. Activating subscription... Good day and good luck!';
+        
+                // Update subscription status to active
+                $subscription->add_order_note($success_message);
+        
+                // Log the success message
+                error_log($success_message);
+        
+                // Activate Subscription
+                $subscription->update_status('active');
+            }
 
-            // Log the message
-            error_log($message);
+        } catch (\Exception $e) {
 
-        } else {
+            // Update server metadata on failed provisioning and trip CB
+            update_post_meta($this->server_post_id, '_arsol_state_20_ip_address', -1);
 
-            // No server manager required, mark the subscription as active
-            $success_message = 'Server is ready, no server manager required. Activating subscription... Good day and good luck!';
-            
-            // Update subscription status to active
-            $subscription->add_order_note($success_message);
+            // Handle the exception and exit
+            $this->handle_exception($e);
 
-            // Log the success message
-            error_log($success_message);
+            return false; // Add fallback return false
 
-            // Activate Subscription
-            $subscription->update_status('active');
         }
-
+    
     }
     
     // Step 4 (Optional): Create server in Runcloud
@@ -1172,35 +1135,28 @@ class ServerOrchestrator {
     }
 
     public function start_server_powerup($subscription) {
-        // Early validation of required parameters
-        $subscription_id = $subscription->get_id();
-        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-        
+       
+        // Get server post_id from subscription 
+        $server_post_id =  $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
+
         // If no linked server post ID is found, log the error and exit
-        if (!$server_post_id) {
-            error_log(sprintf('#041 No linked server post ID found for power-up. Subscription ID: %s', $subscription_id));
-            return;
+        if(!$server_post_id) {
+            $this->throw_exception('Server post not found for power-up. Subscription ID: ' . $subscription->get_id());
+            return false; // Add fallback return false
         }
-
-        // Check circuit breaker status for power-up (added rule to allow power up when circuit breaker is testing circuit but not when it is off)
-        $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-        if ($this->server_circuit_breaker_position == -1) {
-            error_log('#042 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped or in progress. Skipping power-up.');
-            return;
-        }
-
+        
         // Fetch server metadata required for the power-up process
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         
         // If any critical metadata is missing, log the error and exit
         if (!$server_provider_slug || !$server_provisioned_id) {
-            error_log(sprintf('[SIYA Server Manager] Missing server provisioning details. Server Post ID: %s', $server_post_id));
-            return;
+
+            $this->throw_exception('Missing server provisioning details');
+            return false;// Add fallback return false
         }
 
         // Initialize the server provider instance
-        $this->initialize_server_provider($server_provider_slug);
         $task_id = uniqid();
 
         // Schedule the power-up action
@@ -1215,6 +1171,7 @@ class ServerOrchestrator {
         $subscription->add_order_note(
             'Server power-up scheduled.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
         );
+    
     }
 
     public function finish_server_powerup($args) {
@@ -1276,6 +1233,7 @@ class ServerOrchestrator {
                 $subscription->add_order_note(
                     'Retrying server power-up.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                 );
+
             } else {
                 error_log(sprintf('#047 Maximum retry attempts reached. Server power-up failed. Server Post ID: %s', $server_post_id));
                 $subscription->add_order_note('Maximum retry attempts reached. Server power-up failed.');
@@ -2053,6 +2011,111 @@ class ServerOrchestrator {
 
     }
 
+    public function wait_for_remote_server_status($server_post_id, $target_status, $poll_interval = 10, $time_out = 120, $max_retries = 10) {
+        error_log("[SIYA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
+        $start_time = time();
+        $attempts = 0;
+
+        try {
+            while ((time() - $start_time) < $time_out) {
+                try {
+                    // Fetch the current server status
+                    $remote_status = $this->update_server_status(
+                        $server_post_id,
+                        get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
+                        get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
+                    );
+
+                    error_log('#017 [SIYA Server Manager - ServerOrchestrator] Checking remote status: ' . json_encode($remote_status, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+                    // If remote status matches the target status (e.g., "active")
+                    if (!empty($remote_status['provisioned_remote_status']) && $remote_status['provisioned_remote_status'] === $target_status) {
+                        error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
+
+                        try {
+                            // Fetch the provisioned server IPs
+                            $server_ipv4 = $this->get_provisioned_server_ip(get_post_meta($server_post_id, 'arsol_server_provider_slug', true), get_post_meta($server_post_id, 'arsol_server_provisioned_id', true), 'ipv4');
+
+                            // Check if the IP threw WP errors
+                            if (is_wp_error($server_ipv4)) {
+                                $error_message = $server_ipv4->get_error_message();
+                                $this->throw_exception($error_message);
+                            }
+
+                        } catch (\Exception $e) {
+                            $error_definition = 'Error fetching provisioned server IP';
+
+                            // Update server metadata on failed provisioning and trip CB
+                            update_post_meta($this->server_post_id, '_arsol_state_20_ip_addres', -1);
+
+                            // Handle the exception and exit
+                            $this->handle_exception($e);
+
+                            // Trigger the circuit breaker
+                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                            return false; // Add fallback return false
+                        }
+
+                        // Get the IPv6 address to add to metadata if available
+                        $server_ipv6 = $this->get_provisioned_server_ip(get_post_meta($server_post_id, 'arsol_server_provider_slug', true), get_post_meta($server_post_id, 'arsol_server_provisioned_id', true), 'ipv6');
+
+                        // Save IP addresses to post meta for RunCloud deployment
+                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $server_ipv4);
+                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $server_ipv6);
+                        update_post_meta($server_post_id, '_arsol_state_20_ip_address', 2);
+
+                        // Add order note with IP addresses
+                        $success_message = sprintf(
+                            'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
+                            PHP_EOL,
+                            $server_ipv4 ?: 'Not provided',
+                            PHP_EOL,
+                            $server_ipv6 ?: 'Not provided'
+                        );
+
+                        $subscription->add_order_note($success_message);
+                        error_log($success_message);
+
+                        break; // Exit the loop after acquiring the IP addresses
+                    }
+
+                } catch (\Exception $e) {
+                    $error_definition = 'Error checking server status';
+
+                    // Handle the exception and exit
+                    $this->handle_exception($e);
+
+                    return false; // Add fallback return false
+                }
+
+                // Timeout check inside the loop
+                if ((time() - $start_time) >= $time_out) {
+                    // Timeout reached without acquiring the target status
+                    error_log("#023 [SIYA Server Manager] Timeout reached for server post ID: " . $server_post_id);
+                    $subscription->add_order_note('Server provisioning failed: Timeout reached.');
+
+                    // Throw timeout exception if maximum retries or timeout is reached
+                    throw new \Exception("Server status check timed out after {$time_out} seconds. Current retry attempt: {$attempts}");
+                    
+                    // If max retries have been reached, stop the process
+                    return false; // Max retries reached or timeout
+                }
+
+                $attempts++;
+                sleep($poll_interval);
+            }
+            
+        } catch (\Exception $e) {
+
+            error_log("[SIYA] Server failed to reach the target status '{$target_status}' within time.");
+            $this->handle_exception($e);
+            return false;
+        }
+
+        error_log("[SIYA] Server failed to reach the target status '{$target_status}' within time.");
+        return false;
+    }
 }
 
 
