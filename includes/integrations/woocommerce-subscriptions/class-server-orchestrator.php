@@ -2021,6 +2021,8 @@ private function handle_exception($e, bool $rethrow = false, int $error_level = 
     $caller = next(debug_backtrace());
     $caller_info = sprintf(
         "Exception triggered in function: %s, called from file: %s on line: %d\nError Message: %s",
+        $backtrace = debug_backtrace();
+        $caller = next($backtrace);
         $caller['function'] ?? 'Unknown function',
         $caller['file'] ?? 'Unknown file',
         $caller['line'] ?? 'Unknown line',
