@@ -91,9 +91,6 @@ class ServerOrchestrator {
         // Add new action hook for deploying to RunCloud
         add_action('arsol_start_server_manager_connection_hook', array($this, 'start_server_manager_connection'), 20, 2);
 
-        // Add new action hook for the scheduled server manager connection completion
-        add_action('arsol_finish_server_manager_connection_hook', array($this, 'finish_server_manager_connection'), 20, 1);
-
         // Add new action hooks for server connection
         add_action('arsol_verify_server_manager_connection_hook', [$this, 'verify_server_manager_connection']);
 
@@ -553,6 +550,7 @@ class ServerOrchestrator {
         if ($connect_server_manager === 'yes') {
            
             // Schedule deploy_to_runcloud_and_update_metadata using Action Scheduler (only once)
+            $task_id = uniqid(); 
             as_schedule_single_action(
                 time(),
                 'arsol_start_server_manager_connection_hook',
@@ -711,18 +709,21 @@ class ServerOrchestrator {
 
         if ($server_deployed_status == 2) {
            
-            // Schedule finish_server_manager_connection using Action Scheduler
-            as_schedule_single_action(time(), 
-                'arsol_finish_server_manager_connection_hook', 
+            // Schedule apply_firewall_rules using Action Scheduler
+            $task_id = uniqid(); 
+            as_schedule_single_action(
+                time(),
+                'arsol_apply_firewall_rules_hook',
                 [[
                     'server_post_id' => $server_post_id,
-                    'task_id' => $args['task_id']
+                    'task_id' => $task_id
                 ]],  
-                'arsol_class_server_orchestrator');
-    
+                'arsol_class_server_orchestrator'
+            );
+
             // Add order note for scheduling the next step
             $subscription->add_order_note(
-                'Scheduled the completion of the server manager connection.' . PHP_EOL . '(Task ID: ' . $args['task_id'] . ')'
+                'Scheduled the completion of the server manager connection.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
             );
             
             // Log the scheduling
@@ -731,42 +732,18 @@ class ServerOrchestrator {
     
     }
 
-    // Install Runcloud agent script on provisioned server to connect server to Runcloud
-    public function finish_server_manager_connection($args) {
-        
-        // Retrieve server and subscription data
+    public function apply_firewall_rules($args) {
+        // Now handling manager connection finishing logic here
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
-    
+
         if (!$subscription) {
             error_log('Failed to retrieve subscription for ID: ' . $subscription_id);
-            return; // Exit on failure
+            return;
         }
-    
-        // Log subscription retrieval
         error_log('Subscription retrieved successfully: ' . $subscription->get_id());
-    
-        // Schedule applying firewall rules instead of directly doing it here
-        as_schedule_single_action(
-            time(),
-            'arsol_apply_firewall_rules_hook',
-            [[$args]],
-            'arsol_class_server_orchestrator'
-        );
-        $subscription->add_order_note('Scheduled firewall application.');
-    }    
-
-    public function apply_firewall_rules($args) {
-        $server_post_id = $args['server_post_id'];
-        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
-        $subscription = wcs_get_subscription($subscription_id);
-        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
-        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-
-        // Open ports if they haven't been successfully opened before
-        $firewall_status = get_post_meta($server_post_id, '_arsol_state_40_firewall_rules', true);
-        
+        $subscription->add_order_note('Server manager connection finishing logic triggered in apply_firewall_rules.');
         if ($firewall_status != 2) {
 
             try {
@@ -812,13 +789,21 @@ class ServerOrchestrator {
         }
 
         // Schedule installing server manager agent
+        $task_id = uniqid(); 
         as_schedule_single_action(
             time(),
             'arsol_install_server_manager_agent_on_server_hook',
-            [[$args]],
+            [[
+                'server_post_id' => $server_post_id,
+                'task_id' => $task_id
+            ]],
             'arsol_class_server_orchestrator'
         );
-        $subscription->add_order_note('Scheduled server manager agent installation.');
+         // Add order note for scheduling the next step
+         $subscription->add_order_note(
+            'Scheduled the installation of the server manager agent on server.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+        );
+        
     }
 
     public function install_server_manager_agent_on_server($args) {
@@ -899,6 +884,7 @@ class ServerOrchestrator {
         
         // Message
         $message = 'Scheduled agent installation and server connection verification.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+        
         
         // Update server note
         $subscription->add_order_note(
@@ -1671,7 +1657,7 @@ class ServerOrchestrator {
                 // Check if the value is a nested array
                 if (is_array($value)) {
                     // Loop through the nested array and add term IDs to the collection
-                    foreach ($value as $nested_value) {
+                    foreach ($nested_value as $nested_value) {
                         $term_ids[] = (int) $nested_value; // Treat as term ID
                     }
                 } else {
@@ -1818,7 +1804,7 @@ class ServerOrchestrator {
 
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Exception caught: %s', $e->getMessage()));
-            $this->throw_exception($e->getMessage(), 'Error provisioning server');
+            $this->throw_exception($e.getMessage(), 'Error provisioning server');
         }
     }
 
