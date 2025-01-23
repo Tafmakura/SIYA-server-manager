@@ -106,6 +106,7 @@ class ServerOrchestrator {
 
     // Step 1: Start server provisioning process (Create server post)
     public function start_server_provision($subscription) {
+       
         try {
 
             $this->subscription = $subscription;
@@ -176,7 +177,6 @@ class ServerOrchestrator {
                  // Define the message
                  $message = 'Server post exists. Server post ID: ' . $this->server_post_id;
 
-
             }
 
             if ($this->server_post_status == 2) {
@@ -202,9 +202,14 @@ class ServerOrchestrator {
                         'server_provider_slug' => $this->server_provider_slug,
                         'task_id' => $task_id
                     ]);
+
+                    // Add order note for the scheduled action
                     $subscription->add_order_note(
                         'Scheduled background server provisioning.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
                     );
+
+                    // Log the scheduled action
+                    error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
     
                 } else {
     
@@ -212,13 +217,10 @@ class ServerOrchestrator {
     
                 }
                
+            
             }
 
          
-
-            error_log('#004 [SIYA Server Manager - ServerOrchestrator] Scheduled background server provision for subscription ' . $this->subscription_id);
-
-    
         } catch (\Exception $e) {
 
             // Update State meta
