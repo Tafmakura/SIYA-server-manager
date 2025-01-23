@@ -737,6 +737,9 @@ class ServerOrchestrator {
         $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
+        $firewall_status = get_post_meta($server_post_id, '_arsol_state_40_firewall_rules', true);
+        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
 
         if (!$subscription) {
             error_log('Failed to retrieve subscription for ID: ' . $subscription_id);
@@ -766,7 +769,7 @@ class ServerOrchestrator {
                     error_log($message);
                     
                 } 
-                
+
                 
             } catch (\Exception $e) {
    
