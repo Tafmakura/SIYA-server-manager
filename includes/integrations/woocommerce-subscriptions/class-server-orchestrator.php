@@ -99,8 +99,8 @@ class ServerOrchestrator {
         // Add new action hooks for firewall rules and agent installation
         add_action('arsol_apply_firewall_rules_hook', [$this, 'apply_firewall_rules']);
         add_action('arsol_install_server_manager_agent_on_server_hook', [$this, 'install_server_manager_agent_on_server']);
-        add_action('arsol_verify_server_manager_agent_installation_on_server_hook', [$this, 'verify_server_manager_agent_installation_on_server']);
-        add_action('arsol_verify_server_manager_connection_to_server_hook', [$this, 'verify_server_manager_connection_to_server']);
+        add_action('arsol_verify_server_manager_agent_installation_on_server_hook', [$this, 'verify_server_manager_agent_installation_on_server'], 10, 2);
+        add_action('arsol_verify_server_manager_connection_to_server_hook', [$this, 'verify_server_manager_connection_to_server'], 10, 2);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -875,11 +875,7 @@ class ServerOrchestrator {
 
         as_schedule_single_action(time() + 120, 
             'arsol_verify_server_manager_agent_installation_on_server_hook', 
-            [[
-                'subscription_id' => $subscription->get_id(),
-                'server_post_id' => $server_post_id,
-                'task_id' => $task_id
-            ]],  
+            [$server_post_id, $task_id],  
             'arsol_class_server_orchestrator'
         );
         
@@ -896,9 +892,8 @@ class ServerOrchestrator {
         error_log($message);
     }
 
-    public function verify_server_manager_agent_installation_on_server($args) {
-        $server_post_id = $args['server_post_id'];
-        $subscription_id = $args['subscription_id'];
+    public function verify_server_manager_agent_installation_on_server($server_post_id, $task_id) {
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
         $server_manager_instance = new Runcloud();
 
@@ -925,7 +920,7 @@ class ServerOrchestrator {
                             update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
 
                             // Success message
-                            $message = 'Script installation completed successfully.';
+                            $message = 'Script installation verified.';
                             $subscription->add_order_note($message);
                             error_log($message);
 
@@ -967,19 +962,9 @@ class ServerOrchestrator {
             }
 
             // Schedule server manager connection verification
-            $task_id = uniqid();
             as_schedule_single_action(time(), 
                 'arsol_verify_server_manager_connection_to_server_hook', 
-                [[
-                    'subscription_id' => $subscription->get_id(),
-                    'server_post_id' => $server_post_id,
-                    'server_id' => get_post_meta($server_post_id, 'arsol_server_deployed_id', true),
-                    'ssh_host' => get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true),
-                    'ssh_username' => get_post_meta($server_post_id, 'arsol_ssh_username', true),
-                    'ssh_private_key' => get_post_meta($server_post_id, 'arsol_ssh_private_key', true),
-                    'ssh_port' => 22,
-                    'task_id' => $task_id
-                ]],  
+                [$server_post_id, $task_id],  
                 'arsol_class_server_orchestrator'
             );
 
@@ -995,9 +980,8 @@ class ServerOrchestrator {
         }
     }
 
-    public function verify_server_manager_connection_to_server($args) {
-        $server_post_id = $args['server_post_id'];
-        $subscription_id = $args['subscription_id'];
+    public function verify_server_manager_connection_to_server($server_post_id, $task_id) {
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
         $server_manager_instance = new Runcloud();
 
