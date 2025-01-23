@@ -140,7 +140,7 @@ class ServerOrchestrator {
             // Check if the server post already exists
             $server_post = ServerPost::get_server_post_from_subscription($subscription);
 
-            // If the server post does not exist, create it
+            // If the server post does not exist, create it in the database
             if (!$server_post) {
 
                 try {
