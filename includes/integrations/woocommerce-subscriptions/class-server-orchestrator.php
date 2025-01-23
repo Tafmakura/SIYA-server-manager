@@ -292,15 +292,9 @@ class ServerOrchestrator {
             $this->server_product_id = get_post_meta($server_post_id, 'arsol_server_product_id', true);
             $this->server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
     
-            error_log('Milestone 1');
-            error_log(sprintf('#007 [SIYA Server Manager - ServerOrchestrator] Received arguments: %s', json_encode($args, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
-            
             // Load all parameters from the server post metadata
             $server_post_instance = new ServerPost($this->server_post_id);
             $metadata = $server_post_instance->get_meta_data();
-    
-            error_log('Milestone 2');
-            error_log(sprintf('#008 [SIYA Server Manager - ServerOrchestrator] Loaded metadata: %s', json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
     
             // Load parameters into class properties
             $this->server_post_name = $metadata['arsol_server_post_name'] ?? null;
