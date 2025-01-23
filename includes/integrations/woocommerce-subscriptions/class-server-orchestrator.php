@@ -2024,7 +2024,7 @@ private function handle_exception($e, int $error_level = E_USER_WARNING, bool $r
         $e->getMessage()
     );
 
-    // Get the caller's information (where the exception was triggered)
+    // Get the caller's information (where the exception was triggerred)
     $caller = next(debug_backtrace());
     $caller_info = sprintf(
         "Exception triggered in function: %s, called from file: %s on line: %d",
