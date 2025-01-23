@@ -2011,6 +2011,14 @@ class ServerOrchestrator {
     }
 
     public function wait_for_remote_server_status($server_post_id, $target_status, $poll_interval = 10, $time_out = 120, $max_retries = 10) {
+
+        // Validate required arguments
+        if (!$server_post_id || !$target_status) {
+            $error_message = 'Missing required arguments: server_post_id or target_status';
+            error_log("[SIYA] $error_message");
+            throw new \InvalidArgumentException($error_message);
+        }
+
         error_log("[SIYA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
         $start_time = time();
         $attempts = 0;
