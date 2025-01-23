@@ -2013,23 +2013,18 @@ private function handle_exception($e, bool $rethrow = false, int $error_level = 
     // Get file and line from exception
     $file = basename($e->getFile());
     $line = $e->getLine();
+    
+    // Get error message from exception
+    $error_message = $e->getMessage();
 
-    // Format the basic error message
-    $error_message = sprintf(
-        "CAUGHT Exception:\n%sFile: %s\nLine: %d\nMessage: %s",
-        $error_code_msg,
-        $file,
-        $line,
-        $e->getMessage()
-    );
-
-    // Get the caller's information (where the exception was triggerred)
+    // Get the caller's information (where the exception was triggered)
     $caller = next(debug_backtrace());
     $caller_info = sprintf(
-        "Exception triggered in function: %s, called from file: %s on line: %d",
+        "Exception triggered in function: %s, called from file: %s on line: %d\nError Message: %s",
         $caller['function'] ?? 'Unknown function',
         $caller['file'] ?? 'Unknown file',
-        $caller['line'] ?? 'Unknown line'
+        $caller['line'] ?? 'Unknown line',
+        $error_message
     );
 
     // Add caller info to the error message
@@ -2049,15 +2044,18 @@ private function handle_exception($e, bool $rethrow = false, int $error_level = 
             );
             $formatted_trace[] = $entry;
         }
+
         $error_message .= "\nStack trace:\n" . implode("\n", $formatted_trace);
     }
 
     // Log the error (if not rethrowing)
     if (!$rethrow) {
+
         trigger_error($error_message, $error_level);
+
     } else {
+        
         // If rethrowing, log it with a specific notice
-        trigger_error("Rethrowing: " . $error_message, E_USER_NOTICE);
         throw $e;
     }
 }
