@@ -2024,7 +2024,7 @@ class ServerOrchestrator {
 
             // Build the caller info message
             $caller_info = sprintf(
-                "[SIYA Error Handler says] --  %s %s --\n Exception triggered in -- %s -- function/method, called from class: -- %s --, contained in the file -- %s -- on line: (%d)",
+                "SIYA Error Message: \"%s\" %s --\n Exception triggered in > %s > function/method, called from class: > %s > contained in the file > %s > on line: (%d)",
                 $error_code_msg,    // Error Code (if available)
                 $error_message,     // Error Message
                 $function_name,     // Function name from second trace entry
