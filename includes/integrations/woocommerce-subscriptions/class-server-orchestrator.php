@@ -105,6 +105,7 @@ class ServerOrchestrator {
     public function start_server_provision($subscription) {
         try {
             $this->subscription = $subscription;
+            $this->subscription_id = $subscription->get_id(); 
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
             $this->server_product = wc_get_product($this->server_product_id); 
             $this->server_provider_slug = $this->server_product
