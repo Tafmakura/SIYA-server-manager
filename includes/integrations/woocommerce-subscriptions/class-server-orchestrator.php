@@ -195,6 +195,13 @@ class ServerOrchestrator {
 
             }
 
+            error_log(sprintf(
+                'Server post ID: %s, Server product ID: %s, Subscription ID: %s',
+                $this->server_post_id,
+                $this->server_product_id,
+                $this->subscription_id
+            ));
+
             if ($this->server_post_id && $this->server_product_id && $this->subscription_id) {
                 
                 $task_id = uniqid();
