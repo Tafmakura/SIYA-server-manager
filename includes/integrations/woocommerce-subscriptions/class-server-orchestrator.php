@@ -1528,7 +1528,7 @@ class ServerOrchestrator {
 
     private function create_and_update_server_post($subscription) {
 
-        $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+        $server_product_id = $this->extract_server_product_from_subscription($subscription);
         $server_post_instance = new ServerPost();
         
         error_log(' subscription id: ' . $subscription->get_id());
