@@ -125,13 +125,15 @@ class ServerOrchestrator {
 
             error_log ('#001 [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
 
+            
+            /*
             // Place subscription on hold until deployment is done 
             $subscription->add_order_note(
                 'Server provisioning started. Subscription will be placed on hold until provisioning is complete. Instruction from payment gateway to change status from Pending to Active will be noted but ignored. '
             );
-
-            // TO RESTORE
-           // $subscription->update_status('on-hold');
+            */
+         
+           $subscription->update_status('on-hold');
     
             $this->server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
