@@ -1590,58 +1590,43 @@ class ServerOrchestrator {
             $subscription->save();
 
 
-            // Validate required variables for server provisioning
-            if (!$this->server_post_id) {
-                $this->throw_exception('Server post ID is missing');
-            }
-
-            if (!$this->subscription_id) {
-                $this->throw_exception('Subscription ID is missing');
-            }
-
-            if (!$server_product_id) {
-                $this->throw_exception('Server product ID is missing');
-            }
-
-            if (!$server_product) {
-                $this->throw_exception('Server product object is missing');
-            }
-
-            if (!$server_provider_slug) {
-                $this->throw_exception('Server provider slug is missing');
-            }
-
-            // Log validated metadata for debugging
-            error_log(sprintf('#003 [SIYA Server Manager - ServerOrchestrator] Validated server post metadata:%s%s',
-                PHP_EOL,
-                json_encode([
-                    'server_post_id' => $this->server_post_id,
-                    'subscription_id' => $this->subscription_id, 
-                    'server_product_id' => $server_product_id,
-                    'server_provider_slug' => $server_provider_slug
-                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-            ));
-
             try {
 
-                // Assign tags to the server post
-                $meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
-                $post_id = $this->server_post_id;
-                $taxonomy = 'arsol_server_tag';
-                $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
-                if (!$success) {
+                // Validate server product before assigning taxonomies
+                if (!$server_product || !is_object($server_product) || !method_exists($server_product, 'get_meta')) {
+                    $this->throw_exception('Invalid server product object');
+                }
 
-                    $this->throw_exception('Failed to assign tags to server post.');
-                
+                // Validate server post ID
+                if (!$this->server_post_id || !is_numeric($this->server_post_id)) {
+                    $this->throw_exception('Invalid server post ID');
+                }
+
+                // Assign tags to the server post
+                $tag_meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
+                $post_id = $this->server_post_id;
+                $tag_taxonomy = 'arsol_server_tag';
+
+                // Only attempt to assign tags if meta value exists
+                if (!empty($tag_meta_value)) {
+                    $tag_success = $this->assign_taxonomy_terms_to_server_post($post_id, $tag_meta_value, $tag_taxonomy);
+                    if (!$tag_success) {
+                        error_log(sprintf('Failed to assign tags to server post ID: %d', $post_id));
+                        $this->throw_exception('Failed to assign tags to server post');
+                    }
                 }
 
                 // Assign server groups to the server post
-                $meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
-                $post_id = $this->server_post_id;
-                $taxonomy = 'arsol_server_group';
-                $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
-                if (!$success) {
-                    $this->throw_exception('Failed to assign groups to server post.');
+                $group_meta_value = $server_product->get_meta('_arsol_assigned_server_groups', true);
+                $group_taxonomy = 'arsol_server_group';
+
+                // Only attempt to assign groups if meta value exists
+                if (!empty($group_meta_value)) {
+                    $group_success = $this->assign_taxonomy_terms_to_server_post($post_id, $group_meta_value, $group_taxonomy);
+                    if (!$group_success) {
+                        error_log(sprintf('Failed to assign groups to server post ID: %d', $post_id));
+                        $this->throw_exception('Failed to assign groups to server post');
+                    }
                 }
 
                 Error_log('Server post created and updated successfully');
