@@ -242,18 +242,18 @@ class ServerOrchestrator {
 
     }
     
-    public function finish_server_provision($args) {
+    public function finish_server_provision($server_post_id, $task_id = null) {
         
         try { // Finish server provisioning process (Provision server)
 
             error_log('#006 [SIYA Server Manager - ServerOrchestrator] Starting server completion');
             
             // Extract the arguments from action scheduler
-            $this->subscription_id = $args['subscription_id'];
+            $this->subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
             $this->subscription = wcs_get_subscription($this->subscription_id);
-            $this->server_post_id = $args['server_post_id'];
-            $this->server_product_id = $args['server_product_id'];
-            $this->server_provider_slug = $args['server_provider_slug'];
+            $this->server_post_id = $server_post_id;
+            $this->server_product_id = get_post_meta($server_post_id, 'arsol_server_product_id', true);
+            $this->server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
     
             error_log('Milestone 1');
             error_log(sprintf('#007 [SIYA Server Manager - ServerOrchestrator] Received arguments: %s', json_encode($args, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
@@ -356,11 +356,11 @@ class ServerOrchestrator {
                     'server_post_id'            => $this->server_post_id,
                     'poll_interval'             => 10,
                     'time_out'                  => 120,
-                    'task_id'                   => $task_id
+                    'task_id'                   => $task_id ?: uniqid()
                 ]);
 
                 $this->subscription->add_order_note(
-                    'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                    'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
                 );
 
                 error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
@@ -392,21 +392,20 @@ class ServerOrchestrator {
     }
     
     // Step 3: Wait for server active state (Check server status) 
-    public function wait_for_server_active_state($args) {
+    public function wait_for_server_active_state($server_post_id, $task_id = null) {
         error_log('#015 [SIYA Server Manager - ServerOrchestrator] Scheduled server status update started');
         
-        $server_provider_slug = $args['server_provider'];
-        $server_manager = $args['server_manager'];
-        $connect_server_manager = $args['connect_server_manager'];
-        $server_provisioned_id = $args['server_provisioned_id'];
-        $target_status = $args['target_status'];
-        $server_post_id = $args['server_post_id'];
+        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+        $server_manager = get_post_meta($server_post_id, 'arsol_server_manager', true);
+        $connect_server_manager = get_post_meta($server_post_id, '_arsol_server_manager_required', true);
+        $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
+        $target_status = 'active';
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
-        $poll_interval = $args['poll_interval'];
-        $time_out = $args['time_out'];
-        $max_retries = $args['max_retries'] ?? 10; // Default to 10 retries if not provided
-        $retry_count = $args['retry_count'] ?? 0;
+        $poll_interval = 10;
+        $time_out = 120;
+        $max_retries = 10;
+        $retry_count = 0;
     
         // Initialize task ID variable
         $task_id = uniqid();
@@ -556,15 +555,12 @@ class ServerOrchestrator {
             as_schedule_single_action(
                 time(),
                 'arsol_start_server_manager_connection_hook',
-                [[
-                    'server_post_id' => $server_post_id,
-                    'task_id' => $task_id
-                ]],
+                [$server_post_id, $task_id ?: uniqid()],
                 'arsol_class_server_orchestrator'
             );
 
             // Add order note to inform the user about scheduling
-            $message = 'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+            $message = 'Scheduled the start of the server manager connection.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')';
             
             // Add order note for the scheduled action
             $subscription->add_order_note(
@@ -592,9 +588,8 @@ class ServerOrchestrator {
     }
     
     // Step 4 (Optional): Create server in Runcloud
-    public function start_server_manager_connection($args) {
+    public function start_server_manager_connection($server_post_id, $task_id = null) {
     
-        $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
         error_log(sprintf('#023 [SIYA Server Manager - ServerOrchestrator] Starting deployment to RunCloud for subscription %d', $subscription_id));
@@ -716,16 +711,13 @@ class ServerOrchestrator {
             as_schedule_single_action(
                 time(),
                 'arsol_apply_firewall_rules_hook',
-                [[
-                    'server_post_id' => $server_post_id,
-                    'task_id' => $task_id
-                ]],  
+                [$server_post_id, $task_id ?: uniqid()],
                 'arsol_class_server_orchestrator'
             );
 
             // Add order note for scheduling the next step
             $subscription->add_order_note(
-                'Scheduled the completion of the server manager connection.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+                'Scheduled the completion of the server manager connection.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
             );
             
             // Log the scheduling
@@ -734,9 +726,8 @@ class ServerOrchestrator {
     
     }
 
-    public function apply_firewall_rules($args) {
+    public function apply_firewall_rules($server_post_id, $task_id = null) {
         // Now handling manager connection finishing logic here
-        $server_post_id = $args['server_post_id'];
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
         $firewall_status = get_post_meta($server_post_id, '_arsol_state_40_firewall_rules', true);
@@ -799,21 +790,17 @@ class ServerOrchestrator {
         as_schedule_single_action(
             time(),
             'arsol_install_server_manager_agent_on_server_hook',
-            [[
-                'server_post_id' => $server_post_id,
-                'task_id' => $task_id
-            ]],
+            [$server_post_id, $task_id ?: uniqid()],
             'arsol_class_server_orchestrator'
         );
          // Add order note for scheduling the next step
          $subscription->add_order_note(
-            'Scheduled the installation of the server manager agent on server.' . PHP_EOL . '(Task ID: ' . $task_id . ')'
+            'Scheduled the installation of the server manager agent on server.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
         );
         
     }
 
-    public function install_server_manager_agent_on_server($args) {
-        $server_post_id = $args['server_post_id'];
+    public function install_server_manager_agent_on_server($server_post_id, $task_id = null) {
         $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
         $subscription = wcs_get_subscription($subscription_id);
 
@@ -875,12 +862,12 @@ class ServerOrchestrator {
 
         as_schedule_single_action(time() + 120, 
             'arsol_verify_server_manager_agent_installation_on_server_hook', 
-            [$server_post_id, $task_id],  
+            [$server_post_id, $task_id ?: uniqid()],  
             'arsol_class_server_orchestrator'
         );
         
         // Message
-        $message = 'Scheduled verification of server installation agent script on server.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+        $message = 'Scheduled verification of server installation agent script on server.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')';
         
         
         // Update server note
