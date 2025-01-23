@@ -1599,7 +1599,9 @@ class ServerOrchestrator {
                 $taxonomy = 'arsol_server_tag';
                 $success = $this->assign_taxonomy_terms_to_server_post($post_id, $meta_value, $taxonomy);
                 if (!$success) {
+
                     $this->throw_exception('Failed to assign tags to server post.');
+                
                 }
 
                 // Assign server groups to the server post
@@ -2003,81 +2005,64 @@ class ServerOrchestrator {
          * @param bool $stack_trace Whether to log the stack trace (default is true).
          */
          
-        private function handle_exception($e, bool $rethrow = false, bool $stack_trace = false) {
-            // Get the error code from the exception and include it in the log if available
-            $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
+    private function handle_exception($e, bool $rethrow = false, bool $stack_trace = false) {
+        // Get the error code from the exception and include it in the log if available
+        $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
 
-            // Capture the stack trace of the exception
-            $trace = '';
-            if ($stack_trace) {
-                // Format the stack trace
-                $trace_array = $e->getTrace();
-                $formatted_trace = [];
+        // Capture the stack trace of the exception
+        $trace = '';
+        if ($stack_trace) {
+            // Format the stack trace
+            $trace_array = $e->getTrace();
+            $formatted_trace = [];
 
-                foreach ($trace_array as $trace_entry) {
-                    $entry = "File: " . (isset($trace_entry['file']) ? $trace_entry['file'] : 'Unknown file') . "\n";
-                    $entry .= "Line: " . (isset($trace_entry['line']) ? $trace_entry['line'] : 'Unknown line') . "\n";
-                    $entry .= "Function/Method: " . (isset($trace_entry['function']) ? $trace_entry['function'] : 'Unknown function') . "\n";
+            foreach ($trace_array as $trace_entry) {
+                $entry = "File: " . (isset($trace_entry['file']) ? $trace_entry['file'] : 'Unknown file') . "\n";
+                $entry .= "Line: " . (isset($trace_entry['line']) ? $trace_entry['line'] : 'Unknown line') . "\n";
+                $entry .= "Function/Method: " . (isset($trace_entry['function']) ? $trace_entry['function'] : 'Unknown function') . "\n";
 
-                    if (isset($trace_entry['class'])) {
-                        $entry .= "Class: " . $trace_entry['class'] . "\n";
-                    }
-
-                    // Add a separator between stack trace entries
-                    $formatted_trace[] = $entry . "\n";
+                if (isset($trace_entry['class'])) {
+                    $entry .= "Class: " . $trace_entry['class'] . "\n";
                 }
 
-                $trace = implode("", $formatted_trace);
+                // Add a separator between stack trace entries
+                $formatted_trace[] = $entry . "\n";
             }
 
-            // If not rethrowing, log the exception message with appropriate format
-            if (!$rethrow) {
-                // Log with stack trace if requested
-                if ($stack_trace) {
-                    error_log(sprintf(
-                        "%sFunction/Method: %s::%s\nException: %s\n\nStack trace:\n%s",
-                        $error_code_msg,
-                        __CLASS__,
-                        __FUNCTION__,
-                        $e->getMessage(),
-                        $trace
-                    ));
-                } else {
-                    // Log without stack trace, with file and line number details
-                    error_log(sprintf(
-                        "%sFunction/Method: %s::%s\nException: %s\n\nCaught at: %s (Line %d)\n",
-                        $error_code_msg,
-                        __CLASS__,
-                        __FUNCTION__,
-                        $e->getMessage(),
-                        __FILE__,
-                        __LINE__
-                    ));
-                }
-            }
-
-            // If rethrowing, log that the exception was rethrown and rethrow the original exception as-is
-            if ($rethrow) {
-                // Get the caller's file, line number, and class name (the location where handle_exception was called)
-                $backtrace = debug_backtrace();
-                $caller = $backtrace[1]; // The caller is at index 1
-
-                // Get the caller class name, if available
-                $caller_class = isset($caller['class']) ? $caller['class'] : 'Unknown Class';
-
-                // Log that the exception was rethrown, including the calling class, method, file, and line number
-                error_log(sprintf(
-                    'Plugin: %s Exception: %s File: %s Line: %d',
-                    $caller_class,
-                    $e->getMessage(),
-                    $caller['file'],
-                    $caller['line']
-                ));
-
-                // Rethrow the original exception without modifying it
-                throw $e;
-            }
+            $trace = implode("", $formatted_trace);
         }
+
+        // If not rethrowing, log the exception message with appropriate format
+        if (!$rethrow) {
+            // Log with stack trace if requested
+            // Log the exception's file and line number
+            $file = $e->getFile();
+            $line = $e->getLine();
+            error_log(sprintf(
+                "[SIYA Server Manager] Exception:\n" .
+                "File: %s\n" . 
+                "Line: %d\n" .
+                "Message: %s",
+                basename($file),
+                $line,
+                $e->getMessage()
+            ));
+
+            if ($stack_trace) {
+                error_log(sprintf(
+                    "Stack trace:\n%s",
+                    str_replace("\n", "\n", $trace)
+                ));
+            } 
+        
+        }
+
+        // If rethrowing, log that the exception was rethrown and rethrow the original exception as-is
+        if ($rethrow) {
+            // Rethrow the original exception without modifying it
+            throw $e;
+        }
+    }
 
     // New helper method to throw exceptions
     private function throw_exception($message) {
