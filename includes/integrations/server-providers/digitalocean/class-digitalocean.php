@@ -94,17 +94,6 @@ class DigitalOcean /*implements ServerProvider*/ {
             $runcloud_script = $this->get_runcloud_agent_script();
         }
 
-        // Setup SSH access
-        try {
-            $user_script = $this->setup_ssh_access($server_post_id);
-            if ($runcloud_script) {
-                $user_script .= "\n" . $runcloud_script;
-            }
-        } catch (\Exception $e) {
-            error_log('[SIYA Server Manager][DigitalOcean] Error setting up SSH access: ' . $e->getMessage());
-            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
-        }
-
         $server_data = [
             'name' => $server_name,
             'size' => $server_plan,
@@ -148,50 +137,6 @@ class DigitalOcean /*implements ServerProvider*/ {
 curl -s https://manage.runcloud.io/installer.sh | sudo bash
 EOD;
     }
-
-    private function setup_ssh_access($server_post_id) {
-        // Retrieve SSH key and username from server metadata
-        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
-        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
-
-        if (empty($ssh_public_key) || empty($ssh_username)) {
-            $error_message = 'SSH key or username not found in server metadata';
-            error_log('[SIYA Server Manager][DigitalOcean] ' . $error_message);
-            throw new \Exception($error_message);
-        }
-
-        error_log(sprintf('[SIYA Server Manager][DigitalOcean] Setting up SSH access for user: %s with public key: %s', $ssh_username, $ssh_public_key));
-
-        $user_script = sprintf(
-            "#!/bin/bash\n" .
-            "echo '[SIYA Server Manager][DigitalOcean] Creating user: %s'\n" .
-            "useradd -m -s /bin/bash %s\n" .
-            "echo '[SIYA Server Manager][DigitalOcean] Creating SSH directory'\n" .
-            "mkdir -p /home/%s/.ssh\n" .
-            "echo '[SIYA Server Manager][DigitalOcean] Copying SSH key'\n" .
-            "echo \"%s\" > /home/%s/.ssh/authorized_keys\n" .
-            "echo '[SIYA Server Manager][DigitalOcean] Setting permissions'\n" .
-            "chown -R %s:%s /home/%s/.ssh\n" .
-            "chmod 700 /home/%s/.ssh\n" .
-            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
-            "echo '[SIYA Server Manager][DigitalOcean] User setup completed for: %s'\n",
-            $ssh_username,
-            $ssh_username,
-            $ssh_username,
-            $ssh_public_key,
-            $ssh_username,
-            $ssh_username, $ssh_username,
-            $ssh_username,
-            $ssh_username,
-            $ssh_username,
-            $ssh_username
-        );
-
-        error_log('[SIYA Server Manager][DigitalOcean] SSH access setup script generated successfully.');
-
-        return $user_script;
-    }
-
 
     private function map_statuses($raw_status) {
         $status_map = [
