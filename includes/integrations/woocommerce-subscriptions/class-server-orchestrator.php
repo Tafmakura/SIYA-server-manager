@@ -99,6 +99,8 @@ class ServerOrchestrator {
         // Add new action hooks for firewall rules and agent installation
         add_action('arsol_apply_firewall_rules_hook', [$this, 'apply_firewall_rules']);
         add_action('arsol_install_server_manager_agent_on_server_hook', [$this, 'install_server_manager_agent_on_server']);
+        add_action('arsol_verify_server_manager_agent_installation_on_server_hook', [$this, 'verify_server_manager_agent_installation_on_server']);
+        add_action('arsol_verify_server_manager_connection_to_server_hook', [$this, 'verify_server_manager_connection_to_server']);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -872,15 +874,10 @@ class ServerOrchestrator {
         $task_id = uniqid();
 
         as_schedule_single_action(time() + 120, 
-            'arsol_verify_server_manager_connection_hook', 
+            'arsol_verify_server_manager_agent_installation_on_server_hook', 
             [[
                 'subscription_id' => $subscription->get_id(),
                 'server_post_id' => $server_post_id,
-                'server_id' => get_post_meta($server_post_id, 'arsol_server_deployed_id', true),
-                'ssh_host' => get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true),
-                'ssh_username' => get_post_meta($server_post_id, 'arsol_ssh_username', true),
-                'ssh_private_key' => get_post_meta($server_post_id, 'arsol_ssh_private_key', true),
-                'ssh_port' => 22,
                 'task_id' => $task_id
             ]],  
             'arsol_class_server_orchestrator'
@@ -899,14 +896,13 @@ class ServerOrchestrator {
         error_log($message);
     }
 
-    // Verify server manager connection to provisioned server
-    public function verify_server_manager_connection($args) {
+    public function verify_server_manager_agent_installation_on_server($args) {
         $server_post_id = $args['server_post_id'];
         $subscription_id = $args['subscription_id'];
         $subscription = wcs_get_subscription($subscription_id);
         $server_manager_instance = new Runcloud();
 
-        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager agent installation for server post ID: %d', $server_post_id));
 
         // Prevent PHP from timing out
         set_time_limit(0);
@@ -922,7 +918,6 @@ class ServerOrchestrator {
                 while ((time() - $startTime) < $installationTimeout) {
                     
                     try {
-
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
                         if (isset($status['status']) && $status['status'] === 'running') {
@@ -936,83 +931,91 @@ class ServerOrchestrator {
 
                             break; // Exit on success
 
-                        } elseif ( $status['status'] === 'failed') {
-
-                            // Update server metadata on failed installation and trip CB
+                        } elseif ($status['status'] === 'failed') {
                             update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
-
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
-                            
-                            // Trigger the circuit breaker
                             ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
                             return false; // Exit on failure
-
 
                         } elseif ($status['status'] === 'not-installed') {
-
-                            // Reset the previous flag so that a script reinstall can be initiated
                             update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
-
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
-                            
-                            // Trigger the circuit breaker
                             ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-                            
                             return false; // Exit on failure
-                        
                         }
 
                     } catch (\Exception $e) {
-
-                        // Centralize exception handling for retries
                         $this->handle_exception($e);
-                    
                     }
 
                     error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation after 30 seconds.');
-
                     sleep(30); // Retry after 30 seconds
-                    
                 }
 
-                // Timeout Handling for script installation
                 if ((time() - $startTime) >= $installationTimeout) {
-                   
                     $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Script installation timeout exceeded for server post ID: ' . $server_post_id;
                     error_log($timeout_message);
                     $subscription->add_order_note($timeout_message);
-
-                    // Update server metadata on failed installation and trip CB
                     update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
-
-                    // Handle the exception and exit on timeout
                     $this->handle_exception(new \Exception('Timeout while installing script'));
-
-                    // Trigger the circuit breaker on timeout
                     ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
                     return false; // Return false after timeout handling
                 }
 
             } else {
-
                 error_log('STATE CHECK (60): Script installation is okay.');
-            
             }
 
+            // Schedule server manager connection verification
+            $task_id = uniqid();
+            as_schedule_single_action(time() + 120, 
+                'arsol_verify_server_manager_connection_to_server_hook', 
+                [[
+                    'subscription_id' => $subscription->get_id(),
+                    'server_post_id' => $server_post_id,
+                    'server_id' => get_post_meta($server_post_id, 'arsol_server_deployed_id', true),
+                    'ssh_host' => get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true),
+                    'ssh_username' => get_post_meta($server_post_id, 'arsol_ssh_username', true),
+                    'ssh_private_key' => get_post_meta($server_post_id, 'arsol_ssh_private_key', true),
+                    'ssh_port' => 22,
+                    'task_id' => $task_id
+                ]],  
+                'arsol_class_server_orchestrator'
+            );
+
+            $message = 'Scheduled server manager connection verification.' . PHP_EOL . '(Task ID: ' . $task_id . ')';
+            $subscription->add_order_note(
+                $message
+            );
+            error_log($message);
+
+        } catch (\Exception $e) {
+            $this->handle_exception($e);
+            return false; // Add fallback return false
+        }
+    }
+
+    public function verify_server_manager_connection_to_server($args) {
+        $server_post_id = $args['server_post_id'];
+        $subscription_id = $args['subscription_id'];
+        $subscription = wcs_get_subscription($subscription_id);
+        $server_manager_instance = new Runcloud();
+
+        error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Verifying server manager connection for server post ID: %d', $server_post_id));
+
+        // Prevent PHP from timing out
+        set_time_limit(0);
+
+        try {
             // Check connection status if not already successful (status 2)
             $connectionStatus = get_post_meta($server_post_id, '_arsol_state_70_manager_connection', true);
 
             if ($connectionStatus != 2) {
-
                 $connectTimeout = apply_filters('siya_server_connection_timeout', 60);
                 $connectStart = time();
 
                 while ((time() - $connectStart) < $connectTimeout) {
-
                     try {
-
                         $connStatus = $server_manager_instance->get_connection_status($server_post_id);
 
                         if (!empty($connStatus['connected']) && !empty($connStatus['online'])) {
@@ -1021,7 +1024,6 @@ class ServerOrchestrator {
                             update_post_meta($server_post_id, 'arsol_server_manager_online', $connStatus['online']);
                             update_post_meta($server_post_id, 'arsol_server_manager_agent_version', $connStatus['agentVersion'] ?? 'Unknown');
 
-                            // Success message
                             $success_message = sprintf(
                                 'Server manager connected to server successfully!%sConnected: %s%sOnline: %s%sAgent Version: %s',
                                 PHP_EOL,
@@ -1032,10 +1034,8 @@ class ServerOrchestrator {
                                 get_post_meta($server_post_id, 'arsol_server_manager_agent_version', true) ?: 'Unknown'
                             );
 
-                            // Update server note
                             $subscription->add_order_note($success_message);
                             error_log($success_message);
-
                             break; // Exit the loop on success
                         }
 
@@ -1045,53 +1045,33 @@ class ServerOrchestrator {
                         }
 
                     } catch (\Exception $e) {
-
-                        // Centralize exception handling for retries
                         $this->handle_exception($e);
-
                     }
 
                     error_log('[SIYA Server Manager - ServerOrchestrator] Retrying connection status after 15 seconds.');
-
                     sleep(15); // Retry after 15 seconds
-
                 }
 
-                // Timeout Handling for connection
                 if ((time() - $connectStart) >= $connectTimeout) {
                     $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Connection status timeout exceeded for server post ID: ' . $server_post_id;
                     error_log($timeout_message);
                     $subscription->add_order_note($timeout_message);
-
-                    // Update server metadata on failed connection and trip CB
                     update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
-
-                    // Handle the exception and exit on timeout
                     $this->handle_exception(new \Exception('Timeout while fetching connection status'));
-
-                    // Trigger the circuit breaker on timeout
                     ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
                     return false; // Return false after timeout handling
                 }
 
             } else {
-
                 error_log('STATE CHECK (70): Server manager connection status is okay.');
-            
             }
 
-            // Success message after verifying both installation and connection
             $success_message = 'Server manager connected to server successfully! Activating subscription to active... Good day and good luck!';
             $subscription->add_order_note($success_message);
             error_log($success_message);
-
-            // Activate the subscription
             $subscription->update_status('active');
 
         } catch (\Exception $e) {
-
-            // Handle the exception and exit
             $this->handle_exception($e);
             return false; // Add fallback return false
         }
