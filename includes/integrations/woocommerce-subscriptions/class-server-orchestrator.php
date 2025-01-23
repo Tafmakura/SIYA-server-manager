@@ -126,29 +126,28 @@ class ServerOrchestrator {
             error_log ('#001 [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
 
             
-            /*
+            /* TO RESTORE
             // Place subscription on hold until deployment is done 
             $subscription->add_order_note(
                 'Server provisioning started. Subscription will be placed on hold until provisioning is complete. Instruction from payment gateway to change status from Pending to Active will be noted but ignored. '
             );
-            */
+           
          
            $subscription->update_status('on-hold');
-    
-            $this->server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+            */
+            
+            // Check if the server post already exists
+            $server_post = ServerPost::get_server_post_from_subscription($subscription);
+            $this->server_post_id = $server_post->ID;
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true); 
            
             if ($this->server_post_status != 2) {
 
                 // Check if the server post already exists
-
+               
                 error_log( 'server post id:' . $this->server_post_id);
 
-                if (!$this->server_post_id) {
-
-                    // Secondary check for server post
-                    $server_post_instance = new ServerPost();
-                    $existing_server_post = $this->check_existing_server($server_post_instance, $this->subscription);
+                if (!$server_post) {
 
                     if (!$existing_server_post) {
 
@@ -1863,19 +1862,6 @@ class ServerOrchestrator {
     
 
 
-    public function check_existing_server($server_post_instance, $subscription) {
-       
-        $server_post = $server_post_instance->get_server_post_by_subscription($subscription);
-       
-       
-        if ($server_post) {
-            error_log('[SIYA Server Manager - ServerOrchestrator] Found existing server: ' . $server_post->post_id);
-            return $server_post;
-        }
-
-        error_log('[SIYA Server Manager - ServerOrchestrator] No existing server found');
-        return false;
-    }
 
     public function extract_server_product_from_subscription($subscription) {
 
