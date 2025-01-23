@@ -218,7 +218,7 @@ class ServerOrchestrator {
                 }
                
             
-            }
+            } 
 
          
         } catch (\Exception $e) {
