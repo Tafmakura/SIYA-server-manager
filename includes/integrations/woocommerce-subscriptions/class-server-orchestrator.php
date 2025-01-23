@@ -1991,11 +1991,6 @@ class ServerOrchestrator {
         return $remote_status;
     }
 
-    // New helper method to schedule actions
-    private function schedule_action($hook, $args) {
-        as_schedule_single_action(time(), $hook, [$args], 'arsol_class_server_orchestrator');
-    }
-
     private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = true) {
         // Get the error code from the exception (if available)
         $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
@@ -2031,6 +2026,9 @@ class ServerOrchestrator {
     
         // Add stack trace if requested
         if ($stack_trace) {
+            // Add stack trace heading with a separating line
+            $error_message .= "\n--- Stack Trace ---";
+    
             // Loop through each trace entry and append to the error message one at a time
             foreach ($trace_array as $index => $trace_entry) {
                 $formatted_entry = sprintf(
@@ -2041,7 +2039,7 @@ class ServerOrchestrator {
                     $trace_entry['function'] ?? 'Unknown function',
                     $trace_entry['class'] ?? 'Unknown class'
                 );
-                // Append each formatted entry to the error message without horizontal rule
+                // Append each formatted entry to the error message with no additional horizontal rule
                 $error_message .= "\n" . $formatted_entry;
             }
         }
@@ -2055,7 +2053,6 @@ class ServerOrchestrator {
         }
     }
     
-
 
 
 
