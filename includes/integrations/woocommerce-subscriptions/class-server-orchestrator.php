@@ -80,6 +80,7 @@ class ServerOrchestrator {
         // Add new action hook for the scheduled processes
         add_action('arsol_finish_server_provision', array($this, 'finish_server_provision'), 20, 1);
         add_action('arsol_wait_for_server_active_state_hook', array($this, 'wait_for_server_active_state'), 20, 1);
+        add_action('arsol_provision_remote_server', array($this, 'provision_remote_server'), 20, 1);
 
         // Add new action hooks for server powerup
         add_action('woocommerce_subscription_status_active', array($this, 'start_server_powerup'), 20, 1);
@@ -242,7 +243,7 @@ class ServerOrchestrator {
 
     }
     
-    public function finish_server_provision($server_post_id, $task_id = null) {
+    public function provision_remote_server($server_post_id, $task_id = null) {
         
         try { // Finish server provisioning process (Provision server)
 
