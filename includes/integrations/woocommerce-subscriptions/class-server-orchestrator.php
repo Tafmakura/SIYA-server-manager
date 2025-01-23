@@ -2044,6 +2044,7 @@ class ServerOrchestrator {
          * @param bool $rethrow Whether to rethrow the exception or not.
          * @param bool $stack_trace Whether to log the stack trace (default is true).
          */
+         
         private function handle_exception($e, bool $rethrow = false, bool $stack_trace = true) {
             // Get the error code from the exception and include it in the log if available
             $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
@@ -2107,11 +2108,17 @@ class ServerOrchestrator {
                 $caller_class = isset($caller['class']) ? $caller['class'] : 'Unknown Class';
 
                 // Log that the exception was rethrown, including the calling class, method, file, and line number
-                error_log(sprintf('%s::%s Rethrew an exception at line %d in %s',
-                    $caller_class,
+                error_log(sprintf(
+                    'The method (function) %s rethrew an exception at line %d',
                     $caller['function'],
-                    $caller['line'],
-                    $caller['file']
+                    $caller['line']
+                ));
+                error_log(sprintf(
+                    'Plugin: %s Exception: %s File: %s Line: %d',
+                    $caller_class,
+                    $e->getMessage(),
+                    $caller['file'],
+                    $caller['line']
                 ));
 
                 // Rethrow the original exception without modifying it
