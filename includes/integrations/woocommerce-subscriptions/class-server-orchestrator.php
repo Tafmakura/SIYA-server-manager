@@ -147,7 +147,7 @@ class ServerOrchestrator {
 
                     error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
                            
-                    $server_post = $this->create_and_update_server_post($this->server_product_id, $server_post_instance, $subscription);
+                    $server_post = $this->create_and_update_server_post($subscription);
 
                     if (is_wp_error($server_post)) {
                         throw new Exception($server_post->get_error_message(), $server_post->get_error_code());
@@ -1526,7 +1526,10 @@ class ServerOrchestrator {
     // Helper Methods
 
 
-    private function create_and_update_server_post($server_product_id, $server_post_instance, $subscription) {
+    private function create_and_update_server_post($subscription) {
+
+        $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+        $server_post_instance = new ServerPost();
         
         error_log(' subscription id: ' . $subscription->get_id());
 
