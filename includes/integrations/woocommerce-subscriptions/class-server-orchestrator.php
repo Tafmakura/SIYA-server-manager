@@ -107,6 +107,7 @@ class ServerOrchestrator {
     // Step 1: Start server provisioning process (Create server post)
     public function start_server_provision($subscription) {
         try {
+
             $this->subscription = $subscription;
             $this->subscription_id = $subscription->get_id(); 
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
@@ -119,7 +120,10 @@ class ServerOrchestrator {
                 error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
                 
                 return;
+            
             }
+
+            error_log ('#001 [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
 
             // Place subscription on hold until deployment is done 
             $subscription->add_order_note(
@@ -1895,8 +1899,8 @@ class ServerOrchestrator {
         return false;
     }
 
-
     public function extract_server_product_from_subscription($subscription) {
+
         error_log('[SIYA Server Manager - ServerOrchestrator] Starting server product extraction from subscription ' . $subscription->get_id());
     
         // Ensure the subscription object has the required method and is valid
