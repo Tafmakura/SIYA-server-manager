@@ -787,6 +787,9 @@ class ServerOrchestrator {
                     // Success message
                     $message = 'Successfully executed agent installation script on server.';
 
+                    // Set the verification wait time
+                    $verification_wait_time = 120;
+
                     // Update server note
                     $subscription->add_order_note(
                         $message
@@ -824,7 +827,8 @@ class ServerOrchestrator {
         // Schedule server manager connection verification
         $task_id = uniqid();
 
-        as_schedule_single_action(time() + 120, 
+        // Schedule the verification with a wait time for new script installations and no wait time for existing installations
+        as_schedule_single_action(time() + ($verification_wait_time ?? 0), 
             'arsol_verify_server_manager_agent_installation_on_server_hook', 
             [$server_post_id, $task_id ?: uniqid()],  
             'arsol_class_server_orchestrator'
