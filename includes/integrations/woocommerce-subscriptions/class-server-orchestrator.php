@@ -157,9 +157,7 @@ class ServerOrchestrator {
             $this->subscription_id = $subscription->get_id(); 
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
             $this->server_product = wc_get_product($this->server_product_id); 
-            $this->server_provider_slug = $this->server_product
-                ? $this->server_product->get_meta('_arsol_server_provider_slug', true)
-                : null;
+            $this->server_provider_slug = $this->server_product->get_meta('arsol_server_provider_slug');
                 
             if (!$this->server_product_id) {
                 error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
@@ -379,15 +377,8 @@ class ServerOrchestrator {
                 $task_id = uniqid();
 
                 $this->schedule_action('arsol_wait_for_server_active_state_hook', [
-                    'server_provider'           => $this->server_provider_slug,
-                    'connect_server_manager'    => $this->connect_server_manager,
-                    'server_manager'            => $this->server_manager,
-                    'server_provisioned_id'     => $this->server_provisioned_id,
-                    'target_status'             => 'active',
-                    'server_post_id'            => $this->server_post_id,
-                    'poll_interval'             => 10,
-                    'time_out'                  => 120,
-                    'task_id'                   => $task_id ?: uniqid()
+                    'server_post_id' => $this->server_post_id,
+                    'task_id' => $task_id ?: uniqid()
                 ]);
 
                 $this->subscription->add_order_note(
@@ -455,7 +446,7 @@ class ServerOrchestrator {
                 // Use the new wait_for_remote_server_status method
                 try {
 
-                    $status_check = $this->wait_for_remote_server_status($server_post_id, 'active', $poll_interval, $time_out);
+                    $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
                     
                     if (!$status_check) {
 
