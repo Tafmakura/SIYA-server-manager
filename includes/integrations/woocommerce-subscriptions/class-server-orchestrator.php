@@ -99,6 +99,9 @@ class ServerOrchestrator {
 
         add_action('arsol_finish_server_deletion_hook', [$this, 'finish_server_deletion']);  
 
+        // Add new action hooks for firewall rules and agent installation
+        add_action('arsol_apply_firewall_rules_hook', [$this, 'apply_firewall_rules']);
+        add_action('arsol_install_server_manager_agent_on_server_hook', [$this, 'install_server_manager_agent_on_server']);
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -752,19 +755,23 @@ class ServerOrchestrator {
         // Log subscription retrieval
         error_log('Subscription retrieved successfully: ' . $subscription->get_id());
     
-        $server_deployed_id = get_post_meta($server_post_id, 'arsol_server_deployed_id', true);
-        $server_ip = get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true);
+        // Schedule applying firewall rules instead of directly doing it here
+        as_schedule_single_action(
+            time(),
+            'arsol_apply_firewall_rules_hook',
+            [[$args]],
+            'arsol_class_server_orchestrator'
+        );
+        $subscription->add_order_note('Scheduled firewall application.');
+    }    
+
+    public function apply_firewall_rules($args) {
+        $server_post_id = $args['server_post_id'];
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+        $subscription = wcs_get_subscription($subscription_id);
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
-    
-        if (!$server_deployed_id || !$server_ip) {
-            error_log('Missing server ID or IP address for connection.');
-            $subscription->add_order_note('Missing server ID or IP address for connection.');
 
-            return; // Exit on failure
-
-        }
-    
         // Open ports if they haven't been successfully opened before
         $firewall_status = get_post_meta($server_post_id, '_arsol_state_40_firewall_rules', true);
         
@@ -777,6 +784,18 @@ class ServerOrchestrator {
                 // Update server metadata on successful provisioning
                 if ($open_ports_result) {
                     update_post_meta($server_post_id, '_arsol_state_40_firewall_rules', 2);
+
+                    // Success message
+                    $message = 'Successfully opened firewall ports on server.';
+
+                    // Update server note
+                    $subscription->add_order_note(
+                        $message
+                    );
+
+                    // Log the success message
+                    error_log($message);
+                    
                 } 
                 
             } catch (\Exception $e) {
@@ -799,7 +818,22 @@ class ServerOrchestrator {
             error_log('STATE CHECK (40): Firewall rules are okay.');
         
         }
-    
+
+        // Schedule installing server manager agent
+        as_schedule_single_action(
+            time(),
+            'arsol_install_server_manager_agent_on_server_hook',
+            [[$args]],
+            'arsol_class_server_orchestrator'
+        );
+        $subscription->add_order_note('Scheduled server manager agent installation.');
+    }
+
+    public function install_server_manager_agent_on_server($args) {
+        $server_post_id = $args['server_post_id'];
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+        $subscription = wcs_get_subscription($subscription_id);
+
         // Execute RunCloud script if it hasn't been successfully executed before
         $script_execution_status = get_post_meta($server_post_id, '_arsol_state_50_script_execution', true);
 
@@ -846,6 +880,7 @@ class ServerOrchestrator {
               
             }  
 
+
         } else {
 
             error_log('STATE CHECK (50): Script execution okay.');
@@ -853,7 +888,6 @@ class ServerOrchestrator {
         }
 
         // Schedule server manager connection verification
-
         $task_id = uniqid();
 
         as_schedule_single_action(time() + 120, 
@@ -861,8 +895,8 @@ class ServerOrchestrator {
             [[
                 'subscription_id' => $subscription->get_id(),
                 'server_post_id' => $server_post_id,
-                'server_id' => $server_deployed_id,
-                'ssh_host' => $server_ip,
+                'server_id' => get_post_meta($server_post_id, 'arsol_server_deployed_id', true),
+                'ssh_host' => get_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', true),
                 'ssh_username' => get_post_meta($server_post_id, 'arsol_ssh_username', true),
                 'ssh_private_key' => get_post_meta($server_post_id, 'arsol_ssh_private_key', true),
                 'ssh_port' => 22,
@@ -881,10 +915,9 @@ class ServerOrchestrator {
 
         // Log the message
         error_log($message);
-    }    
-    
-    // Verify server manager connection to provisioned server
+    }
 
+    // Verify server manager connection to provisioned server
     public function verify_server_manager_connection($args) {
         $server_post_id = $args['server_post_id'];
         $subscription_id = $args['subscription_id'];
