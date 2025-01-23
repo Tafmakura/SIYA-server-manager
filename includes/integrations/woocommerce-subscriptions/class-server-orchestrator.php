@@ -147,13 +147,13 @@ class ServerOrchestrator {
 
                     error_log('#002 [SIYA Server Manager - ServerOrchestrator] creating new server post');
                            
-                    $server_post = $this->create_and_update_server_post($subscription);
+                    $server_post_id = $this->create_and_update_server_post($subscription);
 
                     if (is_wp_error($server_post)) {
                         throw new Exception($server_post->get_error_message(), $server_post->get_error_code());
-                    } 
+                    }
                     
-                    $this->server_post_id = $server_post->ID;
+                    $this->server_post_id = $server_post_id;
                     $message = 'Server post created and updated successfully.';
                     $subscription->add_order_note($message);
                     error_log($message);
@@ -166,8 +166,6 @@ class ServerOrchestrator {
                     
                     // Rethrow
                     $this->handle_exception($e, true);
-                    
-            
 
                 }
                     
@@ -1630,7 +1628,7 @@ class ServerOrchestrator {
 
             }
 
-            return true;
+            return $post_id;
 
         } elseif ($post_id instanceof \WP_Error) {
             
