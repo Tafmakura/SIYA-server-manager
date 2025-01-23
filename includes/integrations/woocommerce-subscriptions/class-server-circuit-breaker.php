@@ -110,12 +110,12 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             } else {
                 // If not, mark the circuit breaker as half-open (in progress) and initiate provisioning
                 update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_HALF_OPEN);
-
+                $subscription->update_status('on-hold');
+                
                 // Increment retry counter if under 2; else trip breaker (no further auto-retry)
                 if ($retry_counter < 2) {
                     $retry_counter++;
                     update_post_meta($server_post_id, '_arsol_state_00_retry_counter', $retry_counter);
-                    $subscription->update_status('on-hold');
                     $this->start_server_provision($subscription);
                     $subscription->add_order_note("Server provisioning failed or incomplete. Retrying deployment.");
                     error_log("[SIYA Server Manager - ServerCircuitBreaker] WARNING: Triggered provisioning for subscription {$subscription_id}.");
