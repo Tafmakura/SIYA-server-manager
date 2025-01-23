@@ -165,10 +165,9 @@ class ServerOrchestrator {
                 } catch (\Exception $e) {
                     
                     // Rethrow
-                    $this->handle_exception($e, true);
+                    $this->handle_exception($e, E_USER_WARNING, true);
                     
-                    // TO DELETE IN PRODUCTION
-                    trigger_error('Fatal Error: Skipped error handler ', E_USER_WARNING);
+            
 
                 }
                     
