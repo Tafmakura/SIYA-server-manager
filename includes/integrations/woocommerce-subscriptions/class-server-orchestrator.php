@@ -2026,22 +2026,27 @@ class ServerOrchestrator {
     
         // Add stack trace if requested
         if ($stack_trace) {
-            // Add stack trace heading with a separating line
-            $error_message .= "\n--- Stack Trace ---";
+            // Add a line to separate the stack trace from the error message
+            $error_message .= "\n--- Stack Trace ---\n";
     
-            // Loop through each trace entry and append to the error message one at a time
-            foreach ($trace_array as $index => $trace_entry) {
+            // Loop through each trace entry and append to the error message
+            $formatted_trace = [];
+            $counter = 1; // Stack trace numbering starts from 1
+            foreach ($trace_array as $trace_entry) {
                 $formatted_entry = sprintf(
                     "Stack Trace #%d: File: %s, Line: %s, Function: %s, Class: %s",
-                    $index + 1, // Stack trace numbering starts from 1
+                    $counter++, // Stack trace numbering starts from 1
                     $trace_entry['file'] ?? 'Unknown file',
                     $trace_entry['line'] ?? 'Unknown line',
                     $trace_entry['function'] ?? 'Unknown function',
                     $trace_entry['class'] ?? 'Unknown class'
                 );
-                // Append each formatted entry to the error message with no additional horizontal rule
-                $error_message .= "\n" . $formatted_entry;
+                // Add the formatted trace entry and a separator line
+                $formatted_trace[] = $formatted_entry . "\n---"; // Add a separator line after each entry
             }
+    
+            // Join all formatted trace entries with line breaks and append them to the error message
+            $error_message .= implode("\n", $formatted_trace);
         }
     
         // Optionally, trigger an error if not rethrowing
