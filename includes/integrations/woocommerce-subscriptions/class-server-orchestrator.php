@@ -157,7 +157,8 @@ class ServerOrchestrator {
             
             }
             
-            $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
+            $server_post = ServerPost::get_server_post_from_subscription($subscription);
+            $server_post_id = $server_post->ID;
             $server_provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
    
             error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] Server post id: ' . $server_post_id);
