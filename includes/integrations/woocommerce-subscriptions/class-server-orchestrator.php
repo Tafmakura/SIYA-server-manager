@@ -1073,14 +1073,17 @@ class ServerOrchestrator {
         
         // If no linked server post ID is found, log the error and exit
         if (!$server_post_id) {
-            error_log('#032 [SIYA Server Manager - ServerOrchestrator] No server post found for shutdown. Subscription ID: ' . $subscription_id);
+   
+            $this->throw_exception('No server post found for shutdown.');
             return;
         }
 
         // Check circuit breaker status for shutdown
         $this->server_circuit_breaker_position = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+        
         if ($this->server_circuit_breaker_position == 1) {
-            error_log('#033 [SIYA Server Manager - ServerOrchestrator] Server circuit breaker for subscription ' . $subscription_id . ' is tripped or in progress. Skipping shutdown.');
+ 
+            $this->throw_exception('Server circuit breaker is in a half-open state. Skipping shutdown.');
             return;
         }
 
@@ -1088,10 +1091,11 @@ class ServerOrchestrator {
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
         
-        // If provisioning ID is missing, log the error and exit
-        if (empty($server_provisioned_id)) {
-            error_log('[SIYA Server Manager] Server provisioning ID not found, skipping shutdown. Server Post ID: ' . $server_post_id);
-            return;
+        // If any critical metadata is missing, log the error and exit
+        if (!$server_provider_slug || !$server_provisioned_id) {
+
+            $this->throw_exception('Missing server provisioning details required to power up the server. Server Post ID: ' . $server_post_id);
+            return false;// Add fallback return false
         }
 
         // Initialize the server provider
@@ -1194,10 +1198,18 @@ class ServerOrchestrator {
 
         // If no linked server post ID is found, log the error and exit
         if(!$server_post_id) {
+            
             $this->throw_exception('Server post not found for power-up. Subscription ID: ' . $subscription->get_id());
             return false; // Add fallback return false
         }
         
+        // If subscription is on hold refuse
+        if ($subscription->get_status() === 'on-hold') {
+            
+            $this->throw_exception('Subscription is on hold. Cannot power up the server.');
+            return false; // Add fallback return false
+        }
+
         // Fetch server metadata required for the power-up process
         $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
         $server_provisioned_id = get_post_meta($server_post_id, 'arsol_server_provisioned_id', true);
@@ -1205,7 +1217,7 @@ class ServerOrchestrator {
         // If any critical metadata is missing, log the error and exit
         if (!$server_provider_slug || !$server_provisioned_id) {
 
-            $this->throw_exception('Missing server provisioning details');
+            $this->throw_exception('Missing server provisioning details required to power up the server. Server Post ID: ' . $server_post_id);
             return false;// Add fallback return false
         }
 

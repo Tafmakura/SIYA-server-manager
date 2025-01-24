@@ -76,7 +76,7 @@ class ServerError {
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
             $server_actions = array();
-            $server_actions[] = '<a href="#" class="view-server">View</a>'; // Always show View
+            $server_actions[] = '<a href="' . esc_url( get_edit_post_link($server_post_id) ) . '" class="order-preview">View</a>'; // Always show View
 
             if ($circuit_breaker == -1) {
                 echo '<mark class="subscription-status order-status server-status status-error error tips"><span>Error</span></mark>';
@@ -92,7 +92,7 @@ class ServerError {
 
             // Add row actions
             echo '<div class="row-actions">';
-            echo '<span class="view-server"><a href="#" class="order-preview">View</a></span>';
+            echo '<span class="view-server"><a href="' . esc_url( get_edit_post_link($server_post_id) ) . '" class="order-preview">View</a></span>';
 
             if ($circuit_breaker == -1) {
                 echo ' | <span class="repair-server"><a href="#">Repair</a></span>';
