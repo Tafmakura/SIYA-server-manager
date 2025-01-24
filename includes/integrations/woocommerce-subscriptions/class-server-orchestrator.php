@@ -134,7 +134,7 @@ class ServerOrchestrator {
     }
 
     // Prepare server repair
-    public function start_server_repair($subscription) {
+    public function start_server_maintenance($subscription) {
         error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
        
         // Get server post ID

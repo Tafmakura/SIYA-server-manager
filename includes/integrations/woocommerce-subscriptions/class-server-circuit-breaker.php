@@ -118,14 +118,15 @@ class ServerCircuitBreaker extends ServerOrchestrator {
     public function half_open_circuit_breaker(\WC_Subscription $subscription) {
         error_log("[SIYA Debug] Setting circuit breaker to half-open for subscription: " . $subscription->get_id());
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+        update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_HALF_OPEN);
         
         // Check to see if maintanace is happening on a new server or an existing server
         if ($server_post_id) {
-            update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_HALF_OPEN);
+          
             $subscription->add_order_note("Circuit breaker set to half-open (in progress).");
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker set to half-open for subscription {$subscription->get_id()}.");
-        
-            $this->start_server_repair($subscription);
+  
+            $this->start_server_maintenance($subscription);
 
         } else {
 
@@ -136,16 +137,17 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         }
     }
 
-    public function reset_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
-        error_log("[SIYA Debug] Resetting circuit breaker for subscription: " . $subscription->get_id());
-        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-        
+    public function reset_circuit_breaker(\WC_Subscription $subscription, array $details = []) {   
         if ($server_post_id) {
+            error_log("[SIYA Debug] Resetting circuit breaker for subscription: " . $subscription->get_id());
+            $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_CLOSED);
             $subscription->add_order_note("Circuit breaker reset and subscription activated. " . json_encode($details));
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker reset for subscription {$subscription->get_id()}. Details: " . json_encode($details));
             
             $this->start_server_powerup($subscription);
+        } else  {
+            error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription->get_id()}.");
         }
     }
 }
