@@ -104,6 +104,7 @@ class ServerOrchestrator {
         add_action('arsol_verify_server_manager_connection_to_server_hook', [$this, 'verify_server_manager_connection_to_server'], 10, 2);
 
         add_action('admin_post_repair', [$this, 'trigger_server_repair_from_url']);
+        add_action('admin_post_reboot', [$this, 'trigger_server_reboot_from_url']);
     }
 
     // Prepare the on button
@@ -154,6 +155,25 @@ class ServerOrchestrator {
         }
 
         $this->start_server_preflight_check($subscription);
+
+        wp_redirect(wp_get_referer());
+        exit;
+    }
+
+    public function trigger_server_reboot_from_url() {
+        check_admin_referer('reboot_nonce', '_wpnonce');
+
+        $subscription_id = isset($_REQUEST['subscription_id']) ? absint($_REQUEST['subscription_id']) : 0;
+        if (!$subscription_id) {
+            wp_die('Invalid subscription ID.');
+        }
+
+        $subscription = wcs_get_subscription($subscription_id);
+        if (!$subscription) {
+            wp_die('Subscription not found.');
+        }
+
+        $this->start_server_reboot($subscription);
 
         wp_redirect(wp_get_referer());
         exit;
@@ -1367,6 +1387,12 @@ class ServerOrchestrator {
                 $subscription->add_order_note('Maximum retry attempts reached. Server power-up failed.');
             }
         }
+    }
+
+    public function start_server_reboot($subscription) {
+        // Implement the logic to start server reboot
+        // Similar to start_server_powerup but for rebooting the server
+        error_log ('#048 [SIYA Server Manager - ServerOrchestrator] Starting server reboot process');
     }
 
    // Start server deletion process
