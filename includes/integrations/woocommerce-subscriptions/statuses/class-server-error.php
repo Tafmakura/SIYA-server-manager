@@ -69,7 +69,7 @@ class ServerError {
 
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             if (!$server_post_id) {
-                echo '<span class="arsol-server-status arsol-no-server">No Server</span>';
+                echo '<span class="server-status no-server">No Server</span>';
                 return;
             }
 
@@ -90,12 +90,17 @@ class ServerError {
     public function add_status_styles() {
         ?>
         <style>
-           
-            .arsol-status-active { background: #c6e1c6; color: #5b841b; }
-            .arsol-status-pending { background: #f8dda7; color: #94660c; }
-            .arsol-status-error { background: #eba3a3; color: #761919; }
-            .arsol-status-in-progress { background: #c8d7e1; color: #2e4453; }
-            .arsol-no-server { background: #e5e5e5; color: #777; }
+            .arsol-server-status {
+                padding: 2px 8px;
+                border-radius: 3px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            .status-active { background: #c6e1c6; color: #5b841b; }
+            .status-pending { background: #f8dda7; color: #94660c; }
+            .status-error { background: #eba3a3; color: #761919; }
+            .status-in-progress { background: #c8d7e1; color: #2e4453; }
+            .no-server { background: #e5e5e5; color: #777; }
         </style>
         <?php
     }
