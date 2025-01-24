@@ -2010,6 +2010,9 @@ class ServerOrchestrator {
             throw new \InvalidArgumentException($error_message);
         }
 
+        // Print server post ID for debugging
+        error_log(sprintf('[SIYA] Server post ID: %s', print_r($server_post_id, true)));
+
         error_log("[SIYA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
         $start_time = time();
         $attempts = 0;
