@@ -1968,6 +1968,9 @@ class ServerOrchestrator {
 
     public function wait_for_remote_server_status($server_post_id, $target_status, $poll_interval = 10, $time_out = 120, $max_retries = 10) {
 
+        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+        $subscription = wcs_get_subscription($subscription_id);
+
         // Validate required arguments
         if (!$server_post_id || !$target_status) {
             $error_message = 'Missing required arguments: server_post_id or target_status';
