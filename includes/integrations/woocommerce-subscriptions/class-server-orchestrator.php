@@ -153,7 +153,7 @@ class ServerOrchestrator {
             wp_die('Subscription not found.');
         }
 
-        $this->start_server_repair($subscription);
+        $this->start_server_preflight_check($subscription);
 
         wp_redirect(wp_get_referer());
         exit;
