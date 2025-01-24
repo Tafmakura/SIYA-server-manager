@@ -127,8 +127,13 @@ class ServerOrchestrator {
             error_log('#PFC006 [SIYA Server Manager - ServerOrchestrator] Circuit breaker test completed successfully');
 
         } catch (\Exception $e) {
+
             error_log('#PFC007 [SIYA Server Manager - ServerOrchestrator] Exception caught: ' . $e->getMessage());
-            // Catch and handle the exception
+            
+            // Trip circuit breaker before handling exception
+            ServerCircuitBreaker::trip_circuit_breaker($subscription);
+            
+            // Catch and handle the exception 
             $this->handle_exception($e, true);
         }
     }
@@ -145,6 +150,15 @@ class ServerOrchestrator {
             get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
             get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
             );
+
+            // Error log
+            error_log('#SR002 [SIYA Server Manager - ServerOrchestrator] Server post id: ' . $server_post_id);
+
+            // Check if server post exists
+            if (!$server_post_id) {
+                error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] No server post found');
+                return;
+            }
 
             // Check if server previsously provisioned successfully 
             if($server_provision_status == 2){
@@ -183,24 +197,26 @@ class ServerOrchestrator {
            
             if($server_remote_status == 'active' || $server_provision_status != 2 ) {
 
-            error_log('#SR011 [SIYA Server Manager - ServerOrchestrator] starting maintenance');
+                error_log('#SR011 [SIYA Server Manager - ServerOrchestrator] starting maintenance');
 
-            // Construct message
-            $message = 'Maintenance started on server';
+                // Construct message
+                $message = 'Maintenance started on server';
 
-            // Add order note for the scheduled action
-            $subscription->add_order_note($message);
+                // Add order note for the scheduled action
+                $subscription->add_order_note($message);
 
-            // Log the scheduled action 
-            error_log('#SR012 [SIYA Server Manager - ServerOrchestrator] ' . $message);
+                // Log the scheduled action 
+                error_log('#SR012 [SIYA Server Manager - ServerOrchestrator] ' . $message);
 
-            // Provision server
-            error_log('#SR013 [SIYA Server Manager - ServerOrchestrator] Starting remote server provisioning');
-            $this->provision_remote_server($server_post_id);
-            error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning completed');
+                // Provision server
+                error_log('#SR013 [SIYA Server Manager - ServerOrchestrator] Starting remote server provisioning');
+                $this->provision_remote_server($server_post_id);
+                error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning completed');
+
             }
 
         } catch (\Exception $e) {
+
             error_log('#SR015 [SIYA Server Manager - ServerOrchestrator] Exception in server repair: ' . $e->getMessage());
             $this->handle_exception($e);
             
@@ -225,7 +241,7 @@ class ServerOrchestrator {
             if (!$this->server_product_id) {
                 error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
                 
-                return;
+                $this->throw_exception('No server product found in subscription');
             
             }
 
@@ -342,109 +358,111 @@ class ServerOrchestrator {
     }
     
     public function provision_remote_server($server_post_id, $task_id = null) {
-    try {
-        // Extract the arguments from action scheduler
-        $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
-        $subscription = wcs_get_subscription($subscription_id);
-        $server_product_id = get_post_meta($server_post_id, 'arsol_server_product_id', true);
-        $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+        try {
+            // Extract the arguments from action scheduler
+            $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+            $subscription = wcs_get_subscription($subscription_id);
+            $server_product_id = get_post_meta($server_post_id, 'arsol_server_product_id', true);
+            $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
 
-        // Load all parameters from the server post metadata
-        $server_post_instance = new ServerPost($server_post_id);
-        $metadata = $server_post_instance->get_meta_data();
+            // Load all parameters from the server post metadata
+            $server_post_instance = new ServerPost($server_post_id);
+            $metadata = $server_post_instance->get_meta_data();
 
-        // Load required parameters from metadata
-        $connect_server_manager = $metadata['_arsol_server_manager_required'] ?? null;
+            // Load required parameters from metadata
+            $connect_server_manager = $metadata['_arsol_server_manager_required'] ?? null;
 
-        error_log(sprintf(
-            'Server post ID: %s, Server product ID: %s, Subscription ID: %s',
-            $server_post_id,
-            $server_product_id,
-            $subscription_id
-        ));
+            error_log(sprintf(
+                'Server post ID: %s, Server product ID: %s, Subscription ID: %s',
+                $server_post_id,
+                $server_product_id,
+                $subscription_id
+            ));
 
-        // Check if the server has already been provisioned
-        $server_provisioned_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true); 
-        
-        if ($server_provisioned_status != 2) {
-            try {
-                // Step 2: Provision server if not already provisioned
-                $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+            // Check if the server has already been provisioned
+            $server_provisioned_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true); 
+            
+            if ($server_provisioned_status != 2) {
+                try {
+                    // Step 2: Provision server if not already provisioned
+                    $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
 
-                error_log('Server Provider Slug:' . $server_provider_slug);
+                    error_log('Server Provider Slug:' . $server_provider_slug);
 
-                $this->initialize_server_provider($server_provider_slug);
+                    $this->initialize_server_provider($server_provider_slug);
 
-                // Attempt to provision the server
-                $server_data = $this->provision_server_at_provider($subscription);
+                    // Attempt to provision the server
+                    $server_data = $this->provision_server_at_provider($subscription);
 
-                // Update server metadata on successful provisioning
-                update_post_meta($server_post_id, '_arsol_state_10_provisioning', 2); // Status 2 indicates success
+                    // Update server metadata on successful provisioning
+                    update_post_meta($server_post_id, '_arsol_state_10_provisioning', 2); // Status 2 indicates success
 
-                error_log(sprintf('#010 [SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
-                    PHP_EOL,
-                    json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-                ));
+                    error_log(sprintf('#010 [SIYA Server Manager - ServerOrchestrator] Provisioned server data:%s%s', 
+                        PHP_EOL,
+                        json_encode($server_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                    ));
 
-            } catch (\Exception $e) {
-                $error_definition = 'Error creating and updating server post';
-                // Rethrow
-                $this->handle_exception($e, true);
+                } catch (\Exception $e) {
+                    $error_definition = 'Error creating and updating server post';
+                    // Rethrow
+                    $this->handle_exception($e, true);
+                }
             }
-        }
 
-        // Check updated server metadata
-        $server_provisioned_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true); 
-        if ($server_provisioned_status == 2) {
-            try {
-                // Step 3: Schedule asynchronous action with predefined parameters to complete server provisioning
-                $metadata = $server_post_instance->get_meta_data();
+            // Check updated server metadata
+            $server_provisioned_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true); 
+            if ($server_provisioned_status == 2) {
+                try {
+                    // Step 3: Schedule asynchronous action with predefined parameters to complete server provisioning
+                    $metadata = $server_post_instance->get_meta_data();
 
-                // Load parameters into local variables
-                $server_provisioned_status = $metadata['_arsol_state_10_provisioning'] ?? null;
-                $server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
-                $server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
-                $server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
-                $server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
-                $server_provisioned_ipv6 = $metadata['arsol_server_provisioned_ipv6'] ?? null;
-                $server_provisioned_root_password = $metadata['arsol_server_provisioned_root_password'] ?? null;
-                $server_provisioned_date = $metadata['arsol_server_provisioned_date'] ?? null;
-                $server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
-                $server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
+                    // Load parameters into local variables
+                    $server_provisioned_status = $metadata['_arsol_state_10_provisioning'] ?? null;
+                    $server_provisioned_id = $metadata['arsol_server_provisioned_id'] ?? null;
+                    $server_provisioned_name = $metadata['arsol_server_provisioned_name'] ?? null;
+                    $server_provisioned_os = $metadata['arsol_server_provisioned_os'] ?? null;
+                    $server_provisioned_ipv4 = $metadata['arsol_server_provisioned_ipv4'] ?? null;
+                    $server_provisioned_ipv6 = $metadata['arsol_server_provisioned_ipv6'] ?? null;
+                    $server_provisioned_root_password = $metadata['arsol_server_provisioned_root_password'] ?? null;
+                    $server_provisioned_date = $metadata['arsol_server_provisioned_date'] ?? null;
+                    $server_provisioned_remote_status = $metadata['arsol_server_provisioned_remote_status'] ?? null;
+                    $server_provisioned_remote_raw_status = $metadata['arsol_server_provisioned_remote_raw_status'] ?? null;
 
-                $task_id = uniqid();
-                as_schedule_single_action(time(), 'arsol_wait_for_server_active_state_hook', [
-                    'server_post_id' => $server_post_id,
-                    'task_id' => $task_id ?: uniqid()
-                ], 'arsol_class_server_orchestrator');
+                    $task_id = uniqid();
+                    as_schedule_single_action(time(), 'arsol_wait_for_server_active_state_hook', [
+                        'server_post_id' => $server_post_id,
+                        'task_id' => $task_id ?: uniqid()
+                    ], 'arsol_class_server_orchestrator');
 
-                $subscription->add_order_note(
-                    'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
-                );
+                    $subscription->add_order_note(
+                        'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
+                    );
 
-                error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $subscription_id);
+                    error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $subscription_id);
 
-            } catch (\Exception $e) {
-                $error_definition = 'Error scheduling background server status update';
-                $this->handle_exception($e);
+                } catch (\Exception $e) {
+                    $error_definition = 'Error scheduling background server status update';
+                    $this->handle_exception($e);
+                }
             }
+
+        } catch (\Exception $e) {
+
+            $this->handle_exception($e);
+            
+            // Update server metadata on failed provisioning and trip CB
+            update_post_meta($server_post_id, '_arsol_state_10_provisioning', -1);
+
+            // Handle the exception and exit
+            $this->handle_exception($e);
+
+            // Trigger the circuit breaker
+            ServerCircuitBreaker::trip_circuit_breaker($subscription);
+            
+            return false; // Add fallback return false
         }
-
-    } catch (\Exception $e) {
-        $this->handle_exception($e);
-        
-        // Update server metadata on failed provisioning and trip CB
-        update_post_meta($server_post_id, '_arsol_state_10_provisioning', -1);
-
-        // Handle the exception and exit
-        $this->handle_exception($e);
-
-        // Trigger the circuit breaker
-        ServerCircuitBreaker::trip_circuit_breaker($subscription);
-        
-        return false; // Add fallback return false
+    
     }
-}
     
     // Step 3: Wait for server active state (Check server status) 
     public function wait_for_server_active_state($server_post_id, $task_id = null) {
