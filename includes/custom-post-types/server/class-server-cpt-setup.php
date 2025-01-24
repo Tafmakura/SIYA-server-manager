@@ -31,6 +31,7 @@ class ServerPostSetup {
         // Add new actions and filters
         add_filter('post_row_actions', array($this, 'modify_server_actions'), 10, 2);
         add_action('init', array($this, 'modify_server_capabilities'));
+        add_action('admin_head', array($this, 'my_column_width'));
     }
 
     /**
@@ -407,6 +408,12 @@ class ServerPostSetup {
             $role->add_cap('delete_servers');
             $role->add_cap('delete_published_servers');
         }
+    }
+
+    public function my_column_width() {
+        echo '<style type="text/css">
+                .table-view-list.server .column-details { width: 400px !important; overflow: hidden; }
+              </style>';
     }
     
     // Other methods remain unchanged
