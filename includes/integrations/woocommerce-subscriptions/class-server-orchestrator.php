@@ -306,6 +306,9 @@ class ServerOrchestrator {
             try {
                 // Step 2: Provision server if not already provisioned
                 $server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+
+                error_log('Server Provider Slug:' . $server_provider_slug);
+
                 $this->initialize_server_provider($server_provider_slug);
 
                 // Attempt to provision the server
