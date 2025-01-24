@@ -105,6 +105,7 @@ class ServerError {
 
     public function add_status_styles() {
         ?>
+        
         <style>
             .server-status {
                 padding: 2px 8px;
