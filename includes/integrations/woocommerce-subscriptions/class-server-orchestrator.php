@@ -129,23 +129,57 @@ class ServerOrchestrator {
         
     }
 
-    // Prepare the on button
+    // Prepare server repair
     public function start_server_repair($subscription) {
-        try {
-            // Primary Check: Look for linked server product
-            $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
+       
+        // Get server post ID
+        $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
 
-            if (!$this->server_product_id) {
-                error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
-                return;
+        // Get server remote status
+        $server_remote_status = $this->get_and_update_server_remote_status(
+            $server_post_id,
+            get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
+            get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
+        );
+
+        if($server_remote_status != 'active' ){
+
+            // Power up server 
+            $this->start_server_powerup($subscription);
+
+            // Wait for status
+            try {
+
+                $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
+                
+                if (!$status_check) {
+                    $this->throw_exception('Server status check failed');
+                }
+                
+            } catch (\Exception $e) {
+                // Handle the exception and exit
+                $this->handle_exception($e, true);
+                return false;
             }
-            // Test the circuit
-            $circuit_breaker_instance = new ServerCircuitBreaker();
-            $circuit_breaker_instance->test_circuit($this->subscription);
-        } catch (\Exception $e) {
-            // Catch and handle the exception
-            $this->handle_exception($e, true);
-        }
+
+        } 
+
+        if($server_remote_status != 'active' ){
+
+            // Construct message
+            $message = 'Maintanace started on server ';
+
+            // Add order note for the scheduled action
+            $subscription->add_order_note($message);
+
+            // Log the scheduled action 
+            error_log($message);
+
+            // Provision server
+            $this->provision_remote_server($server_post_id);
+        
+        }     
+
     }
 
     // Step 1: Start server provisioning process (Create server post)
@@ -411,9 +445,8 @@ class ServerOrchestrator {
             if ($server_ip_status != 2) {
 
                 error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is not 2. Checking and updating server status.');
-        
-                // Use the new wait_for_remote_server_status method
 
+                // Check if the remote server is active
                 try {
 
                     $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
@@ -444,7 +477,7 @@ class ServerOrchestrator {
                     }
 
                 } catch (\Exception $e) {
-                    
+
                     $error_definition = 'Error fetching provisioned server IP';
 
                     // Update server metadata on failed provisioning and trip CB
@@ -507,16 +540,24 @@ class ServerOrchestrator {
             } else {
 
                 // No server manager required, mark the subscription as active
-                $success_message = 'Server is ready, no server manager required. Activating subscription... Good day and good luck!';
+                $success_message = 'Server is ready, no server manager required. Good day and good luck!';
         
                 // Update subscription status to active
                 $subscription->add_order_note($success_message);
         
                 // Log the success message
                 error_log($success_message);
-        
-                // Activate Subscription
-                $subscription->update_status('active');
+
+                try {
+                    // Reset circuit
+                    $circuit_breaker_instance = new ServerCircuitBreaker();
+                    $circuit_breaker_instance->test_circuit($subscription);
+                } catch (\Exception $e) {
+                    // Handle the exception
+                    $this->handle_exception($e);
+                    return false;
+                }
+
             }
 
         } catch (\Exception $e) {
@@ -990,7 +1031,16 @@ class ServerOrchestrator {
             $success_message = 'Server manager connected to server successfully! Activating subscription to active... Good day and good luck!';
             $subscription->add_order_note($success_message);
             error_log($success_message);
-            $subscription->update_status('active');
+
+            try {
+                // Reset circuit
+                $circuit_breaker_instance = new ServerCircuitBreaker();
+                $circuit_breaker_instance->test_circuit($subscription);
+            } catch (\Exception $e) {
+                // Handle the exception
+                $this->handle_exception($e);
+                return false;
+            }
 
         } catch (\Exception $e) {
             $this->handle_exception($e);
@@ -1075,7 +1125,7 @@ class ServerOrchestrator {
         $this->server_provider->shutdown_server($server_provisioned_id);
 
         // Update server suspension status
-        $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
+        $remote_status = $this->get_and_update_server_remote_status($server_post_id, $server_provider_slug, $server_provisioned_id);
         error_log(sprintf('#036 [SIYA Server Manager - ServerOrchestrator] Updated remote status metadata for server post ID %d: %s', $server_post_id, $remote_status['provisioned_remote_status']));
 
         // Verify server shutdown
@@ -1186,7 +1236,7 @@ class ServerOrchestrator {
         $this->server_provider->poweron_server($server_provisioned_id);
 
         // Update the server's remote status
-        $remote_status = $this->update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id);
+        $remote_status = $this->get_and_update_server_remote_status($server_post_id, $server_provider_slug, $server_provisioned_id);
         error_log(sprintf('#044 Updated remote status metadata for Server Post ID: %s', $server_post_id));
 
         // Check if the server is now active or in the process of starting
@@ -1859,7 +1909,7 @@ class ServerOrchestrator {
         }
     }
 
-    private function update_server_status($server_post_id, $server_provider_slug, $server_provisioned_id) {
+    private function get_and_update_server_remote_status($server_post_id, $server_provider_slug, $server_provisioned_id) {
 
         // Get remote status
         $this->initialize_server_provider($server_provider_slug);
@@ -2012,7 +2062,7 @@ class ServerOrchestrator {
             while ((time() - $start_time) < $time_out) {
                 try {
                     // Fetch the current server status
-                    $remote_status = $this->update_server_status(
+                    $remote_status = $this->get_and_update_server_remote_status(
                         $server_post_id,
                         get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
                         get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)

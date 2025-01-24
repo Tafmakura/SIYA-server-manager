@@ -408,7 +408,7 @@ function force_on_hold_and_check_server_status($subscription_id) {
 }
 
 // ...existing code...
-function update_server_status($post_id, $status) {
+function get_and_update_server_remote_status($post_id, $status) {
     $server = new ServerPost($post_id);
     $meta_data = [
         '_arsol_state_10_provisioning' => $status,

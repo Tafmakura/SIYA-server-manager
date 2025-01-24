@@ -135,7 +135,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $subscription->add_order_note("Circuit breaker set to half-open (in progress).");
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker set to half-open for subscription {$subscription->get_id()}.");
         
-            $this->start_server_powerup($subscription);
+            $this->start_server_repair($subscription);
         }
     }
 
@@ -144,7 +144,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         
         if ($server_post_id) {
             update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_CLOSED);
-            $subscription->update_status('active');
+           
+        
             $subscription->add_order_note("Circuit breaker reset and subscription activated. " . json_encode($details));
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker reset for subscription {$subscription->get_id()}. Details: " . json_encode($details));
             
