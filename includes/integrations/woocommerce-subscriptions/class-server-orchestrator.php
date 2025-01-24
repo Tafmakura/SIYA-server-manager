@@ -1976,7 +1976,7 @@ class ServerOrchestrator {
          * @param bool $rethrow Whether to rethrow the exception or not (default is false).
          * @param bool $stack_trace Whether to log the stack trace (default is true).
          */
-        private function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = false) {
+        protected function handle_exception($e, bool $rethrow = false, int $error_level = E_USER_WARNING, bool $stack_trace = false) {
             // Get the error code from the exception (if available)
             $error_code_msg = $e->getCode() ? sprintf("Error Code: %s\n", $e->getCode()) : '';
 
