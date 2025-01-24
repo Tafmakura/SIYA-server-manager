@@ -445,7 +445,7 @@ class ServerOrchestrator {
         
                 // Use the new wait_for_remote_server_status method
 
-                error_log('HOyo Server ID: ' . $server_provisioned_id);
+                error_log('HOyo Server ID: ' . $server_post_id);
 
                 try {
 
