@@ -69,20 +69,20 @@ class ServerError {
 
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             if (!$server_post_id) {
-                echo '<span class="server-status no-server">No Server</span>';
+                echo '<mark class="server-status no-server"><span>No Server</span></mark>';
                 return;
             }
 
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
             if ($circuit_breaker == -1) {
-                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-error arsol-server-status arsol-tips"><span>Error</span></mark>';
+                echo '<mark class="server-status error"><span>Error</span></mark>';
             } elseif ($circuit_breaker == 1) {
-                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-in-progress arsol-server-status arsol-tips"><span>Maintenance</span></mark>';
+                echo '<mark class="server-status in-progress"><span>Maintenance</span></mark>';
             } elseif ($circuit_breaker == 0) {
-                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-active arsol-server-status arsol-tips"><span>Okay</span></mark>';
+                echo '<mark class="server-status active"><span>Okay</span></mark>';
             } else {
-                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-pending arsol-server-status arsol-tips"><span>Setup</span></mark>';
+                echo '<mark class="server-status pending"><span>Setup</span></mark>';
             }
         }
     }
@@ -90,17 +90,17 @@ class ServerError {
     public function add_status_styles() {
         ?>
         <style>
-            .arsol-server-status {
+            .server-status {
                 padding: 2px 8px;
                 border-radius: 3px;
                 font-size: 12px;
                 font-weight: 500;
             }
-            .arsol-status-active { background: #c6e1c6; color: #5b841b; }
-            .arsol-status-pending { background: #f8dda7; color: #94660c; }
-            .arsol-status-error { background: #eba3a3; color: #761919; }
-            .arsol-status-in-progress { background: #c8d7e1; color: #2e4453; }
-            .arsol-no-server { background: #e5e5e5; color: #777; }
+            .server-status.active { background: #c6e1c6; color: #5b841b; }
+            .server-status.pending { background: #f8dda7; color: #94660c; }
+            .server-status.error { background: #eba3a3; color: #761919; }
+            .server-status.in-progress { background: #c8d7e1; color: #2e4453; }
+            .server-status.no-server { background: #e5e5e5; color: #777; }
         </style>
         <?php
     }
