@@ -80,7 +80,7 @@ class ServerError {
             } elseif ($circuit_breaker == 1) {
                 echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Maintenance</span></mark>';
             } elseif ($circuit_breaker == 0) {
-                echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Okay</span></mark>';
+                echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Live</span></mark>';
             } else {
                 echo '<mark class="subscription-status order-status server-status status-on-hold pending tips"><span>Setup</span></mark>';
             }
