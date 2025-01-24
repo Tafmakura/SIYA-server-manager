@@ -126,7 +126,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $subscription->add_order_note("Circuit breaker set to half-open (in progress).");
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker set to half-open for subscription {$subscription->get_id()}.");
   
-            $this->start_server_maintenance($subscription);
+            $this->start_server_repair($subscription);
 
         } else {
             //privision_server

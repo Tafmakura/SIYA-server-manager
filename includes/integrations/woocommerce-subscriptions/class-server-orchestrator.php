@@ -102,6 +102,8 @@ class ServerOrchestrator {
         add_action('arsol_install_server_manager_agent_on_server_hook', [$this, 'install_server_manager_agent_on_server']);
         add_action('arsol_verify_server_manager_agent_installation_on_server_hook', [$this, 'verify_server_manager_agent_installation_on_server'], 10, 2);
         add_action('arsol_verify_server_manager_connection_to_server_hook', [$this, 'verify_server_manager_connection_to_server'], 10, 2);
+
+        add_action('admin_post_repair', [$this, 'trigger_server_repair_from_url']);
     }
 
     // Prepare the on button
@@ -138,8 +140,27 @@ class ServerOrchestrator {
         }
     }
 
+    public function trigger_server_repair_from_url() {
+        check_admin_referer('repair_nonce', '_wpnonce');
+
+        $subscription_id = isset($_REQUEST['subscription_id']) ? absint($_REQUEST['subscription_id']) : 0;
+        if (!$subscription_id) {
+            wp_die('Invalid subscription ID.');
+        }
+
+        $subscription = wcs_get_subscription($subscription_id);
+        if (!$subscription) {
+            wp_die('Subscription not found.');
+        }
+
+        $this->start_server_repair($subscription);
+
+        wp_redirect(wp_get_referer());
+        exit;
+    }
+
     // Prepare server repair
-    public function start_server_maintenance($subscription) {
+    public function start_server_repair($subscription) {
         try {
             
             error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
@@ -221,16 +242,10 @@ class ServerOrchestrator {
 
                 // Provision server
                 error_log('#SR013 [SIYA Server Manager - ServerOrchestrator] Starting remote server provisioning');
-                try {
+      
+                $this->start_server_provision($subscription);
 
-                    $this->start_server_provision($subscription);
-
-                } catch (\Exception $e) {
-                    error_log('#SR016 [SIYA Server Manager - ServerOrchestrator] Exception during server provision: ' . $e->getMessage());
-                    $this->handle_exception($e, true);
-                    return false;
-                }
-                error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning completed');
+                error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning scheduled, repair process started');
 
             }
 

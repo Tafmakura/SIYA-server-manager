@@ -80,12 +80,14 @@ class ServerError {
 
             if ($circuit_breaker == -1) {
                 echo '<mark class="subscription-status order-status server-status status-error error tips"><span>Error</span></mark>';
-                $server_actions[] = '<a href="#" class="repair-server">Repair</a>';
+                $repair_url = wp_nonce_url(admin_url('admin-post.php?action=repair&subscription_id=' . $subscription_id), 'repair_nonce');
+                $server_actions[] = '<a href="' . esc_url($repair_url) . '" class="repair-server">Repair</a>';
             } elseif ($circuit_breaker == 1) {
                 echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Repair</span></mark>';
             } elseif ($circuit_breaker == 0) {
                 echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Okay</span></mark>';
-                $server_actions[] = '<a href="#" class="reboot-server">Reboot</a>';
+                $reboot_url = wp_nonce_url(admin_url('admin-post.php?action=reboot&subscription_id=' . $subscription_id), 'reboot_nonce');
+                $server_actions[] = '<a href="' . esc_url($reboot_url) . '" class="reboot-server">Reboot</a>';
             } else {
                 echo '<mark class="subscription-status order-status server-status status-on-hold pending tips"><span>Setup</span></mark>';
             }
@@ -95,9 +97,9 @@ class ServerError {
             echo '<span class="view-server"><a href="' . esc_url( get_edit_post_link($server_post_id) ) . '">View</a></span>';
 
             if ($circuit_breaker == -1) {
-                echo ' | <span class="repair-server"><a href="#">Repair</a></span>';
+                echo ' | <span class="repair-server"><a href="' . esc_url($repair_url) . '">Repair</a></span>';
             } elseif ($circuit_breaker == 0) {
-                echo ' | <span class="reboot-server"><a href="#">Reboot</a></span>';
+                echo ' | <span class="reboot-server"><a href="' . esc_url($reboot_url) . '">Reboot</a></span>';
             }
             echo '</div>';
         }
