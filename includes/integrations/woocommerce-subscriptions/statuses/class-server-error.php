@@ -92,7 +92,7 @@ class ServerError {
 
             // Add row actions
             echo '<div class="row-actions">';
-            echo '<span class="view-server"><a href="#">View</a></span>';
+            echo '<span class="view-server"><a href="#" class="order-preview">View</a></span>';
 
             if ($circuit_breaker == -1) {
                 echo ' | <span class="repair-server"><a href="#">Repair</a></span>';
