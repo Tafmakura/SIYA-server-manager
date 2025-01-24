@@ -1840,12 +1840,12 @@ class ServerOrchestrator {
         // Use passed server provider slug or get from metadata if not provided
         if ($server_provider_slug) {
             $this->server_provider_slug = $server_provider_slug;
-        } else if (!$this->server_provider_slug) {
+        } else if (!$server_provider_slug) {
             $this->server_provider_slug = get_post_meta($this->server_post_id, 'arsol_server_provider_slug', true);
         }
 
         // Initialize the appropriate provider instance
-        switch ($this->server_provider_slug) {
+        switch ($server_provider_slug) {
             case 'digitalocean':
                 if (!$this->digitalocean) {
                     $this->digitalocean = new DigitalOcean();
@@ -1865,7 +1865,7 @@ class ServerOrchestrator {
                 $this->server_provider = $this->vultr;
                 break;
             default:
-                $this->throw_exception('Unknown server provider: ' . $this->server_provider_slug);
+                $this->throw_exception('Unknown server provider: ' . $server_provider_slug);
         }
     }
 
@@ -2011,7 +2011,7 @@ class ServerOrchestrator {
             throw new \InvalidArgumentException($error_message);
         }
 
-        error_log("[HWAHWA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
+        error_log("[SIYA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
         $start_time = time();
         $attempts = 0;
 
