@@ -106,80 +106,94 @@ class ServerOrchestrator {
 
     // Prepare the on button
     public function start_server_preflight_check($subscription) {
+        error_log('#PFC001 [SIYA Server Manager - ServerOrchestrator] Starting server preflight check');
+        
         try {
-
             // Primary Check: Look for linked server product
+            error_log('#PFC002 [SIYA Server Manager - ServerOrchestrator] Extracting server product from subscription');
             $this->server_product_id = $this->extract_server_product_from_subscription($subscription);
 
             if (!$this->server_product_id) {
-                error_log('#001 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
+                error_log('#PFC003 [SIYA Server Manager - ServerOrchestrator] No server product found in subscription, moving on');
                 return;
             }
+            
+            error_log('#PFC004 [SIYA Server Manager - ServerOrchestrator] Server product found: ' . $this->server_product_id);
 
             // Test the circuit
+            error_log('#PFC005 [SIYA Server Manager - ServerOrchestrator] Testing circuit breaker');
             $circuit_breaker_instance = new ServerCircuitBreaker();
             $circuit_breaker_instance->test_circuit($this->subscription);
+            error_log('#PFC006 [SIYA Server Manager - ServerOrchestrator] Circuit breaker test completed successfully');
 
         } catch (\Exception $e) {
-
+            error_log('#PFC007 [SIYA Server Manager - ServerOrchestrator] Exception caught: ' . $e->getMessage());
             // Catch and handle the exception
             $this->handle_exception($e, true);
-        
         }
-        
     }
 
     // Prepare server repair
     public function start_server_repair($subscription) {
+        error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
        
         // Get server post ID
+        error_log('#SR002 [SIYA Server Manager - ServerOrchestrator] Getting server post ID from subscription');
         $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
+        error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] Server post ID: ' . $server_post_id);
 
         // Get server remote status
+        error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
         $server_remote_status = $this->get_and_update_server_remote_status(
             $server_post_id,
             get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
             get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
         );
+        error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
 
         if($server_remote_status != 'active' ){
+            error_log('#SR006 [SIYA Server Manager - ServerOrchestrator] Server not active, initiating power up sequence');
 
             // Power up server 
             $this->start_server_powerup($subscription);
 
             // Wait for status
             try {
-
+                error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
                 $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
                 
                 if (!$status_check) {
+                    error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
                     $this->throw_exception('Server status check failed');
                 }
                 
+                error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
+                
             } catch (\Exception $e) {
+                error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
                 // Handle the exception and exit
                 $this->handle_exception($e, true);
                 return false;
             }
-
         } 
 
         if($server_remote_status != 'active' ){
+            error_log('#SR011 [SIYA Server Manager - ServerOrchestrator] Server still not active, starting maintenance');
 
             // Construct message
-            $message = 'Maintanace started on server ';
+            $message = 'Maintenance started on server';
 
             // Add order note for the scheduled action
             $subscription->add_order_note($message);
 
             // Log the scheduled action 
-            error_log($message);
+            error_log('#SR012 [SIYA Server Manager - ServerOrchestrator] ' . $message);
 
             // Provision server
+            error_log('#SR013 [SIYA Server Manager - ServerOrchestrator] Starting remote server provisioning');
             $this->provision_remote_server($server_post_id);
-        
+            error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning completed');
         }     
-
     }
 
     // Step 1: Start server provisioning process (Create server post)
