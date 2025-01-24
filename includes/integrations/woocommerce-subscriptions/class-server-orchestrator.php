@@ -141,14 +141,15 @@ class ServerOrchestrator {
     // Prepare server repair
     public function start_server_maintenance($subscription) {
         try {
+            
             error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
             
             $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
             $server_provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
             $server_remote_status = $this->get_and_update_server_remote_status(
-            $server_post_id,
-            get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
-            get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
+                $server_post_id,
+                get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
+                get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
             );
 
             // Error log
