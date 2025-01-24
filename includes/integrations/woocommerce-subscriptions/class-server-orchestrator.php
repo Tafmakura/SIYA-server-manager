@@ -228,13 +228,14 @@ class ServerOrchestrator {
                 if ($this->server_post_id && $this->server_product_id && $this->subscription_id) {
                     
                     $task_id = uniqid();
-                    as_schedule_single_action(time(), 'arsol_provision_remote_server_hook', [
-                        'subscription_id' => $this->subscription_id,
-                        'server_post_id' => $this->server_post_id,
-                        'server_product_id' => $this->server_product_id,
-                        'server_provider_slug' => $this->server_provider_slug,
-                        'task_id' => $task_id
-                    ], 'arsol_class_server_orchestrator');
+                    as_schedule_single_action(time(), 
+                        'arsol_provision_remote_server_hook', 
+                        [
+                            'subscription_id' => $this->subscription_id,
+                            'task_id' => $task_id
+                        ], 
+                        'arsol_class_server_orchestrator'
+                    );
 
                     // Construct message
                     $message = 'Scheduled remote server provisioning for subscription #' . $this->subscription_id . PHP_EOL . '(Task ID: ' . $task_id . ')';
