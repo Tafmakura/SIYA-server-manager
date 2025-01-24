@@ -139,17 +139,17 @@ class ServerOrchestrator {
         
         $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
         $server_provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
-        
+        $server_remote_status = $this->get_and_update_server_remote_status(
+            $server_post_id,
+            get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
+            get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
+        );
+
         // Check if server previsously provisioned successfully 
         if($server_provision_status == 2){
 
              // Get server remote status
             error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
-            $server_remote_status = $this->get_and_update_server_remote_status(
-                $server_post_id,
-                get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
-                get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
-            );
             error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
 
             if($server_remote_status != 'active' ){
