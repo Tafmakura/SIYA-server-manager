@@ -137,6 +137,9 @@ class ServerOrchestrator {
     public function start_server_maintenance($subscription) {
         error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
         
+        $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
+        $server_provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
+        
         // Check if server previsously provisioned successfully 
         if($server_provision_status == 2){
 
