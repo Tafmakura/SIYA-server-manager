@@ -76,7 +76,7 @@ class ServerError {
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
             $server_actions = array();
-            $server_actions[] = '<a href="' . esc_url( get_edit_post_link($server_post_id) ) . '" class="order-preview">View</a>'; // Always show View
+            $server_actions[] = '<a href="' . esc_url( get_edit_post_link($server_post_id) ) . '">View</a>'; // Always show View
 
             if ($circuit_breaker == -1) {
                 echo '<mark class="subscription-status order-status server-status status-error error tips"><span>Error</span></mark>';
@@ -92,7 +92,7 @@ class ServerError {
 
             // Add row actions
             echo '<div class="row-actions">';
-            echo '<span class="view-server"><a href="' . esc_url( get_edit_post_link($server_post_id) ) . '" class="order-preview">View</a></span>';
+            echo '<span class="view-server"><a href="' . esc_url( get_edit_post_link($server_post_id) ) . '">View</a></span>';
 
             if ($circuit_breaker == -1) {
                 echo ' | <span class="repair-server"><a href="#">Repair</a></span>';
@@ -115,7 +115,7 @@ class ServerError {
             .server-status.okay { background: #c6e1c6; color: #5b841b; }
             .server-status.setup { background: #f8dda7; color: #94660c; }
             .server-status.error { background: #eba3a3; color: #761919; }
-            .server-status.repair { background: #c8d7e1; color: #2e4453; }
+            .server-status.repair { background: #c8d7e1; color:rgb(24, 77, 112); }
             .server-status.no-server { background: #e5e5e5; color: #777; }
         </style>
         <?php
