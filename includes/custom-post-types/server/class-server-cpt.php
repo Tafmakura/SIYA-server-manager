@@ -152,8 +152,7 @@ class ServerPost {
     }
    
    
-    public static function get_server_post_from_subscription($subscription) {
-        
+    public static function get_server_post_id_from_subscription($subscription) {
         // Get the subscription ID
         $subscription_id = $subscription->get_id();
     
@@ -161,8 +160,8 @@ class ServerPost {
         $linked_server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
     
         if ($linked_server_post_id) {
-            // If the linked server post ID is found, return an instance of self
-            return new self($linked_server_post_id);
+            // If the linked server post ID is found, return it as an integer
+            return (int) $linked_server_post_id;
         }
     
         // If no linked server post ID is found, perform a query to find it
@@ -179,13 +178,14 @@ class ServerPost {
         $query = new \WP_Query($args);
     
         if ($query->posts) {
-            // If a matching server post is found, return an instance of self
-            return new self($query->posts[0]->ID);
+            // If a matching server post is found, return the post ID as an integer
+            return (int) $query->posts[0]->ID;
         }
     
         // If no server post is found, return false
         return false;
     }
+    
     
     public function update_meta_data($post_id, array $meta_data) {
         $this->post_id = $post_id;
