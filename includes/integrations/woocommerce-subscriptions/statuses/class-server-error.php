@@ -26,7 +26,7 @@ class ServerError {
             if ('status' === $key) {
                 $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
                 // Add width style
-                echo '<style>.column-arsol-server-status { width: 150px; }</style>';
+                echo '<style>.column-arsol-server-status { width: 120px; }</style>';
             }
         }
         return $new_columns;
@@ -111,11 +111,12 @@ class ServerError {
         ?>
         
         <style>
-            .server-status {
+            .server-status { /*
                 padding: 2px 8px;
                 border-radius: 3px;
                 font-size: 12px;
                 font-weight: 500;
+                */
             }
             .server-status.okay { background: #c6e1c6; color: #5b841b; }
             .server-status.setup { background: #f8dda7; color: #94660c; }
