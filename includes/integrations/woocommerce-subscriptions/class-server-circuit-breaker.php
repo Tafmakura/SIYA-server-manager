@@ -126,7 +126,9 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker set to half-open for subscription {$subscription->get_id()}.");
         
             $this->start_server_repair($subscription);
+            
         } else {
+
             error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription->get_id()}.");
             
             //privision_server
