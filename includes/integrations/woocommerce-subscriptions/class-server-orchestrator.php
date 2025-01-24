@@ -228,13 +228,13 @@ class ServerOrchestrator {
                 if ($this->server_post_id && $this->server_product_id && $this->subscription_id) {
                     
                     $task_id = uniqid();
-                    $this->schedule_action('arsol_provision_remote_server_hook', [
+                    as_schedule_single_action(time(), 'arsol_provision_remote_server_hook', [
                         'subscription_id' => $this->subscription_id,
                         'server_post_id' => $this->server_post_id,
                         'server_product_id' => $this->server_product_id,
                         'server_provider_slug' => $this->server_provider_slug,
                         'task_id' => $task_id
-                    ]);
+                    ], 'arsol_class_server_orchestrator');
 
                     // Construct message
                     $message = 'Scheduled remote server provisioning for subscription #' . $this->subscription_id . PHP_EOL . '(Task ID: ' . $task_id . ')';
@@ -376,10 +376,15 @@ class ServerOrchestrator {
                 
                 $task_id = uniqid();
 
-                $this->schedule_action('arsol_wait_for_server_active_state_hook', [
+                error_log('HOyo Server ID: ' . $this->server_post_id);
+
+
+
+                as_schedule_single_action(time(), 'arsol_wait_for_server_active_state_hook', 
+                [
                     'server_post_id' => $this->server_post_id,
                     'task_id' => $task_id ?: uniqid()
-                ]);
+                ], 'arsol_class_server_orchestrator');
 
                 $this->subscription->add_order_note(
                     'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
@@ -416,6 +421,8 @@ class ServerOrchestrator {
     // Step 3: Wait for server active state (Check server status) 
     public function wait_for_server_active_state($server_post_id, $task_id = null) {
 
+        error_log('HOyo Server ID: ' . $server_post_id);
+
         try {
 
             error_log('#015 [SIYA Server Manager - ServerOrchestrator] Scheduled server status update started');
@@ -444,8 +451,6 @@ class ServerOrchestrator {
                 error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is not 2. Checking and updating server status.');
         
                 // Use the new wait_for_remote_server_status method
-
-                error_log('HOyo Server ID: ' . $server_post_id);
 
                 try {
 
@@ -1891,11 +1896,6 @@ class ServerOrchestrator {
         ]);
 
         return $remote_status;
-    }
-
-    // New helper method to schedule actions
-    private function schedule_action($hook, $args) {
-        as_schedule_single_action(time(), $hook, [$args], 'arsol_class_server_orchestrator');
     }
 
         /**
