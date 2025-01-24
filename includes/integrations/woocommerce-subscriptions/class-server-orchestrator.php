@@ -268,9 +268,9 @@ class ServerOrchestrator {
 
           
             // Check if the server post already exists
-           //  $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
+            $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
 
-            
+            error_log('#001a [SIYA Server Manager - ServerOrchestrator] Checking if server post exists: ' . $server_post_id);
 
             // If the server post does not exist, create it in the database
             if (!$server_post_id) {
