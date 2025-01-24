@@ -145,8 +145,7 @@ class ServerOrchestrator {
             error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
 
              // Get server post_id from subscription 
-            $server_post = ServerPost::get_server_post_from_subscription($subscription);
-            $server_post_id = $server_post->ID;
+            $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
 
             // If no linked server post ID is found, log the error and exit
             if(!$server_post_id) {
