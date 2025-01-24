@@ -231,7 +231,7 @@ class ServerOrchestrator {
                     as_schedule_single_action(time(), 
                         'arsol_provision_remote_server_hook', 
                         [
-                            'subscription_id' => $this->subscription_id,
+                            'server_post_id' => $this->server_post_id,
                             'task_id' => $task_id
                         ], 
                         'arsol_class_server_orchestrator'
