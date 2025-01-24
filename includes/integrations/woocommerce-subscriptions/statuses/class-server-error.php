@@ -75,15 +75,22 @@ class ServerError {
 
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
+            $server_actions = array();
+            $server_actions[] = '<a href="#" class="view-server">View</a>'; // Always show View
+
             if ($circuit_breaker == -1) {
                 echo '<mark class="subscription-status order-status server-status status-error error tips"><span>Error</span></mark>';
+                $server_actions[] = '<a href="#" class="repair-server">Repair</a>';
             } elseif ($circuit_breaker == 1) {
                 echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Repair</span></mark>';
             } elseif ($circuit_breaker == 0) {
                 echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Okay</span></mark>';
+                $server_actions[] = '<a href="#" class="reboot-server">Reboot</a>';
             } else {
                 echo '<mark class="subscription-status order-status server-status status-on-hold pending tips"><span>Setup</span></mark>';
             }
+
+            echo ' ' . implode(' | ', $server_actions);
         }
     }
 
