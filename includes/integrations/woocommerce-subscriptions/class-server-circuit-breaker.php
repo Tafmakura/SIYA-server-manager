@@ -119,6 +119,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         error_log("[SIYA Debug] Setting circuit breaker to half-open for subscription: " . $subscription->get_id());
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         
+        // Check to see if maintanace is happening on a new server or an existing server
         if ($server_post_id) {
             update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_HALF_OPEN);
             $subscription->add_order_note("Circuit breaker set to half-open (in progress).");
