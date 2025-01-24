@@ -289,6 +289,8 @@ class ServerOrchestrator {
             $this->server_post_id = $server_post_id;
             $this->server_product_id = get_post_meta($server_post_id, 'arsol_server_product_id', true);
             $this->server_provider_slug = get_post_meta($server_post_id, 'arsol_server_provider_slug', true);
+
+            error_log ('#006B [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
     
             // Load all parameters from the server post metadata
             $server_post_instance = new ServerPost($this->server_post_id);
@@ -309,6 +311,14 @@ class ServerOrchestrator {
             $this->server_max_applications = $metadata['arsol_server_max_applications'] ?? null;
             $this->server_max_staging_sites = $metadata['arsol_server_max_staging_sites'] ?? null;
 
+            error_log(sprintf(
+                'Server post ID: %s, Server product ID: %s, Subscription ID: %s',
+                $this->server_post_id,
+                $this->server_product_id,
+                $this->subscription_id
+            ));
+
+            error_log ('#006C [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
 
             // Check if the server has already been provisioned
             $this->server_provisioned_status = get_post_meta($this->server_post_id, '_arsol_state_10_provisioning', true); 
