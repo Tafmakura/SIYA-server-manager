@@ -182,6 +182,7 @@ class ServerPostSetup {
 
     public function populate_custom_columns($column, $post_id) {
         if ($column === 'details') {
+            echo '<style>.column-details { width: 400px; }</style>';
             // Get the associated subscription ID
             $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
     
