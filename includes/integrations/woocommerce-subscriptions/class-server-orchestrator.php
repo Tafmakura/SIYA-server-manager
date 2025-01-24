@@ -373,7 +373,8 @@ class ServerOrchestrator {
 
             } catch (\Exception $e) {
                 $error_definition = 'Error creating and updating server post';
-                $this->handle_exception($e);
+                // Rethrow
+                $this->handle_exception($e, true);
             }
         }
 
