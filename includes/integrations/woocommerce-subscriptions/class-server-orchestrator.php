@@ -1220,6 +1220,7 @@ class ServerOrchestrator {
             error_log('#035 [SIYA Server Manager - ServerOrchestrator] Missing parameters for shutdown. Args: ' . json_encode($args));
             return;
         }
+        
         // Retrieve the subscription instance
         $subscription = wcs_get_subscription($subscription_id);
 
