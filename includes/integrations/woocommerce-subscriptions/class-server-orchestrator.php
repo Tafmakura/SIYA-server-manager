@@ -268,7 +268,7 @@ class ServerOrchestrator {
 
           
             // Check if the server post already exists
-            $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
+           //  $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
 
             
 

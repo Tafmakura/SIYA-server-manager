@@ -129,9 +129,6 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $this->start_server_maintenance($subscription);
 
         } else {
-
-            error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription->get_id()}.");
-            
             //privision_server
             $this->start_server_provision($subscription);
         }
@@ -144,7 +141,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_CLOSED);
             $subscription->add_order_note("Circuit breaker reset and subscription activated. " . json_encode($details));
-            error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker reset for subscription {$subscription->get_id()}. Details: " . json_encode($details));
+            error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker reset for subscription {$subscription->get_id()}.");
         } else  {
             error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription->get_id()}.");
             $this->throw_exception("Server post ID not found for subscription {$subscription->get_id()}");
