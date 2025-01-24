@@ -78,9 +78,9 @@ class ServerError {
             if ($circuit_breaker == -1) {
                 echo '<mark class="subscription-status order-status server-status status-error error tips"><span>Error</span></mark>';
             } elseif ($circuit_breaker == 1) {
-                echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Maintenance</span></mark>';
+                echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Repair</span></mark>';
             } elseif ($circuit_breaker == 0) {
-                echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Live</span></mark>';
+                echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Okay</span></mark>';
             } else {
                 echo '<mark class="subscription-status order-status server-status status-on-hold pending tips"><span>Setup</span></mark>';
             }
@@ -96,10 +96,10 @@ class ServerError {
                 font-size: 12px;
                 font-weight: 500;
             }
-            .server-status.active { background: #c6e1c6; color: #5b841b; }
-            .server-status.pending { background: #f8dda7; color: #94660c; }
+            .server-status.okay { background: #c6e1c6; color: #5b841b; }
+            .server-status.setup { background: #f8dda7; color: #94660c; }
             .server-status.error { background: #eba3a3; color: #761919; }
-            .server-status.in-progress { background: #c8d7e1; color: #2e4453; }
+            .server-status.repair { background: #c8d7e1; color: #2e4453; }
             .server-status.no-server { background: #e5e5e5; color: #777; }
         </style>
         <?php
