@@ -82,7 +82,7 @@ class ServerError {
             } elseif ($circuit_breaker == 0) {
                 echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Okay</span></mark>';
             } else {
-                echo '<mark class="subscription-status order-status server-statusstatus-on-hold on-hold tips"><span>Setup</span></mark>';
+                echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Setup</span></mark>';
             }
         }
     }
