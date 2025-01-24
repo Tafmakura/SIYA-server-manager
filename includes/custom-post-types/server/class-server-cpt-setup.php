@@ -412,7 +412,7 @@ class ServerPostSetup {
 
     public function my_column_width() {
         echo '<style type="text/css">
-                .table-view-list.server .column-details { width: 400px !important; overflow: hidden; }
+                .column-arsol-server-status .column-details { width: 400px !important; overflow: hidden; }
               </style>';
     }
     
