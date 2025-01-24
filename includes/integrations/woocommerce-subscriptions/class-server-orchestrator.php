@@ -284,11 +284,9 @@ class ServerOrchestrator {
                     if (is_wp_error($server_post_id)) {
                         throw new Exception($server_post->get_error_message(), $server_post->get_error_code());
                     }
-                    
-                    $this->server_post_id = $server_post_id;
 
                     // Update server metadata
-                    update_post_meta($this->server_post_id, '_arsol_state_05_server_post', 2);
+                    update_post_meta($server_post_id, '_arsol_state_05_server_post', 2);
 
                     //Update poststatus variable to 2
                     $this->server_post_status = 2;
@@ -304,14 +302,12 @@ class ServerOrchestrator {
             } else {
 
                  // Define the message
-                 $message = 'Server post exists. Server post ID: ' . $this->server_post_id;
+                 $message = 'Server post exists. Server post ID: ' . $server_post_id;
 
             }
 
             // Check latest server post status 
-            $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true);
-
-            error_log('STATE CHECK (05): Server post status: ' . $this->server_post_status);
+            $this->server_post_status = get_post_meta($server_post_id, '_arsol_state_05_server_post', true);
 
             if ($this->server_post_status == 2) {
 
@@ -321,18 +317,18 @@ class ServerOrchestrator {
             
                 error_log(sprintf(
                     'Server post ID: %s, Server product ID: %s, Subscription ID: %s',
-                    $this->server_post_id,
+                    $server_post_id,
                     $this->server_product_id,
                     $this->subscription_id
                 ));
     
-                if ($this->server_post_id && $this->server_product_id && $this->subscription_id) {
+                if ($server_post_id && $this->server_product_id && $this->subscription_id) {
                     
                     $task_id = uniqid();
                     as_schedule_single_action(time(), 
                         'arsol_provision_remote_server_hook', 
                         [
-                            'server_post_id' => $this->server_post_id,
+                            'server_post_id' => $server_post_id,
                             'task_id' => $task_id
                         ], 
                         'arsol_class_server_orchestrator'
@@ -360,8 +356,7 @@ class ServerOrchestrator {
         } catch (\Exception $e) {
 
             // Update State meta
-            update_post_meta($this->server_post_id, '_arsol_state_05_server_post', -1);
-
+            update_post_meta($server_post_id, '_arsol_state_05_server_post', -1);
 
             // Handle the exception and continue
             $this->handle_exception($e);
