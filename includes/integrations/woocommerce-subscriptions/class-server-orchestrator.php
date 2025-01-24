@@ -143,21 +143,27 @@ class ServerOrchestrator {
         try {
             
             error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
+
+             // Get server post_id from subscription 
+            $server_post_id =  $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
+
+            // If no linked server post ID is found, log the error and exit
+            if(!$server_post_id) {
+
+                // Error log
+                error_log('#SR002 [SIYA Server Manager - ServerOrchestrator] No server post found');
+                
+                $this->start_server_provision($subscription);
+            
+            }
             
             $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
             $server_provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
-            $server_remote_status = $this->get_and_update_server_remote_status(
-                $server_post_id,
-                get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
-                get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
-            );
-
-            // Error log
-            error_log('#SR002 [SIYA Server Manager - ServerOrchestrator] Server post id: ' . $server_post_id);
+   
+            error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] Server post id: ' . $server_post_id);
 
             // Check if server post exists
-        
-            error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] No server post found');
+       
        
 
             // Check if server previsously provisioned successfully 
@@ -166,6 +172,12 @@ class ServerOrchestrator {
                 // Get server remote status
                 error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
                 error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
+
+                $server_remote_status = $this->get_and_update_server_remote_status(
+                    $server_post_id,
+                    get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
+                    get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
+                );
 
                 if($server_remote_status != 'active' ){
                     error_log('#SR006 [SIYA Server Manager - ServerOrchestrator] Server not active, initiating power up sequence');
@@ -195,7 +207,7 @@ class ServerOrchestrator {
 
             }  
            
-            if( $server_remote_status == 'active' || $server_provision_status != 2 ) {
+            if( $server_provision_status != 2 ) {
 
                 error_log('#SR011 [SIYA Server Manager - ServerOrchestrator] starting maintenance');
 
