@@ -565,7 +565,7 @@ class ServerOrchestrator {
                 try {
                     // Reset circuit
                     $circuit_breaker_instance = new ServerCircuitBreaker();
-                    $circuit_breaker_instance->test_circuit($subscription);
+                    $circuit_breaker_instance->reset_circuit_breaker($subscription);
                 } catch (\Exception $e) {
                     // Handle the exception
                     $this->handle_exception($e);
@@ -1049,7 +1049,7 @@ class ServerOrchestrator {
             try {
                 // Reset circuit
                 $circuit_breaker_instance = new ServerCircuitBreaker();
-                $circuit_breaker_instance->test_circuit($subscription);
+                $circuit_breaker_instance->reset_circuit_breaker($subscription);
             } catch (\Exception $e) {
                 // Handle the exception
                 $this->handle_exception($e);

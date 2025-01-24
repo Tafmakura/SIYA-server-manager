@@ -115,7 +115,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         }
     }
 
-    public static function half_open_circuit_breaker(\WC_Subscription $subscription) {
+    public function half_open_circuit_breaker(\WC_Subscription $subscription) {
         error_log("[SIYA Debug] Setting circuit breaker to half-open for subscription: " . $subscription->get_id());
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         
@@ -126,7 +126,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker set to half-open for subscription {$subscription->get_id()}.");
         
             $this->start_server_repair($subscription);
-            
+
         } else {
 
             error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription->get_id()}.");
@@ -136,7 +136,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         }
     }
 
-    public static function reset_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
+    public function reset_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
         error_log("[SIYA Debug] Resetting circuit breaker for subscription: " . $subscription->get_id());
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         
