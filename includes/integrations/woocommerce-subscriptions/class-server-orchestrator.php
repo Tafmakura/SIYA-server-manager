@@ -222,7 +222,7 @@ class ServerOrchestrator {
 
                 // Provision server
                 error_log('#SR013 [SIYA Server Manager - ServerOrchestrator] Starting remote server provisioning');
-                $this->provision_remote_server($server_post_id);
+                $this->start_server_provision($subscription);
                 error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning completed');
 
             }
