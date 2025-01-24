@@ -421,8 +421,6 @@ class ServerOrchestrator {
     // Step 3: Wait for server active state (Check server status) 
     public function wait_for_server_active_state($server_post_id, $task_id = null) {
 
-       
-
         try {
 
             error_log('#015 [SIYA Server Manager - ServerOrchestrator] Scheduled server status update started');
@@ -2013,8 +2011,7 @@ class ServerOrchestrator {
             throw new \InvalidArgumentException($error_message);
         }
 
-
-        error_log("[SIYA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
+        error_log("[HWAHWA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
         $start_time = time();
         $attempts = 0;
 
