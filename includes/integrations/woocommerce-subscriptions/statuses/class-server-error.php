@@ -78,11 +78,11 @@ class ServerError {
             if ($circuit_breaker == -1) {
                 echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-error arsol-server-status arsol-tips"><span>Error</span></mark>';
             } elseif ($circuit_breaker == 1) {
-                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-in-progress arsol-server-status arsol-tips"><span>Maintenance</span></mark>';
+                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-in-progress arsol-server-status arsol-tips"><span>Reparing</span></mark>';
             } elseif ($circuit_breaker == 0) {
                 echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-active arsol-server-status arsol-tips"><span>Okay</span></mark>';
             } else {
-                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-pending arsol-server-status arsol-tips"><span>Setup</span></mark>';
+                echo '<mark class="arsol-subscription-status arsol-order-status arsol-status-pending arsol-server-status arsol-tips"><span>Building...</span></mark>';
             }
         }
     }
