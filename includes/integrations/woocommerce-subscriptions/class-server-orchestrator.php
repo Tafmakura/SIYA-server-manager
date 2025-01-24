@@ -322,6 +322,7 @@ class ServerOrchestrator {
 
             // Check if the server has already been provisioned
             $this->server_provisioned_status = get_post_meta($this->server_post_id, '_arsol_state_10_provisioning', true); 
+            
             if ($this->server_provisioned_status != 2) {
               
                 try {  // Step 2: Provision server if not already provisioned
@@ -380,32 +381,31 @@ class ServerOrchestrator {
 
                 }
 
-            }
-            
-            try { // Step 4: Schedule asynchronous action with predefined parameters to complete server provisioning
+      
                 
-                $task_id = uniqid();
+                try { // Step 4: Schedule asynchronous action with predefined parameters to complete server provisioning
+                    
+                    $task_id = uniqid();
 
-                error_log('HOyo Server ID: ' . $this->server_post_id);
 
+                    as_schedule_single_action(time(), 'arsol_wait_for_server_active_state_hook', 
+                    [
+                        'server_post_id' => $this->server_post_id,
+                        'task_id' => $task_id ?: uniqid()
+                    ], 'arsol_class_server_orchestrator');
 
+                    $this->subscription->add_order_note(
+                        'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
+                    );
 
-                as_schedule_single_action(time(), 'arsol_wait_for_server_active_state_hook', 
-                [
-                    'server_post_id' => $this->server_post_id,
-                    'task_id' => $task_id ?: uniqid()
-                ], 'arsol_class_server_orchestrator');
+                    error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
 
-                $this->subscription->add_order_note(
-                    'Scheduled background server status update.' . PHP_EOL . '(Task ID: ' . ($task_id ?: uniqid()) . ')'
-                );
+                } catch (\Exception $e) {
 
-                error_log('#012 [SIYA Server Manager - ServerOrchestrator] Scheduled background server status update for subscription ' . $this->subscription_id);
+                    $error_definition = 'Error scheduling background server status update';
+                    $this->handle_exception($e);
 
-            } catch (\Exception $e) {
-
-                $error_definition = 'Error scheduling background server status update';
-                $this->handle_exception($e);
+                }
 
             }
     
