@@ -432,7 +432,33 @@ class ServerOrchestrator {
                 
                 }
         
-        
+
+                try {
+                    // Fetch the provisioned server IPs
+                    $server_ipv4 = $this->get_provisioned_server_ip(get_post_meta($server_post_id, 'arsol_server_provider_slug', true), get_post_meta($server_post_id, 'arsol_server_provisioned_id', true), 'ipv4');
+
+                    // Check if the IP threw WP errors
+                    if (is_wp_error($server_ipv4)) {
+                        $error_message = $server_ipv4->get_error_message();
+                        $this->throw_exception($error_message);
+                    }
+
+                } catch (\Exception $e) {
+                    
+                    $error_definition = 'Error fetching provisioned server IP';
+
+                    // Update server metadata on failed provisioning and trip CB
+                    update_post_meta($this->server_post_id, '_arsol_state_20_ip_addres', -1);
+
+                    // Handle the exception and exit
+                    $this->handle_exception($e);
+
+                    // Trigger the circuit breaker
+                    ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
+                    return false; // Add fallback return false
+                }
+
                 // Get the IPv6 address to add to metadata if available
                 $server_ipv6 = $this->get_provisioned_server_ip($server_provider_slug, $server_provisioned_id, 'ipv6');
         
@@ -1998,52 +2024,7 @@ class ServerOrchestrator {
                     if (!empty($remote_status['provisioned_remote_status']) && $remote_status['provisioned_remote_status'] === $target_status) {
                         error_log('#018 [SIYA Server Manager - ServerOrchestrator] Remote status matched target status: ' . $target_status);
 
-                        try {
-                            // Fetch the provisioned server IPs
-                            $server_ipv4 = $this->get_provisioned_server_ip(get_post_meta($server_post_id, 'arsol_server_provider_slug', true), get_post_meta($server_post_id, 'arsol_server_provisioned_id', true), 'ipv4');
-
-                            // Check if the IP threw WP errors
-                            if (is_wp_error($server_ipv4)) {
-                                $error_message = $server_ipv4->get_error_message();
-                                $this->throw_exception($error_message);
-                            }
-
-                        } catch (\Exception $e) {
-                            $error_definition = 'Error fetching provisioned server IP';
-
-                            // Update server metadata on failed provisioning and trip CB
-                            update_post_meta($this->server_post_id, '_arsol_state_20_ip_addres', -1);
-
-                            // Handle the exception and exit
-                            $this->handle_exception($e);
-
-                            // Trigger the circuit breaker
-                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-
-                            return false; // Add fallback return false
-                        }
-
-                        // Get the IPv6 address to add to metadata if available
-                        $server_ipv6 = $this->get_provisioned_server_ip(get_post_meta($server_post_id, 'arsol_server_provider_slug', true), get_post_meta($server_post_id, 'arsol_server_provisioned_id', true), 'ipv6');
-
-                        // Save IP addresses to post meta for RunCloud deployment
-                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv4', $server_ipv4);
-                        update_post_meta($server_post_id, 'arsol_server_provisioned_ipv6', $server_ipv6);
-                        update_post_meta($server_post_id, '_arsol_state_20_ip_address', 2);
-
-                        // Add order note with IP addresses
-                        $success_message = sprintf(
-                            'Successfully acquired IP addresses!%sIPv4: %s%sIPv6: %s',
-                            PHP_EOL,
-                            $server_ipv4 ?: 'Not provided',
-                            PHP_EOL,
-                            $server_ipv6 ?: 'Not provided'
-                        );
-
-                        $subscription->add_order_note($success_message);
-                        error_log($success_message);
-
-                        break; // Exit the loop after acquiring the IP addresses
+                        return true; // Return true if the target status is reached
                     }
 
                 } catch (\Exception $e) {
@@ -2077,6 +2058,7 @@ class ServerOrchestrator {
             error_log("[SIYA] Server failed to reach the target status '{$target_status}' within time.");
             $this->handle_exception($e);
             return false;
+        
         }
 
         error_log("[SIYA] Server failed to reach the target status '{$target_status}' within time.");
