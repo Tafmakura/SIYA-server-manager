@@ -70,7 +70,7 @@ class ServerOrchestrator {
 
         // Change the action hook to use Action Scheduler
         // Hook into WooCommerce subscription status change from pending to active to start server provisioning
-        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_provision'), 20, 1);
+        add_action('woocommerce_subscription_status_pending_to_active', array($this, 'start_server_preflight_check'), 20, 1);
 
         // Register new hooks to trigger shutdown
         add_action('woocommerce_subscription_status_active_to_on-hold', array($this, 'start_server_shutdown'), 20, 1);
