@@ -85,7 +85,7 @@ class ServerError {
             } elseif ($circuit_breaker == 1) {
                 echo '<mark class="subscription-status order-status server-status status-on-hold on-hold tips"><span>Repair</span></mark>';
             } elseif ($circuit_breaker == 0) {
-                echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Active</span></mark>';
+                echo '<mark class="subscription-status order-status server-status status-active active tips"><span>Live</span></mark>';
                 $reboot_url = wp_nonce_url(admin_url('admin-post.php?action=reboot&subscription_id=' . $subscription_id), 'reboot_nonce');
                 $server_actions[] = '<a href="' . esc_url($reboot_url) . '" class="reboot-server">Reboot</a>';
             } else {
@@ -110,10 +110,10 @@ class ServerError {
         
         <style>
             .server-status {
-               /* padding: 2px 8px;
+                padding: 2px 8px;
                 border-radius: 3px;
-                font-size: 12px; 
-                font-weight: 500; */
+                font-size: 12px;
+                font-weight: 500;
             }
             .server-status.okay { background: #c6e1c6; color: #5b841b; }
             .server-status.setup { background: #f8dda7; color: #94660c; }
