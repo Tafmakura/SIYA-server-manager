@@ -69,20 +69,20 @@ class ServerError {
 
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             if (!$server_post_id) {
-                echo '<mark class="server-status no-server"><span>No Server</span></mark>';
+                echo '<mark class="subscription-status order-status status-no-server no-server tips"><span>No Server</span></mark>';
                 return;
             }
 
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
             if ($circuit_breaker == -1) {
-                echo '<mark class="server-status error"><span>Error</span></mark>';
+                echo '<mark class="subscription-status order-status status-error error tips"><span>Error</span></mark>';
             } elseif ($circuit_breaker == 1) {
-                echo '<mark class="server-status in-progress"><span>Maintenance</span></mark>';
+                echo '<mark class="subscription-status order-status status-in-progress in-progress tips"><span>Maintenance</span></mark>';
             } elseif ($circuit_breaker == 0) {
-                echo '<mark class="server-status active"><span>Okay</span></mark>';
+                echo '<mark class="subscription-status order-status status-active active tips"><span>Okay</span></mark>';
             } else {
-                echo '<mark class="server-status pending"><span>Setup</span></mark>';
+                echo '<mark class="subscription-status order-status status-pending pending tips"><span>Setup</span></mark>';
             }
         }
     }
