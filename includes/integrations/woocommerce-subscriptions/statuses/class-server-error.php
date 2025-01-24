@@ -90,7 +90,16 @@ class ServerError {
                 echo '<mark class="subscription-status order-status server-status status-on-hold pending tips"><span>Setup</span></mark>';
             }
 
-            echo ' ' . implode(' | ', $server_actions);
+            // Add row actions
+            echo '<div class="row-actions">';
+            echo '<span class="view-server"><a href="#">View</a></span>';
+
+            if ($circuit_breaker == -1) {
+                echo ' | <span class="repair-server"><a href="#">Repair</a></span>';
+            } elseif ($circuit_breaker == 0) {
+                echo ' | <span class="reboot-server"><a href="#">Reboot</a></span>';
+            }
+            echo '</div>';
         }
     }
 
