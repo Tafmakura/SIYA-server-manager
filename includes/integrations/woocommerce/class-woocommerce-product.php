@@ -69,7 +69,7 @@ class Product {
     public function add_arsol_server_settings_tab_content() {
         global $post;
         $slugs = new Slugs();
-        include plugin_dir_path(__FILE__) . '../../../templates/admin/woocommerce/product-settings-server.php';
+        include plugin_dir_path(__FILE__) . '../../../ui/templates/admin/woocommerce/product-settings-server.php';
     }
 
     public function save_arsol_server_settings_tab_content($post_id) {
