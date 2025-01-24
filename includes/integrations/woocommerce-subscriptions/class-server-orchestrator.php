@@ -145,7 +145,8 @@ class ServerOrchestrator {
             error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
 
              // Get server post_id from subscription 
-            $server_post_id =  $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
+            $server_post = ServerPost::get_server_post_from_subscription($subscription);
+            $server_post_id = $server_post->ID;
 
             // If no linked server post ID is found, log the error and exit
             if(!$server_post_id) {
@@ -157,8 +158,6 @@ class ServerOrchestrator {
             
             }
             
-            $server_post = ServerPost::get_server_post_from_subscription($subscription);
-            $server_post_id = $server_post->ID;
             $server_provision_status = get_post_meta($server_post_id, '_arsol_state_10_provisioning', true);
    
             error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] Server post id: ' . $server_post_id);
