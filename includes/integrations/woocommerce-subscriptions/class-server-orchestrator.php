@@ -1969,7 +1969,7 @@ class ServerOrchestrator {
     }
 
         /**
-         * Handle exceptions with optional rethrowing and stack trace logging..
+         * Handle exceptions with optional rethrowing and stack trace logging.
          *
          * @param $e
          * @param int $error_level The error level (default is E_USER_WARNING).
