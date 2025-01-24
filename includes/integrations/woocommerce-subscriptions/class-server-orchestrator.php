@@ -1768,7 +1768,7 @@ class ServerOrchestrator {
 
         } catch (\Exception $e) {
             error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Exception caught: %s', $e->getMessage()));
-            $this->throw_exception($e.getMessage(), 'Error provisioning server');
+            $this->throw_exception($e->getMessage(), 'Error provisioning server');
         }
     }
 
