@@ -136,49 +136,51 @@ class ServerOrchestrator {
     // Prepare server repair
     public function start_server_maintenance($subscription) {
         error_log('#SR001 [SIYA Server Manager - ServerOrchestrator] Starting server repair process');
-       
-        // Get server post ID
-        error_log('#SR002 [SIYA Server Manager - ServerOrchestrator] Getting server post ID from subscription');
-        $server_post_id = ServerPost::get_server_post_from_subscription($subscription);
-        error_log('#SR003 [SIYA Server Manager - ServerOrchestrator] Server post ID: ' . $server_post_id);
+        
+        // Check if server previsously provisioned successfully 
+        if($server_provision_status == 2){
 
-        // Get server remote status
-        error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
-        $server_remote_status = $this->get_and_update_server_remote_status(
-            $server_post_id,
-            get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
-            get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
-        );
-        error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
+             // Get server remote status
+            error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
+            $server_remote_status = $this->get_and_update_server_remote_status(
+                $server_post_id,
+                get_post_meta($server_post_id, 'arsol_server_provider_slug', true),
+                get_post_meta($server_post_id, 'arsol_server_provisioned_id', true)
+            );
+            error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
 
-        if($server_remote_status != 'active' ){
-            error_log('#SR006 [SIYA Server Manager - ServerOrchestrator] Server not active, initiating power up sequence');
+            if($server_remote_status != 'active' ){
+                error_log('#SR006 [SIYA Server Manager - ServerOrchestrator] Server not active, initiating power up sequence');
 
-            // Power up server 
-            $this->start_server_powerup($subscription);
+                // Power up server 
+                $this->start_server_powerup($subscription);
 
-            // Wait for status
-            try {
-                error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
-                $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
-                
-                if (!$status_check) {
-                    error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
-                    $this->throw_exception('Server status check failed');
+                // Wait for status
+                try {
+                    error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
+                    $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
+                    
+                    if (!$status_check) {
+                        error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
+                        $this->throw_exception('Server status check failed');
+                    }
+                    
+                    error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
+                    
+                } catch (\Exception $e) {
+                    error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
+                    // Handle the exception and exit
+                    $this->handle_exception($e, true);
+                    return false;
                 }
-                
-                error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
-                
-            } catch (\Exception $e) {
-                error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
-                // Handle the exception and exit
-                $this->handle_exception($e, true);
-                return false;
-            }
-        } 
+            } 
 
-        if($server_remote_status != 'active' ){
-            error_log('#SR011 [SIYA Server Manager - ServerOrchestrator] Server still not active, starting maintenance');
+        }  
+       
+
+        if($server_remote_status == 'active' || $server_provision_status != 2 ) {
+
+            error_log('#SR011 [SIYA Server Manager - ServerOrchestrator] starting maintenance');
 
             // Construct message
             $message = 'Maintenance started on server';
