@@ -421,7 +421,7 @@ class ServerOrchestrator {
     // Step 3: Wait for server active state (Check server status) 
     public function wait_for_server_active_state($server_post_id, $task_id = null) {
 
-        error_log('HOyo Server ID: ' . $server_post_id);
+       
 
         try {
 
