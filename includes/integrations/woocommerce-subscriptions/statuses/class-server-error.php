@@ -76,13 +76,13 @@ class ServerError {
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
             if ($circuit_breaker == -1) {
-                echo '<span class="server-status error">Error</span>';
+                echo '<mark class="subscription-status order-status status-error arsol-server-status tips"><span>Error</span></mark>';
             } elseif ($circuit_breaker == 1) {
-                echo '<span class="server-status in-progress">Maintenance</span>';
+                echo '<mark class="subscription-status order-status status-in-progress arsol-server-status tips"><span>Maintenance</span></mark>';
             } elseif ($circuit_breaker == 0) {
-                echo '<span class="server-status active">Okay</span>';
+                echo '<mark class="subscription-status order-status status-active arsol-server-status tips"><span>Okay</span></mark>';
             } else {
-                echo '<span class="server-status pending">Setup</span>';
+                echo '<mark class="subscription-status order-status status-pending arsol-server-status tips"><span>Setup</span></mark>';
             }
         }
     }
@@ -90,17 +90,17 @@ class ServerError {
     public function add_status_styles() {
         ?>
         <style>
-            .server-status {
+            .arsol-server-status {
                 padding: 2px 8px;
                 border-radius: 3px;
                 font-size: 12px;
                 font-weight: 500;
             }
-            .server-status.active { background: #c6e1c6; color: #5b841b; }
-            .server-status.pending { background: #f8dda7; color: #94660c; }
-            .server-status.error { background: #eba3a3; color: #761919; }
-            .server-status.in-progress { background: #c8d7e1; color: #2e4453; }
-            .server-status.no-server { background: #e5e5e5; color: #777; }
+            .status-active { background: #c6e1c6; color: #5b841b; }
+            .status-pending { background: #f8dda7; color: #94660c; }
+            .status-error { background: #eba3a3; color: #761919; }
+            .status-in-progress { background: #c8d7e1; color: #2e4453; }
+            .no-server { background: #e5e5e5; color: #777; }
         </style>
         <?php
     }
