@@ -311,6 +311,8 @@ class ServerOrchestrator {
             // Check latest server post status 
             $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true);
 
+            error_log('STATE CHECK (05): Server post status: ' . $this->server_post_status);
+
             if ($this->server_post_status == 2) {
 
 
