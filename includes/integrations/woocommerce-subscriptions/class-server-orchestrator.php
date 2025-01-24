@@ -309,11 +309,7 @@ class ServerOrchestrator {
             }
 
             // Check latest server post status 
-            // Get server metadata to check current status
-            $metadata = $server_post_instance->get_meta_data($this->server_post_id);
-            $this->server_post_status = $metadata['_arsol_state_05_server_post'] ?? null;
-
-            error_log('Checking server post status: ' . $this->server_post_status);
+            $this->server_post_status = get_post_meta($this->server_post_id, '_arsol_state_05_server_post', true);
 
             if ($this->server_post_status == 2) {
 
