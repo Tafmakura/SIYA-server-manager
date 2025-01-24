@@ -221,7 +221,15 @@ class ServerOrchestrator {
 
                 // Provision server
                 error_log('#SR013 [SIYA Server Manager - ServerOrchestrator] Starting remote server provisioning');
-                $this->start_server_provision($subscription);
+                try {
+
+                    $this->start_server_provision($subscription);
+
+                } catch (\Exception $e) {
+                    error_log('#SR016 [SIYA Server Manager - ServerOrchestrator] Exception during server provision: ' . $e->getMessage());
+                    $this->handle_exception($e, true);
+                    return false;
+                }
                 error_log('#SR014 [SIYA Server Manager - ServerOrchestrator] Remote server provisioning completed');
 
             }
@@ -258,10 +266,11 @@ class ServerOrchestrator {
 
             error_log ('#001 [SIYA Server Manager - ServerOrchestrator] Starting server provisioning process for subscription ' . $this->subscription_id);
 
-           
           
             // Check if the server post already exists
             $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
+
+            
 
             // If the server post does not exist, create it in the database
             if (!$server_post_id) {
@@ -1866,9 +1875,6 @@ class ServerOrchestrator {
         return null;  // Return null if neither IP version is available
     
     }
-    
-
-
 
     public function extract_server_product_from_subscription($subscription) {
 
