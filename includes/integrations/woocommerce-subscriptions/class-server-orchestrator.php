@@ -444,6 +444,9 @@ class ServerOrchestrator {
                 error_log('#016 [SIYA Server Manager - ServerOrchestrator] IP status is not 2. Checking and updating server status.');
         
                 // Use the new wait_for_remote_server_status method
+
+                error_log('HOyo Server ID: ' . $server_provisioned_id);
+
                 try {
 
                     $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
@@ -2010,8 +2013,6 @@ class ServerOrchestrator {
             throw new \InvalidArgumentException($error_message);
         }
 
-        // Print server post ID for debugging
-        error_log(sprintf('[SIYA] Server post ID: %s', print_r($server_post_id, true)));
 
         error_log("[SIYA] Checking for server status='{$target_status}' on server post ID={$server_post_id}.");
         $start_time = time();
