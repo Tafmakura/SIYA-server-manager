@@ -70,7 +70,7 @@ class ServerError {
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             if (!$server_post_id) {
                 // Load the status button template for "No Server"
-                $template_path = plugin_dir_path(__DIR__) . 'ui/components/admin/status-button.php';
+                $template_path = plugin_dir_path(__FILE__) . 'ui/components/admin/status-button.php';
                 if (file_exists($template_path)) {
                     $status = 'no-server';
                     $label = 'No Server';
@@ -82,7 +82,7 @@ class ServerError {
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
             // Load the status button template with the appropriate data
-            $template_path = plugin_dir_path(__DIR__) . 'ui/components/admin/status-button.php';
+            $template_path = plugin_dir_path(__FILE__) . 'ui/components/admin/status-button.php';
            //if (file_exists($template_path)) {
                 require_once $template_path;
           //  }
