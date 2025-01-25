@@ -38,7 +38,7 @@ class Slugs {
             self::MENU_SLUG
         );
 
-        // Register WordPress provider setting
+        // Register Sites provider setting
         register_setting(
             self::OPTION_GROUP,
             'siya_wp_server_provider',
@@ -48,7 +48,7 @@ class Slugs {
             ]
         );
 
-        // Register WordPress group setting
+        // Register Sites group setting
         register_setting(
             self::OPTION_GROUP,
             'siya_wp_server_group',

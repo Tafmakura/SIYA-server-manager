@@ -9,8 +9,8 @@ if (!defined('ABSPATH')) {
         <?php settings_fields('siya_settings_slugs'); ?>
         <?php do_settings_sections('siya-slugs-settings'); ?>
 
-        <!-- WordPress Plan Section -->
-        <h2>WordPress managed hosting</h2>
+        <!-- Sites Plan Section -->
+        <h2>Sites managed hosting</h2>
         <table class="form-table">
             <tr>
                 <th scope="row">Server provider</th>
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
                         <option value="hetzner" <?php selected(get_option('siya_wp_server_provider'), 'hetzner'); ?>>Hetzner</option>
                         <option value="vultr" <?php selected(get_option('siya_wp_server_provider'), 'vultr'); ?>>Vultr</option>
                     </select>
-                    <p class="arsol-description">Select the cloud provider for WordPress hosting</p>
+                    <p class="arsol-description">Select the cloud provider for Sites hosting</p>
                 </td>
             </tr>
             <tr>
@@ -36,7 +36,7 @@ if (!defined('ABSPATH')) {
                         }
                         ?>
                     </select>
-                    <p class="arsol-description">Select the server group for WordPress hosting</p>
+                    <p class="arsol-description">Select the server group for Sites hosting</p>
                 </td>
             </tr>
         </table>

@@ -29,7 +29,7 @@ class ServerOrchestrator {
     private $server_post_name;
     private $server_post_creation_date;
     private $server_post_status;
-    private $wordpress_server;
+    private $sites_server;
     private $wordpress_ecommerce;
     private $connect_server_manager;
     private $server_group_slug;
@@ -1626,7 +1626,7 @@ class ServerOrchestrator {
                 'arsol_server_post_creation_date' => current_time('mysql'),
                 'arsol_server_post_status' => 2,
                 'arsol_server_product_id' => $server_product_id,
-                'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
+                'arsol_sites_server' => $server_product->get_meta('_arsol_sites_server', true),
                 'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
                 '_arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),

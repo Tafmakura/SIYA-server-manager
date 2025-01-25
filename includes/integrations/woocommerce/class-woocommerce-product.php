@@ -77,8 +77,8 @@ class Product {
             return;
         }
 
-        // Force Runcloud integration if WordPress server is enabled
-        $is_wordpress_server = isset($_POST['_arsol_wordpress_server']);
+        // Force Runcloud integration if Sites server is enabled
+        $is_sites_server = isset($_POST['_arsol_sites_server']);
         
         // Define and sanitize basic fields
         $fields = [
@@ -87,8 +87,8 @@ class Product {
             '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
             '_arsol_max_applications'     => absint($_POST['_arsol_max_applications'] ?? 0),
             '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
-            '_arsol_server_manager_required' => $is_wordpress_server ? 'yes' : (isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no'),
-            '_arsol_wordpress_server'     => $is_wordpress_server ? 'yes' : 'no',
+            '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no'),
+            '_arsol_sites_server'     => $is_sites_server ? 'yes' : 'no',
             '_arsol_wordpress_ecommerce'  => isset($_POST['_arsol_wordpress_ecommerce']) ? 'yes' : 'no',
         ];
 
@@ -112,11 +112,11 @@ class Product {
             }
         }
 
-        // Set region and image values - only clear if WordPress server is being enabled
-        $was_wordpress_server = get_post_meta($post_id, '_arsol_wordpress_server', true) === 'yes';
+        // Set region and image values - only clear if Sites server is being enabled
+        $was_sites_server = get_post_meta($post_id, '_arsol_sites_server', true) === 'yes';
 
-        if ($is_wordpress_server && !$was_wordpress_server) {
-            // Only clear values when transitioning to WordPress server
+        if ($is_sites_server && !$was_sites_server) {
+            // Only clear values when transitioning to Sites server
             $fields['_arsol_server_region'] = '';
             $fields['_arsol_server_image'] = '';
         } else {
@@ -171,7 +171,7 @@ class Product {
             }
 
             function toggle_ecommerce_and_server_group_fields() {
-                if ($('#_arsol_wordpress_server').is(':checked')) {
+                if ($('#_arsol_sites_server').is(':checked')) {
                     $('.arsol_wordpress_ecommerce_field').show();
                     $('.arsol_server_group_slug_field').hide();
                 } else {
@@ -180,11 +180,11 @@ class Product {
                 }
             }
 
-            function handleWordPressServerChange() {
-                var $wordpressCheckbox = $('#_arsol_wordpress_server');
+            function handleSitesServerChange() {
+                var $sitesCheckbox = $('#_arsol_sites_server');
                 var $runcloudCheckbox = $('#_arsol_server_manager_required');
                 
-                if ($wordpressCheckbox.is(':checked')) {
+                if ($sitesCheckbox.is(':checked')) {
                     $runcloudCheckbox.prop('checked', true).prop('disabled', true);
                     $('.arsol_wordpress_ecommerce_field').show();
                     $('.arsol_server_group_slug_field').hide();
@@ -202,24 +202,24 @@ class Product {
                 toggle_arsol_server_settings_tab();
             });
 
-            $('#_arsol_wordpress_server').on('change', function() {
-                handleWordPressServerChange();
+            $('#_arsol_sites_server').on('change', function() {
+                handleSitesServerChange();
                 if ($(this).is(':checked')) {
-                    setWordPressProvider();
-                    toggleWordPressFields();
+                    setSitesProvider();
+                    toggleSitesFields();
                 } else {
                     $('#_arsol_server_provider_slug').prop('disabled', false);
                     $('#_arsol_server_plan_group_slug').prop('disabled', false);
-                    toggleWordPressFields();
+                    toggleSitesFields();
                 }
             });
 
             // Initial state
-            handleWordPressServerChange();
+            handleSitesServerChange();
 
             // Ensure WordPress Ecommerce maintains its state when hidden before saving
             $('#post').on('submit', function() {
-                if (!$('#_arsol_wordpress_server').is(':checked')) {
+                if (!$('#_arsol_sites_server').is(':checked')) {
                     $('#_arsol_wordpress_ecommerce').prop('checked', false);
                 }
                 // Enable provider and group fields before submitting

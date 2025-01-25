@@ -13,7 +13,7 @@
 
         $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
         $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
-        $is_wordpress_server = get_post_meta($post->ID, '_arsol_wordpress_server', true) === 'yes';
+        $is_sites_server = get_post_meta($post->ID, '_arsol_sites_server', true) === 'yes';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_wordpress_ecommerce', true) === 'yes';
         $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
 
@@ -56,12 +56,12 @@
             'value'       => $is_server_manager ? 'yes' : 'no'
         ));
         woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_wordpress_server',
-            'label'       => __('WordPress server', 'woocommerce'),
-            'description' => __('Enable this option to set up a WordPress server.', 'woocommerce'),
+            'id'          => '_arsol_sites_server',
+            'label'       => __('Sites server', 'woocommerce'),
+            'description' => __('Enable this option to set up a Sites server.', 'woocommerce'),
             'desc_tip'    => 'true',
             'cbvalue'     => 'yes',
-            'value'       => $is_wordpress_server ? 'yes' : 'no'
+            'value'       => $is_sites_server ? 'yes' : 'no'
         ));    
         ?>
         <div class="arsol_wordpress_ecommerce_field">
@@ -124,7 +124,7 @@
 
         // Add wrapper div for region and image fields
         ?>
-        <div class="arsol_non_wordpress_fields">
+        <div class="arsol_non_sites_server_fields">
             <?php
             // Region Text Field
             $region = get_post_meta($post->ID, '_arsol_server_region', true);
@@ -220,7 +220,7 @@
 .hidden {
     display: none;
 }
-.arsol_non_wordpress_fields.hidden {
+.arsol_non_sites_server_fields.hidden {
     display: none;
 }
 </style>
@@ -317,7 +317,7 @@ jQuery(document).ready(function($) {
         });
     }
 
-    function setWordPressProvider() {
+    function setSitesProvider() {
         var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
         var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
         $('#_arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
@@ -329,11 +329,11 @@ jQuery(document).ready(function($) {
         });
     }
 
-    function toggleWordPressFields() {
-        if ($('#_arsol_wordpress_server').is(':checked')) {
-            $('.arsol_non_wordpress_fields').addClass('hidden');
+    function toggleSitesFields() {
+        if ($('#_arsol_sites_server').is(':checked')) {
+            $('.arsol_non_sites_server_fields').addClass('hidden');
         } else {
-            $('.arsol_non_wordpress_fields').removeClass('hidden');
+            $('.arsol_non_sites_server_fields').removeClass('hidden');
         }
     }
 
@@ -353,14 +353,14 @@ jQuery(document).ready(function($) {
         updatePlans(provider, group);
     });
 
-    $('#_arsol_wordpress_server').on('change', function() {
+    $('#_arsol_sites_server').on('change', function() {
         if ($(this).is(':checked')) {
-            setWordPressProvider();
-            toggleWordPressFields();
+            setSitesProvider();
+            toggleSitesFields();
         } else {
             $('#_arsol_server_provider_slug').prop('disabled', false);
             $('#_arsol_server_plan_group_slug').prop('disabled', false);
-            toggleWordPressFields();
+            toggleSitesFields();
         }
     });
 
@@ -375,12 +375,12 @@ jQuery(document).ready(function($) {
         });
     }
 
-    if ($('#_arsol_wordpress_server').is(':checked')) {
-        setWordPressProvider();
+    if ($('#_arsol_sites_server').is(':checked')) {
+        setSitesProvider();
     }
 
     // Initial state
-    toggleWordPressFields();
+    toggleSitesFields();
 
     // Add validation for region and server image fields
     $('#arsol_server_region, #_arsol_server_image').on('input', function() {
