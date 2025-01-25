@@ -28,21 +28,6 @@ class Subscription {
         }
         return $new_columns;
     }
-    /**
-     * Render custom column content
-     *
-     * @param string $column The column name.
-     * @param \WC_Subscription $subscription The subscription object.
-     */
-    public function render_custom_column($column, $subscription) {
-
-        if ('arsol-server-status' !== $column || !$subscription) {
-            return;
-        }
-    
-        arsol_component_status_pill_simple($subscription);
-    
-    }
 
     /**
      * Add server widget to order details
@@ -54,7 +39,8 @@ class Subscription {
         $subscription_id = $order->get_id();
         $server_post_id = get_post_meta($subscription_id, 'arsol_linked_server_post_id', true);
 
-       ;
+        echo "Subscription ID: " . $subscription_id . "<br>";
+        echo "Server Post ID: " . $server_post_id . "<br>";
     
         if (!$server_post_id) {
             return;
