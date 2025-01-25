@@ -34,10 +34,6 @@ class Setup {
         add_action('admin_head', array($this, 'my_column_width'));
 
         // Add new column and render its content
-        add_filter('manage_server_posts_columns', array($this, 'add_custom_server_column'));
-        add_action('manage_server_posts_custom_column', array($this, 'render_custom_server_column'), 10, 2);
-
-        // Add new column and render its content
         add_filter('manage_server_posts_columns', array($this, 'add_server_column'));
         add_action('manage_server_posts_custom_column', array($this, 'render_server_column'), 10, 2);
 
@@ -400,29 +396,13 @@ class Setup {
               </style>';
     }
 
-    public function add_custom_server_column($columns) {
-        $new_columns = array();
-        $new_columns['server_status'] = __('Server Status', 'your-text-domain');
-        foreach ($columns as $key => $value) {
-            $new_columns[$key] = $value;
-        }
-        return $new_columns;
-    }
-
-    public function render_custom_server_column($column, $post_id) {
-        if ($column === 'server_status') {
-            // Custom logic to render the column content
-            echo 'Custom Status'; // Replace with actual status logic
-        }
-    }
-
     public function add_server_column($columns) {
-        $new_columns = array('server' => __('Server', 'your-text-domain'));
+        $new_columns = array('arsol_server_status' => __('Status', 'your-text-domain'));
         return array_merge($new_columns, $columns);
     }
 
     public function render_server_column($column, $post_id) {
-        if ($column === 'server') {
+        if ($column === 'arsol_server_status') {
             echo 'Hello World';
         }
     }
