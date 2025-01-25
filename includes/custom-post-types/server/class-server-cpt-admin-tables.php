@@ -13,6 +13,8 @@ class Tables {
         add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
         add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
+        add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
+        add_action('admin_head', array($this, 'set_custom_column_width'));
     }
 
     /**
@@ -51,5 +53,63 @@ class Tables {
      */
     public function add_server_widget($order) {
         echo '<div class="server-widget">HELLO WORLD</div>';
+    }
+
+    public function populate_custom_columns($column, $post_id) {
+        if ($column === 'details') {
+            echo '<style>.column-details { width: 400px !important; }</style>';
+            // Get the associated subscription ID
+            $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
+    
+            if ($subscription_id) {
+
+                // Get the subscription object
+                $subscription = wcs_get_subscription($subscription_id);
+
+                if ($subscription) {
+                    // Get the customer ID
+                    $customer_id = $subscription->get_customer_id();
+    
+                    // Get billing name (first and last)
+                    $billing_first_name = $subscription->get_billing_first_name();
+                    $billing_last_name = $subscription->get_billing_last_name();
+                    
+                    // Check if the billing name exists, if not, use the profile name or username
+                    if ($billing_first_name && $billing_last_name) {
+                        $billing_name = $billing_first_name . ' ' . $billing_last_name;
+                    } else {
+                        // Fallback to user's display name or username if billing name is missing
+                        $user = get_userdata($customer_id);
+                        
+                        // Use display name if available, otherwise fallback to username
+                        $billing_name = $user ? $user->display_name : ( $user ? $user->user_login : __('No customer found', 'your-text-domain') );
+                    }
+    
+                    // Generate links for subscription and customer
+                    $subscription_link = get_edit_post_link($subscription_id);
+                    $customer_wc_link = admin_url('user-edit.php?user_id=' . $customer_id);
+    
+                    // Render the column content
+                    echo sprintf(
+                        __('Assigned server post id: #%d for subscription: <strong><a href="%s">#%s</a></strong> associated with customer: <a href="%s">%s</a>', 'your-text-domain'),
+                        $post_id,
+                        esc_url($subscription_link),
+                        esc_html($subscription_id),
+                        esc_url($customer_wc_link),
+                        esc_html($billing_name)
+                    );
+                } else {
+                    echo __('Invalid subscription', 'your-text-domain');
+                }
+            } else {
+                echo __('No subscription found', 'your-text-domain');
+            }
+        }
+    }
+
+    public function set_custom_column_width() {
+        echo '<style>
+                .column-server_status { width: 90px; }
+              </style>';
     }
 }
