@@ -3,13 +3,9 @@
 function arsol_sub_component_status_subscription_page($server_post_id){
 
     $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
+    $subscription = wcs_get_subscription($subscription_id);?>
 
-    
-    $subscription = wcs_get_subscription($subscription_id);
-
-    ?>
     <h3>Server</h3>
-    
     <p class="form-field form-field-wide">
         <p class="description">Server ID: <a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>">#<?php echo $server_post_id; ?></a></p>
         <div class="arsol-server-status" style="margin-top: 10px;">
@@ -23,5 +19,6 @@ function arsol_sub_component_status_subscription_page($server_post_id){
         .server-status.repairing { background: #c8d7e1; color: #194d70; }
         .server-status.no-server { background: #e5e5e5; color: #777; }
     </style>
+    
 <?php }
 
