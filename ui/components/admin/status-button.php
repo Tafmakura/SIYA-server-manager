@@ -5,7 +5,7 @@ $subscription = isset($args['subscription']) ? $args['subscription'] : null;
 
 
 
-if ($circuit_breaker === null || $server_post_id === null || $subscription === null) {
+if ($server_post_id === null) {
     echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
     return;
 }
