@@ -1,12 +1,8 @@
 <?php 
 
-function arsol_component_status_pill_simple($column, $subscription){
+function arsol_component_status_pill_simple($subscription){
 
     echo 'HELLO WORLD';
-
-    if ('arsol-server-status' !== $column || !$subscription) {
-        return;
-    }
 
     $status = $subscription->get_status();
     if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
