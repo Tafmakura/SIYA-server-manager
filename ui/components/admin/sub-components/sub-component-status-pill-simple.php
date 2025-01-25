@@ -35,7 +35,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         $label = 'Setup';
     }
     ?>
-    <mark class="server-status <?php echo esc_attr($status); ?> tips">
+    <mark class="order-status server-status <?php echo esc_attr($status); ?> tips">
         <span><?php echo esc_html($label); ?></span>
     </mark>
     <div class="row-actions">
