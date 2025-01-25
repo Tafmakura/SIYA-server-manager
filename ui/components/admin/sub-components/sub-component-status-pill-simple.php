@@ -7,6 +7,11 @@ function arsol_sub_component_status_pill_simple($server_post_id){
     
     $subscription = wcs_get_subscription($subscription_id);
 
+    if (!$subscription) {
+        echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
+        return;
+    }
+
     $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
     $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
@@ -44,7 +49,5 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         .server-status.repair { background: #d1ecf1; color: #0c5460; }
         .server-status.no-server { background: #e2e3e5; color: #6c757d; }
     </style>
-    
-
 <?php }
 
