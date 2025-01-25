@@ -51,6 +51,8 @@ class Subscription {
 
         $subscription_id = $order->get_id();
         $server_post_id = get_post_meta($subscription_id, 'arsol_linked_server_post_id', true);
+
+        error_log('Server post ID: ' . $server_post_id);
     
         if (!$server_post_id) {
             return;
