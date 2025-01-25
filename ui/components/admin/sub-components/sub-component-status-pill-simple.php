@@ -7,17 +7,11 @@ function arsol_sub_component_status_pill_simple($server_post_id){
     
     $subscription = wcs_get_subscription($subscription_id);
 
-    if (!$server_post_id) {
+    if (!$server_post_id || !$subscription_id) {    
         echo '<div><span>N/A</span></div>';
         return false;
     }
 
-    if (!$subscription) {
-        echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
-        return false;
-    }
-
-    $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
     $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
     $server_actions = array();
@@ -41,7 +35,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         $label = 'Setup';
     }
     ?>
-    <mark class="order-status server-status status-<?php echo esc_attr($status); ?> tips">
+    <mark class="order-status server-status <?php echo esc_attr($status); ?> tips">
         <span><?php echo esc_html($label); ?></span>
     </mark>
     <div class="row-actions">
