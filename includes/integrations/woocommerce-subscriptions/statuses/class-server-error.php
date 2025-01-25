@@ -29,65 +29,40 @@ class ServerError {
         }
         return $new_columns;
     }
-
     /**
      * Render custom column content
      *
      * @param string $column The column name.
-     * @param int $subscription_id The subscription ID.
+     * @param \WC_Subscription $subscription The subscription object.
      */
-    public function render_custom_column($column, $subscription_id) {
-        global $post, $the_subscription;
-
-        // Attempt to get the subscription ID for the current row from the passed variable or the global $post object.
-        if ( ! empty( $subscription_id ) ) {
-            $subscription_id = is_int( $subscription_id ) ? $subscription_id : $subscription_id->get_id();
-        } else {
-            $subscription_id = $post->ID;
+    public function render_custom_column($column, $subscription) {
+        if ('arsol-server-status' !== $column || !$subscription) {
+            return;
         }
 
-        // If we have a subscription ID, set the global $the_subscription object.
-        if ( empty( $the_subscription ) || $the_subscription->get_id() !== $subscription_id ) {
-            $the_subscription = wcs_get_subscription( $subscription_id );
-        }
-
-        // If the subscription failed to load, only display the ID.
-        if ( empty( $the_subscription ) ) {
+        $status = $subscription->get_status();
+        if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
             echo '&mdash;';
             return;
         }
 
-        if ('arsol-server-status' === $column) {
-            $subscription = wcs_get_subscription($subscription_id);
-            if (!$subscription) return;
-
-            $status = $subscription->get_status();
-            if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
-                echo '&mdash;';
-                return;
-            }
-
-            $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-            if (!$server_post_id) {
-                // Load the status button template for "No Server"
-                $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
-                if (file_exists($template_path)) {
-                    $status = 'no-server';
-                    $label = 'No Server';
-                    require $template_path;
-                }
-                return;
-            }
-
-            $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-
-            // Load the status button template with the appropriate data
+        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+        if (!$server_post_id) {
+            // Load the status button template for "No Server"
             $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
-           //if (file_exists($template_path)) {
+            if (file_exists($template_path)) {
+                $status = 'no-server';
+                $label = 'No Server';
                 require $template_path;
-          //  }
-
+            }
+            return;
         }
+
+        $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+
+        // Load the status button template with the appropriate data
+        $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
+        require $template_path;
     }
 
     /**
