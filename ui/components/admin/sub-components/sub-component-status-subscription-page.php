@@ -16,7 +16,7 @@ function arsol_sub_component_status_subscription_page($server_post_id){
 
     <style>
         .arsol-server-status {
-            padding-top: 1em;
+            margin-top: 1em;
         }
         .arsol-server-status-pill {
             display: inline-block;
