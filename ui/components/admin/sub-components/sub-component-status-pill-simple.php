@@ -38,9 +38,11 @@ function arsol_sub_component_status_pill_simple($server_post_id){
     <mark class="order-status server-status <?php echo esc_attr($status); ?> tips">
         <span><?php echo esc_html($label); ?></span>
     </mark>
-    <div class="row-actions">
-        <?php echo implode(' | ', $server_actions); ?>
-    </div>
+    <?php if (!is_singular('shop_subscription')): ?>
+        <div class="row-actions">
+            <?php echo implode(' | ', $server_actions); ?>
+        </div>
+    <?php endif; ?>
     <style>
         .server-status.active { background: #c6e1c6; color: #5b841b; }
         .server-status.building { background: #f8dda7; color: #94660c; }
