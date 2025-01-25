@@ -12,7 +12,6 @@ class ServerError {
     public function __construct() {
         add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
-        add_action('admin_head', array($this, 'add_status_styles'));
         add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
     }
 
