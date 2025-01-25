@@ -37,8 +37,8 @@ class ServerError {
      */
     public function render_custom_column($column, $subscription) {
 
-       arsol_componet_status_pill_simple($subscription);
-       
+       arsol_component_status_pill_simple($subscription);
+
     }
 
     /**
