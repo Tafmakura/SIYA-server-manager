@@ -14,7 +14,6 @@ class Tables {
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
         add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
-        add_action('admin_head', array($this, 'set_custom_column_width'));
     }
 
     /**
@@ -105,11 +104,5 @@ class Tables {
                 echo __('No subscription found', 'your-text-domain');
             }
         }
-    }
-
-    public function set_custom_column_width() {
-        echo '<style>
-                .column-server_status { width: 90px; }
-              </style>';
     }
 }
