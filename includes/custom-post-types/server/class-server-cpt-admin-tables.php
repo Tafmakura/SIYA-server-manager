@@ -26,7 +26,7 @@ class Tables {
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
             if ('status' === $key) {
-                $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
+                $new_columns['arsol-server-status'] = __('Server Status', 'siya-text-domain');
                 // Add width style
                 echo '<style>.column-arsol-server-status { width: 90px; }</style>';
             }
@@ -115,17 +115,20 @@ class Tables {
     }
 
     public function add_server_column($columns) {
-        $new_columns = array();
-        foreach ($columns as $key => $value) {
-            $new_columns[$key] = $value;
-            if ('title' === $key) {
-                $new_columns['arsol_server_status'] = __('Status', 'your-text-domain');
-                // Add width style
-                echo '<style>.column-arsol-server-status { width: 90px; }</style>';
-            }
-        }
+        // Add the new column at the start of the columns array
+        $new_columns = array('arsol_server_status' => __('Status', 'your-text-domain'));
+    
+        // Merge the new column with the existing columns
+        $new_columns = array_merge($new_columns, $columns);
+    
+        // Add width style for the column
+        add_action('admin_head', function () {
+            echo '<style>.column-arsol-server-status { width: 90px; }</style>';
+        });
+    
         return $new_columns;
     }
+    
 
     public function render_server_column($column, $post_id) {
         if ($column === 'arsol_server_status') {
