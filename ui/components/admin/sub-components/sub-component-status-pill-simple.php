@@ -23,16 +23,16 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         $repair_url = wp_nonce_url(admin_url('admin-post.php?action=repair&subscription_id=' . $subscription->get_id()), 'repair_nonce');
         $server_actions[] = '<a href="' . esc_url($repair_url) . '" class="repair-server">Repair</a>';
     } elseif ($circuit_breaker == 1) {
-        $status = 'reparing';
-        $label = 'Repair';
+        $status = 'repairing';
+        $label = 'Repairing';
     } elseif ($circuit_breaker == 0) {
         $status = 'active';
-        $label = 'Live';
+        $label = 'Active';
         $reboot_url = wp_nonce_url(admin_url('admin-post.php?action=reboot&subscription_id=' . $subscription->get_id()), 'reboot_nonce');
         $server_actions[] = '<a href="' . esc_url($reboot_url) . '" class="reboot-server">Reboot</a>';
     } else {
         $status = 'building';
-        $label = 'Setup';
+        $label = 'Building';
     }
     ?>
     <mark class="order-status server-status <?php echo esc_attr($status); ?> tips">
@@ -42,12 +42,11 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         <?php echo implode(' | ', $server_actions); ?>
     </div>
     <style>
-  
-        .server-status.active { background: #d4edda; color: #155724; }
-        .server-status.building { background: #fff3cd; color: #856404; }
-        .server-status.error { background: #f8d7da; color: #721c24; }
-        .server-status.repairing { background: #d1ecf1; color: #0c5460; }
-        .server-status.no-server { background: #e2e3e5; color: #6c757d; }
+        .server-status.active { background: #c6e1c6; color: #5b841b; }
+        .server-status.building { background: #f8dda7; color: #94660c; }
+        .server-status.error { background: #eba3a3; color: #761919; }
+        .server-status.repairing { background: #c8d7e1; color: #194d70; }
+        .server-status.no-server { background: #e5e5e5; color: #777; }
     </style>
 <?php }
 
