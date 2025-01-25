@@ -74,7 +74,7 @@ class ServerError {
                 if (file_exists($template_path)) {
                     $status = 'no-server';
                     $label = 'No Server';
-                    require $template_path;
+                    require_once $template_path;
                 }
                 return;
             }
@@ -84,8 +84,10 @@ class ServerError {
             // Load the status button template with the appropriate data
             $template_path = __DIR__ . '/ui/components/admin/status-button.php';
             if (file_exists($template_path)) {
-                require $template_path;
+                require_once $template_path;
             }
+
+            ?> <h1> HOYO!!!! </h1> <?php 
         }
     }
 
