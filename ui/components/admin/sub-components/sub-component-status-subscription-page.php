@@ -6,9 +6,9 @@ function arsol_sub_component_status_subscription_page($server_post_id){
     $subscription = wcs_get_subscription($subscription_id);?>
   
     <p class="form-field form-field-wide arsol-server-status" style="margin-top: 1em;" ><p>
-    <h3>Server status</h3>
+    <h3>Server</h3>
     <p class="form-field form-field-wide arsol-server-status-pill" >
-    <p><?php echo esc_html__('<b>Server status: Server status represents the installation status of the server and not its current power status. While active a server may be powered off', 'arsol-server-manager'); ?></p>
+    <p><?php echo esc_html__('<b>Important:</b> A Server status represents the installation status of the server and not its current power status. While in an active state, a server may be in a different power state', 'arsol-server-manager'); ?></p>
     <p class="form-field form-field-wide"><b>Server name: </b><a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>">ARSOL<?php echo $subscription_id; ?> →</a></p>
     <p class="form-field form-field-wide arsol-server-status-pill" style="margin-top: 10px;">
         <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
