@@ -6,7 +6,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
 
     if (!$subscription_id) {
         
-        echo '<mark class="subscription-status no-server tips"><span>--</span></mark>';
+        echo '<mark class="no-server"><span>--</span></mark>';
    
         return;
     }
@@ -22,8 +22,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
     $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
     if ($server_post_id === null) {
-        echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
-        return;
+
     }
     
     $server_actions = array();

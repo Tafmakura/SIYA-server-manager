@@ -396,12 +396,13 @@ class Setup {
     }
 
     /**
-     * Load WooCommerce styles on the servers table page.
+     * Load WooCommerce and WooCommerce Subscriptions styles on the servers table page.
      */
     public function load_woocommerce_styles($hook) {
         global $typenow;
         if ($typenow === 'server' && $hook === 'edit.php') {
             wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION);
+            wp_enqueue_style('wcs_admin_styles', plugin_dir_url(WC_Subscriptions::$plugin_file) . 'assets/css/admin.css', array(), WC_Subscriptions::$version);
         }
     }
     
