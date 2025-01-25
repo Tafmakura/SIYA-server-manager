@@ -50,6 +50,10 @@ class ServerError {
         }
 
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
+
+        // echo server post id
+        echo $server_post_id;
+
         if (!$server_post_id) {
             // Load the status button template for "No Server"
             $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
