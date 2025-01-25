@@ -6,9 +6,16 @@ function arsol_sub_component_status_subscription_page($server_post_id){
     $subscription = wcs_get_subscription($subscription_id);?>
 
   
-    <p class="form-field form-field-wide arsol-server-status" >
-        <h3>Server status</h3>
-    <p>
+    <p class="form-field form-field-wide arsol-server-status" ><p>
+    <h3>Server status</h3>
+    <p class="form-field form-field-wide arsol-server-status-pill" style="margin-top: 10px;">
+    <p><?php esc_html_e('An active status indicates the server was installed correctly and remains available, even when powered off. Servers in error state indicate installation issues and may be completely unavailable or operating with limited functionality.', 'arsol-server-manager'); ?></p>
+        <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
+    <p>Server statuses indicate the current state of your server. Possible states are: 
+    <strong>Active</strong> (server is running), 
+    <strong>Inactive</strong> (server is stopped), 
+    <strong>Suspended</strong> (subscription paused), or 
+    <strong>Error</strong> (requires attention).</p>
     <p class="form-field form-field-wide arsol-server-status-pill" style="margin-top: 10px;">
         <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
     </p>
