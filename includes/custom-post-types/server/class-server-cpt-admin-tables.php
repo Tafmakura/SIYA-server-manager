@@ -42,7 +42,7 @@ class Tables {
             return;
         }
     
-        arsol_component_status_pill_simple($subscription);
+        arsol_sub_component_status_pill_simple($subscription);
     
     }
 

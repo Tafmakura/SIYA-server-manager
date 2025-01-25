@@ -54,7 +54,7 @@ class Setup {
      * Instantiate classes.
      */
     private function instatiate_classes() {
-        new \SIYA\CustomPostTypes\ServerPost\ServerPost();
+        new \SIYA\CustomPostTypes\ServerPost();
         new \SIYA\CustomPostTypes\ServerPost\Admin\Tables();
         new \SIYA\CustomPostTypes\ServerPost\Admin\Page\Subscription();
     }
