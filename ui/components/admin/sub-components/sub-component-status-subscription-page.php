@@ -9,12 +9,13 @@ function arsol_sub_component_status_subscription_page($server_post_id){
 
     ?>
     <h3>Server</h3>
+    
     <p class="form-field form-field-wide">
-        <label for="arsol-server-status">Server</label>
-        <a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>"><?php echo $server_post_id; ?></a>
+        <p class="description">Server ID: <a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>"><?php echo $server_post_id; ?></a></p>
         <div class="arsol-server-status">
             <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
         </div>
+    </p>
     <style>
         .server-status.active { background: #c6e1c6; color: #5b841b; }
         .server-status.building { background: #f8dda7; color: #94660c; }
