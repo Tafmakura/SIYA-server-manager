@@ -74,7 +74,7 @@ class ServerError {
                 if (file_exists($template_path)) {
                     $status = 'no-server';
                     $label = 'No Server';
-                    require_once $template_path;
+                    require $template_path;
                 }
                 return;
             }
@@ -84,7 +84,7 @@ class ServerError {
             // Load the status button template with the appropriate data
             $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
            //if (file_exists($template_path)) {
-                require_once $template_path;
+                require $template_path;
           //  }
 
         }
