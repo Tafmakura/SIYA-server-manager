@@ -7,9 +7,14 @@ function arsol_sub_component_status_pill_simple($server_post_id){
     
     $subscription = wcs_get_subscription($subscription_id);
 
+    if (!$server_post_id) {
+        echo '<div style="text-align:center"><span>N/A</span></div>';
+        return false;
+    }
+
     if (!$subscription) {
         echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
-        return;
+        return false;
     }
 
     $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
