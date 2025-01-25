@@ -39,6 +39,8 @@ class ServerError {
 
        arsol_component_status_pill_simple($subscription);
 
+       echo RED;
+
     }
 
     /**
