@@ -10,6 +10,7 @@ class Subscription {
      */
 
     public function __construct() {
+
         add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
     }
 
@@ -48,16 +49,6 @@ class Subscription {
      * Add server widget to order details
      */
     public function add_server_widget($order) {
-
-        $subscription_id = $order->get_id();
-        $server_post_id = get_post_meta($subscription_id, 'arsol_linked_server_post_id', true);
-
-        error_log('Server post ID: ' . $server_post_id);
-    
-        if (!$server_post_id) {
-            return;
-        }
-    
-        arsol_sub_component_status_subscription_page($server_post_id);
+        echo '<div class="server-widget">HELLO WORLD</div>';
     }
 }
