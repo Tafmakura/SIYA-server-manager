@@ -35,13 +35,25 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         $label = 'Setup';
     }
     ?>
-    <mark class="order-status server-status <?php echo esc_attr($status); ?> tips">
+    <mark class="server-status <?php echo esc_attr($status); ?> tips">
         <span><?php echo esc_html($label); ?></span>
     </mark>
     <div class="row-actions">
         <?php echo implode(' | ', $server_actions); ?>
     </div>
     <style>
+        .server-status {
+            display: inline-flex;
+            line-height: 2.5em;
+            color: #454545;
+            background: #e5e5e5;
+            border-radius: 4px;
+            border-bottom: 1px solid rgba(0,0,0,.05);
+            margin: -.25em 0;
+            cursor: inherit!important;
+            white-space: nowrap;
+            max-width: 100%;
+        }
         .server-status.okay { background: #d4edda; color: #155724; }
         .server-status.setup { background: #fff3cd; color: #856404; }
         .server-status.error { background: #f8d7da; color: #721c24; }
