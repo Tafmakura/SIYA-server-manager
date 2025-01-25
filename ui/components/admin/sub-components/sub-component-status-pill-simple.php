@@ -6,7 +6,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
 
     if (!$subscription_id) {
         
-        <echo '<mark class="subscription-status no-server tips"><span>--</span></mark>';
+        echo '<mark class="subscription-status no-server tips"><span>--</span></mark>';
    
         return;
     }

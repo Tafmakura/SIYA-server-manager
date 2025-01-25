@@ -33,6 +33,9 @@ class Setup {
         add_action('init', array($this, 'modify_server_capabilities'));
         add_action('admin_head', array($this, 'my_column_width'));
 
+        // Add action to load WooCommerce styles
+        add_action('admin_enqueue_scripts', array($this, 'load_woocommerce_styles'));
+
         // Include necessary files
         $this->include_files();
 
@@ -390,6 +393,16 @@ class Setup {
         echo '<style type="text/css">
                 .column-arsol-server-status .column-details { width: 400px !important; overflow: hidden; }
               </style>';
+    }
+
+    /**
+     * Load WooCommerce styles on the servers table page.
+     */
+    public function load_woocommerce_styles($hook) {
+        global $typenow;
+        if ($typenow === 'server' && $hook === 'edit.php') {
+            wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION);
+        }
     }
     
     // Other methods remain unchanged
