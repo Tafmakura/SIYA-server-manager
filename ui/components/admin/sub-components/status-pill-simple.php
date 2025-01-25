@@ -1,6 +1,6 @@
 <?php 
 
-function arsol_component_status_pill_simple(){
+function arsol_component_status_pill_simple($subscription){
 
     if ('arsol-server-status' !== $column || !$subscription) {
         return;
