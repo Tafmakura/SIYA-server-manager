@@ -2,8 +2,6 @@
 
 function arsol_component_status_pill_simple($subscription){
 
-    echo 'HELLO WORLD';
-
     $status = $subscription->get_status();
     if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
         echo '&mdash;';

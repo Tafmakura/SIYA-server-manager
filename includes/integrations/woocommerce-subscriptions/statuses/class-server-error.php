@@ -37,15 +37,11 @@ class ServerError {
      */
     public function render_custom_column($column, $subscription) {
 
-
         if ('arsol-server-status' !== $column || !$subscription) {
             return;
         }
-           echo 'HELLO WORLD';
- 
-           arsol_component_status_pill_simple($subscription);
     
-           echo 'RED';
+        arsol_component_status_pill_simple($subscription);
     
     }
 
