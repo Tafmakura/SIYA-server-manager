@@ -48,6 +48,9 @@ class Setup {
 
 
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
+
+        // UI
+        require_once plugin_dir_path(__DIR__) . '/ui/components/class-components-setup.php';
     }
 
     /**
@@ -77,6 +80,9 @@ class Setup {
         }
         if (class_exists('Siya\Setup\CustomPostTypes')) {
             $custom_post_types = new \Siya\Setup\CustomPostTypes();
+        }
+        if (class_exists('Siya\UI\Components\Setup\ComponentSetup')) {
+            $component_setup = new \Siya\UI\Components\Setup\ComponentSetup();
         }
 
     }

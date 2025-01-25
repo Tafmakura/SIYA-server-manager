@@ -3,7 +3,6 @@
 namespace Siya\Integrations\WoocommerceSubscriptions\Statuses;
 
 class ServerError {
-
     /**
      * Get examples from here for subs table : plugins/woocommerce-subscriptions/vendor/woocommerce/subscriptions-core/includes/admin/class-wcs-admin-post-types.php
      * Get examples from here for subs details : plugins/woocommerce-subscriptions/vendor/woocommerce/subscriptions-core/includes/admin/meta-boxes/class-wcs-meta-box-subscription-data.php
@@ -38,22 +37,7 @@ class ServerError {
      */
     public function render_custom_column($column, $subscription) {
 
-        if ('arsol-server-status' !== $column || !$subscription) {
-            return;
-        }
-
-        $status = $subscription->get_status();
-        if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
-            echo '&mdash;';
-            return;
-        }
-
-        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-        $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-
-        // Load the status button template with the appropriate data
-        $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
-        require $template_path;
+       
     }
 
     /**
