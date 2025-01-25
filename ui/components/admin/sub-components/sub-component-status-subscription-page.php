@@ -4,7 +4,6 @@ function arsol_sub_component_status_subscription_page($server_post_id){
 
     $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
     $subscription = wcs_get_subscription($subscription_id);?>
-
   
     <p class="form-field form-field-wide arsol-server-status" style="margin-top: 1em;" ><p>
     <h3>Server status</h3>
