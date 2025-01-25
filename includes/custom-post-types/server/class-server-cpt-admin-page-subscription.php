@@ -14,30 +14,12 @@ class Subscription {
     }
 
     /**
-     * Add custom column to subscriptions list
-     */
-    public function add_custom_column($columns) {
-        $new_columns = array();
-        foreach ($columns as $key => $value) {
-            $new_columns[$key] = $value;
-            if ('status' === $key) {
-                $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
-                // Add width style
-                echo '<style>.column-arsol-server-status { width: 90px; }</style>';
-            }
-        }
-        return $new_columns;
-    }
-
-    /**
      * Add server widget to order details
      */
     public function add_server_widget($order) {
 
-        echo 'HELLO';
-
-        $subscription_id = $order->get_id();
-        $server_post_id = get_post_meta($subscription_id, 'arsol_linked_server_post_id', true);
+        $subscription = $order;
+        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
 
         echo "Subscription ID: " . $subscription_id . "<br>";
         echo "Server Post ID: " . $server_post_id . "<br>";
@@ -46,10 +28,7 @@ class Subscription {
             return;
         }
 
-    
         arsol_sub_component_status_subscription_page($server_post_id);
 
-
-        echo 'WORLD';
     }
 }
