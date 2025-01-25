@@ -9,7 +9,7 @@ function arsol_sub_component_status_subscription_page($server_post_id){
     <h3>Server status</h3>
     <p class="form-field form-field-wide arsol-server-status-pill" >
     <p><?php echo esc_html__('Possible server states: Active, Building, Repairing and Error.', 'arsol-server-manager'); ?></p>
-    <p class="form-field form-field-wide">Server name: <a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>">ARSOL<?php echo $subscription_id; ?></a></p>
+    <p class="form-field form-field-wide"><b>Server name:</b><a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>">ARSOL<?php echo $subscription_id; ?></a></p>
     <p class="form-field form-field-wide arsol-server-status-pill" style="margin-top: 10px;">
         <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
     </p>
