@@ -133,13 +133,9 @@ class Tables {
     
 
     public function render_server_column($column, $post_id) {
-        if (!$column === 'arsol_server_status') {
-            return;
+        if ($column === 'arsol_server_status') {
+            $server_post_id = $post_id;
+            arsol_sub_component_status_pill_simple($server_post_id);
         }
-
-        $server_post_id = $post_id;
-    
-        arsol_sub_component_status_pill_simple($server_post_id);
-    
     }
 }
