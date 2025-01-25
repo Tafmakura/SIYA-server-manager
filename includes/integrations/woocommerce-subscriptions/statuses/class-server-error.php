@@ -36,13 +36,10 @@ class ServerError {
      * @param \WC_Subscription $subscription The subscription object.
      */
     public function render_custom_column($column, $subscription) {
-        
+
         if ('arsol-server-status' !== $column || !$subscription) {
             return;
         }
-
-        // echo subscription id 
-        echo $subscription->get_id();
 
         $status = $subscription->get_status();
         if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
