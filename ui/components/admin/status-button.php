@@ -3,6 +3,8 @@ $circuit_breaker = isset($args['circuit_breaker']) ? $args['circuit_breaker'] : 
 $server_post_id = isset($args['server_post_id']) ? $args['server_post_id'] : null;
 $subscription = isset($args['subscription']) ? $args['subscription'] : null;
 
+
+
 if ($circuit_breaker === null || $server_post_id === null || $subscription === null) {
     echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
     return;

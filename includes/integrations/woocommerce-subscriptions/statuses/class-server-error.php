@@ -67,6 +67,9 @@ class ServerError {
 
         $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
+        // echo circuit breaker
+        echo $circuit_breaker;
+
         // Load the status button template with the appropriate data
         $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
         require $template_path;
