@@ -1,8 +1,4 @@
 <?php
-$circuit_breaker = isset($args['circuit_breaker']) ? $args['circuit_breaker'] : null;
-$server_post_id = isset($args['server_post_id']) ? $args['server_post_id'] : null;
-$subscription = isset($args['subscription']) ? $args['subscription'] : null;
-
 
 
 if ($server_post_id === null) {
