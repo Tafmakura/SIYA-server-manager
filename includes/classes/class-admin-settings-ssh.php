@@ -37,7 +37,7 @@ class SSH {
     }
 
     public static function settings_page() {
-        include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-ssh.php';
+        include plugin_dir_path(__DIR__) . '../ui/templates/admin/settings-page-ssh.php';
     }
 }
 
