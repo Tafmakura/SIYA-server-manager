@@ -87,7 +87,6 @@ class ServerError {
                 require_once $template_path;
           //  }
 
-            ?> <h1> HOYO!!!! </h1> <?php 
         }
     }
 
