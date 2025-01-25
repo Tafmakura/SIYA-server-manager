@@ -1,8 +1,11 @@
 <?php
 
-namespace SIYA\CustomPostTypes;
+namespace SIYA\CustomPostTypes\ServerPost;
 
-class ServerPostSetup {
+use WC_Subscriptions;
+
+
+class Setup {
 
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
@@ -18,7 +21,6 @@ class ServerPostSetup {
         add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
         add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
         add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
-        add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
         add_action('edit_form_top', array($this, 'display_custom_title'));
         add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
         add_action('admin_head', array($this, 'remove_preview_button'));
@@ -31,6 +33,34 @@ class ServerPostSetup {
         // Add new actions and filters
         add_filter('post_row_actions', array($this, 'modify_server_actions'), 10, 2);
         add_action('init', array($this, 'modify_server_capabilities'));
+        add_action('admin_head', array($this, 'my_column_width'));
+
+        // Add action to load WooCommerce styles
+        add_action('admin_enqueue_scripts', array($this, 'load_woocommerce_styles'));
+
+        // Include necessary files
+        $this->include_files();
+
+        // Instantiate classes
+        $this->instatiate_classes();
+
+    }
+    /**
+     * Include necessary files.
+     */
+    private function include_files() {
+        require_once plugin_dir_path(__FILE__) . 'class-server-cpt.php';
+        require_once plugin_dir_path(__FILE__) . 'class-server-cpt-admin-tables.php';
+        require_once plugin_dir_path(__FILE__) . 'class-server-cpt-admin-page-subscription.php';
+    }
+
+    /**
+     * Instantiate classes.
+     */
+    private function instatiate_classes() {
+        new \SIYA\CustomPostTypes\ServerPost();
+        new \SIYA\CustomPostTypes\ServerPost\Admin\Tables();
+        new \SIYA\CustomPostTypes\ServerPost\Admin\Page\Subscription();
     }
 
     /**
@@ -72,6 +102,8 @@ class ServerPostSetup {
 
         register_post_type('server', $args);
     }
+
+    
 
     public function register_server_taxonomies() {
         // Hierarchical taxonomy: Group
@@ -180,56 +212,7 @@ class ServerPostSetup {
 
  
 
-    public function populate_custom_columns($column, $post_id) {
-        if ($column === 'details') {
-            // Get the associated subscription ID
-            $subscription_id = get_post_meta($post_id, 'arsol_server_subscription_id', true);
-    
-            if ($subscription_id) {
-
-                // Get the subscription object
-                $subscription = wcs_get_subscription($subscription_id);
-
-                if ($subscription) {
-                    // Get the customer ID
-                    $customer_id = $subscription->get_customer_id();
-    
-                    // Get billing name (first and last)
-                    $billing_first_name = $subscription->get_billing_first_name();
-                    $billing_last_name = $subscription->get_billing_last_name();
-                    
-                    // Check if the billing name exists, if not, use the profile name or username
-                    if ($billing_first_name && $billing_last_name) {
-                        $billing_name = $billing_first_name . ' ' . $billing_last_name;
-                    } else {
-                        // Fallback to user's display name or username if billing name is missing
-                        $user = get_userdata($customer_id);
-                        
-                        // Use display name if available, otherwise fallback to username
-                        $billing_name = $user ? $user->display_name : ( $user ? $user->user_login : __('No customer found', 'your-text-domain') );
-                    }
-    
-                    // Generate links for subscription and customer
-                    $subscription_link = get_edit_post_link($subscription_id);
-                    $customer_wc_link = admin_url('user-edit.php?user_id=' . $customer_id);
-    
-                    // Render the column content
-                    echo sprintf(
-                        __('Assigned server post id: #%d for subscription: <strong><a href="%s">#%s</a></strong> associated with customer: <a href="%s">%s</a>', 'your-text-domain'),
-                        $post_id,
-                        esc_url($subscription_link),
-                        esc_html($subscription_id),
-                        esc_url($customer_wc_link),
-                        esc_html($billing_name)
-                    );
-                } else {
-                    echo __('Invalid subscription', 'your-text-domain');
-                }
-            } else {
-                echo __('No subscription found', 'your-text-domain');
-            }
-        }
-    }
+  
         
     public function disable_title_editing() {
         global $post_type;
@@ -405,6 +388,23 @@ class ServerPostSetup {
             $role = get_role('administrator');
             $role->add_cap('delete_servers');
             $role->add_cap('delete_published_servers');
+        }
+    }
+
+    public function my_column_width() {
+        echo '<style type="text/css">
+                .column-arsol-server-status .column-details { width: 400px !important; overflow: hidden; }
+              </style>';
+    }
+
+    /**
+     * Load WooCommerce and WooCommerce Subscriptions styles on the servers table page.
+     */
+    public function load_woocommerce_styles($hook) {
+        global $typenow;
+        if ($typenow === 'server' && $hook === 'edit.php') {
+            wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION);
+            wp_enqueue_style('wcs_admin_styles', plugin_dir_url(WC_Subscriptions::$plugin_file) . 'assets/css/admin.css', array(), WC_Subscriptions::$version);
         }
     }
     

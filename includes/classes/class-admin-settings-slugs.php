@@ -114,7 +114,7 @@ class Slugs {
     }
 
     public static function settings_page(): void {
-        include plugin_dir_path(__DIR__) . '../templates/admin/settings-page-slugs.php';
+        include plugin_dir_path(__DIR__) . '../ui/templates/admin/settings-page-slugs.php';
     }
 
     /**

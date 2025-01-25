@@ -87,15 +87,6 @@ class Hetzner /*implements ServerProvider*/ {
             throw new \Exception('Server plan required');
         }
 
-        // Setup SSH access
-        try {
-            $user_script = $this->setup_ssh_access($server_post_id);
-        } catch (\Exception $e) {
-            error_log('[SIYA Server Manager][Hetzner] Error setting up SSH access: ' . $e->getMessage());
-            throw new \Exception('Error setting up SSH access: ' . $e->getMessage());
-        }
-
-
         $server_data = [
             'name' => $server_name,
             'server_type' => $server_plan,
@@ -132,49 +123,6 @@ class Hetzner /*implements ServerProvider*/ {
 
         // Return the compiled data
         return $server_data;
-    }
-
-    private function setup_ssh_access($server_post_id) {
-        // Retrieve SSH key and username from server metadata
-        $ssh_public_key = get_post_meta($server_post_id, 'arsol_ssh_public_key', true);
-        $ssh_username = get_post_meta($server_post_id, 'arsol_ssh_username', true);
-
-        if (empty($ssh_public_key) || empty($ssh_username)) {
-            $error_message = 'SSH key or username not found in server metadata';
-            error_log('[SIYA Server Manager][Hetzner] ' . $error_message);
-            throw new \Exception($error_message);
-        }
-
-        error_log(sprintf('[SIYA Server Manager][Hetzner] Setting up SSH access for user: %s with public key: %s', $ssh_username, $ssh_public_key));
-
-        $user_script = sprintf(
-            "#!/bin/bash\n" .
-            "echo '[SIYA Server Manager][Hetzner] Creating user: %s'\n" .
-            "useradd -m -s /bin/bash %s\n" .
-            "echo '[SIYA Server Manager][Hetzner] Creating SSH directory'\n" .
-            "mkdir -p /home/%s/.ssh\n" .
-            "echo '[SIYA Server Manager][Hetzner] Copying SSH key'\n" .
-            "echo \"%s\" > /home/%s/.ssh/authorized_keys\n" .
-            "echo '[SIYA Server Manager][Hetzner] Setting permissions'\n" .
-            "chown -R %s:%s /home/%s/.ssh\n" .
-            "chmod 700 /home/%s/.ssh\n" .
-            "chmod 600 /home/%s/.ssh/authorized_keys\n" .
-            "echo '[SIYA Server Manager][Hetzner] User setup completed for: %s'\n",
-            $ssh_username,
-            $ssh_username,
-            $ssh_username,
-            $ssh_public_key,
-            $ssh_username,
-            $ssh_username, $ssh_username,
-            $ssh_username,
-            $ssh_username,
-            $ssh_username,
-            $ssh_username
-        );
-
-        error_log('[SIYA Server Manager][Hetzner] SSH access setup script generated successfully.');
-
-        return $user_script;
     }
 
     private function map_statuses($raw_status) {
