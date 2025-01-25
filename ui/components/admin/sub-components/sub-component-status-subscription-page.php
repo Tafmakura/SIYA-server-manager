@@ -7,7 +7,7 @@ function arsol_sub_component_status_subscription_page($server_post_id){
 
     <h3>Server</h3>
     <p class="form-field form-field-wide">
-        <p class="description">Server ID: <a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>">#<?php echo $server_post_id; ?></a></p>
+        <p class="description">Server ID: <a href="<?php echo esc_url(get_edit_post_link($server_post_id)); ?>">#ARSOL<?php echo $subscription_id; ?></a></p>
         <div class="arsol-server-status" style="margin-top: 10px;">
             <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
         </div>
@@ -19,6 +19,6 @@ function arsol_sub_component_status_subscription_page($server_post_id){
         .server-status.repairing { background: #c8d7e1; color: #194d70; }
         .server-status.no-server { background: #e5e5e5; color: #777; }
     </style>
-    
+
 <?php }
 
