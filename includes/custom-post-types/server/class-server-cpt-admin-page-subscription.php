@@ -21,9 +21,6 @@ class Subscription {
         $subscription = $order;
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
 
-        echo "Subscription ID: " . $subscription_id . "<br>";
-        echo "Server Post ID: " . $server_post_id . "<br>";
-    
         if (!$server_post_id) {
             return;
         }
