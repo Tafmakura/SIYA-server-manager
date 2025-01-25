@@ -26,8 +26,8 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         $status = 'repairing';
         $label = 'Repairing';
     } elseif ($circuit_breaker == 0) {
-        $status = 'active';
-        $label = 'Active';
+        $status = 'available';
+        $label = 'Available';
         $reboot_url = wp_nonce_url(admin_url('admin-post.php?action=reboot&subscription_id=' . $subscription->get_id()), 'reboot_nonce');
         $server_actions[] = '<a href="' . esc_url($reboot_url) . '" class="reboot-server">Reboot</a>';
     } else {
@@ -44,7 +44,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         </div>
     <?php endif; ?>
     <style>
-        .server-status.active { background: #c6e1c6; color: #5b841b; }
+        .server-status.available { background: #c6e1c6; color: #5b841b; }
         .server-status.building { background: #f8dda7; color: #94660c; }
         .server-status.error { background: #eba3a3; color: #761919; }
         .server-status.repairing { background: #c8d7e1; color: #194d70; }
