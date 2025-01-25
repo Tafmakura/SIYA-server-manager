@@ -13,6 +13,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/classes/class-setup.php';
 use Siya\Setup;
 
 
+if ( ! defined( '__SIYA_PLUGIN_ROOT__' ) ) {
+    define( '__SIYA_PLUGIN_ROOT__', plugin_dir_path( __FILE__ ) );
+}
 
 // Instantiate the Setup class
 $siyaServerManager = new Setup();
