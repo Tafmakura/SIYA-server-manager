@@ -1,9 +1,9 @@
 <?php
 $circuit_breaker = isset($args['circuit_breaker']) ? $args['circuit_breaker'] : null;
 $server_post_id = isset($args['server_post_id']) ? $args['server_post_id'] : null;
-$subscription_id = isset($args['subscription_id']) ? $args['subscription_id'] : null;
+$subscription = isset($args['subscription']) ? $args['subscription'] : null;
 
-if ($circuit_breaker === null || $server_post_id === null || $subscription_id === null) {
+if ($circuit_breaker === null || $server_post_id === null || $subscription === null) {
     echo '<mark class="subscription-status order-status server-status status-no-server no-server tips"><span>No Server</span></mark>';
     return;
 }
@@ -14,7 +14,7 @@ $server_actions[] = '<a href="' . esc_url(get_edit_post_link($server_post_id)) .
 if ($circuit_breaker == -1) {
     $status = 'error';
     $label = 'Error';
-    $repair_url = wp_nonce_url(admin_url('admin-post.php?action=repair&subscription_id=' . $subscription_id), 'repair_nonce');
+    $repair_url = wp_nonce_url(admin_url('admin-post.php?action=repair&subscription_id=' . $subscription->get_id()), 'repair_nonce');
     $server_actions[] = '<a href="' . esc_url($repair_url) . '" class="repair-server">Repair</a>';
 } elseif ($circuit_breaker == 1) {
     $status = 'on-hold';
@@ -22,7 +22,7 @@ if ($circuit_breaker == -1) {
 } elseif ($circuit_breaker == 0) {
     $status = 'active';
     $label = 'Live';
-    $reboot_url = wp_nonce_url(admin_url('admin-post.php?action=reboot&subscription_id=' . $subscription_id), 'reboot_nonce');
+    $reboot_url = wp_nonce_url(admin_url('admin-post.php?action=reboot&subscription_id=' . $subscription->get_id()), 'reboot_nonce');
     $server_actions[] = '<a href="' . esc_url($reboot_url) . '" class="reboot-server">Reboot</a>';
 } else {
     $status = 'pending';
