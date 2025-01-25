@@ -37,10 +37,11 @@ class ServerError {
      */
     public function render_custom_column($column, $subscription) {
 
+           echo 'HELLO WORLD';
  
            arsol_component_status_pill_simple($subscription);
     
-           echo RED;
+           echo 'RED';
     
     }
 
