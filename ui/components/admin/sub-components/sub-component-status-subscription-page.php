@@ -28,6 +28,9 @@ function arsol_sub_component_status_subscription_page($server_post_id){
         .arsol-server-status-pill {
             margin-top: 9px;
         }
+        .arsol-row-action {
+            display: none !important;
+        }
 
     </style>
 
