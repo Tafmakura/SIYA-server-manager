@@ -40,6 +40,9 @@ class ServerError {
             return;
         }
 
+        // echo subscription id 
+        echo $subscription->get_id();
+
         $status = $subscription->get_status();
         if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
             echo '&mdash;';
