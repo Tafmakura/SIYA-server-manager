@@ -33,10 +33,6 @@ class Setup {
         add_action('init', array($this, 'modify_server_capabilities'));
         add_action('admin_head', array($this, 'my_column_width'));
 
-        // Add new column and render its content
-        add_filter('manage_server_posts_columns', array($this, 'add_server_column'));
-        add_action('manage_server_posts_custom_column', array($this, 'render_server_column'), 10, 2);
-
         // Include necessary files
         $this->include_files();
 
@@ -394,17 +390,6 @@ class Setup {
         echo '<style type="text/css">
                 .column-arsol-server-status .column-details { width: 400px !important; overflow: hidden; }
               </style>';
-    }
-
-    public function add_server_column($columns) {
-        $new_columns = array('arsol_server_status' => __('Status', 'your-text-domain'));
-        return array_merge($new_columns, $columns);
-    }
-
-    public function render_server_column($column, $post_id) {
-        if ($column === 'arsol_server_status') {
-            echo 'Hello World';
-        }
     }
     
     // Other methods remain unchanged

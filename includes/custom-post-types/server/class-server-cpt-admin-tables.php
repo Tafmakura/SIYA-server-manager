@@ -14,6 +14,8 @@ class Tables {
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
         add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
+        add_filter('manage_server_posts_columns', array($this, 'add_server_column'));
+        add_action('manage_server_posts_custom_column', array($this, 'render_server_column'), 10, 2);
     }
 
     /**
@@ -103,6 +105,31 @@ class Tables {
             } else {
                 echo __('No subscription found', 'your-text-domain');
             }
+        }
+    }
+
+    public function my_column_width() {
+        echo '<style type="text/css">
+                .column-arsol-server-status .column-details { width: 400px !important; overflow: hidden; }
+              </style>';
+    }
+
+    public function add_server_column($columns) {
+        $new_columns = array();
+        foreach ($columns as $key => $value) {
+            $new_columns[$key] = $value;
+            if ('title' === $key) {
+                $new_columns['arsol_server_status'] = __('Status', 'your-text-domain');
+                // Add width style
+                echo '<style>.column-arsol-server-status { width: 90px; }</style>';
+            }
+        }
+        return $new_columns;
+    }
+
+    public function render_server_column($column, $post_id) {
+        if ($column === 'arsol_server_status') {
+            echo 'Hello World';
         }
     }
 }
