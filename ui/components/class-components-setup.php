@@ -19,7 +19,7 @@ class ComponentSetup {
 
     public function include_sub_components() {
         // Code to include sub-components
-        require_once __DIR__ . '/admin/sub-components/status-pill-simple.php';
+        require_once __DIR__ . '/admin/sub-components/sub-component-status-pill-simple.php';
     }
 
     public function initialize_components() {

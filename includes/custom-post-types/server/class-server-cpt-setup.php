@@ -1,8 +1,9 @@
 <?php
 
-namespace SIYA\CustomPostTypes;
+namespace SIYA\CustomPostTypes\ServerPost;
 
-class ServerPostSetup {
+
+class Setup {
 
     public function __construct() {
         add_action('init', array($this, 'create_server_post_type'));
@@ -32,6 +33,30 @@ class ServerPostSetup {
         add_filter('post_row_actions', array($this, 'modify_server_actions'), 10, 2);
         add_action('init', array($this, 'modify_server_capabilities'));
         add_action('admin_head', array($this, 'my_column_width'));
+
+        // Include necessary files
+        $this->include_files();
+
+        // Instantiate classes
+        $this->instatiate_classes();
+
+    }
+    /**
+     * Include necessary files.
+     */
+    private function include_files() {
+        require_once plugin_dir_path(__FILE__) . 'class-server-cpt.php';
+        require_once plugin_dir_path(__FILE__) . 'class-server-cpt-admin-tables.php';
+        require_once plugin_dir_path(__FILE__) . 'class-server-cpt-admin-page-subscription.php';
+    }
+
+    /**
+     * Instantiate classes.
+     */
+    private function instatiate_classes() {
+        new \SIYA\CustomPostTypes\ServerPost\ServerCPT();
+        new \SIYA\CustomPostTypes\ServerPost\Admin\Tables();
+        new \SIYA\CustomPostTypes\ServerPost\Admin\Page\Subscription();
     }
 
     /**
@@ -73,6 +98,8 @@ class ServerPostSetup {
 
         register_post_type('server', $args);
     }
+
+    
 
     public function register_server_taxonomies() {
         // Hierarchical taxonomy: Group

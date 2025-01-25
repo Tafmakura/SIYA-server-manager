@@ -1,6 +1,6 @@
 <?php 
 
-function arsol_component_status_pill_simple($subscription){
+function arsol_sub_component_status_pill_simple($subscription){
 
     $status = $subscription->get_status();
     if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
