@@ -25,7 +25,7 @@ class ServerError {
             if ('status' === $key) {
                 $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
                 // Add width style
-                echo '<style>.column-arsol-server-status { width: 150px; }</style>';
+                echo '<style>.column-arsol-server-status { width: 80px; }</style>';
             }
         }
         return $new_columns;
