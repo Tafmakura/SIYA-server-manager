@@ -24,7 +24,10 @@ class ServerError {
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
             if ('status' === $key) {
-                $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
+                $new_columns['arsol-server-status'] = array(
+                    'label' => __('Server', 'siya-text-domain'),
+                    'width' => '120px'
+                );
             }
         }
         return $new_columns;

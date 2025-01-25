@@ -34,12 +34,6 @@ if ($circuit_breaker == -1) {
     <?php echo implode(' | ', $server_actions); ?>
 </div>
 <style>
-    .server-status {
-        padding: 2px 8px;
-        border-radius: 3px;
-        font-size: 12px;
-        font-weight: 500;
-    }
     .server-status.okay { background: #c6e1c6; color: #5b841b; }
     .server-status.setup { background: #f8dda7; color: #94660c; }
     .server-status.error { background: #eba3a3; color: #761919; }
