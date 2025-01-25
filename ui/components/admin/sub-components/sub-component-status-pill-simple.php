@@ -4,12 +4,7 @@ function arsol_sub_component_status_pill_simple($server_post_id){
 
     $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
 
-    if (!$subscription_id) {
-        
-        echo '<mark class="no-server"><span>--</span></mark>';
-   
-        return;
-    }
+    
     $subscription = wcs_get_subscription($subscription_id);
 
     $status = $subscription->get_status();
@@ -22,7 +17,14 @@ function arsol_sub_component_status_pill_simple($server_post_id){
     $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
 
     if ($server_post_id === null) {
-
+        $status = 'no-server';
+        $label = 'No Server';
+        ?>
+        <mark class="subscription-status order-status server-status status-<?php echo esc_attr($status); ?> tips">
+            <span><?php echo esc_html($label); ?></span>
+        </mark>
+        <?php
+        return;
     }
     
     $server_actions = array();
@@ -53,11 +55,11 @@ function arsol_sub_component_status_pill_simple($server_post_id){
         <?php echo implode(' | ', $server_actions); ?>
     </div>
     <style>
-        .server-status.okay { background: #c6e1c6; color: #5b841b; }
-        .server-status.setup { background: #f8dda7; color: #94660c; }
-        .server-status.error { background: #eba3a3; color: #761919; }
-        .server-status.repair { background: #c8d7e1; color:rgb(24, 77, 112); }
-        .server-status.no-server { background: #e5e5e5; color: #777; }
+        .server-status.okay { background: #d4edda; color: #155724; }
+        .server-status.setup { background: #fff3cd; color: #856404; }
+        .server-status.error { background: #f8d7da; color: #721c24; }
+        .server-status.repair { background: #d1ecf1; color: #0c5460; }
+        .server-status.no-server { background: #e2e3e5; color: #6c757d; }
     </style>
     
 
