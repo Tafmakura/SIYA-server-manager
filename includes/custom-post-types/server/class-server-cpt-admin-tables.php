@@ -110,7 +110,7 @@ class Tables {
 
     public function my_column_width() {
         echo '<style type="text/css">
-                .column-arsol-server-status .column-details { width: 400px !important; overflow: hidden; }
+                .column-arsol-server-status .column-details { width: auto ; overflow: hidden; }
               </style>';
     }
 
