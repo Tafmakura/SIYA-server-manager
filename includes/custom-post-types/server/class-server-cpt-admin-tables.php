@@ -12,7 +12,6 @@ class Tables {
     public function __construct() {
         add_filter('woocommerce_shop_subscription_list_table_columns', array($this, 'add_custom_column'), 20);
         add_action('woocommerce_shop_subscription_list_table_custom_column', array($this, 'render_custom_column'), 10, 2);
-        add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_server_widget'), 30, 1);
         add_action('manage_server_posts_custom_column', array($this, 'populate_custom_columns'), 10, 2);
         add_filter('manage_server_posts_columns', array($this, 'add_server_column'));
         add_action('manage_server_posts_custom_column', array($this, 'render_server_column'), 10, 2);
@@ -49,13 +48,6 @@ class Tables {
     
         arsol_sub_component_status_pill_simple($server_post_id);
     
-    }
-
-    /**
-     * Add server widget to order details
-     */
-    public function add_server_widget($order) {
-        echo '<div class="server-widget">HELLO WORLD</div>';
     }
 
     public function populate_custom_columns($column, $post_id) {
