@@ -50,7 +50,7 @@ class Setup {
         require_once plugin_dir_path(__DIR__) . '/integrations/woocommerce/class-woocommerce-product.php';
 
         // UI
-        require_once plugin_dir_path(__DIR__) . '/ui/components/class-components-setup.php';
+        require_once __SIYA_PLUGIN_ROOT__ . '/ui/components/class-components-setup.php';
     }
 
     /**
