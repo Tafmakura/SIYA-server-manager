@@ -24,10 +24,9 @@ class ServerError {
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
             if ('status' === $key) {
-                $new_columns['arsol-server-status'] = array(
-                    'label' => __('Server', 'siya-text-domain'),
-                    'width' => '120px'
-                );
+                $new_columns['arsol-server-status'] = __('Server', 'siya-text-domain');
+                // Add width style
+                echo '<style>.column-arsol-server-status { width: 150px; }</style>';
             }
         }
         return $new_columns;
@@ -56,13 +55,6 @@ class ServerError {
         // Load the status button template with the appropriate data
         $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
         require $template_path;
-    }
-
-    /**
-     * Remove inline CSS for status styles
-     */
-    public function add_status_styles() {
-        // Remove inline CSS
     }
 
     /**
