@@ -8,7 +8,7 @@ function arsol_sub_component_status_subscription_page($server_post_id){
     <p class="form-field form-field-wide arsol-server-status" style="margin-top: 1em;" ><p>
     <h3>Server status</h3>
     <p class="form-field form-field-wide arsol-server-status-pill" >
-    <p><?php echo esc_html__('Possible server states states are: Active, Building, Repairing and Error. An active server has installed correctly, Server did not install correctly, requires attention.', 'arsol-server-manager'); ?></p>
+    <p><?php echo esc_html__('Possible server states states are: Active, Building, Repairing and Error.', 'arsol-server-manager'); ?></p>
     <p class="form-field form-field-wide arsol-server-status-pill" style="margin-top: 10px;">
         <?php arsol_sub_component_status_pill_simple($server_post_id); ?>
     </p>
