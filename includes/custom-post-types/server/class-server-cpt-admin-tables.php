@@ -44,8 +44,10 @@ class Tables {
         if ('arsol-server-status' !== $column || !$subscription) {
             return;
         }
+
+        $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
     
-        arsol_sub_component_status_pill_simple($subscription);
+        arsol_sub_component_status_pill_simple($server_post_id);
     
     }
 
@@ -131,8 +133,13 @@ class Tables {
     
 
     public function render_server_column($column, $post_id) {
-        if ($column === 'arsol_server_status') {
-            echo 'Hello World';
+        if (!$column === 'arsol_server_status') {
+            return;
         }
+
+        $server_post_id = $post_id;
+    
+        arsol_sub_component_status_pill_simple($server_post_id);
+    
     }
 }

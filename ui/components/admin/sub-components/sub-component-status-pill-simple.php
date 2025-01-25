@@ -1,6 +1,8 @@
 <?php 
 
-function arsol_sub_component_status_pill_simple($subscription){
+function arsol_sub_component_status_pill_simple($server_post_id){
+
+    $subscription = wcs_get_subscription($server_post_id);
 
     $status = $subscription->get_status();
     if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
