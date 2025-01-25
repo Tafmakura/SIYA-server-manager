@@ -3,7 +3,14 @@
 function arsol_sub_component_status_pill_simple($server_post_id){
 
     $subscription_id = get_post_meta($server_post_id, 'arsol_server_subscription_id', true);
-    $subscription = wcs_get_subscription();
+
+    if (!$subscription_id) {
+        
+        <echo '<mark class="subscription-status no-server tips"><span>--</span></mark>';
+   
+        return;
+    }
+    $subscription = wcs_get_subscription($subscription_id);
 
     $status = $subscription->get_status();
     if (!in_array($status, array('active', 'on-hold', 'pending-cancel'))) {
