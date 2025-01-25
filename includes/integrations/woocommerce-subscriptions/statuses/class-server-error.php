@@ -36,6 +36,7 @@ class ServerError {
      * @param \WC_Subscription $subscription The subscription object.
      */
     public function render_custom_column($column, $subscription) {
+        
         if ('arsol-server-status' !== $column || !$subscription) {
             return;
         }
@@ -50,25 +51,7 @@ class ServerError {
         }
 
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-
-        // echo server post id
-        echo $server_post_id;
-
-        if (!$server_post_id) {
-            // Load the status button template for "No Server"
-            $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
-            if (file_exists($template_path)) {
-                $status = 'no-server';
-                $label = 'No Server';
-                require $template_path;
-            }
-            return;
-        }
-
         $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-
-        // echo circuit breaker
-        echo $circuit_breaker;
 
         // Load the status button template with the appropriate data
         $template_path = __SIYA_PLUGIN_ROOT__ . 'ui/components/admin/status-button.php';
