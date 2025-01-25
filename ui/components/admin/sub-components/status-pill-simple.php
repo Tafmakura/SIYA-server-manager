@@ -1,6 +1,6 @@
 <?php 
 
-function arsol_component_status_pill_simple($subscription){
+function arsol_component_status_pill_simple($column, $subscription){
 
     echo 'HELLO WORLD';
 

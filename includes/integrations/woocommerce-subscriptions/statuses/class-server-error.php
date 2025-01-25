@@ -35,14 +35,13 @@ class ServerError {
      * @param string $column The column name.
      * @param \WC_Subscription $subscription The subscription object.
      */
-    public function render_custom_column($subscription) {
+    public function render_custom_column($column, $subscription) {
 
-        echo 'HELLO WORLD';
-
-       arsol_component_status_pill_simple($subscription);
-
-       echo RED;
-
+ 
+           arsol_component_status_pill_simple($subscription);
+    
+           echo RED;
+    
     }
 
     /**
