@@ -9,8 +9,26 @@
                 </div>
             </div>
         </div>
-        <?php 
-
+        <?php
+        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
+        $all_types = [
+            'sites_server'          => __('Sites Server', 'woocommerce'),
+            'application_server'    => __('Application Server', 'woocommerce'),
+            'block_storage_server'  => __('Block Storage Server', 'woocommerce'),
+            'cloud_server'          => __('Cloud Server', 'woocommerce'),
+            'email_server'          => __('Email Server', 'woocommerce'),
+            'object_storage_server' => __('Object Storage Server', 'woocommerce'),
+            'vps_server'            => __('VPS Server', 'woocommerce'),
+        ];
+        $enabled_types = array_intersect_key($all_types, array_flip($enabled_server_types));
+        woocommerce_wp_select(array(
+            'id'          => '_arsol_server_type',
+            'label'       => __('Server Type', 'woocommerce'),
+            'description' => __('Select the server type.', 'woocommerce'),
+            'desc_tip'    => true,
+            'options'     => $enabled_types,
+            'value'       => $server_type
+        ));
         $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
         $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
         $is_sites_server = get_post_meta($post->ID, '_arsol_sites_server', true) === 'yes';

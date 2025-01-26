@@ -69,6 +69,10 @@ class Product {
     public function add_arsol_server_settings_tab_content() {
         global $post;
         $slugs = new Slugs();
+        $enabled_server_types = (array) get_option('arsol_allowed_server_types', []);
+        if (!in_array('sites_server', $enabled_server_types)) {
+            $enabled_server_types[] = 'sites_server';
+        }
         include plugin_dir_path(__FILE__) . '../../../ui/templates/admin/woocommerce/product-settings-server.php';
     }
 
@@ -124,6 +128,8 @@ class Product {
             $fields['_arsol_server_region'] = $region;
             $fields['_arsol_server_image'] = $server_image;
         }
+
+        $fields['_arsol_server_type'] = sanitize_text_field($_POST['_arsol_server_type'] ?? '');
 
         // Save all fields
         foreach ($fields as $meta_key => $value) {
