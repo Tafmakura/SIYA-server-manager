@@ -9,7 +9,7 @@
                 </div>
             </div>
         </div>
-        <?php
+        <?php 
 
         $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
         $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
