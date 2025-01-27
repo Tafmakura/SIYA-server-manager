@@ -10,6 +10,8 @@ class Variation {
    
     public function __construct() {
 
+        echo 'Variation class loaded';
+
     }
 
    
