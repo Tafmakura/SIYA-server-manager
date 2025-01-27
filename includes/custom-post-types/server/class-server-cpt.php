@@ -1,6 +1,6 @@
 <?php
 
-namespace SIYA\CustomPostTypes;
+namespace Siya\CustomPostTypes;
 
 class ServerPost {
     // Base and general properties

@@ -1,6 +1,6 @@
 <?php
 
-namespace SIYA\CustomPostTypes\ServerPost;
+namespace Siya\CustomPostTypes\ServerPost;
 
 use WC_Subscriptions;
 
@@ -58,9 +58,9 @@ class Setup {
      * Instantiate classes.
      */
     private function instatiate_classes() {
-        new \SIYA\CustomPostTypes\ServerPost();
-        new \SIYA\CustomPostTypes\ServerPost\Admin\Tables();
-        new \SIYA\CustomPostTypes\ServerPost\Admin\Page\Subscription();
+        new \Siya\CustomPostTypes\ServerPost();
+        new \Siya\CustomPostTypes\ServerPost\Admin\Tables();
+        new \Siya\CustomPostTypes\ServerPost\Admin\Page\Subscription();
     }
 
     /**
