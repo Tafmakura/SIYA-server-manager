@@ -2,18 +2,24 @@
 
 namespace Siya\Integrations\WooCommerce\Product;
 
-use  Siya\Integrations\WooCommerce\Product;
+use Siya\Integrations\WooCommerce\Product;
 
 defined('ABSPATH') || exit;
 
 class Variation extends Product {
    
     public function __construct() {
+
+        echo "Variation class loaded HOYOOOOOOOOOOOOOOO";
+
         // Add variation specific fields
         add_action('woocommerce_variation_options_pricing', [$this, 'add_custom_variation_fields'], 10, 3);
         
         // Save variation fields
         add_action('woocommerce_save_product_variation', [$this, 'save_custom_variation_fields'], 10, 2);
+
+        // Add client-side validation
+        add_action('admin_footer', [$this, 'add_variation_scripts']);
     }
 
     /**
@@ -51,25 +57,35 @@ class Variation extends Product {
      * Save custom fields for product variation
      */
     public function save_custom_variation_fields($variation_id, $loop) {
-        $region = isset($_POST['_arsol_server_variation_region'][$loop]) 
-            ? sanitize_text_field($_POST['_arsol_server_variation_region'][$loop]) 
-            : '';
-        
-        $image = isset($_POST['_arsol_server_variation_image'][$loop]) 
-            ? sanitize_text_field($_POST['_arsol_server_variation_image'][$loop]) 
-            : '';
+        $fields = [
+            '_arsol_server_variation_region',
+            '_arsol_server_variation_image'
+        ];
 
-        // Validate region format if not empty
-        if (!empty($region) && !preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-            $region = '';
+        foreach ($fields as $field) {
+            $value = isset($_POST[$field][$loop]) ? sanitize_text_field($_POST[$field][$loop]) : '';
+            
+            // Only validate if value is not empty
+            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
+                $value = ''; // Clear invalid values
+            }
+
+            update_post_meta($variation_id, $field, $value);
         }
+    }
 
-        // Validate image format if not empty
-        if (!empty($image) && !preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
-            $image = '';
-        }
-
-        update_post_meta($variation_id, '_arsol_server_variation_region', $region);
-        update_post_meta($variation_id, '_arsol_server_variation_image', $image);
+    /**
+     * Add JavaScript validation for variation fields
+     */
+    public function add_variation_scripts() {
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $(document).on('input', '[id^="_arsol_server_variation_region"], [id^="_arsol_server_variation_image"]', function() {
+                this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
+            });
+        });
+        </script>
+        <?php
     }
 }
