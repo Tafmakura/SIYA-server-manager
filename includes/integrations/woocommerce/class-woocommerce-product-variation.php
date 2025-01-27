@@ -10,7 +10,7 @@ class Variation extends Product {
    
     public function __construct() {
 
-        echo "Variation class loaded HOYOOOOOOOOOOOOOOO";
+        
 
         // Add variation specific fields
         add_action('woocommerce_variation_options_pricing', [$this, 'add_custom_variation_fields'], 10, 3);
@@ -31,7 +31,7 @@ class Variation extends Product {
         
         // Only proceed if this is a variable subscription
         if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
-       //     return;
+            return;
         }
 
         woocommerce_wp_text_input(array(
