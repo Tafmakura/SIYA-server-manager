@@ -28,9 +28,9 @@ class Setup {
         require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce/class-woocommerce-product-variation.php';
 
         // WooCommerce Subscriptions
-        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
         require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
-
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
+     
     }
 
     public function initialize_classes() {
