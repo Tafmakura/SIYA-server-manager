@@ -20,6 +20,9 @@ class Variation extends Product {
 
         // Add client-side validation
         add_action('admin_footer', [$this, 'add_variation_scripts']);
+
+        // Add the server checkbox to variations
+        add_action('woocommerce_variation_options', [$this, 'add_variation_server_option'], 10, 3);
     }
 
     /**
@@ -49,6 +52,23 @@ class Variation extends Product {
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
+            )
+        ));
+    }
+
+    /**
+     * Add server checkbox to variation options
+     */
+    public function add_variation_server_option($loop, $variation_data, $variation) {
+        woocommerce_wp_checkbox(array(
+            'id'            => "_arsol_server_variation_option{$loop}",
+            'name'          => "_arsol_server_variation_option[{$loop}]",
+            'label'         => __('Server', 'woocommerce'),
+            'value'         => 'yes',
+            'cbvalue'       => 'yes',
+            'custom_attributes' => array(
+                'disabled' => 'disabled',
+                'checked'  => 'checked'
             )
         ));
     }
