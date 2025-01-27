@@ -36,7 +36,7 @@ class Setup {
     public function initialize_classes() {
 
       new \Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator();
-    //  new \Siya\Integrations\WoocommerceSubscriptions\ServerCircuitBreaker();
+    //new \Siya\Integrations\WoocommerceSubscriptions\ServerCircuitBreaker();
       new \Siya\Integrations\Woocommerce\Product();
       new \Siya\Integrations\Woocommerce\Product\Variation();
 
