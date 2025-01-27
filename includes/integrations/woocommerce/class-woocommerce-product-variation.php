@@ -31,7 +31,7 @@ class Variation extends Product {
         
         // Only proceed if this is a variable subscription
         if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
-            return;
+       //     return;
         }
 
         woocommerce_wp_text_input(array(
