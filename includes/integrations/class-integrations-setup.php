@@ -8,7 +8,9 @@ use Siya\AdminSettings\Slugs;
 
 class Setup {
     public function __construct() {
-        add_action('init', [$this, 'init']);
+
+        $this->include_files();
+        $this->initialize_classes();
     }
 
     public function include_files() {
@@ -31,7 +33,7 @@ class Setup {
 
     }
 
-    public function init() {
+    public function intialize_classes() {
         if (!class_exists('WooCommerce')) {
             return;
         }
