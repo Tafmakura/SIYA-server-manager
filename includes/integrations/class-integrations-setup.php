@@ -29,28 +29,16 @@ class Setup {
 
         // WooCommerce Subscriptions
         require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
-        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-ochestrator.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-orchestrator.php';
 
     }
 
-    public function intialize_classes() {
-       // if (!class_exists('WooCommerce')) {
-       //     return;
-      //  }
+    public function initialize_classes() {
 
-  
-       // if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
-            $orchestrator = new Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator();
+      new \Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator();
+    //  new \Siya\Integrations\WoocommerceSubscriptions\ServerCircuitBreaker();
+      new \Siya\Integrations\Woocommerce\Product();
 
-         //   if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
-                $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
-         //   }
-
-       // }
-
-   //     if (class_exists('Siya\Integrations\WooCommerce\Product')) {
-            $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
-    ///    }
     }
 
 
