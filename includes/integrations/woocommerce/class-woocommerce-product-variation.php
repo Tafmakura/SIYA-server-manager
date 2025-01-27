@@ -53,7 +53,7 @@ class Variation extends Product {
         woocommerce_wp_text_input(array(
             'id'          => "_arsol_server_variation_image{$loop}",
             'name'        => "_arsol_server_variation_image[{$loop}]",
-            'label'       => __('Server image (Optional overide)', 'woocommerce'),
+            'label'       => __('Server image (optional overide)', 'woocommerce'),
             'wrapper_class' => 'form-row form-row-first',
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
