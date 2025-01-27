@@ -29,10 +29,8 @@ class Variation extends Product {
         // Get the parent product
         $parent_product = wc_get_product($variation->post_parent);
         
-        // Check if this is a variable subscription AND _arsol_server is checked
-        if (!$parent_product || 
-            $parent_product->get_type() !== 'variable-subscription' ||
-            get_post_meta($parent_product->get_id(), '_arsol_server', true) !== 'yes') {
+        // Check if this is a variable subscription
+        if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
             return;
         }
 
@@ -40,7 +38,7 @@ class Variation extends Product {
             'id'          => "_arsol_server_variation_region{$loop}",
             'name'        => "_arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region (optional overide)', 'woocommerce'),
-            'wrapper_class' => 'form-row form-row-first',
+            'wrapper_class' => 'form-row form-row-first arsol-server-field',
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => get_post_meta($variation->ID, '_arsol_server_variation_region', true),
@@ -54,7 +52,7 @@ class Variation extends Product {
             'id'          => "_arsol_server_variation_image{$loop}",
             'name'        => "_arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image (optional overide)', 'woocommerce'),
-            'wrapper_class' => 'form-row form-row-first',
+            'wrapper_class' => 'form-row form-row-first arsol-server-field',
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => get_post_meta($variation->ID, '_arsol_server_variation_image', true),
@@ -93,6 +91,21 @@ class Variation extends Product {
         ?>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
+            // Function to toggle visibility of server fields
+            function toggleServerFields() {
+                var isChecked = $('#_arsol_server').is(':checked');
+                $('.arsol-server-field').toggle(isChecked);
+            }
+
+            // Run on page load
+            toggleServerFields();
+
+            // Run when checkbox changes
+            $('#_arsol_server').change(function() {
+                toggleServerFields();
+            });
+
+            // Input validation
             $(document).on('input', '[id^="_arsol_server_variation_region"], [id^="_arsol_server_variation_image"]', function() {
                 this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
             });
