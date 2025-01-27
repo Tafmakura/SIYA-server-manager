@@ -36,13 +36,10 @@ class Variation extends Product {
             return;
         }
 
-        
-        ?><h3><?php esc_html_e('Server Configuration', 'woocommerce'); ?></h3><?php
-
         woocommerce_wp_text_input(array(
             'id'          => "_arsol_server_variation_region{$loop}",
             'name'        => "_arsol_server_variation_region[{$loop}]",
-            'label'       => __('Override server region (optional)', 'woocommerce'),
+            'label'       => __('Server region (optional overide)', 'woocommerce'),
             'wrapper_class' => 'form-row form-row-first',
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
@@ -56,7 +53,7 @@ class Variation extends Product {
         woocommerce_wp_text_input(array(
             'id'          => "_arsol_server_variation_image{$loop}",
             'name'        => "_arsol_server_variation_image[{$loop}]",
-            'label'       => __('Override server image (optional)', 'woocommerce'),
+            'label'       => __('Server image (Optional overide)', 'woocommerce'),
             'wrapper_class' => 'form-row form-row-first',
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
