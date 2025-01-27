@@ -4,7 +4,7 @@
             <div class="toolbar toolbar-top">
                 <div class="inline notice woocommerce-message">
                     <p class="help arsol">
-                        <?php _e('Notes: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce'); ?>
+                        <?php _e('Notesssss: Changing server settings here will not affect servers associated with completed or pending subscriptions', 'woocommerce'); ?>
                     </p>
                 </div>
             </div>
