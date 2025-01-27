@@ -5,7 +5,7 @@ namespace Siya\Integrations\WoocommerceSubscriptions;
 use Siya\CustomPostTypes\ServerPost;
 use Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator;
 
-class ServerCircuitBreaker /*extends ServerOrchestrator*/ {
+class ServerCircuitBreaker extends ServerOrchestrator {
 
     // Circuit breaker states
     const CIRCUIT_BREAKER_TRIPPED = -1;    // Failed state
