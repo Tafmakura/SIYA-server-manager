@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 
 use Siya\AdminSettings\Slugs;
 
-class WooCommerce {
+class Setup {
     public function __construct() {
         add_action('init', [$this, 'init']);
     }
