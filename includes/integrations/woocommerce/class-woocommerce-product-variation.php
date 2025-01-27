@@ -9,55 +9,23 @@ defined('ABSPATH') || exit;
 class Variation extends Product {
    
     public function __construct() {
-        // Add variation specific fields only for subscription products
-        add_action('woocommerce_variation_options', [$this, 'add_variation_server_option'], 10, 3);
+
+        echo "Variation class loaded HOYOOOOOOOOOOOOOOO";
+
+        // Add variation specific fields
         add_action('woocommerce_variation_options_pricing', [$this, 'add_custom_variation_fields'], 10, 3);
+        
+        // Save variation fields
         add_action('woocommerce_save_product_variation', [$this, 'save_custom_variation_fields'], 10, 2);
+
+        // Add client-side validation
         add_action('admin_footer', [$this, 'add_variation_scripts']);
-    }
-
-    /**
-     * Check if product is a subscription
-     */
-    private function is_subscription_product($product_id) {
-        $product = wc_get_product($product_id);
-        return $product && (
-            $product->is_type('subscription') || 
-            $product->is_type('variable-subscription') || 
-            get_post_meta($product_id, '_arsol_server', true) === 'yes'
-        );
-    }
-
-    /**
-     * Add server checkbox to variation options
-     */
-    public function add_variation_server_option($loop, $variation_data, $variation) {
-        if (!$this->is_subscription_product($variation->post_parent)) {
-            return;
-        }
-
-        woocommerce_wp_checkbox(array(
-            'id'            => "_arsol_server_variation_option{$loop}",
-            'name'          => "_arsol_server_variation_option[{$loop}]",
-            'label'         => __('Server', 'woocommerce'),
-            'value'         => 'yes',
-            'cbvalue'       => 'yes',
-            'custom_attributes' => array(
-                'disabled' => 'disabled',
-                'checked'  => 'checked'
-            )
-        ));
     }
 
     /**
      * Add custom fields to product variation
      */
     public function add_custom_variation_fields($loop, $variation_data, $variation) {
-        // Only show fields for subscription products
-        if (!$this->is_subscription_product($variation->post_parent)) {
-            return;
-        }
-
         woocommerce_wp_text_input(array(
             'id'          => "_arsol_server_variation_region{$loop}",
             'name'        => "_arsol_server_variation_region[{$loop}]",
