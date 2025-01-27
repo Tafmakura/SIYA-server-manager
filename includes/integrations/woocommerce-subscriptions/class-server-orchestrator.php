@@ -30,7 +30,7 @@ class ServerOrchestrator {
     private $server_post_creation_date;
     private $server_post_status;
     private $sites_server;
-    private $wordpress_ecommerce;
+    private $ecommerce_optimized;
     private $connect_server_manager;
     private $server_group_slug;
     private $server_plan_slug;
@@ -1627,7 +1627,7 @@ class ServerOrchestrator {
                 'arsol_server_post_status' => 2,
                 'arsol_server_product_id' => $server_product_id,
                 'arsol_sites_server' => $server_product->get_meta('_arsol_sites_server', true),
-                'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
+                'arsol_ecommerce_optimized' => $server_product->get_meta('_arsol_ecommerce_optimized', true),
                 '_arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_plan_group_slug', true),

@@ -32,8 +32,6 @@ class Product {
         add_action('woocommerce_product_data_panels', [$this, 'add_arsol_server_settings_tab_content']);
         add_action('woocommerce_process_product_meta', [$this, 'save_arsol_server_settings_tab_content']);
         
-        // Enqueue custom script for admin
-        add_action('admin_footer', [$this, 'add_admin_footer_script']);
     }
 
     public function add_arsol_server_product_option($product_type_options) {
@@ -93,7 +91,7 @@ class Product {
             '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
             '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no'),
             '_arsol_sites_server'     => $is_sites_server ? 'yes' : 'no',
-            '_arsol_wordpress_ecommerce'  => isset($_POST['_arsol_wordpress_ecommerce']) ? 'yes' : 'no',
+            '_arsol_ecommerce_optimized'  => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
         ];
 
         // Get existing values for region and image
@@ -158,85 +156,7 @@ class Product {
         update_post_meta($post_id, '_arsol_assigned_server_tags', $assigned_server_tags);
     }
 
-    public function add_admin_footer_script() {
-        ?>
-        <style>
-        .arsol_wordpress_ecommerce_field, .arsol_server_group_slug_field {
-            display: none;
-        }
-        </style>
-        <script type="text/javascript">
-        jQuery(document).ready(function($) {
-            function toggle_arsol_server_settings_tab() {
-                if ($('#_arsol_server').is(':checked')) {
-                    $('#woocommerce-product-data .arsol_server_settings_options').show();
-                } else {
-                    $('#woocommerce-product-data .arsol_server_settings_options').hide();
-                    $('.wc-tabs .general_tab a').click();
-                }
-            }
-
-            function toggle_ecommerce_and_server_group_fields() {
-                if ($('#_arsol_sites_server').is(':checked')) {
-                    $('.arsol_wordpress_ecommerce_field').show();
-                    $('.arsol_server_group_slug_field').hide();
-                } else {
-                    $('.arsol_wordpress_ecommerce_field').hide();
-                    $('.arsol_server_group_slug_field').show();
-                }
-            }
-
-            function handleSitesServerChange() {
-                var $sitesCheckbox = $('#_arsol_sites_server');
-                var $runcloudCheckbox = $('#_arsol_server_manager_required');
-                
-                if ($sitesCheckbox.is(':checked')) {
-                    $runcloudCheckbox.prop('checked', true).prop('disabled', true);
-                    $('.arsol_wordpress_ecommerce_field').show();
-                    $('.arsol_server_group_slug_field').hide();
-                } else {
-                    $runcloudCheckbox.prop('disabled', false);
-                    $('.arsol_wordpress_ecommerce_field').hide();
-                    $('.arsol_server_group_slug_field').show();
-                }
-            }
-
-            toggle_arsol_server_settings_tab();
-            toggle_ecommerce_and_server_group_fields();
-
-            $('#_arsol_server').on('change', function() {
-                toggle_arsol_server_settings_tab();
-            });
-
-            $('#_arsol_sites_server').on('change', function() {
-                handleSitesServerChange();
-                if ($(this).is(':checked')) {
-                    setSitesProvider();
-                    toggleSitesFields();
-                } else {
-                    $('#_arsol_server_provider_slug').prop('disabled', false);
-                    $('#_arsol_server_plan_group_slug').prop('disabled', false);
-                    toggleSitesFields();
-                }
-            });
-
-            // Initial state
-            handleSitesServerChange();
-
-            // Ensure WordPress Ecommerce maintains its state when hidden before saving
-            $('#post').on('submit', function() {
-                if (!$('#_arsol_sites_server').is(':checked')) {
-                    $('#_arsol_wordpress_ecommerce').prop('checked', false);
-                }
-                // Enable provider and group fields before submitting
-                $('#_arsol_server_provider_slug').prop('disabled', false);
-                $('#_arsol_server_plan_group_slug').prop('disabled', false);
-            });
-        });
-        </script>
-        <?php
-    }
-
+    
     public function add_custom_fields() {
         global $post;
         $slugs = new Slugs();

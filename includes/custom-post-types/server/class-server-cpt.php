@@ -16,7 +16,7 @@ class ServerPost {
     public $server_connection_status;
     public $server_product_id;
     public $sites_server;
-    public $wordpress_ecommerce;
+    public $ecommerce_optimized;
     public $connect_server_manager;  // Added missing property
     public $server_provider_slug;
     public $server_group_slug;
@@ -83,7 +83,7 @@ class ServerPost {
         $this->server_connection_status = get_post_meta($this->post_id, 'arsol_server_connection_status', true);
         $this->server_product_id = get_post_meta($this->post_id, 'arsol_server_product_id', true);
         $this->sites_server = get_post_meta($this->post_id, 'arsol_sites_server', true);
-        $this->wordpress_ecommerce = get_post_meta($this->post_id, 'arsol_wordpress_ecommerce', true);
+        $this->ecommerce_optimized = get_post_meta($this->post_id, 'arsol_ecommerce_optimized', true);
         $this->server_provider_slug = get_post_meta($this->post_id, 'arsol_server_provider_slug', true);
         $this->server_group_slug = get_post_meta($this->post_id, 'arsol_server_group_slug', true);
         $this->server_plan_slug = get_post_meta($this->post_id, 'arsol_server_plan_slug', true);
@@ -210,7 +210,7 @@ class ServerPost {
             'arsol_server_type' => get_post_meta($post_id, 'arsol_server_type', true),
             'arsol_server_status_date' => get_post_meta($post_id, 'arsol_server_status_date', true),
             'arsol_sites_server' => get_post_meta($post_id, 'arsol_sites_server', true),
-            'arsol_wordpress_ecommerce' => get_post_meta($post_id, 'arsol_wordpress_ecommerce', true),
+            'arsol_ecommerce_optimized' => get_post_meta($post_id, 'arsol_ecommerce_optimized', true),
             'arsol_server_provider_slug' => get_post_meta($post_id, 'arsol_server_provider_slug', true),
             'arsol_server_group_slug' => get_post_meta($post_id, 'arsol_server_group_slug', true),
             'arsol_server_plan_slug' => get_post_meta($post_id, 'arsol_server_plan_slug', true),

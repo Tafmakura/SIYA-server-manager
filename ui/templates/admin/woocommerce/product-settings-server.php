@@ -74,7 +74,7 @@
         </div>
         <?php
         $is_sites_server = $server_type === 'sites_server';
-        $is_ecommerce = get_post_meta($post->ID, '_arsol_wordpress_ecommerce', true) === 'yes';
+        $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
         $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
 
         // Initialize Runcloud checkbox
@@ -87,12 +87,12 @@
             'value'       => $is_server_manager ? 'yes' : 'no' // Use saved value directly
         ));
         ?>
-        <div class="arsol_wordpress_ecommerce_field">
+        <div class="arsol_ecommerce_optimized_field hidden">
             <?php
             woocommerce_wp_checkbox(array(
-                'id'          => '_arsol_wordpress_ecommerce',
+                'id'          => '_arsol_ecommerce_optimized',
                 'label'       => __('E-commerce', 'woocommerce'),
-                'description' => __('Enable this option if the server will support ecommerce.', 'woocommerce'),
+                'description' => __('Enable this option if the server setup is optimized for ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',
                 'cbvalue'     => 'yes',
                 'value'       => $is_ecommerce ? 'yes' : 'no'
@@ -110,7 +110,8 @@
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($providers, array_map([$slugs, 'get_provider_name'], $providers)),
-            'value'       => $selected_provider
+            'value'       => $selected_provider,
+            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
         ));
 
         // Group Dropdown
@@ -123,7 +124,8 @@
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
-            'value'       => $selected_group
+            'value'       => $selected_group,
+            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
         ));
 
         // Plan Dropdown
@@ -250,6 +252,9 @@
     display: none;
 }
 .arsol_max_staging_sites_field.hidden {
+    display: none;
+}
+.arsol_ecommerce_optimized_field.hidden {
     display: none;
 }
 </style>
@@ -382,14 +387,18 @@ jQuery(document).ready(function($) {
         if (serverType === 'sites_server') {
             $('.arsol_non_sites_server_fields').addClass('hidden');
             $('.arsol_max_staging_sites_field').removeClass('hidden');
+            $('.arsol_ecommerce_optimized_field').removeClass('hidden'); // Show ecommerce field
             setSitesProvider();
             setRuncloudCheckboxState(true, true);
+            $('#_arsol_server_provider_slug').prop('disabled', true);
+            $('#_arsol_server_plan_group_slug').prop('disabled', true);
         } else if (!serverType) {
             // If no server type selected, keep Runcloud checked and disabled
             setRuncloudCheckboxState(true, true);
         } else {
             $('.arsol_non_sites_server_fields').removeClass('hidden');
             $('.arsol_max_staging_sites_field').addClass('hidden');
+            $('.arsol_ecommerce_optimized_field').addClass('hidden'); // Hide ecommerce field
             $('#_arsol_server_provider_slug').prop('disabled', false);
             $('#_arsol_server_plan_group_slug').prop('disabled', false);
             setRuncloudCheckboxState(false, false);
@@ -451,8 +460,55 @@ jQuery(document).ready(function($) {
     $('#arsol_server_region, #_arsol_server_image').on('input', function() {
         this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
     });
+
+    function toggle_arsol_server_settings_tab() {
+        if ($('#_arsol_server').is(':checked')) {
+            $('#woocommerce-product-data .arsol_server_settings_options').show();
+        } else {
+            $('#woocommerce-product-data .arsol_server_settings_options').hide();
+            $('.wc-tabs .general_tab a').click();
+        }
+    }
+
+    // Initial state
+    toggle_arsol_server_settings_tab();
+
+    $('#_arsol_server').on('change', function() {
+        toggle_arsol_server_settings_tab();
+    });
 });
 </script>
+
+<?php 
+
+// Add the script to the admin footer
+add_action('admin_footer', 'add_admin_footer_script');
+
+function add_admin_footer_script() {
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        function toggle_arsol_server_settings_tab() {
+            if ($('#_arsol_server').is(':checked')) {
+                $('#woocommerce-product-data .arsol_server_settings_options').show();
+            } else {
+                $('#woocommerce-product-data .arsol_server_settings_options').hide();
+                $('.wc-tabs .general_tab a').click();
+            }
+        }
+
+        // Initial state
+        toggle_arsol_server_settings_tab();
+
+        $('#_arsol_server').on('change', function() {
+            toggle_arsol_server_settings_tab();
+        });
+    });
+    </script>
+    <?php
+}
+?>
+
 
 
 
