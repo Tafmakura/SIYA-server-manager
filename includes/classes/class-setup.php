@@ -63,6 +63,9 @@ class Setup {
         if (class_exists('Siya\UI\Components\Setup\ComponentSetup')) {
             $component_setup = new \Siya\UI\Components\Setup\ComponentSetup();
         }
+        if (class_exists('Siya\Integrations\Setup')) {
+            $integrations_setup = new \Siya\Integrations\Setup();
+        }
 
     }
 

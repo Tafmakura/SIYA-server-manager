@@ -36,9 +36,6 @@ class WooCommerce {
             return;
         }
 
-        new WooCommerce\Product();
-        new WooCommerce\Product\Variation();
-
         if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
             $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
         }
