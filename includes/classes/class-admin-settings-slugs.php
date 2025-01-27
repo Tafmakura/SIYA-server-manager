@@ -82,6 +82,7 @@ class Slugs {
             $group_slug = preg_replace('/[^a-zA-Z0-9-]/', '', sanitize_text_field($plan['group_slug']));
             $slug = preg_replace('/[^a-zA-Z0-9-]/', '', sanitize_text_field($plan['slug']));
             $description = sanitize_textarea_field($plan['description']);
+            $server_types = array_map('sanitize_text_field', $plan['server_types'] ?? []);
 
             if (!isset($grouped_plans[$group_slug])) {
                 $grouped_plans[$group_slug] = [
@@ -92,7 +93,8 @@ class Slugs {
 
             $grouped_plans[$group_slug]['plans'][] = [
                 'slug' => $slug,
-                'description' => $description
+                'description' => $description,
+                'server_types' => $server_types
             ];
         }
 
@@ -203,4 +205,6 @@ class Slugs {
         $plans = $this->get_filtered_plans($provider, $group);
         wp_send_json($plans);
     }
+
+
 }

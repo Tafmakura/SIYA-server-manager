@@ -41,7 +41,7 @@ class Product {
         $product_type_options['arsol_server'] = array(
             'id'            => '_arsol_server',
             'wrapper_class' => 'show_if_simple show_if_variable',
-            'label'         => __('ARSOL Server', 'woocommerce'),
+            'label'         => __('Server', 'woocommerce'),
             'description'   => __('', 'woocommerce'),
             'default'       => 'no'
         );

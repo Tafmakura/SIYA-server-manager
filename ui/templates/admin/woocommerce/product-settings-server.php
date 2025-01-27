@@ -26,61 +26,66 @@
             'label'       => __('Server Type', 'woocommerce'),
             'description' => __('Select the server type.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $enabled_types,
-            'value'       => $server_type
+            'options'     => $enabled_types,  // No placeholder option
+            'value'       => $server_type ?: ''  // Ensure the value is empty if not set
         ));
-        $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
-        $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
-        $is_sites_server = get_post_meta($post->ID, '_arsol_sites_server', true) === 'yes';
+        ?>
+        <div class="arsol_max_applications_field">
+            <?php
+            $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
+            woocommerce_wp_text_input(array(
+                'id'          => '_arsol_max_applications',
+                'label'       => __('Maximum applications', 'woocommerce'),
+                'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
+                'desc_tip'    => 'true',
+                'type'        => 'number',
+                'custom_attributes' => array(
+                    'min' => '0',
+                    'max' => '999',
+                    'step' => '1',
+                    'required' => 'required',
+                    'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
+                    'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
+                ),
+                'value'       => empty($max_applications) ? '0' : $max_applications
+            ));
+            ?>
+        </div>
+        <div class="arsol_max_staging_sites_field">
+            <?php
+            $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
+            woocommerce_wp_text_input(array(
+                'id'          => '_arsol_max_staging_sites',
+                'label'       => __('Maximum staging sites', 'woocommerce'),
+                'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
+                'desc_tip'    => 'true',
+                'type'        => 'number',
+                'custom_attributes' => array(
+                    'min' => '0',
+                    'max' => '999',
+                    'step' => '1',
+                    'required' => 'required',
+                    'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
+                    'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
+                ),
+                'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
+            ));
+            ?>
+        </div>
+        <?php
+        $is_sites_server = $server_type === 'sites_server';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_wordpress_ecommerce', true) === 'yes';
         $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
 
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_max_applications',
-            'label'       => __('Maximum applications', 'woocommerce'),
-            'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'type'        => 'number',
-            'custom_attributes' => array(
-                'min' => '0',
-                'max' => '999',
-                'step' => '1',
-                'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
-            ),
-            'value'       => empty($max_applications) ? '0' : $max_applications
-        ));
-        woocommerce_wp_text_input(array(
-            'id'          => '_arsol_max_staging_sites',
-            'label'       => __('Maximum staging sites', 'woocommerce'),
-            'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'type'        => 'number',
-            'custom_attributes' => array(
-                'min' => '0',
-                'max' => '999',
-                'step' => '1',
-                'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
-            ),
-            'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
-        ));
+        // Initialize Runcloud checkbox
         woocommerce_wp_checkbox(array(
             'id'          => '_arsol_server_manager_required',
             'label'       => __('Runcloud', 'woocommerce'),
             'description' => __('Connect this server to Runcloud server manager.', 'woocommerce'),
             'desc_tip'    => 'true',
             'cbvalue'     => 'yes',
-            'value'       => $is_server_manager ? 'yes' : 'no'
+            'value'       => $is_server_manager ? 'yes' : 'no' // Use saved value directly
         ));
-        woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_sites_server',
-            'label'       => __('Sites server', 'woocommerce'),
-            'description' => __('Enable this option to set up a Sites server.', 'woocommerce'),
-            'desc_tip'    => 'true',
-            'cbvalue'     => 'yes',
-            'value'       => $is_sites_server ? 'yes' : 'no'
-        ));    
         ?>
         <div class="arsol_wordpress_ecommerce_field">
             <?php
@@ -241,6 +246,12 @@
 .arsol_non_sites_server_fields.hidden {
     display: none;
 }
+.arsol_max_applications_field.hidden {
+    display: none;
+}
+.arsol_max_staging_sites_field.hidden {
+    display: none;
+}
 </style>
 
 <script type="text/javascript">
@@ -249,10 +260,11 @@ jQuery(document).ready(function($) {
         var provider = $('#_arsol_server_provider_slug').val();
         var group = $('#_arsol_server_plan_group_slug').val();
         var plan = $('#_arsol_server_plan_slug').val();
+        var serverType = $('#_arsol_server_type').val();
 
-        if (!provider || !group || !plan) {
+        if (!provider || !group || !plan || !serverType) {
             e.preventDefault();
-            alert('Please fill in all required fields: Server provider, Server group, and Server plan.');
+            alert('Please fill in all required fields: Server type, Server provider, Server group, and Server plan.');
         }
     });
 
@@ -343,15 +355,53 @@ jQuery(document).ready(function($) {
             if (groups.includes(wpGroup)) {
                 $('#_arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
                 updatePlans(wpProvider, wpGroup);
+            } else {
+                $('#_arsol_server_plan_group_slug').prop('disabled', true); // Always disabled
+                updatePlans(wpProvider, wpGroup);
             }
         });
     }
 
+    function setRuncloudCheckboxState(checked = true, disabled = true) {
+        console.log('Setting Runcloud checkbox state:', { checked, disabled }); // Debug log
+        var $checkbox = $('#_arsol_server_manager_required');
+        var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
+        
+        if (checked) {
+            $checkbox.prop('checked', true);
+        } else {
+            // If not forced checked, use the saved value
+            $checkbox.prop('checked', savedValue === 'yes');
+        }
+        
+        $checkbox.prop('disabled', disabled).trigger('change');
+    }
+
     function toggleSitesFields() {
-        if ($('#_arsol_sites_server').is(':checked')) {
+        var serverType = $('#_arsol_server_type').val();
+        if (serverType === 'sites_server') {
             $('.arsol_non_sites_server_fields').addClass('hidden');
+            $('.arsol_max_staging_sites_field').removeClass('hidden');
+            setSitesProvider();
+            setRuncloudCheckboxState(true, true);
+        } else if (!serverType) {
+            // If no server type selected, keep Runcloud checked and disabled
+            setRuncloudCheckboxState(true, true);
         } else {
             $('.arsol_non_sites_server_fields').removeClass('hidden');
+            $('.arsol_max_staging_sites_field').addClass('hidden');
+            $('#_arsol_server_provider_slug').prop('disabled', false);
+            $('#_arsol_server_plan_group_slug').prop('disabled', false);
+            setRuncloudCheckboxState(false, false);
+        }
+    }
+
+    function toggleApplicationsField() {
+        var serverType = $('#_arsol_server_type').val();
+        if (serverType === 'sites_server' || serverType === 'application_server') {
+            $('.arsol_max_applications_field').removeClass('hidden');
+        } else {
+            $('.arsol_max_applications_field').addClass('hidden');
         }
     }
 
@@ -371,15 +421,9 @@ jQuery(document).ready(function($) {
         updatePlans(provider, group);
     });
 
-    $('#_arsol_sites_server').on('change', function() {
-        if ($(this).is(':checked')) {
-            setSitesProvider();
-            toggleSitesFields();
-        } else {
-            $('#_arsol_server_provider_slug').prop('disabled', false);
-            $('#_arsol_server_plan_group_slug').prop('disabled', false);
-            toggleSitesFields();
-        }
+    $('#_arsol_server_type').on('change', function() {
+        toggleSitesFields();
+        toggleApplicationsField();
     });
 
     // Initial load
@@ -393,12 +437,15 @@ jQuery(document).ready(function($) {
         });
     }
 
-    if ($('#_arsol_sites_server').is(':checked')) {
-        setSitesProvider();
-    }
-
     // Initial state
     toggleSitesFields();
+    toggleApplicationsField();
+
+    // Ensure Runcloud checkbox is correctly set and disabled on initial load
+    if ($('#_arsol_server_type').val() === 'sites_server') {
+        $('#_arsol_server_manager_required').prop('checked', true).prop('disabled', true);
+        setSitesProvider();
+    }
 
     // Add validation for region and server image fields
     $('#arsol_server_region, #_arsol_server_image').on('input', function() {

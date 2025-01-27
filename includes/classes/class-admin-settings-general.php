@@ -17,18 +17,18 @@ class General {
 
         add_settings_section(
             'siya_general_section',
-            'General Settings',
+            'Admin Permissions',
             null,
             'siya_settings_general'
         );
-
+/* 
         add_settings_section(
             'siya_general_server_types_section',
             'Allowed server types',
             null,
             'siya_settings_general'
         );
-
+*/
         add_settings_field(
             'arsol_allow_admin_server_delition',
             'Allow server deletion by admin',
