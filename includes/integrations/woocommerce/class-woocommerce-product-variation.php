@@ -72,6 +72,22 @@ class Variation extends Product {
             '_arsol_server_variation_image'
         ];
 
+        // Get parent product ID
+        $variation = wc_get_product($variation_id);
+        if (!$variation) return;
+        
+        $parent_id = $variation->get_parent_id();
+        $is_server_enabled = get_post_meta($parent_id, '_arsol_server', true) === 'yes';
+
+        if (!$is_server_enabled) {
+            // Delete meta keys if _arsol_server is not checked
+            foreach ($fields as $field) {
+                delete_post_meta($variation_id, $field);
+            }
+            return;
+        }
+
+        // Only save fields if _arsol_server is checked
         foreach ($fields as $field) {
             $value = isset($_POST[$field][$loop]) ? sanitize_text_field($_POST[$field][$loop]) : '';
             
