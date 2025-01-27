@@ -29,25 +29,28 @@ class Setup {
 
         // WooCommerce Subscriptions
         require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
-        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-woocommerce-server-ochestrator.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-ochestrator.php';
 
     }
 
     public function intialize_classes() {
-        if (!class_exists('WooCommerce')) {
-            return;
-        }
+       // if (!class_exists('WooCommerce')) {
+       //     return;
+      //  }
 
-        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
-            $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
-        }
-        if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
-            $orchestrator = new \Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator();
-        }
+  
+       // if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerOrchestrator')) {
+            $orchestrator = new Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator();
 
-        if (class_exists('Siya\Integrations\WooCommerce\Product')) {
+         //   if (class_exists('Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker')) {
+                $circuit_breaker = new \Siya\Integrations\WooCommerceSubscriptions\ServerCircuitBreaker();
+         //   }
+
+       // }
+
+   //     if (class_exists('Siya\Integrations\WooCommerce\Product')) {
             $woocommerce_product = new \Siya\Integrations\WooCommerce\Product();
-        }
+    ///    }
     }
 
 
