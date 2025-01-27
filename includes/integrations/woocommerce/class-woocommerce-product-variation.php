@@ -26,6 +26,14 @@ class Variation extends Product {
      * Add custom fields to product variation
      */
     public function add_custom_variation_fields($loop, $variation_data, $variation) {
+        // Get the parent product
+        $parent_product = wc_get_product($variation->post_parent);
+        
+        // Only proceed if this is a variable subscription
+        if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
+            return;
+        }
+
         woocommerce_wp_text_input(array(
             'id'          => "_arsol_server_variation_region{$loop}",
             'name'        => "_arsol_server_variation_region[{$loop}]",
