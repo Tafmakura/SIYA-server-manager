@@ -16,20 +16,20 @@ class Setup {
     public function include_files() {
         
         // Server Managers
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-managers/runcloud/class-runcloud.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/server-managers/runcloud/class-runcloud.php';
         
         // Server Providers
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-providers/digitalocean/class-digitalocean.php';
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-providers/hetzner/class-hetzner.php';
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-providers/vultr/class-vultr.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/server-providers/digitalocean/class-digitalocean.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/server-providers/hetzner/class-hetzner.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/server-providers/vultr/class-vultr.php';
         
         // WooCommerce
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/woocommerce/class-woocommerce-product.php';
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/woocommerce/class-woocommerce-product-variation.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce/class-woocommerce-product.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce/class-woocommerce-product-variation.php';
 
         // WooCommerce Subscriptions
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
-        require_once SIYA_PLUGIN_PATH . 'includes/integrations/woocommerce-subscriptions/class-woocommerce-server-ochestrator.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-server-circuit-breaker.php';
+        require_once __SIYA_PLUGIN_ROOT__ . 'includes/integrations/woocommerce-subscriptions/class-woocommerce-server-ochestrator.php';
 
     }
 
