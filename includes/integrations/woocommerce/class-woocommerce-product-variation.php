@@ -36,6 +36,9 @@ class Variation extends Product {
             return;
         }
 
+        
+        ?><h3><?php esc_html_e('Server Configuration', 'woocommerce'); ?></h3><?php
+
         woocommerce_wp_text_input(array(
             'id'          => "_arsol_server_variation_region{$loop}",
             'name'        => "_arsol_server_variation_region[{$loop}]",
