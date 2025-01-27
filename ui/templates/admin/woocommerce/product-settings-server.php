@@ -491,11 +491,9 @@ function add_admin_footer_script() {
         function toggle_arsol_server_settings_tab() {
             if ($('#_arsol_server').is(':checked')) {
                 $('#woocommerce-product-data .arsol_server_settings_options').show();
-                $('#_virtual').prop('checked', true); // Check _virtual
             } else {
                 $('#woocommerce-product-data .arsol_server_settings_options').hide();
                 $('.wc-tabs .general_tab a').click();
-                $('#_virtual').prop('checked', false); // Uncheck _virtual
             }
         }
 
