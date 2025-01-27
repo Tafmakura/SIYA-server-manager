@@ -461,6 +461,11 @@ jQuery(document).ready(function($) {
         this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
     });
 
+    // Add validation for variation region and image fields
+    $(document).on('input', '[id^="_arsol_server_variation_region"], [id^="_arsol_server_variation_image"]', function() {
+        this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
+    });
+
     function toggle_arsol_server_settings_tab() {
         if ($('#_arsol_server').is(':checked')) {
             $('#woocommerce-product-data .arsol_server_settings_options').show();
