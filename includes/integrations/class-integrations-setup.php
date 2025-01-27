@@ -13,8 +13,10 @@ class WooCommerce {
 
     public function include_files() {
         
-        // Integrations
+        // Server Managers
         require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-managers/runcloud/class-runcloud.php';
+        
+        // Server Providers
         require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-providers/digitalocean/class-digitalocean.php';
         require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-providers/hetzner/class-hetzner.php';
         require_once SIYA_PLUGIN_PATH . 'includes/integrations/server-providers/vultr/class-vultr.php';
