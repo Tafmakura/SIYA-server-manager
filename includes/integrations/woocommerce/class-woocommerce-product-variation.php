@@ -21,8 +21,6 @@ class Variation {
         $variation_object = wc_get_product($variation->ID);
         if (!$variation_object) return;
 
-        error_log('variation_object: ' . print_r($variation_object, true));
-
         // Check if arsol_server is enabled on parent
         $parent = wc_get_product($variation_object->get_parent_id());
         $is_server_enabled = $parent ? $parent->get_meta('_arsol_server') === 'yes' : false;
@@ -69,11 +67,11 @@ class Variation {
             
             if (!empty($region)) {
                 if (strlen($region) > 15) {
-                    wc_add_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    $this->add_admin_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                    wc_add_notice(__('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                    $this->add_admin_notice(__('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
                     $has_errors = true;
                 }
             }
@@ -89,13 +87,12 @@ class Variation {
             
             if (!empty($image)) {
                 if (strlen($image) > 15) {
-                    wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    $this->add_admin_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
-                    wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                    $this->add_admin_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
                     $has_errors = true;
-                    return;
                 }
             }
 
@@ -115,5 +112,17 @@ class Variation {
         $variation_data['arsol_server_variation_image'] = $variation->get_meta('_arsol_server_variation_image');
         
         return $variation_data;
+    }
+
+    /**
+     * Add an admin notice.
+     *
+     * @param string $message
+     * @param string $type (success, error, info, warning)
+     */
+    protected function add_admin_notice($message, $type = 'info') {
+        add_action('admin_notices', function () use ($message, $type) {
+            echo "<div class='notice notice-{$type} is-dismissible'><p>{$message}</p></div>";
+        });
     }
 }
