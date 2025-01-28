@@ -545,7 +545,7 @@ jQuery(document).ready(function($) {
 
     // Handle tab visibility on load and checkbox change
     function togglearsol_server_settings_tab() {
-        var $elements = $('.show_ifarsol_server');
+        var $elements = $('.show_if_arsol_server');
         var isChecked = $('#arsol_server').is(':checked');
         
         if (isChecked) {
