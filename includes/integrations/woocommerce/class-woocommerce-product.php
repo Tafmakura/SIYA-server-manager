@@ -211,9 +211,9 @@ class Product {
      */
     public function validate_fields($post_id) {
         // Skip validation if server option is not enabled
-        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-            return;
-        }
+       // if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
+        //    return;
+       // }
 
         $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
