@@ -79,7 +79,7 @@
             ?>
         </div>
         <?php
-        // Provider Dropdown
+        // Provider Dropdownn
         $providers = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
