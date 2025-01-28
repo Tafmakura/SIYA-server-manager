@@ -89,12 +89,11 @@ class Variation {
             
             if (!empty($image)) {
                 if (strlen($image) > 15) {
-                    wc_add_notice(__('Serverr image cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
                     wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
-                    \WC_Admin_Settings::add_error( esc_html__( 'Ongeldige licentie sleutel!', 'restaurant-nybe' ) );
                     $has_errors = true;
                     return;
                 }
