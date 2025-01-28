@@ -21,7 +21,7 @@ class Variation {
         $variation_object = wc_get_product($variation->ID);
         if (!$variation_object) return;
 
-        error_log('variation_object: ' . print_r($variation_object, true)); 
+        error_log('variation_object: ' . print_r($variation_object, true));
 
         // Check if arsol_server is enabled on parent
         $parent = wc_get_product($variation_object->get_parent_id());
