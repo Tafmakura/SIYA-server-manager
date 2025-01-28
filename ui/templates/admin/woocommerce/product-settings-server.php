@@ -221,18 +221,18 @@
 </div>
 
 <style>
-.hidden {
-    display: none;
-}
-.arsol_non_sites_server_fields.hidden {
-    display: none;
-}
-.arsol_max_applications_field.hidden {
-    display: none;
-}
-.arsol_ecommerce_optimized_field.hidden {
-    display: none;
-}
+    .hidden {
+        display: none;
+    }
+    .arsol_non_sites_server_fields.hidden {
+        display: none;
+    }
+    .arsol_max_applications_field.hidden {
+        display: none;
+    }
+    .arsol_ecommerce_optimized_field.hidden {
+        display: none;
+    }
 </style>
 
 <script type="text/javascript">
