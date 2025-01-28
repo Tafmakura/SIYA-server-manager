@@ -57,7 +57,7 @@ class Product {
         $tabs['arsol_server_settings'] = array(
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
-            'class'    => array('show_if_arsol_server'), // This matches WooCommerce's pattern
+            'class'    => array('show_if_subscription', 'show_if_variable-subscription', 'show_if_arsol_server'),
             'priority' => 50,
         );
 
