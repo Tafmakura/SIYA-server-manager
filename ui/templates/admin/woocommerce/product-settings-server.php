@@ -561,36 +561,6 @@ jQuery(document).ready(function($) {
 });
 </script>
 
-<?php 
-
-// Add the script to the admin footer
-add_action('admin_footer', 'add_admin_footer_script');
-
-function add_admin_footer_script() {
-    ?>
-    <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        function toggle_arsol_server_settings_tab() {
-            if ($('#_arsol_server').is(':checked')) {
-                $('#woocommerce-product-data .arsol_server_settings_options').show();
-            } else {
-                $('#woocommerce-product-data .arsol_server_settings_options').hide();
-                $('.wc-tabs .general_tab a').click();
-            }
-        }
-
-        // Initial state
-        toggle_arsol_server_settings_tab();
-
-        $('#_arsol_server').on('change', function() {
-            toggle_arsol_server_settings_tab();
-        });
-    });
-    </script>
-    <?php
-}
-?>
-
 
 
 
