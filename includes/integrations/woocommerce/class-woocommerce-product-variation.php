@@ -23,6 +23,9 @@ class Variation extends Product {
         
         // Add WooCommerce validation
         add_filter('woocommerce_variation_is_valid', [$this, 'validate_variation_fields'], 10, 2);
+
+        // Update validation hook
+        add_action('woocommerce_admin_process_variation_object', [$this, 'validate_variation_fields'], 10, 2);
     }
     /**
      * Add custom fields to product variation
@@ -109,16 +112,10 @@ class Variation extends Product {
     /**
      * Add WooCommerce validation for variation fields
      */
-    public function validate_variation_fields($valid, $variation_id) {
-        // Get parent product to check if arsol_server is enabled
-        $variation = wc_get_product($variation_id);
-        if (!$variation) return $valid;
-        
-        $parent_id = $variation->get_parent_id();
-        $is_server_enabled = get_post_meta($parent_id, 'arsol_server', true) === 'yes';
-
-        if (!$is_server_enabled) {
-            return $valid;
+    public function validate_variation_fields($variation, $i) {
+        $parent = $variation->get_parent_id();
+        if (!$parent || get_post_meta($parent, 'arsol_server', true) !== 'yes') {
+            return;
         }
 
         // Pattern validation for region and image fields
@@ -128,13 +125,13 @@ class Variation extends Product {
         ];
 
         foreach ($pattern_fields as $field => $label) {
-            $value = get_post_meta($variation_id, $field, true);
-            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                wc_add_notice(sprintf(__('Variation %s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label), 'error');
-                $valid = false;
+            $field_name = $field . '[' . $i . ']';
+            if (!empty($_POST[$field_name]) && !preg_match('/^[a-zA-Z0-9-]+$/', $_POST[$field_name])) {
+                wc_add_notice(
+                    sprintf(__('Variation %s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label),
+                    'error'
+                );
             }
         }
-
-        return $valid;
     }
 }
