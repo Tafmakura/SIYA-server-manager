@@ -23,7 +23,7 @@ class Product {
         add_action('woocommerce_process_product_meta', [$this, 'save_arsol_server_settings_tab_content'], 20);
         
         // UI hooks
-        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
+       // add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
         
         add_action('admin_notices', [$this, 'display_validation_errors']);
     }
