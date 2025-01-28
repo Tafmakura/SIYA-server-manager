@@ -51,27 +51,6 @@
             ));
             ?>
         </div>
-        <div class="arsol_max_staging_sites_field">
-            <?php
-            $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
-            woocommerce_wp_text_input(array(
-                'id'          => '_arsol_max_staging_sites',
-                'label'       => __('Maximum staging sites', 'woocommerce'),
-                'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
-                'desc_tip'    => 'true',
-                'type'        => 'number',
-                'custom_attributes' => array(
-                    'min' => '0',
-                    'max' => '999',
-                    'step' => '1',
-                    'required' => 'required',
-                    'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                    'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
-                ),
-                'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
-            ));
-            ?>
-        </div>
         <?php
         $is_sites_server = $server_type === 'sites_server';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
@@ -251,9 +230,6 @@
 .arsol_max_applications_field.hidden {
     display: none;
 }
-.arsol_max_staging_sites_field.hidden {
-    display: none;
-}
 .arsol_ecommerce_optimized_field.hidden {
     display: none;
 }
@@ -386,7 +362,6 @@ jQuery(document).ready(function($) {
         var serverType = $('#_arsol_server_type').val();
         if (serverType === 'sites_server') {
             $('.arsol_non_sites_server_fields').addClass('hidden');
-            $('.arsol_max_staging_sites_field').removeClass('hidden');
             $('.arsol_ecommerce_optimized_field').removeClass('hidden'); // Show ecommerce field
             setSitesProvider();
             setRuncloudCheckboxState(true, true);
@@ -397,7 +372,6 @@ jQuery(document).ready(function($) {
             setRuncloudCheckboxState(true, true);
         } else {
             $('.arsol_non_sites_server_fields').removeClass('hidden');
-            $('.arsol_max_staging_sites_field').addClass('hidden');
             $('.arsol_ecommerce_optimized_field').addClass('hidden'); // Hide ecommerce field
             $('#_arsol_server_provider_slug').prop('disabled', false);
             $('#_arsol_server_plan_group_slug').prop('disabled', false);
