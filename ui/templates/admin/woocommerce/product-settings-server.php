@@ -237,25 +237,6 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Add this function near the top
-    function setServerFieldsVisibility() {
-        var isChecked = $('#arsol_server').is(':checked');
-        $('.show_if_arsol_server').each(function() {
-            // Set inline style directly on the element
-            $(this).attr('style', isChecked ? '' : 'display: none !important');
-        });
-        
-        if (!isChecked) {
-            $('.wc-tabs .general_tab a').click();
-        }
-    }
-
-    // Run on page load
-    setServerFieldsVisibility();
-
-    // Run when checkbox changes
-    $('#arsol_server').on('change', setServerFieldsVisibility);
-
     $('#post').on('submit', function(e) {
         var provider = $('#arsol_server_provider_slug').val();
         var group = $('#arsol_server_plan_group_slug').val();
@@ -568,9 +549,9 @@ jQuery(document).ready(function($) {
         var isChecked = $('#arsol_server').is(':checked');
         
         if (isChecked) {
-            $elements.attr('style', '');  // Remove inline style
+            $elements.attr('style', '').removeClass('hidden');  // Remove both inline style and hidden class
         } else {
-            $elements.attr('style', 'display: none !important');
+            $elements.attr('style', 'display: none !important').addClass('hidden');
             $('.wc-tabs .general_tab a').click();
         }
     }
