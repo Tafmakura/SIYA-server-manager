@@ -61,19 +61,51 @@ class Variation {
         $variation = wc_get_product($variation_id);
         if (!$variation) return;
 
-        // Save region
+        $has_errors = false;
+
+        // Validate and save region
         if (isset($_POST['arsol_server_variation_region'][$loop])) {
             $region = sanitize_text_field($_POST['arsol_server_variation_region'][$loop]);
-            $variation->update_meta_data('_arsol_server_variation_region', $region);
+            
+            if (!empty($region)) {
+                if (strlen($region) > 15) {
+                    wc_add_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    $has_errors = true;
+                }
+                if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
+                    wc_add_notice(__('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                    $has_errors = true;
+                }
+            }
+
+            if (!$has_errors) {
+                $variation->update_meta_data('_arsol_server_variation_region', $region);
+            }
         }
 
-        // Save image
+        // Validate and save image
         if (isset($_POST['arsol_server_variation_image'][$loop])) {
             $image = sanitize_text_field($_POST['arsol_server_variation_image'][$loop]);
-            $variation->update_meta_data('_arsol_server_variation_image', $image);
+            
+            if (!empty($image)) {
+                if (strlen($image) > 15) {
+                    wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    $has_errors = true;
+                }
+                if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
+                    wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                    $has_errors = true;
+                }
+            }
+
+            if (!$has_errors) {
+                $variation->update_meta_data('_arsol_server_variation_image', $image);
+            }
         }
 
-        $variation->save();
+        if (!$has_errors) {
+            $variation->save();
+        }
     }
 
     public function load_variation_fields($variation_data, $product, $variation) {
