@@ -54,7 +54,7 @@ class Product {
     }
 
     public function save_arsol_server_option_fields($post_ID, $product, $update) {
-        $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no';
+        $is_arsol_server = isset($_POST['arsol_server']) ? 'yes' : 'no';
         update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Save with underscore prefix
     }
 
