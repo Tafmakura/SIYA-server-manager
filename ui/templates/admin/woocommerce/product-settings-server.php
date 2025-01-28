@@ -237,18 +237,7 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    $('#post').on('submit', function(e) {
-        var provider = $('#arsol_server_provider_slug').val();
-        var group = $('#arsol_server_plan_group_slug').val();
-        var plan = $('#arsol_server_plan_slug').val();
-        var serverType = $('#arsol_server_type').val();
-
-        if (!provider || !group || !plan || !serverType) {
-            e.preventDefault();
-            alert('Please fill in all required fields: Server type, Server provider, Server group, and Server plan.');
-        }
-    });
-
+    // Remove form validation code, WooCommerce will handle it
     function updateGroups(provider, callback) {
         var serverType = $('#arsol_server_type').val();
         $.ajax({
