@@ -542,39 +542,25 @@ jQuery(document).ready(function($) {
     $('#arsol_server_region, #arsol_server_image').on('input', function() {
         this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
     });
+
+    // Handle tab visibility on load and checkbox change
+    function togglearsol_server_settings_tab() {
+        var $elements = $('.show_ifarsol_server');
+        var isChecked = $('#arsol_server').is(':checked');
+        
+        if (isChecked) {
+            $elements.attr('style', '');  // Remove inline style
+        } else {
+            $elements.attr('style', 'display: none !important');
+            $('.wc-tabs .general_tab a').click();
+        }
+    }
+
+    // Initial state and change handler
+    togglearsol_server_settings_tab();
+    $('#arsol_server').on('change', togglearsol_server_settings_tab);
 });
 </script>
-
-<?php 
-
-// Add the script to the admin footer
-add_action('admin_footer', 'add_admin_footer_script');
-
-function add_admin_footer_script() {
-    ?>
-    <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        // Handle tab visibility on load and checkbox change
-        function togglearsol_server_settings_tab() {
-            var $elements = $('.show_ifarsol_server');
-            var isChecked = $('#arsol_server').is(':checked');
-            
-            if (isChecked) {
-                $elements.attr('style', '');  // Remove inline style
-            } else {
-                $elements.attr('style', 'display: none !important');
-                $('.wc-tabs .general_tab a').click();
-            }
-        }
-
-        // Initial state and change handler
-        togglearsol_server_settings_tab();
-        $('#arsol_server').on('change', togglearsol_server_settings_tab);
-    });
-    </script>
-    <?php
-}
-?>
 
 
 
