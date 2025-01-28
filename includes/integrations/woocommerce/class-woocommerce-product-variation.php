@@ -80,7 +80,7 @@ class Variation extends Product {
         }
 
         // Check if arsol_server is enabled
-        $is_server_enabled = get_post_meta($variation_id, '_arsol_server', true) === 'yes';
+       //$is_server_enabled = get_post_meta($variation_id, '_arsol_server', true) === 'yes';
         
         // Save the custom fields
         if ($is_server_enabled) {
