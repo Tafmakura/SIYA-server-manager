@@ -10,7 +10,7 @@ class Variation extends Product {
    
     public function __construct() {
         // Remove old validation hooks
-        add_action('woocommerce_before_variation_object_save', [$this, 'validate_variation_fields'], 5, 2);
+       // add_action('woocommerce_before_variation_object_save', [$this, 'validate_variation_fields'], 5, 2);
         
         // Admin UI hooks
         add_action('woocommerce_variation_options_pricing', [$this, 'add_custom_variation_fields'], 10, 3);
@@ -70,61 +70,27 @@ class Variation extends Product {
     /**
      * Save custom fields for product variation
      */
-    public function save_custom_variation_fields($variation_id, $loop) {
-        $variation = wc_get_product($variation_id);
-        if (!$variation) return;
+    public function save_custom_variation_fields($variation_id, $i) {
+        // Get the parent product
+        $parent_product = wc_get_product($variation_id);
         
-        $parent_id = $variation->get_parent_id();
-        $is_server_enabled = get_post_meta($parent_id, 'arsol_server', true) === 'yes';
+        // Check if this is a variable subscription
+        if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
+            return;
+        }
 
-        $fields = ['region', 'image'];
+        // Check if arsol_server is enabled
+        $is_server_enabled = get_post_meta($variation_id, '_arsol_server', true) === 'yes';
         
-        foreach ($fields as $field) {
-            $meta_key = "_arsol_server_variation_{$field}";
+        // Save the custom fields
+        if ($is_server_enabled) {
+            $region = isset($_POST['arsol_server_variation_region'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_region'][$i]) : '';
+            $image = isset($_POST['arsol_server_variation_image'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_image'][$i]) : '';
             
-            if (!$is_server_enabled) {
-                delete_post_meta($variation_id, $meta_key);
-                continue;
-            }
-
-            $value = isset($_POST["arsol_server_variation_{$field}"][$loop]) ? 
-                    sanitize_text_field($_POST["arsol_server_variation_{$field}"][$loop]) : '';
-            
-            if ($value && preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                update_post_meta($variation_id, $meta_key, $value);
-            } else {
-                delete_post_meta($variation_id, $meta_key);
-            }
+            update_post_meta($variation_id, '_arsol_server_variation_region', $region);
+            update_post_meta($variation_id, '_arsol_server_variation_image', $image);
         }
     }
 
-    /**
-     * Add WooCommerce validation for variation fields
-     */
-    public function validate_variation_fields($variation, $i) {
-        $parent = $variation->get_parent_id();
-        if (!$parent || get_post_meta($parent, 'arsol_server', true) !== 'yes') {
-            return true;
-        }
-
-        $has_errors = false;
-        $pattern_fields = [
-            'arsol_server_variation_region' => __('Server Region', 'woocommerce'),
-            'arsol_server_variation_image' => __('Server Image', 'woocommerce')
-        ];
-
-        foreach ($pattern_fields as $field => $label) {
-            $field_name = $field . '[' . $i . ']';
-            $value = sanitize_text_field($_POST[$field_name] ?? '');
-            
-            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                $variation->add_error(
-                    sprintf(__('Variation %s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label)
-                );
-                $has_errors = true;
-            }
-        }
-
-        return !$has_errors;
-    }
+ 
 }
