@@ -38,7 +38,8 @@ class Product {
         // Add your custom product type options here
         $product_type_options['arsol_server'] = array(
             'id'            => '_arsol_server',
-            'wrapper_class' => 'show_if_subscription show_if_variable-subscription', // Fixed class name
+            'wrapper_class' => 'show_if_subscription show_if_variable-subscription show_if_arsol_server',
+            'style' => 'display: none;',
             'label'         => __('Server', 'woocommerce'),
             'description'   => __('', 'woocommerce'),
             'default'       => 'no'
