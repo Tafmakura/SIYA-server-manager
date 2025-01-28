@@ -209,9 +209,9 @@ class Product {
 
     public function validate_server_fields($product) {
         // Check if arsol_server is checked
-     //   if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-      //      return;
-     //   }
+        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
+            return;
+        }
 
         // Required fields validation for server
         $required_fields = [
