@@ -40,7 +40,7 @@ class Product {
             'id'            => 'arsol_server',
             'wrapper_class' => 'show_if_subscription show_if_variable-subscription',
             'label'         => __('Server', 'woocommerce'),
-            'description'   => __('', 'woocommerce'),
+            'description'   => __('Enable this if the product is a subscription to a server', 'woocommerce'),
             'default'       => 'no'
         );
     
