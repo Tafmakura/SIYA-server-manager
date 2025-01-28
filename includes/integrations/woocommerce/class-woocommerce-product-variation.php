@@ -45,7 +45,8 @@ class Variation extends Product {
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
-            )
+            ),
+            'style'       => 'display: none;'
         ));
 
         woocommerce_wp_text_input(array(
@@ -59,7 +60,8 @@ class Variation extends Product {
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
-            )
+            ),
+            'style'       => 'display: none;'
         ));
     }
 
