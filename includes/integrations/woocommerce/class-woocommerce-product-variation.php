@@ -71,37 +71,30 @@ class Variation extends Product {
      * Save custom fields for product variation
      */
     public function save_custom_variation_fields($variation_id, $loop) {
-        $fields = [
-            '_arsol_server_variation_region', // Fix: Add underscore prefix
-            '_arsol_server_variation_image'   // Fix: Add underscore prefix
-        ];
-
-        // Get parent product ID
         $variation = wc_get_product($variation_id);
         if (!$variation) return;
         
         $parent_id = $variation->get_parent_id();
         $is_server_enabled = get_post_meta($parent_id, 'arsol_server', true) === 'yes';
 
-        if (!$is_server_enabled) {
-            // Delete meta keys if arsol_server is not checked
-            foreach ($fields as $field) {
-                delete_post_meta($variation_id, $field);
-            }
-            return;
-        }
-
-        // Only save fields if arsol_server is checked
+        $fields = ['region', 'image'];
+        
         foreach ($fields as $field) {
-            $post_key = ltrim($field, '_'); // Remove underscore for POST key
-            $value = isset($_POST[$post_key][$loop]) ? sanitize_text_field($_POST[$post_key][$loop]) : '';
+            $meta_key = "_arsol_server_variation_{$field}";
             
-            // Only validate if value is not empty
-            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                $value = ''; // Clear invalid values
+            if (!$is_server_enabled) {
+                delete_post_meta($variation_id, $meta_key);
+                continue;
             }
 
-            update_post_meta($variation_id, $field, $value); // Use field with underscore
+            $value = isset($_POST["arsol_server_variation_{$field}"][$loop]) ? 
+                    sanitize_text_field($_POST["arsol_server_variation_{$field}"][$loop]) : '';
+            
+            if ($value && preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
+                update_post_meta($variation_id, $meta_key, $value);
+            } else {
+                delete_post_meta($variation_id, $meta_key);
+            }
         }
     }
 
