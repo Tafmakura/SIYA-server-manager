@@ -33,14 +33,12 @@ class Variation extends Product {
         if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
             return;
         }
-
-      //  echo '<div class="arsol-server-variation-fields show_if_arsol_server">';
         
         woocommerce_wp_text_input(array(
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional overide)', 'woocommerce'),
-            'wrapper_class' => 'form-row form-row-first arsol-server-field show_if_arsol_sever',
+            'wrapper_class' => 'form-row form-row-first show_if_arsol_server', // Updated class
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => get_post_meta($variation->ID, 'arsol_server_variation_region', true),
@@ -54,7 +52,7 @@ class Variation extends Product {
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional overide)', 'woocommerce'),
-            'wrapper_class' => 'form-row form-row-first arsol-server-field show_if_arsol_sever',
+            'wrapper_class' => 'form-row form-row-first show_if_arsol_server', // Updated class
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => get_post_meta($variation->ID, 'arsol_server_variation_image', true),
@@ -64,7 +62,6 @@ class Variation extends Product {
             )
         ));
 
-      //  echo '</div>';
     }
 
     /**
