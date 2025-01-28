@@ -463,31 +463,38 @@ jQuery(document).ready(function($) {
         updatePlans(provider, group);
     });
 
-    $('#_arsol_server_type').on('change', function() {
-        var serverType = $(this).val();
-        
-        // Remove duplicate calls from other functions
-        if (serverType !== 'sites_server') {
-            // Immediately disable and show empty text
+    function updateServerTypeFields(serverType) {
+        // First handle UI visibility
+        if (serverType === 'sites_server') {
+            $('.arsol_non_sites_server_fields').addClass('hidden');
+            $('.arsol_ecommerce_optimized_field').removeClass('hidden');
+            setRuncloudCheckboxState(true, true);
+            setSitesProvider(); // Always call for sites_server
+        } else {
+            // Immediately disable and show empty text for non-sites server
             var $providerSelect = $('#_arsol_server_provider_slug');
             var $groupSelect = $('#_arsol_server_plan_group_slug');
             var $planSelect = $('#_arsol_server_plan_slug');
             
+            $('.arsol_non_sites_server_fields').removeClass('hidden');
+            $('.arsol_ecommerce_optimized_field').addClass('hidden');
+            setRuncloudCheckboxState(false, false);
+            
+            // Clear and disable dropdowns
             $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
             $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
             $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-
-            // Only update UI visibility
-            $('.arsol_non_sites_server_fields').removeClass('hidden');
-            $('.arsol_ecommerce_optimized_field').addClass('hidden');
-            toggleApplicationsField();
-
-            // Single AJAX call to update providers
+            
+            // Fetch new provider options
             updateProvidersByServerType(serverType);
-        } else {
-            toggleSitesFields();
-            toggleApplicationsField();
         }
+        
+        toggleApplicationsField();
+    }
+
+    $('#_arsol_server_type').on('change', function() {
+        var serverType = $(this).val();
+        updateServerTypeFields(serverType);
     });
 
     // Initial load
