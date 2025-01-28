@@ -31,7 +31,7 @@ class Variation extends Product {
         }
 
         // Check if arsol_server is enabled
-        $is_server_enabled = get_post_meta($variation->post_parent, 'arsol_server', true) === 'yes';
+        $is_server_enabled = get_post_meta($variation->post_parent, '_arsol_server', true) === 'yes';
         $hidden_class = $is_server_enabled ? '' : 'hidden';
         
         woocommerce_wp_text_input(array(
@@ -77,7 +77,7 @@ class Variation extends Product {
         if (!$variation) return;
         
         $parent_id = $variation->get_parent_id();
-        $is_server_enabled = get_post_meta($parent_id, 'arsol_server', true) === 'yes';
+        $is_server_enabled = get_post_meta($parent_id, '_arsol_server', true) === 'yes';
 
         if (!$is_server_enabled) {
             // Delete meta keys if arsol_server is not checked
@@ -105,7 +105,7 @@ class Variation extends Product {
      */
     public function validate_variation_fields($variation, $i) {
         $parent = $variation->get_parent_id();
-        if (!$parent || get_post_meta($parent, 'arsol_server', true) !== 'yes') {
+        if (!$parent || get_post_meta($parent, '_arsol_server', true) !== 'yes') {
             return true;
         }
 
