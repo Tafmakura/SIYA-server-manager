@@ -57,21 +57,15 @@ class Product {
         $tabs['arsol_server_settings'] = array(
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
-            'class'    => ['hide_if_simple', 'hide_if_grouped', 'hide_if_external', 'hide_if_variable', 'show_if_subscription hide_if_arsol_server_disabled'],
+            'class'    => ['show_if_subscription', 'show_if_variable-subscription'], // Fixed class name
             'priority' => 50,
         );
+
         return $tabs;
     }
 
     public function add_arsol_server_settings_tab_content() {
         global $post;
-        
-        // Only load content if server option is enabled
-        $is_server = get_post_meta($post->ID, '_arsol_server', true);
-        if ($is_server !== 'yes') {
-            return;
-        }
-        
         $slugs = new Slugs();
         $enabled_server_types = (array) get_option('arsol_allowed_server_types', []);
         if (!in_array('sites_server', $enabled_server_types)) {
