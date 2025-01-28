@@ -13,6 +13,7 @@ class Product {
         add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
+        add_filter('woocommerce_admin_meta_boxes_validate_product_server', [$this, 'validate_server_fields'], 10, 2);
     }
 
     public function init() {
@@ -200,5 +201,41 @@ class Product {
         update_post_meta($post_id, 'arsol_server_provider_slug', $provider);
         update_post_meta($post_id, 'arsol_server_plan_group_slug', $group_slug);
         update_post_meta($post_id, 'arsol_server_plan_slug', $plan_slug);
+    }
+
+    public function validate_server_fields($passed, $post_id) {
+        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
+            return $passed;
+        }
+
+        // Required fields validation
+        $required_fields = [
+            'arsol_server_type' => __('Server Type', 'woocommerce'),
+            'arsol_server_provider_slug' => __('Server Provider', 'woocommerce'),
+            'arsol_server_plan_group_slug' => __('Server Plan Group', 'woocommerce'),
+            'arsol_server_plan_slug' => __('Server Plan', 'woocommerce'),
+        ];
+
+        foreach ($required_fields as $field => $label) {
+            if (empty($_POST[$field])) {
+                wc_add_notice(__($label . ' is required.', 'woocommerce'), 'error');
+                $passed = false;
+            }
+        }
+
+        // Pattern validation for region and image fields
+        $pattern_fields = [
+            'arsol_server_region' => __('Server Region', 'woocommerce'),
+            'arsol_server_image' => __('Server Image', 'woocommerce'),
+        ];
+
+        foreach ($pattern_fields as $field => $label) {
+            if (!empty($_POST[$field]) && !preg_match('/^[a-zA-Z0-9-]+$/', $_POST[$field])) {
+                wc_add_notice(sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label), 'error');
+                $passed = false;
+            }
+        }
+
+        return $passed;
     }
 }

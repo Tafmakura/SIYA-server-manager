@@ -18,8 +18,11 @@ class Variation extends Product {
         // Save variation fields
         add_action('woocommerce_save_product_variation', [$this, 'save_custom_variation_fields'], 10, 2);
 
-        // Add client-side validation
-        add_action('admin_footer', [$this, 'add_variation_scripts']);
+        // Remove client-side validation
+        // add_action('admin_footer', [$this, 'add_variation_scripts']);
+        
+        // Add WooCommerce validation
+        add_filter('woocommerce_variation_is_valid', [$this, 'validate_variation_fields'], 10, 2);
     }
 
     /**
@@ -102,18 +105,23 @@ class Variation extends Product {
     }
 
     /**
-     * Add JavaScript validation for variation fields
+     * Add WooCommerce validation for variation fields
      */
-    public function add_variation_scripts() {
-        ?>
-        <script type="text/javascript">
-        jQuery(document).ready(function($) {
-            // Input validation only - visibility handled by WooCommerce
-            $(document).on('input', '[id^="arsol_server_variation_region"], [id^="arsol_server_variation_image"]', function() {
-                this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
-            });
-        });
-        </script>
-        <?php
+    public function validate_variation_fields($valid, $variation_id) {
+        // Pattern validation for region and image fields
+        $pattern_fields = [
+            'arsol_server_variation_region' => __('Server Region', 'woocommerce'),
+            'arsol_server_variation_image' => __('Server Image', 'woocommerce'),
+        ];
+
+        foreach ($pattern_fields as $field => $label) {
+            $value = get_post_meta($variation_id, $field, true);
+            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
+                wc_add_notice(sprintf(__('Variation %s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label), 'error');
+                $valid = false;
+            }
+        }
+
+        return $valid;
     }
 }
