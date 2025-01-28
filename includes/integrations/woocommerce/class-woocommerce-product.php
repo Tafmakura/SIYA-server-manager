@@ -57,7 +57,8 @@ class Product {
         $tabs['arsol_server_settings'] = array(
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
-            'class'    => ['show_if_subscription', 'show_if_variable-subscription'], // Fixed class name
+            'class'    => ['hide_if_simple', 'hide_if_grouped', 'hide_if_external', 'hide_if_variable'],
+            'style'    => 'display: none;',  // Hide by default
             'priority' => 50,
         );
 
@@ -66,6 +67,11 @@ class Product {
 
     public function add_arsol_server_settings_tab_content() {
         global $post;
+        $is_server = get_post_meta($post->ID, '_arsol_server', true);
+        
+        // Add visibility class based on server setting
+        echo '<div class="panel-wrap arsol_server_settings_options' . ($is_server === 'yes' ? '' : ' hidden') . '">';
+        
         $slugs = new Slugs();
         $enabled_server_types = (array) get_option('arsol_allowed_server_types', []);
         if (!in_array('sites_server', $enabled_server_types)) {
