@@ -35,13 +35,13 @@ class Variation extends Product {
         $hidden_class = $is_server_enabled ? '' : 'hidden';
         
         woocommerce_wp_text_input(array(
-            'id'          => "_arsol_server_variation_region{$loop}",
-            'name'        => "_arsol_server_variation_region[{$loop}]",
+            'id'          => "arsol_server_variation_region{$loop}",
+            'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional overide)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => get_post_meta($variation->ID, '_arsol_server_variation_region', true),
+            'value'       => get_post_meta($variation->ID, 'arsol_server_variation_region', true),
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
@@ -49,13 +49,13 @@ class Variation extends Product {
         ));
 
         woocommerce_wp_text_input(array(
-            'id'          => "_arsol_server_variation_image{$loop}",
-            'name'        => "_arsol_server_variation_image[{$loop}]",
+            'id'          => "arsol_server_variation_image{$loop}",
+            'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional overide)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => get_post_meta($variation->ID, '_arsol_server_variation_image', true),
+            'value'       => get_post_meta($variation->ID, 'arsol_server_variation_image', true),
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
