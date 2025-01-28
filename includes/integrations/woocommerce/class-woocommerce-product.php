@@ -14,8 +14,8 @@ class Product {
         // Basic hooks
         add_action('init', [$this, 'init']);
         
-        // Validation hooks (should run first)
-        add_action('woocommerce_before_product_object_save', [$this, 'validate_server_fields'], 5);
+        // Replace validation hooks with single hook
+        add_action('woocommerce_before_product_object_save', [$this, 'validate_fields'], 5);
         
         // Admin UI hooks
         add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
@@ -206,49 +206,75 @@ class Product {
         update_post_meta($post_id, 'arsol_server_plan_slug', $plan_slug);
     }
 
-    public function validate_server_fields($product) {
+    /**
+     * Single method to handle all field validation
+     */
+    public function validate_fields($product) {
+        // Skip validation if server option is not enabled
         if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-        //    return;
+            return true;
         }
 
-        $this->validation_errors = []; // Reset errors
+        $errors = [];
+        $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
+        $is_sites_server = $server_type === 'sites_server';
 
-        // Validate required fields
+        // 1. Required Fields Validation
         $required_fields = [
-            'arsol_server_type' => __('Server Type', 'woocommerce'),
-            'arsol_server_provider_slug' => __('Server Provider', 'woocommerce'),
-            'arsol_server_plan_group_slug' => __('Server Plan Group', 'woocommerce'),
-            'arsol_server_plan_slug' => __('Server Plan', 'woocommerce'),
+            'arsol_server_type' => __('Server Type', 'woocommerce')
         ];
+
+        // Add provider fields only if not sites server
+        if (!$is_sites_server) {
+            $required_fields += [
+                'arsol_server_provider_slug' => __('Server Provider', 'woocommerce'),
+                'arsol_server_plan_group_slug' => __('Server Plan Group', 'woocommerce'),
+                'arsol_server_plan_slug' => __('Server Plan', 'woocommerce')
+            ];
+        }
 
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                $this->validation_errors[] = sprintf(__('%s is required.', 'woocommerce'), $label);
+                $errors[] = sprintf(__('%s is required.', 'woocommerce'), $label);
             }
         }
 
-        // Pattern validation for region and image fields
+        // 2. Pattern Validation
         $pattern_fields = [
             'arsol_server_region' => __('Server Region', 'woocommerce'),
-            'arsol_server_image' => __('Server Image', 'woocommerce'),
+            'arsol_server_image' => __('Server Image', 'woocommerce')
         ];
 
         foreach ($pattern_fields as $field => $label) {
-            if (!empty($_POST[$field]) && !preg_match('/^[a-zA-Z0-9-]+$/', $_POST[$field])) {
-                $this->validation_errors[] = sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label);
+            $value = sanitize_text_field($_POST[$field] ?? '');
+            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
+                $errors[] = sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label);
             }
         }
 
-        // Max length validation for region
-        if (!empty($_POST['arsol_server_region']) && strlen($_POST['arsol_server_region']) > 50) {
-            $this->validation_errors[] = __('Server Region cannot exceed 50 characters.', 'woocommerce');
+        // 3. Length Validation
+        $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
+        if (strlen($region) > 50) {
+            $errors[] = __('Server Region cannot exceed 50 characters.', 'woocommerce');
         }
 
-        if (!empty($this->validation_errors)) {
-            foreach ($this->validation_errors as $error) {
-                wc_add_notice($error, 'error');
+        // 4. Applications Validation
+        if ($is_sites_server || $server_type === 'application_server') {
+            $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
+            if ($max_apps < 1) {
+                $errors[] = __('Maximum applications must be at least 1.', 'woocommerce');
             }
         }
+
+        // Add all errors to WooCommerce notices
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                $product->add_error($error);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     public function display_validation_errors() {

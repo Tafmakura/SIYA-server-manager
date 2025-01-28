@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
 class Variation extends Product {
    
     public function __construct() {
-        // Validation hooks (should run first)
+        // Remove old validation hooks
         add_action('woocommerce_before_variation_object_save', [$this, 'validate_variation_fields'], 5, 2);
         
         // Admin UI hooks
@@ -106,23 +106,27 @@ class Variation extends Product {
     public function validate_variation_fields($variation, $i) {
         $parent = $variation->get_parent_id();
         if (!$parent || get_post_meta($parent, 'arsol_server', true) !== 'yes') {
-            return;
+            return true;
         }
 
-        // Pattern validation for region and image fields
+        $has_errors = false;
         $pattern_fields = [
             'arsol_server_variation_region' => __('Server Region', 'woocommerce'),
-            'arsol_server_variation_image' => __('Server Image', 'woocommerce'),
+            'arsol_server_variation_image' => __('Server Image', 'woocommerce')
         ];
 
         foreach ($pattern_fields as $field => $label) {
             $field_name = $field . '[' . $i . ']';
-            if (!empty($_POST[$field_name]) && !preg_match('/^[a-zA-Z0-9-]+$/', $_POST[$field_name])) {
-                wc_add_notice(
-                    sprintf(__('Variation %s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label),
-                    'error'
+            $value = sanitize_text_field($_POST[$field_name] ?? '');
+            
+            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
+                $variation->add_error(
+                    sprintf(__('Variation %s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label)
                 );
+                $has_errors = true;
             }
         }
+
+        return !$has_errors;
     }
 }
