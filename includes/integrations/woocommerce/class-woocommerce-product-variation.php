@@ -35,8 +35,8 @@ class Variation extends Product {
         $hidden_class = $is_server_enabled ? '' : 'hidden';
         
         // Fix: Get the saved values using the correct meta keys
-        $region_value = get_post_meta($variation->ID, '_arsol_server_variation_region', true);
-        $image_value = get_post_meta($variation->ID, '_arsol_server_variation_image', true);
+        $region_value = $variation->get_meta('_arsol_server_variation_region');
+        $image_value  = $variation->get_meta('_arsol_server_variation_image');
         
         woocommerce_wp_text_input(array(
             'id'          => "arsol_server_variation_region{$loop}",
@@ -80,15 +80,19 @@ class Variation extends Product {
         }
 
         // Check if arsol_server is enabled
-        $is_server_enabled = get_post_meta($variation_id, '_arsol_server', true) === 'yes';
+        $wc_variation = wc_get_product($variation_id);
+        if (!$wc_variation || $wc_variation->get_type() !== 'variation') return;
+
+        $is_server_enabled = $wc_variation->get_meta('_arsol_server') === 'yes';
         
         // Save the custom fields
         if ($is_server_enabled) {
             $region = isset($_POST['arsol_server_variation_region'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_region'][$i]) : '';
-            $image = isset($_POST['arsol_server_variation_image'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_image'][$i]) : '';
+            $image  = isset($_POST['arsol_server_variation_image'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_image'][$i]) : '';
             
-            update_post_meta($variation_id, '_arsol_server_variation_region', $region);
-            update_post_meta($variation_id, '_arsol_server_variation_image', $image);
+            $wc_variation->update_meta_data('_arsol_server_variation_region', $region);
+            $wc_variation->update_meta_data('_arsol_server_variation_image', $image);
+            $wc_variation->save();
         }
     }
 
