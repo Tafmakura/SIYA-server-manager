@@ -79,9 +79,6 @@ class Product {
             return;
         }
 
-        // Force Runcloud integration if Sites server is enabled
-        $is_sites_server = isset($_POST['_arsol_sites_server']);
-        
         // Get server type
         $server_type = sanitize_text_field($_POST['_arsol_server_type'] ?? '');
         
@@ -90,8 +87,8 @@ class Product {
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
             '_arsol_server_plan_group_slug'    => sanitize_text_field($_POST['_arsol_server_plan_group_slug'] ?? ''),
             '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
-            '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no'),
-            '_arsol_sites_server'     => $is_sites_server ? 'yes' : 'no',
+            '_arsol_server_manager_required' => isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no',
+            '_arsol_sites_server'     => isset($_POST['_arsol_sites_server']) ? 'yes' : 'no',
             '_arsol_ecommerce_optimized'  => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
         ];
 
@@ -123,18 +120,9 @@ class Product {
             }
         }
 
-        // Set region and image values - only clear if Sites server is being enabled
-        $was_sites_server = get_post_meta($post_id, '_arsol_sites_server', true) === 'yes';
-
-        if ($is_sites_server && !$was_sites_server) {
-            // Only clear values when transitioning to Sites server
-            $fields['_arsol_server_region'] = '';
-            $fields['_arsol_server_image'] = '';
-        } else {
-            // Keep existing or updated values
-            $fields['_arsol_server_region'] = $region;
-            $fields['_arsol_server_image'] = $server_image;
-        }
+        // Set region and image values
+        $fields['_arsol_server_region'] = $region;
+        $fields['_arsol_server_image'] = $server_image;
 
         $fields['_arsol_server_type'] = sanitize_text_field($_POST['_arsol_server_type'] ?? '');
 
