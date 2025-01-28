@@ -34,15 +34,15 @@ class Product {
         }
 
         // Product type hooks
-        add_filter('product_type_options', [$this, 'addarsol_server_product_option']);
+        add_filter('product_type_options', [$this, 'add_arsol_server_product_option']);
         add_action('save_post_product', [$this, 'save_arsol_server_option_fields'], 10, 3);
         
         // Server settings tab hooks
-        add_filter('woocommerce_product_data_tabs', [$this, 'addarsol_server_settings_tab']);
-        add_action('woocommerce_product_data_panels', [$this, 'addarsol_server_settings_tab_content']);
+        add_filter('woocommerce_product_data_tabs', [$this, 'add_arsol_server_settings_tab']);
+        add_action('woocommerce_product_data_panels', [$this, 'add_arsol_server_settings_tab_content']);
     }
 
-    public function addarsol_server_product_option($product_type_options) {
+    public function add_arsol_server_product_option($product_type_options) {
         $product_type_options['_arsol_server'] = [
             'id'            => '_arsol_server', // ID without underscore for WooCommerce show/hide
             'wrapper_class' => 'show_if_subscription show_if_variable-subscription',
@@ -58,7 +58,7 @@ class Product {
         update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Save with underscore prefix
     }
 
-    public function addarsol_server_settings_tab($tabs) {
+    public function add_arsol_server_settings_tab($tabs) {
         $tabs['arsol_server_settings'] = [
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
@@ -69,7 +69,7 @@ class Product {
         return $tabs;
     }
 
-    public function addarsol_server_settings_tab_content() {
+    public function add_arsol_server_settings_tab_content() {
         global $post;
         $slugs = new Slugs();
         $enabled_server_types = (array) get_option('arsol_allowed_server_types', []);
