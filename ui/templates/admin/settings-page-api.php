@@ -2,6 +2,12 @@
     <h1><?php _e('SIYA API Keys', 'arsol_siya'); ?></h1>
     <p><?php _e('Configure your API settings below. Ensure all fields are filled correctly.', 'arsol_siya'); ?></p>
     
+    <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') : ?>
+        <div id="message" class="updated notice is-dismissible">
+            <p><?php _e('Settings saved successfully.', 'arsol_siya'); ?></p>
+        </div>
+    <?php endif; ?>
+
     <form method="post" action="options.php">
         <?php settings_fields('siya_settings_api'); ?>
 

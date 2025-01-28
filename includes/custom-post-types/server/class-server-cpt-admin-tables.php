@@ -1,6 +1,6 @@
 <?php
 
-namespace SIYA\CustomPostTypes\ServerPost\Admin;
+namespace Siya\CustomPostTypes\ServerPost\Admin;
 
 class Tables {
     

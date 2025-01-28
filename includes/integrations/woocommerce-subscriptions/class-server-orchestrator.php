@@ -1,4 +1,4 @@
-<?php //
+<?php
 
 namespace Siya\Integrations\WoocommerceSubscriptions;
 
@@ -7,7 +7,6 @@ use Siya\Integrations\ServerManagers\Runcloud;
 use Siya\Integrations\ServerProviders\DigitalOcean;
 use Siya\Integrations\ServerProviders\Hetzner;
 use Siya\Integrations\ServerProviders\Vultr;
-use Siya\Integrations\WoocommerceSubscriptions\ServerCircuitBreaker;
 
 class ServerOrchestrator {
    
@@ -30,8 +29,8 @@ class ServerOrchestrator {
     private $server_post_name;
     private $server_post_creation_date;
     private $server_post_status;
-    private $wordpress_server;
-    private $wordpress_ecommerce;
+    private $sites_server;
+    private $ecommerce_optimized;
     private $connect_server_manager;
     private $server_group_slug;
     private $server_plan_slug;
@@ -460,7 +459,6 @@ class ServerOrchestrator {
                     // Rethrow
                     $this->handle_exception($e, true);
                 }
-
             }
 
             // Check updated server metadata
@@ -1152,7 +1150,6 @@ class ServerOrchestrator {
 
     
     public function start_server_shutdown($subscription) {
-
         // Early validation of required parameters
         $subscription_id = $subscription->get_id();
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
@@ -1624,13 +1621,13 @@ class ServerOrchestrator {
 
             // Update server post metadata with correct meta keys
             $metadata = [
-                'arsol_server_subscription_id' => $subscription_id,
-                'arsol_server_post_name' => 'ARSOL' . $subscription_id,
+                'arsol_server_subscription_id' => $this->subscription_id,
+                'arsol_server_post_name' => 'ARSOL' . $this->subscription_id,
                 'arsol_server_post_creation_date' => current_time('mysql'),
                 'arsol_server_post_status' => 2,
                 'arsol_server_product_id' => $server_product_id,
-                'arsol_wordpress_server' => $server_product->get_meta('_arsol_wordpress_server', true),
-                'arsol_wordpress_ecommerce' => $server_product->get_meta('_arsol_wordpress_ecommerce', true),
+                'arsol_sites_server' => $server_product->get_meta('_arsol_sites_server', true),
+                'arsol_ecommerce_optimized' => $server_product->get_meta('_arsol_ecommerce_optimized', true),
                 '_arsol_server_manager_required' => $server_product->get_meta('_arsol_server_manager_required', true),
                 'arsol_server_provider_slug' => $server_product->get_meta('_arsol_server_provider_slug', true),
                 'arsol_server_group_slug' => $server_product->get_meta('_arsol_server_plan_group_slug', true),
@@ -1641,7 +1638,7 @@ class ServerOrchestrator {
                 'arsol_server_max_staging_sites' => $server_product->get_meta('_arsol_max_staging_sites', true),
                 'arsol_server_suspension' => 'no', // Add suspension status
             ];
-            $server_post_instance->update_meta_data($server_post_id, $metadata);
+            $server_post_instance->update_meta_data($this->server_post_id, $metadata);
 
             // Update server post metadata and save
             $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
@@ -1874,9 +1871,8 @@ class ServerOrchestrator {
             return $server_data;
 
         } catch (\Exception $e) {
-
-            $this->handle_exception($e);
-
+            error_log(sprintf('[SIYA Server Manager - ServerOrchestrator] Exception caught: %s', $e->getMessage()));
+            $this->throw_exception($e->getMessage(), 'Error provisioning server');
         }
     }
 

@@ -2,8 +2,8 @@
 
 namespace Siya\Integrations\WoocommerceSubscriptions;
 
-use SIYA\CustomPostTypes\ServerPost;
-use Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator;
+use \Siya\CustomPostTypes\ServerPost;
+use \Siya\Integrations\WoocommerceSubscriptions\ServerOrchestrator;
 
 class ServerCircuitBreaker extends ServerOrchestrator {
 
