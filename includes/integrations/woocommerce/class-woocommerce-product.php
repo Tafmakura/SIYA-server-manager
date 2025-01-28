@@ -36,22 +36,19 @@ class Product {
     }
 
     public function addarsol_server_product_option($product_type_options) {
-        // Add your custom product type options here
         $product_type_options['arsol_server'] = array(
-            'id'            => 'arsol_server',
+            'id'            => '_arsol_server', // Change to match meta key
             'wrapper_class' => 'show_if_subscription show_if_variable-subscription',
             'label'         => __('Server', 'woocommerce'),
             'description'   => __('Enable this if the product is a subscription to a server', 'woocommerce'),
             'default'       => 'no'
         );
-    
         return $product_type_options;
     }
 
     public function savearsol_server_option_fields($post_ID, $product, $update) {
-        // Save the ARSOL server checkbox value
-        $isarsol_server = isset($_POST['arsol_server']) ? 'yes' : 'no';
-        update_post_meta($post_ID, 'arsol_server', $isarsol_server);
+        $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no'; // Match the field ID
+        update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Match the meta key
     }
 
     public function addarsol_server_settings_tab($tabs) {
