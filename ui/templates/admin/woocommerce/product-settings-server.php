@@ -221,6 +221,9 @@
 </div>
 
 <style>
+.show_if_arsol_server {
+    display: none;
+}
 .hidden {
     display: none;
 }
