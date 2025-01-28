@@ -94,7 +94,7 @@ class Variation {
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
                     wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
-                    WC_Admin_Settings::add_error( esc_html__( 'Ongeldige licentie sleutel!', 'restaurant-nybe' ) );
+                    \WC_Admin_Settings::add_error( esc_html__( 'Ongeldige licentie sleutel!', 'restaurant-nybe' ) );
                     $has_errors = true;
                     return;
                 }
