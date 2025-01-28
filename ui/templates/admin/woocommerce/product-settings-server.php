@@ -36,7 +36,7 @@
             woocommerce_wp_text_input(array(
                 'id'          => '_arsol_max_applications',
                 'label'       => __('Maximum applications', 'woocommerce'),
-                'description' => __('Enter the maximum number of applications or sites allowed with this plan.', 'woocommerce'),
+                'description' => __('Enter the maximum number of applications or sites that can be installed on this server plan.', 'woocommerce'),
                 'desc_tip'    => 'true',
                 'type'        => 'number',
                 'custom_attributes' => array(
