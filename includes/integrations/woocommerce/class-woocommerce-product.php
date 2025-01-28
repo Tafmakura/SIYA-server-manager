@@ -44,7 +44,7 @@ class Product {
 
     public function add_arsol_server_product_option($product_type_options) {
         $product_type_options['arsol_server'] = [
-            'id'            => '_arsol_server', // ID without underscore for WooCommerce show/hide
+            'id'            => 'arsol_server', // ID without underscore for WooCommerce show/hide
             'wrapper_class' => 'show_if_subscription show_if_variable-subscription',
             'label'         => __('Server', 'woocommerce'),
             'description'   => __('Enable this if the product is a subscription to a server', 'woocommerce'),
