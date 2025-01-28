@@ -14,16 +14,16 @@ class Product {
         // Basic hooks
         add_action('init', [$this, 'init']);
         
-        // Replace validation hooks with single hook
-        add_action('woocommerce_process_product_meta', [$this, 'validate_fields'], 5);
-        
-        // Admin UI hooks
-        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
+        // Validation hook - run before saving but after product init
+        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_fields'], 5);
         
         // Save hooks (should run after validation)
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields'], 10);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta'], 15);
         add_action('woocommerce_process_product_meta', [$this, 'savearsol_server_settings_tab_content'], 20);
+        
+        // UI hooks
+        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
         
         add_action('admin_notices', [$this, 'display_validation_errors']);
     }
@@ -209,11 +209,13 @@ class Product {
     /**
      * Single method to handle all field validation
      */
-    public function validate_fields($post_id) {
+    public function validate_fields($product) {
+        // Get post ID from product object
+        $post_id = $product->get_id();
         
-        // Skip validation if server option is not enabled
+        // Check if product has server option enabled using post data (not meta)
         if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-            return;
+            return $product;
         }
 
         $has_errors = false;
@@ -272,10 +274,12 @@ class Product {
         }
 
         if ($has_errors) {
-            // Prevent saving by redirecting back
-            wp_redirect(wp_get_referer());
-            exit;
+            // Add error to product object instead of redirecting
+            $product->add_error('Validation failed: Please check the server settings.');
+            return false;
         }
+
+        return $product;
     }
 
     public function display_validation_errors() {
