@@ -265,7 +265,7 @@ jQuery(document).ready(function($) {
                 
                 if (groups.length === 0 && serverType !== 'sites_server') {
                     $groupSelect.prop('disabled', true);
-                    $groupSelect.append(new Option('Empty', '')); // Add Empty text
+                    $groupSelect.append(new Option('empty', '')); // Add Empty text
                 } else {
                     $groupSelect.prop('disabled', false);
                     groups.forEach(function(group) {
@@ -437,6 +437,19 @@ jQuery(document).ready(function($) {
         });
     }
 
+    function disableAllDropdowns(serverType) {
+        if (serverType === 'sites_server') return;
+
+        var $providerSelect = $('#_arsol_server_provider_slug');
+        var $groupSelect = $('#_arsol_server_plan_group_slug');
+        var $planSelect = $('#_arsol_server_plan_slug');
+
+        // Disable and clear all dropdowns at once
+        $providerSelect.prop('disabled', true).empty().append(new Option('Empty', ''));
+        $groupSelect.prop('disabled', true).empty().append(new Option('Empty', ''));
+        $planSelect.prop('disabled', true).empty().append(new Option('Empty', ''));
+    }
+
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
         updateGroups(provider, function(groups) {
@@ -455,8 +468,15 @@ jQuery(document).ready(function($) {
 
     $('#_arsol_server_type').on('change', function() {
         var serverType = $(this).val();
+        
+        // First disable all dropdowns immediately
+        disableAllDropdowns(serverType);
+        
+        // Then trigger other UI updates
         toggleSitesFields();
         toggleApplicationsField();
+        
+        // Finally fetch new data if needed
         if (serverType !== 'sites_server') {
             updateProvidersByServerType(serverType);
         }
