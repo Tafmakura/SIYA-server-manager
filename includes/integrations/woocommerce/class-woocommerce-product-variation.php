@@ -2,95 +2,83 @@
 
 namespace Siya\Integrations\WooCommerce\Product;
 
-use Siya\Integrations\WooCommerce\Product;
-
 defined('ABSPATH') || exit;
 
-class Variation extends Product {
-   
+class Variation {
+    
     public function __construct() {
-        // Remove old validation hooks
-       // add_action('woocommerce_before_variation_object_save', [$this, 'validate_variation_fields'], 5, 2);
+        // Display fields
+        add_action('woocommerce_variation_options', [$this, 'add_custom_fields'], 10, 3);
         
-        // Admin UI hooks
-        add_action('woocommerce_variation_options_pricing', [$this, 'add_custom_variation_fields'], 10, 3);
+        // Save fields
+        add_action('woocommerce_save_product_variation', [$this, 'save_custom_fields'], 10, 2);
         
-        // Save hooks (should run after validation)
-        add_action('woocommerce_save_product_variation', [$this, 'save_custom_variation_fields'], 15, 2);
+        // Load variation data
+        add_filter('woocommerce_available_variation', [$this, 'load_variation_fields'], 10, 3);
     }
-    /**
-     * Add custom fields to product variation
-     */
-    public function add_custom_variation_fields($loop, $variation_data, $variation) {
-        // Get the parent product
-        $parent_product = wc_get_product($variation->post_parent);
-        
-        // Check if this is a variable subscription
-        if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
-            return;
-        }
 
-        // Check if arsol_server is enabled
-        $is_server_enabled = get_post_meta($variation->post_parent, '_arsol_server', true) === 'yes';
+    public function add_custom_fields($loop, $variation_data, $variation) {
+        $variation_object = wc_get_product($variation->ID);
+        if (!$variation_object) return;
+
+        // Check if arsol_server is enabled on parent
+        $parent = wc_get_product($variation_object->get_parent_id());
+        $is_server_enabled = $parent ? $parent->get_meta('_arsol_server') === 'yes' : false;
         $hidden_class = $is_server_enabled ? '' : 'hidden';
-        
-        // Fix: Get the saved values using the correct meta keys
-        $region_value = get_post_meta($variation->ID, '_arsol_server_variation_region', true);
-        $image_value = get_post_meta($variation->ID, '_arsol_server_variation_image', true);
-        
-        woocommerce_wp_text_input(array(
+
+        woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
-            'label'       => __('Server region slug (optional overide)', 'woocommerce'),
+            'label'       => __('Server region slug (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => $region_value, // Fix: Use the retrieved value
-            'custom_attributes' => array(
+            'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
+            'custom_attributes' => [
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
-            )
-        ));
+            ]
+        ]);
 
-        woocommerce_wp_text_input(array(
+        woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
-            'label'       => __('Server image slug (optional overide)', 'woocommerce'),
+            'label'       => __('Server image slug (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => $image_value, // Fix: Use the retrieved value
-            'custom_attributes' => array(
+            'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
+            'custom_attributes' => [
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
-            )
-        ));
+            ]
+        ]);
     }
 
-    /**
-     * Save custom fields for product variation
-     */
-    public function save_custom_variation_fields($variation_id, $i) {
-        // Get the parent product
-        $parent_product = wc_get_product($variation_id);
-        
-        // Check if this is a variable subscription
-        if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
-            return;
+    public function save_custom_fields($variation_id, $loop) {
+        $variation = wc_get_product($variation_id);
+        if (!$variation) return;
+
+        // Save region
+        if (isset($_POST['arsol_server_variation_region'][$loop])) {
+            $region = sanitize_text_field($_POST['arsol_server_variation_region'][$loop]);
+            $variation->update_meta_data('_arsol_server_variation_region', $region);
         }
 
-        // Check if arsol_server is enabled
-       //$is_server_enabled = get_post_meta($variation_id, '_arsol_server', true) === 'yes';
-        
-        // Save the custom fields
-       // if ($is_server_enabled) {
-            $region = isset($_POST['arsol_server_variation_region'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_region'][$i]) : '';
-            $image = isset($_POST['arsol_server_variation_image'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_image'][$i]) : '';
-            
-            update_post_meta($variation_id, '_arsol_server_variation_region', $region);
-            update_post_meta($variation_id, '_arsol_server_variation_image', $image);
-      //  }
+        // Save image
+        if (isset($_POST['arsol_server_variation_image'][$loop])) {
+            $image = sanitize_text_field($_POST['arsol_server_variation_image'][$loop]);
+            $variation->update_meta_data('_arsol_server_variation_image', $image);
+        }
+
+        $variation->save();
     }
 
- 
+    public function load_variation_fields($variation_data, $product, $variation) {
+        // Add custom fields to variation data with arsol prefix
+        $variation_data['arsol_server_variation_region'] = $variation->get_meta('_arsol_server_variation_region');
+        $variation_data['arsol_server_variation_image'] = $variation->get_meta('_arsol_server_variation_image');
+        
+        return $variation_data;
+    }
 }
