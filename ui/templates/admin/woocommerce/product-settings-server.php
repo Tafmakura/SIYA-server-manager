@@ -265,7 +265,7 @@ jQuery(document).ready(function($) {
                 
                 if (groups.length === 0 && serverType !== 'sites_server') {
                     $groupSelect.prop('disabled', true);
-                    $groupSelect.append(new Option('empty', '')); // Add Empty text
+                    $groupSelect.append(new Option('empty', '')); // Add empty text
                 } else {
                     $groupSelect.prop('disabled', false);
                     groups.forEach(function(group) {
@@ -291,7 +291,7 @@ jQuery(document).ready(function($) {
         if (!group) {
             $planSelect.empty();
             if (serverType !== 'sites_server') {
-                $planSelect.append(new Option('Empty', '')); // Add Empty text
+                $planSelect.append(new Option('empty', '')); // Add empty text
             }
             $planSelect.prop('disabled', true);
             return;
@@ -325,7 +325,7 @@ jQuery(document).ready(function($) {
                 if (plans.length === 0 && serverType !== 'sites_server') {
                     $planSelect.empty();
                     $planSelect.prop('disabled', true);
-                    $planSelect.append(new Option('Empty', '')); // Add Empty text
+                    $planSelect.append(new Option('empty', '')); // Add empty text
                 } else {
                     $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
@@ -419,7 +419,7 @@ jQuery(document).ready(function($) {
                 
                 if (providers.length === 0) {
                     $providerSelect.prop('disabled', true);
-                    $providerSelect.append(new Option('Empty', '')); // Add Empty text
+                    $providerSelect.append(new Option('empty', '')); // Add empty text
                 } else {
                     $providerSelect.prop('disabled', false);
                     providers.forEach(function(provider) {
@@ -445,19 +445,16 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#_arsol_server_plan_slug');
 
         // Disable and clear all dropdowns at once
-        $providerSelect.prop('disabled', true).empty().append(new Option('Empty', ''));
-        $groupSelect.prop('disabled', true).empty().append(new Option('Empty', ''));
-        $planSelect.prop('disabled', true).empty().append(new Option('Empty', ''));
+        $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
     }
 
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
-        updateGroups(provider, function(groups) {
-            var selectedGroup = $('#_arsol_server_plan_group_slug').val();
-            if (selectedGroup) {
-                updatePlans(provider, selectedGroup);
-            }
-        });
+        if (provider) {
+            updateGroups(provider);
+        }
     });
 
     $('#_arsol_server_plan_group_slug').on('change', function() {
@@ -469,16 +466,27 @@ jQuery(document).ready(function($) {
     $('#_arsol_server_type').on('change', function() {
         var serverType = $(this).val();
         
-        // First disable all dropdowns immediately
-        disableAllDropdowns(serverType);
-        
-        // Then trigger other UI updates
-        toggleSitesFields();
-        toggleApplicationsField();
-        
-        // Finally fetch new data if needed
+        // Remove duplicate calls from other functions
         if (serverType !== 'sites_server') {
+            // Immediately disable and show empty text
+            var $providerSelect = $('#_arsol_server_provider_slug');
+            var $groupSelect = $('#_arsol_server_plan_group_slug');
+            var $planSelect = $('#_arsol_server_plan_slug');
+            
+            $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+            $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+            $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+
+            // Only update UI visibility
+            $('.arsol_non_sites_server_fields').removeClass('hidden');
+            $('.arsol_ecommerce_optimized_field').addClass('hidden');
+            toggleApplicationsField();
+
+            // Single AJAX call to update providers
             updateProvidersByServerType(serverType);
+        } else {
+            toggleSitesFields();
+            toggleApplicationsField();
         }
     });
 

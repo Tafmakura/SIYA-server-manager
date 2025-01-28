@@ -385,7 +385,7 @@ class Runcloud /*implements ServerManager*/ {
         }
 
         if (empty($script_data['script'])) {
-            throw new \Exception('Empty installation script received from RunCloud');
+            throw new \Exception('empty installation script received from RunCloud');
         }
 
         return $script_data['script'];
