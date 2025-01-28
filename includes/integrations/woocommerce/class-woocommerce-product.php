@@ -20,7 +20,7 @@ class Product {
         // Save hooks (should run after validation)
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields'], 10);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta'], 15);
-        add_action('woocommerce_process_product_meta', [$this, 'savearsol_server_settings_tab_content'], 20);
+        add_action('woocommerce_process_product_meta', [$this, 'save_arsol_server_settings_tab_content'], 20);
         
         // UI hooks
         add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
@@ -35,7 +35,7 @@ class Product {
 
         // Product type hooks
         add_filter('product_type_options', [$this, 'addarsol_server_product_option']);
-        add_action('save_post_product', [$this, 'savearsol_server_option_fields'], 10, 3);
+        add_action('save_post_product', [$this, 'save_arsol_server_option_fields'], 10, 3);
         
         // Server settings tab hooks
         add_filter('woocommerce_product_data_tabs', [$this, 'addarsol_server_settings_tab']);
@@ -53,7 +53,7 @@ class Product {
         return $product_type_options;
     }
 
-    public function savearsol_server_option_fields($post_ID, $product, $update) {
+    public function save_arsol_server_option_fields($post_ID, $product, $update) {
         $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no';
         update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Save with underscore prefix
     }
@@ -79,7 +79,7 @@ class Product {
         include plugin_dir_path(__FILE__) . '../../../ui/templates/admin/woocommerce/product-settings-server.php';
     }
 
-    public function savearsol_server_settings_tab_content($post_id) {
+    public function save_arsol_server_settings_tab_content($post_id) {
         if (!isset($_POST['woocommerce_meta_nonce']) || !wp_verify_nonce($_POST['woocommerce_meta_nonce'], 'woocommerce_save_data')) {
             return;
         }
