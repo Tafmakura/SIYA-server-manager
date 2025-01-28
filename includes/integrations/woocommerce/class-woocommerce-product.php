@@ -14,7 +14,7 @@ class Product {
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
         
-        // Replace validation hooks with these
+        // Replace validation hooks with these ones
         add_action('woocommerce_before_product_object_save', [$this, 'validate_server_fields']);
     }
 
