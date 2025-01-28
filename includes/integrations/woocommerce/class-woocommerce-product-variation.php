@@ -108,6 +108,17 @@ class Variation extends Product {
      * Add WooCommerce validation for variation fields
      */
     public function validate_variation_fields($valid, $variation_id) {
+        // Get parent product to check if arsol_server is enabled
+        $variation = wc_get_product($variation_id);
+        if (!$variation) return $valid;
+        
+        $parent_id = $variation->get_parent_id();
+        $is_server_enabled = get_post_meta($parent_id, 'arsol_server', true) === 'yes';
+
+        if (!$is_server_enabled) {
+            return $valid;
+        }
+
         // Pattern validation for region and image fields
         $pattern_fields = [
             'arsol_server_variation_region' => __('Server Region', 'woocommerce'),
