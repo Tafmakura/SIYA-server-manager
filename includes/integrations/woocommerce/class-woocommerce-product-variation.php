@@ -31,7 +31,7 @@ class Variation extends Product {
         }
 
         // Check if arsol_server is enabled
-        $is_server_enabled = get_post_meta($variation->post_parent, 'arsol_server', true) === 'yes';
+        $is_server_enabled = get_post_meta($variation->post_parent, '_arsol_server', true) === 'yes';
         $hidden_class = $is_server_enabled ? '' : 'hidden';
         
         woocommerce_wp_text_input(array(
