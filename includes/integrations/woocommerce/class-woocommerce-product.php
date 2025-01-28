@@ -43,8 +43,8 @@ class Product {
     }
 
     public function add_arsol_server_product_option($product_type_options) {
-        $product_type_options['_arsol_server'] = [
-            'id'            => '_arsol_server', // ID without underscore for WooCommerce show/hide
+        $product_type_options['arsol_server'] = [
+            'id'            => 'arsol_server', // ID without underscore for WooCommerce show/hide
             'wrapper_class' => 'show_if_subscription show_if_variable-subscription',
             'label'         => __('Server', 'woocommerce'),
             'description'   => __('Enable this if the product is a subscription to a server', 'woocommerce'),
@@ -54,7 +54,7 @@ class Product {
     }
 
     public function save_arsol_server_option_fields($post_ID, $product, $update) {
-        $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no';
+        $is_arsol_server = isset($_POST['arsol_server']) ? 'yes' : 'no';
         update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Save with underscore prefix
     }
 
