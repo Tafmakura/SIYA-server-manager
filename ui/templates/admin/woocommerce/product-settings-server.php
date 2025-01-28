@@ -221,9 +221,6 @@
 </div>
 
 <style>
-.show_if_arsol_server {
-    display: none !important;
-}
 .hidden {
     display: none;
 }
@@ -557,21 +554,22 @@ function add_admin_footer_script() {
     ?>
     <script type="text/javascript">
     jQuery(document).ready(function($) {
+        // Handle tab visibility on load and checkbox change
         function toggle_arsol_server_settings_tab() {
-            if ($('#_arsol_server').is(':checked')) {
-                $('#woocommerce-product-data .arsol_server_settings_options').show();
+            var $elements = $('.show_if_arsol_server');
+            var isChecked = $('#_arsol_server').is(':checked');
+            
+            if (isChecked) {
+                $elements.attr('style', '');  // Remove inline style
             } else {
-                $('#woocommerce-product-data .arsol_server_settings_options').hide();
+                $elements.attr('style', 'display: none !important');
                 $('.wc-tabs .general_tab a').click();
             }
         }
 
-        // Initial state
+        // Initial state and change handler
         toggle_arsol_server_settings_tab();
-
-        $('#_arsol_server').on('change', function() {
-            toggle_arsol_server_settings_tab();
-        });
+        $('#_arsol_server').on('change', toggle_arsol_server_settings_tab);
     });
     </script>
     <?php
