@@ -17,7 +17,7 @@ class CustomPostTypes {
     }
 
     private function instatiate_classes() {
-        new \SIYA\CustomPostTypes\ServerPost\Setup();
+        new \Siya\CustomPostTypes\ServerPost\Setup();
     }
 
 

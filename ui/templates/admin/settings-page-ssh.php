@@ -1,6 +1,13 @@
 <!--  This is a template file for the SSH Keys settings page. -->
 <div class="wrap">
     <h1><?php _e('SSH Keys', 'arsol_siya'); ?></h1>
+    
+    <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') : ?>
+        <div id="message" class="updated notice is-dismissible">
+            <p><?php _e('Settings saved successfully.', 'arsol_siya'); ?></p>
+        </div>
+    <?php endif; ?>
+
     <form method="post" action="options.php">
         <?php
         settings_fields('siya_settings_ssh');
