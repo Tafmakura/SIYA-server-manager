@@ -54,12 +54,16 @@ class Product {
     }
 
     public function add_arsol_server_settings_tab($tabs) {
-        $tabs['arsol_server_settings'] = array(
-            'label'    => __('Server Settings', 'woocommerce'),
-            'target'   => 'arsol_server_settings_data',
-            'class'    => ['show_if_subscription', 'show_if_variable-subscription'], // Fixed class name
-            'priority' => 50,
-        );
+        global $post;
+        $is_arsol_server = get_post_meta($post->ID, '_arsol_server', true) === 'yes';
+        if ($is_arsol_server) {
+            $tabs['arsol_server_settings'] = array(
+                'label'    => __('Server Settings', 'woocommerce'),
+                'target'   => 'arsol_server_settings_data',
+                'class'    => ['show_if_subscription', 'show_if_variable-subscription'], // Fixed class name
+                'priority' => 50,
+            );
+        }
 
         return $tabs;
     }
