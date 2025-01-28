@@ -34,7 +34,7 @@ class Variation extends Product {
             return;
         }
 
-        echo '<div class="arsol-server-variation-fields show_if_arsol_server">';
+      //  echo '<div class="arsol-server-variation-fields show_if_arsol_server">';
         
         woocommerce_wp_text_input(array(
             'id'          => "arsol_server_variation_region{$loop}",
@@ -64,7 +64,7 @@ class Variation extends Product {
             )
         ));
 
-        echo '</div>';
+      //  echo '</div>';
     }
 
     /**
