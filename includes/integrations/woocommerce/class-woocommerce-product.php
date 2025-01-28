@@ -208,7 +208,7 @@ class Product {
 
     public function validate_server_fields($product) {
         if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-            return;
+        //    return;
         }
 
         $this->validation_errors = []; // Reset errors
