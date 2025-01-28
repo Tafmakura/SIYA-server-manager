@@ -534,7 +534,7 @@ jQuery(document).ready(function($) {
     // Handle tab visibility on load and checkbox change
     function togglearsol_server_settings_tab() {
         var $elements = $('.show_if_arsol_server');
-        var isChecked = $('#_arsol_server').is(':checked');
+        var isChecked = $('#arsol_server').is(':checked');
         
         if (isChecked) {
             $elements.attr('style', '').removeClass('hidden');  // Remove both inline style and hidden class
@@ -546,7 +546,7 @@ jQuery(document).ready(function($) {
 
     // Initial state and change handler
     togglearsol_server_settings_tab();
-    $('#_arsol_server').on('change', togglearsol_server_settings_tab);
+    $('#arsol_server').on('change', togglearsol_server_settings_tab);
 });
 </script>
 
