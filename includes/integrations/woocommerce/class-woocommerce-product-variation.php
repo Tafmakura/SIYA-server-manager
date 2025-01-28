@@ -83,13 +83,13 @@ class Variation extends Product {
        //$is_server_enabled = get_post_meta($variation_id, '_arsol_server', true) === 'yes';
         
         // Save the custom fields
-        if ($is_server_enabled) {
+       // if ($is_server_enabled) {
             $region = isset($_POST['arsol_server_variation_region'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_region'][$i]) : '';
             $image = isset($_POST['arsol_server_variation_image'][$i]) ? sanitize_text_field($_POST['arsol_server_variation_image'][$i]) : '';
             
             update_post_meta($variation_id, '_arsol_server_variation_region', $region);
             update_post_meta($variation_id, '_arsol_server_variation_image', $image);
-        }
+      //  }
     }
 
  
