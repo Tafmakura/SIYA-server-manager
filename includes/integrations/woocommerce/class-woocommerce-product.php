@@ -38,8 +38,7 @@ class Product {
         // Add your custom product type options here
         $product_type_options['arsol_server'] = array(
             'id'            => '_arsol_server',
-            'wrapper_class' => 'show_if_subscription show_if_variable-subscription show_if_arsol_server',
-            'style' => 'display: none;',
+            'wrapper_class' => 'show_if_subscription show_if_variable-subscription',
             'label'         => __('Server', 'woocommerce'),
             'description'   => __('', 'woocommerce'),
             'default'       => 'no'
@@ -58,7 +57,8 @@ class Product {
         $tabs['arsol_server_settings'] = array(
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
-            'class'    => ['show_if_subscription', 'show_if_variable-subscription'], // Fixed class name
+            'style' => 'display: none;',
+            'class'    => ['show_if_subscription', 'show_if_variable-subscription show_if_arsol_server '], // Fixed class name
             'priority' => 50,
         );
 
