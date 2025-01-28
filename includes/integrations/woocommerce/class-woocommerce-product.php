@@ -15,7 +15,7 @@ class Product {
         add_action('init', [$this, 'init']);
         
         // Replace validation hooks with single hook
-        add_action('woocommerce_before_product_object_save', [$this, 'validate_fields'], 5);
+        add_action('woocommerce_process_product_meta', [$this, 'validate_fields'], 5);
         
         // Admin UI hooks
         add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
@@ -209,13 +209,13 @@ class Product {
     /**
      * Single method to handle all field validation
      */
-    public function validate_fields($product) {
+    public function validate_fields($post_id) {
         // Skip validation if server option is not enabled
-       // if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-      //      return true;
-     //   }
+        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
+            return;
+        }
 
-        $errors = [];
+        $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
         $is_sites_server = $server_type === 'sites_server';
 
@@ -235,7 +235,8 @@ class Product {
 
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                $errors[] = sprintf(__('%s is required.', 'woocommerce'), $label);
+                wc_add_notice(sprintf(__('%s is required.', 'woocommerce'), $label), 'error');
+                $has_errors = true;
             }
         }
 
@@ -248,33 +249,32 @@ class Product {
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                $errors[] = sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label);
+                wc_add_notice(sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label), 'error');
+                $has_errors = true;
             }
         }
 
         // 3. Length Validation
         $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
         if (strlen($region) > 50) {
-            $errors[] = __('Server Region cannot exceed 50 characters.', 'woocommerce');
+            wc_add_notice(__('Server Region cannot exceed 50 characters.', 'woocommerce'), 'error');
+            $has_errors = true;
         }
 
         // 4. Applications Validation
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
-                $errors[] = __('Maximum applications must be at least 1.', 'woocommerce');
+                wc_add_notice(__('Maximum applications must be at least 1.', 'woocommerce'), 'error');
+                $has_errors = true;
             }
         }
 
-        // Add all errors to WooCommerce notices
-        if (!empty($errors)) {
-            foreach ($errors as $error) {
-                $product->add_error($error);
-            }
-            return false;
+        if ($has_errors) {
+            // Prevent saving by redirecting back
+            wp_redirect(wp_get_referer());
+            exit;
         }
-
-        return true;
     }
 
     public function display_validation_errors() {
