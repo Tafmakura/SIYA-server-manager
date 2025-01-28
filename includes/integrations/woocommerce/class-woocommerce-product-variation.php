@@ -9,23 +9,14 @@ defined('ABSPATH') || exit;
 class Variation extends Product {
    
     public function __construct() {
-
+        // Validation hooks (should run first)
+        add_action('woocommerce_before_variation_object_save', [$this, 'validate_variation_fields'], 5, 2);
         
-
-        // Add variation specific fields
+        // Admin UI hooks
         add_action('woocommerce_variation_options_pricing', [$this, 'add_custom_variation_fields'], 10, 3);
         
-        // Save variation fields
-        add_action('woocommerce_save_product_variation', [$this, 'save_custom_variation_fields'], 10, 2);
-
-        // Remove client-side validation
-        // add_action('admin_footer', [$this, 'add_variation_scripts']);
-        
-        // Add WooCommerce validation
-        add_filter('woocommerce_variation_is_valid', [$this, 'validate_variation_fields'], 10, 2);
-
-        // Update validation hook
-        add_action('woocommerce_admin_process_variation_object', [$this, 'validate_variation_fields'], 10, 2);
+        // Save hooks (should run after validation)
+        add_action('woocommerce_save_product_variation', [$this, 'save_custom_variation_fields'], 15, 2);
     }
     /**
      * Add custom fields to product variation

@@ -9,13 +9,21 @@ defined('ABSPATH') || exit;
 class Product {
    
     public function __construct() {
+        // Basic hooks
         add_action('init', [$this, 'init']);
-        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
-        add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
-        add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
         
-        // Replace validation hooks with these ones
-        add_action('woocommerce_before_product_object_save', [$this, 'validate_server_fields']);
+        // Validation hooks (should run first)
+        add_action('woocommerce_before_product_object_save', [$this, 'validate_server_fields'], 5);
+        
+        // Admin UI hooks
+        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
+        
+        // Save hooks (should run after validation)
+        add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields'], 10);
+        add_action('woocommerce_process_product_meta', [$this, 'save_product_meta'], 15);
+        add_action('woocommerce_process_product_meta', [$this, 'savearsol_server_settings_tab_content'], 20);
+        
+        add_action('admin_notices', [$this, 'display_validation_errors']);
     }
 
     protected $validation_errors = [];
@@ -25,18 +33,13 @@ class Product {
             return;
         }
 
-        // Add custom product type options
+        // Product type hooks
         add_filter('product_type_options', [$this, 'addarsol_server_product_option']);
-    
-        // Save the ARSOL server checkbox option
         add_action('save_post_product', [$this, 'savearsol_server_option_fields'], 10, 3);
-          
         
-        // Add Arsol Server Settings Tab
+        // Server settings tab hooks
         add_filter('woocommerce_product_data_tabs', [$this, 'addarsol_server_settings_tab']);
         add_action('woocommerce_product_data_panels', [$this, 'addarsol_server_settings_tab_content']);
-        add_action('woocommerce_process_product_meta', [$this, 'savearsol_server_settings_tab_content']);
-        
     }
 
     public function addarsol_server_product_option($product_type_options) {
@@ -206,11 +209,9 @@ class Product {
 
     public function validate_server_fields($product) {
         // Check if arsol_server is checked
-        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-            return;
-        }
-
-        $has_errors = false;
+     //   if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
+      //      return;
+     //   }
 
         // Required fields validation for server
         $required_fields = [
@@ -227,10 +228,13 @@ class Product {
             unset($required_fields['arsol_server_plan_slug']);
         }
 
+        // Validate required fields
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                $product->add_error(sprintf(__('%s is required when Server option is enabled.', 'woocommerce'), $label));
-                $has_errors = true;
+                wc_add_notice(
+                    sprintf(__('%s is required when Server option is enabled.', 'woocommerce'), $label),
+                    'error'
+                );
             }
         }
 
@@ -242,21 +246,24 @@ class Product {
 
         foreach ($pattern_fields as $field => $label) {
             if (!empty($_POST[$field]) && !preg_match('/^[a-zA-Z0-9-]+$/', $_POST[$field])) {
-                $product->add_error(sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label));
-                $has_errors = true;
+                wc_add_notice(
+                    sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label),
+                    'error'
+                );
             }
         }
 
-        // Add max length validation for region
+        // Max length validation for region
         if (!empty($_POST['arsol_server_region']) && strlen($_POST['arsol_server_region']) > 50) {
-            $product->add_error(__('Server Region cannot exceed 50 characters.', 'woocommerce'));
-            $has_errors = true;
+            wc_add_notice(__('Server Region cannot exceed 50 characters.', 'woocommerce'), 'error');
         }
+    }
 
-        if ($has_errors) {
-            return false;
+    public function display_validation_errors() {
+        if (!empty($this->validation_errors)) {
+            foreach ($this->validation_errors as $error) {
+                echo '<div class="notice notice-error"><p>' . esc_html($error) . '</p></div>';
+            }
         }
-
-        return true;
     }
 }
