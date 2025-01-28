@@ -542,22 +542,6 @@ jQuery(document).ready(function($) {
     $('#arsol_server_region, #_arsol_server_image').on('input', function() {
         this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
     });
-
-    function toggle_arsol_server_settings_tab() {
-        if ($('#_arsol_server').is(':checked')) {
-            $('#woocommerce-product-data .arsol_server_settings_options').show();
-        } else {
-            $('#woocommerce-product-data .arsol_server_settings_options').hide();
-            $('.wc-tabs .general_tab a').click();
-        }
-    }
-
-    // Initial state
-    toggle_arsol_server_settings_tab();
-
-    $('#_arsol_server').on('change', function() {
-        toggle_arsol_server_settings_tab();
-    });
 });
 </script>
 
