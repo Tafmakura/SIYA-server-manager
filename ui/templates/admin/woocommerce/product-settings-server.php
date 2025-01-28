@@ -1,8 +1,3 @@
-<style>
-.wc-tabs li.arsol_server_settings_tab.hide {
-    display: none !important;
-}
-</style>
 <div id="arsol_server_settings_data" class="panel woocommerce_options_panel">
     <div class="options_group">
         <div id="arsol_server_settings" style="padding: 9px 12px;">
@@ -227,7 +222,7 @@
 
 <style>
 .hidden {
-    display: none;
+    display: none !important;
 }
 .arsol_non_sites_server_fields.hidden {
     display: none;
