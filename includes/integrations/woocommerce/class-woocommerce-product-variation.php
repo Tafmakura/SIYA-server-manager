@@ -24,7 +24,6 @@ class Variation extends Product {
         // Add WooCommerce validation
         add_filter('woocommerce_variation_is_valid', [$this, 'validate_variation_fields'], 10, 2);
     }
-
     /**
      * Add custom fields to product variation
      */
@@ -36,12 +35,16 @@ class Variation extends Product {
         if (!$parent_product || $parent_product->get_type() !== 'variable-subscription') {
             return;
         }
+
+        // Check if arsol_server is enabled
+        $is_server_enabled = get_post_meta($variation->post_parent, 'arsol_server', true) === 'yes';
+        $hidden_class = $is_server_enabled ? '' : 'hidden';
         
         woocommerce_wp_text_input(array(
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional overide)', 'woocommerce'),
-            'wrapper_class' => 'form-row form-row-first show_if_arsol_server hidden', // Added hidden class
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => get_post_meta($variation->ID, 'arsol_server_variation_region', true),
@@ -55,7 +58,7 @@ class Variation extends Product {
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional overide)', 'woocommerce'),
-            'wrapper_class' => 'form-row form-row-first show_if_arsol_server hidden', // Added hidden class
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => get_post_meta($variation->ID, 'arsol_server_variation_image', true),
@@ -64,7 +67,6 @@ class Variation extends Product {
                 'title'   => 'Only letters, numbers and hyphens allowed'
             )
         ));
-
     }
 
     /**
