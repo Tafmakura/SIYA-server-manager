@@ -36,7 +36,7 @@
             woocommerce_wp_text_input(array(
                 'id'          => '_arsol_max_applications',
                 'label'       => __('Maximum applications', 'woocommerce'),
-                'description' => __('Enter the maximum number of applications allowed.', 'woocommerce'),
+                'description' => __('Enter the maximum number of applications or sites allowed with this plan.', 'woocommerce'),
                 'desc_tip'    => 'true',
                 'type'        => 'number',
                 'custom_attributes' => array(
@@ -48,27 +48,6 @@
                     'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
                 ),
                 'value'       => empty($max_applications) ? '0' : $max_applications
-            ));
-            ?>
-        </div>
-        <div class="arsol_max_staging_sites_field">
-            <?php
-            $max_staging_sites = get_post_meta($post->ID, '_arsol_max_staging_sites', true);
-            woocommerce_wp_text_input(array(
-                'id'          => '_arsol_max_staging_sites',
-                'label'       => __('Maximum staging sites', 'woocommerce'),
-                'description' => __('Enter the maximum number of staging sites allowed.', 'woocommerce'),
-                'desc_tip'    => 'true',
-                'type'        => 'number',
-                'custom_attributes' => array(
-                    'min' => '0',
-                    'max' => '999',
-                    'step' => '1',
-                    'required' => 'required',
-                    'style' => 'width: 3em; text-align: center;',  // Enough for 3 characters and centered
-                    'oninput' => 'this.value = this.value.replace(/[^0-9]/g, \'\')'  // Only accept numbers
-                ),
-                'value'       => empty($max_staging_sites) ? '0' : $max_staging_sites
             ));
             ?>
         </div>
@@ -251,9 +230,6 @@
 .arsol_max_applications_field.hidden {
     display: none;
 }
-.arsol_max_staging_sites_field.hidden {
-    display: none;
-}
 .arsol_ecommerce_optimized_field.hidden {
     display: none;
 }
@@ -386,7 +362,6 @@ jQuery(document).ready(function($) {
         var serverType = $('#_arsol_server_type').val();
         if (serverType === 'sites_server') {
             $('.arsol_non_sites_server_fields').addClass('hidden');
-            $('.arsol_max_staging_sites_field').removeClass('hidden');
             $('.arsol_ecommerce_optimized_field').removeClass('hidden'); // Show ecommerce field
             setSitesProvider();
             setRuncloudCheckboxState(true, true);
@@ -397,7 +372,6 @@ jQuery(document).ready(function($) {
             setRuncloudCheckboxState(true, true);
         } else {
             $('.arsol_non_sites_server_fields').removeClass('hidden');
-            $('.arsol_max_staging_sites_field').addClass('hidden');
             $('.arsol_ecommerce_optimized_field').addClass('hidden'); // Hide ecommerce field
             $('#_arsol_server_provider_slug').prop('disabled', false);
             $('#_arsol_server_plan_group_slug').prop('disabled', false);
@@ -464,11 +438,9 @@ jQuery(document).ready(function($) {
     function toggle_arsol_server_settings_tab() {
         if ($('#_arsol_server').is(':checked')) {
             $('#woocommerce-product-data .arsol_server_settings_options').show();
-            $('#_virtual').prop('checked', true); // Check _virtual
         } else {
             $('#woocommerce-product-data .arsol_server_settings_options').hide();
             $('.wc-tabs .general_tab a').click();
-            $('#_virtual').prop('checked', false); // Uncheck _virtual
         }
     }
 
@@ -493,11 +465,9 @@ function add_admin_footer_script() {
         function toggle_arsol_server_settings_tab() {
             if ($('#_arsol_server').is(':checked')) {
                 $('#woocommerce-product-data .arsol_server_settings_options').show();
-                $('#_virtual').prop('checked', true); // Check _virtual
             } else {
                 $('#woocommerce-product-data .arsol_server_settings_options').hide();
                 $('.wc-tabs .general_tab a').click();
-                $('#_virtual').prop('checked', false); // Uncheck _virtual
             }
         }
 

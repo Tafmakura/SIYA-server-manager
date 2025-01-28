@@ -38,7 +38,7 @@ class Product {
         // Add your custom product type options here
         $product_type_options['arsol_server'] = array(
             'id'            => '_arsol_server',
-            'wrapper_class' => 'show_if_simple show_if_variable',
+            'wrapper_class' => 'show_if_subscription show_if_variable-subscription', // Fixed class name
             'label'         => __('Server', 'woocommerce'),
             'description'   => __('', 'woocommerce'),
             'default'       => 'no'
@@ -57,7 +57,7 @@ class Product {
         $tabs['arsol_server_settings'] = array(
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
-            'class'    => ['show_if_simple', 'show_if_variable'],
+            'class'    => ['show_if_subscription', 'show_if_variable-subscription'], // Fixed class name
             'priority' => 50,
         );
 
@@ -82,17 +82,26 @@ class Product {
         // Force Runcloud integration if Sites server is enabled
         $is_sites_server = isset($_POST['_arsol_sites_server']);
         
+        // Get server type
+        $server_type = sanitize_text_field($_POST['_arsol_server_type'] ?? '');
+        
         // Define and sanitize basic fields
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['_arsol_server_provider_slug'] ?? ''),
             '_arsol_server_plan_group_slug'    => sanitize_text_field($_POST['_arsol_server_plan_group_slug'] ?? ''),
             '_arsol_server_plan_slug'     => sanitize_text_field($_POST['_arsol_server_plan_slug'] ?? ''),
-            '_arsol_max_applications'     => absint($_POST['_arsol_max_applications'] ?? 0),
-            '_arsol_max_staging_sites'    => absint($_POST['_arsol_max_staging_sites'] ?? 0),
             '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['_arsol_server_manager_required']) ? 'yes' : 'no'),
             '_arsol_sites_server'     => $is_sites_server ? 'yes' : 'no',
             '_arsol_ecommerce_optimized'  => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
         ];
+
+        // Only include max applications if server type is sites_server or application_server
+        if ($server_type === 'sites_server' || $server_type === 'application_server') {
+            $fields['_arsol_max_applications'] = absint($_POST['_arsol_max_applications'] ?? 0);
+        } else {
+            // Delete max applications meta if server type is not sites_server or application_server
+            delete_post_meta($post_id, '_arsol_max_applications');
+        }
 
         // Get existing values for region and image
         $existing_region = get_post_meta($post_id, '_arsol_server_region', true);

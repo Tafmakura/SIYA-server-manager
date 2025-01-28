@@ -1,6 +1,6 @@
 <?php
 
-namespace SIYA\CustomPostTypes\ServerPost\Admin\Page;
+namespace Siya\CustomPostTypes\ServerPost\Admin\Page;
 
 class Subscription {
     
