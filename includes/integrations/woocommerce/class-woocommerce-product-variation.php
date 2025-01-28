@@ -34,6 +34,10 @@ class Variation extends Product {
         $is_server_enabled = get_post_meta($variation->post_parent, '_arsol_server', true) === 'yes';
         $hidden_class = $is_server_enabled ? '' : 'hidden';
         
+        // Fix: Get the saved values using the correct meta keys
+        $region_value = get_post_meta($variation->ID, '_arsol_server_variation_region', true);
+        $image_value = get_post_meta($variation->ID, '_arsol_server_variation_image', true);
+        
         woocommerce_wp_text_input(array(
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
@@ -41,7 +45,7 @@ class Variation extends Product {
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => get_post_meta($variation->ID, 'arsol_server_variation_region', true),
+            'value'       => $region_value, // Fix: Use the retrieved value
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
@@ -55,7 +59,7 @@ class Variation extends Product {
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => get_post_meta($variation->ID, 'arsol_server_variation_image', true),
+            'value'       => $image_value, // Fix: Use the retrieved value
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
@@ -68,8 +72,8 @@ class Variation extends Product {
      */
     public function save_custom_variation_fields($variation_id, $loop) {
         $fields = [
-            'arsol_server_variation_region',
-            'arsol_server_variation_image'
+            '_arsol_server_variation_region', // Fix: Add underscore prefix
+            '_arsol_server_variation_image'   // Fix: Add underscore prefix
         ];
 
         // Get parent product ID
@@ -89,14 +93,15 @@ class Variation extends Product {
 
         // Only save fields if arsol_server is checked
         foreach ($fields as $field) {
-            $value = isset($_POST[$field][$loop]) ? sanitize_text_field($_POST[$field][$loop]) : '';
+            $post_key = ltrim($field, '_'); // Remove underscore for POST key
+            $value = isset($_POST[$post_key][$loop]) ? sanitize_text_field($_POST[$post_key][$loop]) : '';
             
             // Only validate if value is not empty
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
                 $value = ''; // Clear invalid values
             }
 
-            update_post_meta($variation_id, $field, $value);
+            update_post_meta($variation_id, $field, $value); // Use field with underscore
         }
     }
 
