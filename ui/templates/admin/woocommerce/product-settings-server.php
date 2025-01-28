@@ -10,7 +10,7 @@
             </div>
         </div>
         <?php
-        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
+        $server_type = get_post_meta($post->ID, 'arsol_server_type', true);
         $all_types = [
             'sites_server'          => __('Sites Server', 'woocommerce'),
             'application_server'    => __('Application Server', 'woocommerce'),
@@ -22,7 +22,7 @@
         ];
         $enabled_types = array_intersect_key($all_types, array_flip($enabled_server_types));
         woocommerce_wp_select(array(
-            'id'          => '_arsol_server_type',
+            'id'          => 'arsol_server_type',
             'label'       => __('Server Type', 'woocommerce'),
             'description' => __('Select the server type.', 'woocommerce'),
             'desc_tip'    => true,
@@ -54,11 +54,11 @@
         <?php
         $is_sites_server = $server_type === 'sites_server';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
-        $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
+        $is_server_manager = get_post_meta($post->ID, 'arsol_server_manager_required', true) === 'yes';
 
         // Initialize Runcloud checkbox
         woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_server_manager_required',
+            'id'          => 'arsol_server_manager_required',
             'label'       => __('Runcloud', 'woocommerce'),
             'description' => __('Connect this server to Runcloud server manager.', 'woocommerce'),
             'desc_tip'    => 'true',
@@ -81,10 +81,10 @@
         <?php
         // Provider Dropdown
         $providers = $slugs->get_provider_slugs();
-        $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
+        $selected_provider = get_post_meta($post->ID, 'arsol_server_provider_slug', true);
 
         woocommerce_wp_select(array(
-            'id'          => '_arsol_server_provider_slug',
+            'id'          => 'arsol_server_provider_slug',
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
@@ -94,11 +94,11 @@
         ));
 
         // Group Dropdown
-        $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
+        $selected_group = get_post_meta($post->ID, 'arsol_server_plan_group_slug', true);
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
-            'id'          => '_arsol_server_plan_group_slug',
+            'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
@@ -108,7 +108,7 @@
         ));
 
         // Plan Dropdown
-        $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
+        $selected_plan = get_post_meta($post->ID, 'arsol_server_plan_slug', true);
         $plans = $selected_provider && $selected_group ? 
             $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
         $plan_options = [];
@@ -117,7 +117,7 @@
         }
 
         woocommerce_wp_select(array(
-            'id'          => '_arsol_server_plan_slug',
+            'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
@@ -131,9 +131,9 @@
         <div class="arsol_non_sites_server_fields">
             <?php
             // Region Text Field
-            $region = get_post_meta($post->ID, '_arsol_server_region', true);
+            $region = get_post_meta($post->ID, 'arsol_server_region', true);
             woocommerce_wp_text_input(array(
-                'id'          => '_arsol_server_region',
+                'id'          => 'arsol_server_region',
                 'label'       => __('Server region (optional)', 'woocommerce'),
                 'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
                 'desc_tip'    => true,
@@ -145,9 +145,9 @@
             ));
 
             // Server Image Text Field
-            $server_image = get_post_meta($post->ID, '_arsol_server_image', true);
+            $server_image = get_post_meta($post->ID, 'arsol_server_image', true);
             woocommerce_wp_text_input(array(
-                'id'          => '_arsol_server_image',
+                'id'          => 'arsol_server_image',
                 'label'       => __('Server image (optional)', 'woocommerce'),
                 'description' => __('Enter the server image identifier. Only letters, numbers and hyphens allowed.', 'woocommerce'),
                 'desc_tip'    => true,
@@ -238,10 +238,10 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     $('#post').on('submit', function(e) {
-        var provider = $('#_arsol_server_provider_slug').val();
-        var group = $('#_arsol_server_plan_group_slug').val();
-        var plan = $('#_arsol_server_plan_slug').val();
-        var serverType = $('#_arsol_server_type').val();
+        var provider = $('#arsol_server_provider_slug').val();
+        var group = $('#arsol_server_plan_group_slug').val();
+        var plan = $('#arsol_server_plan_slug').val();
+        var serverType = $('#arsol_server_type').val();
 
         if (!provider || !group || !plan || !serverType) {
             e.preventDefault();
@@ -250,7 +250,7 @@ jQuery(document).ready(function($) {
     });
 
     function updateGroups(provider, callback) {
-        var serverType = $('#_arsol_server_type').val();
+        var serverType = $('#arsol_server_type').val();
         $.ajax({
             url: ajaxurl,
             data: {
@@ -259,7 +259,7 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(groups) {
-                var $groupSelect = $('#_arsol_server_plan_group_slug');
+                var $groupSelect = $('#arsol_server_plan_group_slug');
                 var currentValue = $groupSelect.val();
                 $groupSelect.empty();
                 
@@ -285,8 +285,8 @@ jQuery(document).ready(function($) {
     }
 
     function updatePlans(provider, group) {
-        var serverType = $('#_arsol_server_type').val();
-        var $planSelect = $('#_arsol_server_plan_slug');
+        var serverType = $('#arsol_server_type').val();
+        var $planSelect = $('#arsol_server_plan_slug');
         
         if (!group) {
             $planSelect.empty();
@@ -333,7 +333,7 @@ jQuery(document).ready(function($) {
                     });
 
                     // Set the selected plan
-                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
+                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, 'arsol_server_plan_slug', true)); ?>';
                     $planSelect.val(selectedPlan);
                 }
             },
@@ -346,13 +346,13 @@ jQuery(document).ready(function($) {
     function setSitesProvider() {
         var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
         var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-        $('#_arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
+        $('#arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
         updateGroups(wpProvider, function(groups) {
             if (groups.includes(wpGroup)) {
-                $('#_arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
+                $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
                 updatePlans(wpProvider, wpGroup);
             } else {
-                $('#_arsol_server_plan_group_slug').prop('disabled', true); // Always disabled
+                $('#arsol_server_plan_group_slug').prop('disabled', true); // Always disabled
                 updatePlans(wpProvider, wpGroup);
             }
         });
@@ -360,7 +360,7 @@ jQuery(document).ready(function($) {
 
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         console.log('Setting Runcloud checkbox state:', { checked, disabled }); // Debug log
-        var $checkbox = $('#_arsol_server_manager_required');
+        var $checkbox = $('#arsol_server_manager_required');
         var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
         
         if (checked) {
@@ -374,28 +374,28 @@ jQuery(document).ready(function($) {
     }
 
     function toggleSitesFields() {
-        var serverType = $('#_arsol_server_type').val();
+        var serverType = $('#arsol_server_type').val();
         if (serverType === 'sites_server') {
             $('.arsol_non_sites_server_fields').addClass('hidden');
             $('.arsol_ecommerce_optimized_field').removeClass('hidden'); // Show ecommerce field
             setSitesProvider();
             setRuncloudCheckboxState(true, true);
-            $('#_arsol_server_provider_slug').prop('disabled', true);
-            $('#_arsol_server_plan_group_slug').prop('disabled', true);
+            $('#arsol_server_provider_slug').prop('disabled', true);
+            $('#arsol_server_plan_group_slug').prop('disabled', true);
         } else if (!serverType) {
             // If no server type selected, keep Runcloud checked and disabled
             setRuncloudCheckboxState(true, true);
         } else {
             $('.arsol_non_sites_server_fields').removeClass('hidden');
             $('.arsol_ecommerce_optimized_field').addClass('hidden'); // Hide ecommerce field
-            $('#_arsol_server_provider_slug').prop('disabled', false);
-            $('#_arsol_server_plan_group_slug').prop('disabled', false);
+            $('#arsol_server_provider_slug').prop('disabled', false);
+            $('#arsol_server_plan_group_slug').prop('disabled', false);
             setRuncloudCheckboxState(false, false);
         }
     }
 
     function toggleApplicationsField() {
-        var serverType = $('#_arsol_server_type').val();
+        var serverType = $('#arsol_server_type').val();
         if (serverType === 'sites_server' || serverType === 'application_server') {
             $('.arsol_max_applications_field').removeClass('hidden');
         } else {
@@ -413,7 +413,7 @@ jQuery(document).ready(function($) {
                 server_type: serverType
             },
             success: function(providers) {
-                var $providerSelect = $('#_arsol_server_provider_slug');
+                var $providerSelect = $('#arsol_server_provider_slug');
                 var currentValue = $providerSelect.val();
                 $providerSelect.empty();
                 
@@ -440,9 +440,9 @@ jQuery(document).ready(function($) {
     function disableAllDropdowns(serverType) {
         if (serverType === 'sites_server') return;
 
-        var $providerSelect = $('#_arsol_server_provider_slug');
-        var $groupSelect = $('#_arsol_server_plan_group_slug');
-        var $planSelect = $('#_arsol_server_plan_slug');
+        var $providerSelect = $('#arsol_server_provider_slug');
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        var $planSelect = $('#arsol_server_plan_slug');
 
         // Disable and clear all dropdowns at once
         $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
@@ -450,15 +450,15 @@ jQuery(document).ready(function($) {
         $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
     }
 
-    $('#_arsol_server_provider_slug').on('change', function() {
+    $('#arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
         if (provider) {
             updateGroups(provider);
         }
     });
 
-    $('#_arsol_server_plan_group_slug').on('change', function() {
-        var provider = $('#_arsol_server_provider_slug').val();
+    $('#arsol_server_plan_group_slug').on('change', function() {
+        var provider = $('#arsol_server_provider_slug').val();
         var group = $(this).val();
         updatePlans(provider, group);
     });
@@ -469,7 +469,7 @@ jQuery(document).ready(function($) {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
             
-            var $providerSelect = $('#_arsol_server_provider_slug');
+            var $providerSelect = $('#arsol_server_provider_slug');
             
             // Set values first
             $providerSelect.empty().append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider));
@@ -486,15 +486,15 @@ jQuery(document).ready(function($) {
             // Update groups and plans
             updateGroups(wpProvider, function(groups) {
                 if (groups.includes(wpGroup)) {
-                    $('#_arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
+                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
                     updatePlans(wpProvider, wpGroup);
                 }
             });
         } else {
             // Rest of the non-sites server logic
-            var $providerSelect = $('#_arsol_server_provider_slug');
-            var $groupSelect = $('#_arsol_server_plan_group_slug');
-            var $planSelect = $('#_arsol_server_plan_slug');
+            var $providerSelect = $('#arsol_server_provider_slug');
+            var $groupSelect = $('#arsol_server_plan_group_slug');
+            var $planSelect = $('#arsol_server_plan_slug');
             
             $('.arsol_non_sites_server_fields').removeClass('hidden');
             $('.arsol_ecommerce_optimized_field').addClass('hidden');
@@ -512,16 +512,16 @@ jQuery(document).ready(function($) {
         toggleApplicationsField();
     }
 
-    $('#_arsol_server_type').on('change', function() {
+    $('#arsol_server_type').on('change', function() {
         var serverType = $(this).val();
         updateServerTypeFields(serverType);
     });
 
     // Initial load
-    var initialProvider = $('#_arsol_server_provider_slug').val();
+    var initialProvider = $('#arsol_server_provider_slug').val();
     if (initialProvider) {
         updateGroups(initialProvider, function(groups) {
-            var selectedGroup = $('#_arsol_server_plan_group_slug').val();
+            var selectedGroup = $('#arsol_server_plan_group_slug').val();
             if (selectedGroup) {
                 updatePlans(initialProvider, selectedGroup);
             }
@@ -533,13 +533,13 @@ jQuery(document).ready(function($) {
     toggleApplicationsField();
 
     // Ensure Runcloud checkbox is correctly set and disabled on initial load
-    if ($('#_arsol_server_type').val() === 'sites_server') {
-        $('#_arsol_server_manager_required').prop('checked', true).prop('disabled', true);
+    if ($('#arsol_server_type').val() === 'sites_server') {
+        $('#arsol_server_manager_required').prop('checked', true).prop('disabled', true);
         setSitesProvider();
     }
 
     // Add validation for region and server image fields
-    $('#arsol_server_region, #_arsol_server_image').on('input', function() {
+    $('#arsol_server_region, #arsol_server_image').on('input', function() {
         this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
     });
 });
@@ -555,9 +555,9 @@ function add_admin_footer_script() {
     <script type="text/javascript">
     jQuery(document).ready(function($) {
         // Handle tab visibility on load and checkbox change
-        function toggle_arsol_server_settings_tab() {
-            var $elements = $('.show_if_arsol_server');
-            var isChecked = $('#_arsol_server').is(':checked');
+        function togglearsol_server_settings_tab() {
+            var $elements = $('.show_ifarsol_server');
+            var isChecked = $('#arsol_server').is(':checked');
             
             if (isChecked) {
                 $elements.attr('style', '');  // Remove inline style
@@ -568,8 +568,8 @@ function add_admin_footer_script() {
         }
 
         // Initial state and change handler
-        toggle_arsol_server_settings_tab();
-        $('#_arsol_server').on('change', toggle_arsol_server_settings_tab);
+        togglearsol_server_settings_tab();
+        $('#arsol_server').on('change', togglearsol_server_settings_tab);
     });
     </script>
     <?php
