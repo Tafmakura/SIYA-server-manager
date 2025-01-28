@@ -89,7 +89,7 @@ class Variation {
             
             if (!empty($image)) {
                 if (strlen($image) > 15) {
-                    wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    wc_add_notice(__('Serverr image cannot exceed 15 characters.', 'woocommerce'), 'error');
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
