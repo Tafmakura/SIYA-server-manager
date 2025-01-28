@@ -201,11 +201,12 @@ class Product {
     }
 
     public function validate_server_fields($passed, $post_id) {
+        // Check if arsol_server is checked
         if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
             return $passed;
         }
 
-        // Required fields validation
+        // Required fields validation for server
         $required_fields = [
             'arsol_server_type' => __('Server Type', 'woocommerce'),
             'arsol_server_provider_slug' => __('Server Provider', 'woocommerce'),
@@ -215,7 +216,7 @@ class Product {
 
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                wc_add_notice(__($label . ' is required.', 'woocommerce'), 'error');
+                wc_add_notice(sprintf(__('%s is required when Server option is enabled.', 'woocommerce'), $label), 'error');
                 $passed = false;
             }
         }
