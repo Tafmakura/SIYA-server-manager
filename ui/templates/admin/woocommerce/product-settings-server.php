@@ -250,14 +250,17 @@ jQuery(document).ready(function($) {
     });
 
     function updateGroups(provider, callback) {
+        var serverType = $('#_arsol_server_type').val();
         $.ajax({
             url: ajaxurl,
             data: {
                 action: 'get_provider_groups',
-                provider: provider
+                provider: provider,
+                server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(groups) {
                 var $groupSelect = $('#_arsol_server_plan_group_slug');
+                var currentValue = $groupSelect.val();
                 $groupSelect.empty();
                 
                 if (groups.length === 0) {
@@ -267,10 +270,11 @@ jQuery(document).ready(function($) {
                     groups.forEach(function(group) {
                         $groupSelect.append(new Option(group, group));
                     });
-
-                    // Set the selected group
-                    var selectedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_group_slug', true)); ?>';
-                    $groupSelect.val(selectedGroup);
+                    
+                    // Try to keep existing selection if still valid
+                    if (groups.includes(currentValue)) {
+                        $groupSelect.val(currentValue);
+                    }
                 }
                 
                 $groupSelect.trigger('change');
@@ -280,17 +284,21 @@ jQuery(document).ready(function($) {
     }
 
     function updatePlans(provider, group) {
+        var serverType = $('#_arsol_server_type').val();
         var $planSelect = $('#_arsol_server_plan_slug');
+        
         if (!group) {
-            $planSelect.prop('disabled', true).val(''); // Clear value when disabled
+            $planSelect.prop('disabled', true).val('');
             return;
         }
+        
         $.ajax({
             url: ajaxurl,
             data: {
                 action: 'get_group_plans',
                 provider: provider,
-                group: group
+                group: group,
+                server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
                 var plans = [];

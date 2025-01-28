@@ -197,14 +197,25 @@ class Slugs {
 
     public function ajax_get_provider_groups(): void {
         $provider = sanitize_text_field($_GET['provider']);
-        wp_send_json($this->get_provider_group_slugs($provider));
+        $server_type = isset($_GET['server_type']) ? sanitize_text_field($_GET['server_type']) : null;
+        
+        if ($server_type) {
+            wp_send_json($this->get_provider_groups_by_server_type($provider, $server_type));
+        } else {
+            wp_send_json($this->get_provider_group_slugs($provider));
+        }
     }
 
     public function ajax_get_group_plans(): void {
         $provider = sanitize_text_field($_GET['provider']);
         $group = sanitize_text_field($_GET['group']);
-        $plans = $this->get_filtered_plans($provider, $group);
-        wp_send_json($plans);
+        $server_type = isset($_GET['server_type']) ? sanitize_text_field($_GET['server_type']) : null;
+        
+        if ($server_type) {
+            wp_send_json($this->get_group_plans_by_server_type($provider, $group, $server_type));
+        } else {
+            wp_send_json($this->get_filtered_plans($provider, $group));
+        }
     }
 
     public function get_providers_by_server_type(string $server_type): array {
@@ -229,6 +240,28 @@ class Slugs {
         $server_type = sanitize_text_field($_GET['server_type']);
         $providers = $this->get_providers_by_server_type($server_type);
         wp_send_json($providers);
+    }
+
+    public function get_provider_groups_by_server_type(string $provider_slug, string $server_type): array {
+        $plans = get_option("siya_{$provider_slug}_plans", []);
+        $groups = [];
+        
+        foreach ($plans as $plan) {
+            if (isset($plan['server_types']) && 
+                in_array($server_type, $plan['server_types']) && 
+                !in_array($plan['group_slug'], $groups)) {
+                $groups[] = $plan['group_slug'];
+            }
+        }
+        
+        return $groups;
+    }
+
+    public function get_group_plans_by_server_type(string $provider_slug, string $group_slug, string $server_type): array {
+        $all_plans = $this->get_filtered_plans($provider_slug, $group_slug);
+        return array_filter($all_plans, function($plan) use ($server_type) {
+            return isset($plan['server_types']) && in_array($server_type, $plan['server_types']);
+        });
     }
 
 }
