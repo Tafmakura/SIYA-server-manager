@@ -18,7 +18,6 @@ class Product {
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_fields'], 5);
         
         // Save hooks (should run after validation)
-        add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields'], 10);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta'], 15);
         add_action('woocommerce_process_product_meta', [$this, 'save_arsol_server_settings_tab_content'], 20);
         
