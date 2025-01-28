@@ -14,8 +14,8 @@ class Product {
         add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields']);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
         
-        // Add proper validation hooks
-        add_action('woocommerce_admin_process_product_object', [$this, 'validate_server_fields'], 10);
+        // Replace validation hooks with these
+        add_filter('woocommerce_process_product_meta', [$this, 'validate_server_fields'], 5, 2); // Run before save
         add_action('admin_notices', [$this, 'display_validation_errors']);
     }
 
@@ -205,12 +205,14 @@ class Product {
         update_post_meta($post_id, 'arsol_server_plan_slug', $plan_slug);
     }
 
-    public function validate_server_fields($product) {
+    public function validate_server_fields($post_id, $post) {
         // Check if arsol_server is checked
         if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
             return;
         }
 
+        $errors = false;
+        
         // Required fields validation for server
         $required_fields = [
             'arsol_server_type' => __('Server Type', 'woocommerce'),
@@ -251,7 +253,13 @@ class Product {
 
         // If there are errors, prevent saving
         if (!empty($this->validation_errors)) {
-            wp_die(implode('<br>', $this->validation_errors));
+            // Add errors to WooCommerce notice system
+            foreach ($this->validation_errors as $error) {
+                wc_add_notice($error, 'error');
+            }
+            // Prevent save by redirecting back
+            wp_redirect(wp_get_referer());
+            exit;
         }
     }
 
