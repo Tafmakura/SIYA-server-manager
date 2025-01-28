@@ -222,7 +222,7 @@
 
 <style>
 .hidden {
-    display: none !important;
+    display: none;
 }
 .arsol_non_sites_server_fields.hidden {
     display: none;
