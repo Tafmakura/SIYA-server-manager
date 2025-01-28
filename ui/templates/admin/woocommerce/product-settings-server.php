@@ -388,6 +388,39 @@ jQuery(document).ready(function($) {
         }
     }
 
+    function updateProvidersByServerType(serverType) {
+        if (!serverType) return;
+        
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_providers_by_server_type',
+                server_type: serverType
+            },
+            success: function(providers) {
+                var $providerSelect = $('#_arsol_server_provider_slug');
+                var currentValue = $providerSelect.val();
+                $providerSelect.empty();
+                
+                if (providers.length === 0) {
+                    $providerSelect.prop('disabled', true);
+                } else {
+                    $providerSelect.prop('disabled', false);
+                    providers.forEach(function(provider) {
+                        var providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+                        $providerSelect.append(new Option(providerName, provider));
+                    });
+                    
+                    // Try to keep existing selection if still valid
+                    if (providers.includes(currentValue)) {
+                        $providerSelect.val(currentValue);
+                    }
+                }
+                $providerSelect.trigger('change');
+            }
+        });
+    }
+
     $('#_arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
         updateGroups(provider, function(groups) {
@@ -405,8 +438,12 @@ jQuery(document).ready(function($) {
     });
 
     $('#_arsol_server_type').on('change', function() {
+        var serverType = $(this).val();
         toggleSitesFields();
         toggleApplicationsField();
+        if (serverType !== 'sites_server') {
+            updateProvidersByServerType(serverType);
+        }
     });
 
     // Initial load

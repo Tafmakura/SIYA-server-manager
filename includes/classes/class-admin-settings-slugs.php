@@ -17,6 +17,7 @@ class Slugs {
         add_filter('allowed_options', [$this, 'add_allowed_options']);
         add_action('wp_ajax_get_provider_groups', [$this, 'ajax_get_provider_groups']);
         add_action('wp_ajax_get_group_plans', [$this, 'ajax_get_group_plans']);
+        add_action('wp_ajax_get_providers_by_server_type', [$this, 'ajax_get_providers_by_server_type']);
     }
 
     public function add_menu_page(): void {
@@ -206,5 +207,28 @@ class Slugs {
         wp_send_json($plans);
     }
 
+    public function get_providers_by_server_type(string $server_type): array {
+        $providers = [];
+        foreach ($this->get_provider_slugs() as $provider) {
+            $plans = get_option("siya_{$provider}_plans", []);
+            foreach ($plans as $plan) {
+                if (isset($plan['server_types']) && in_array($server_type, $plan['server_types'])) {
+                    $providers[] = $provider;
+                    break;
+                }
+            }
+        }
+        return array_unique($providers);
+    }
+
+    public function ajax_get_providers_by_server_type(): void {
+        if (!isset($_GET['server_type'])) {
+            wp_send_json([]);
+            return;
+        }
+        $server_type = sanitize_text_field($_GET['server_type']);
+        $providers = $this->get_providers_by_server_type($server_type);
+        wp_send_json($providers);
+    }
 
 }
