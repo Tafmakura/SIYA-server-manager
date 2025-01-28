@@ -263,8 +263,9 @@ jQuery(document).ready(function($) {
                 var currentValue = $groupSelect.val();
                 $groupSelect.empty();
                 
-                if (groups.length === 0) {
+                if (groups.length === 0 && serverType !== 'sites_server') {
                     $groupSelect.prop('disabled', true);
+                    $groupSelect.append(new Option('Empty', '')); // Add Empty text
                 } else {
                     $groupSelect.prop('disabled', false);
                     groups.forEach(function(group) {
@@ -288,7 +289,11 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#_arsol_server_plan_slug');
         
         if (!group) {
-            $planSelect.prop('disabled', true).val('');
+            $planSelect.empty();
+            if (serverType !== 'sites_server') {
+                $planSelect.append(new Option('Empty', '')); // Add Empty text
+            }
+            $planSelect.prop('disabled', true);
             return;
         }
         
@@ -317,8 +322,10 @@ jQuery(document).ready(function($) {
                 }
                 $planSelect.empty();
                 
-                if (plans.length === 0) {
-                    $planSelect.prop('disabled', true).val(''); // Clear value when disabled
+                if (plans.length === 0 && serverType !== 'sites_server') {
+                    $planSelect.empty();
+                    $planSelect.prop('disabled', true);
+                    $planSelect.append(new Option('Empty', '')); // Add Empty text
                 } else {
                     $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
@@ -412,6 +419,7 @@ jQuery(document).ready(function($) {
                 
                 if (providers.length === 0) {
                     $providerSelect.prop('disabled', true);
+                    $providerSelect.append(new Option('Empty', '')); // Add Empty text
                 } else {
                     $providerSelect.prop('disabled', false);
                     providers.forEach(function(provider) {
