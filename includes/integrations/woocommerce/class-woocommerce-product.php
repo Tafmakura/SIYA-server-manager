@@ -57,7 +57,11 @@ class Product {
         $tabs['arsol_server_settings'] = array(
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
+<<<<<<< HEAD
             'class'    => array( 'show_if_arsol_server'),
+=======
+            'class'    => array('show_if_arsol_server'), // This matches WooCommerce's pattern
+>>>>>>> parent of 67361b9 (update)
             'priority' => 50,
         );
 
