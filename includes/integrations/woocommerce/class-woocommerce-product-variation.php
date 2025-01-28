@@ -34,6 +34,8 @@ class Variation extends Product {
             return;
         }
 
+        echo '<div class="arsol-server-variation-fields show_if_arsol_server">';
+        
         woocommerce_wp_text_input(array(
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
@@ -45,8 +47,7 @@ class Variation extends Product {
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
-            ),
-            'style'       => 'display: none;'
+            )
         ));
 
         woocommerce_wp_text_input(array(
@@ -60,9 +61,10 @@ class Variation extends Product {
             'custom_attributes' => array(
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
-            ),
-            'style'       => 'display: none;'
+            )
         ));
+
+        echo '</div>';
     }
 
     /**
@@ -109,21 +111,7 @@ class Variation extends Product {
         ?>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
-            // Function to toggle visibility of server fields
-            function toggleServerFields() {
-                var isChecked = $('#arsol_server').is(':checked');
-                $('.arsol-server-field').toggle(isChecked);
-            }
-
-            // Run on page load
-            toggleServerFields();
-
-            // Run when checkbox changes
-            $('#arsol_server').change(function() {
-                toggleServerFields();
-            });
-
-            // Input validation
+            // Input validation only - visibility handled by WooCommerce
             $(document).on('input', '[id^="arsol_server_variation_region"], [id^="arsol_server_variation_image"]', function() {
                 this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
             });
