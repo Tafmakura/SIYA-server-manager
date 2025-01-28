@@ -208,7 +208,7 @@ class Product {
     public function validate_server_fields($post_id, $post) {
         // Check if arsol_server is checked
         if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
-            return;
+         //   return;
         }
 
         $errors = false;
