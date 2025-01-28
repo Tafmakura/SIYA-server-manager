@@ -58,6 +58,7 @@ class Product {
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
             'class'    => ['show_if_subscription', 'show_if_variable-subscription', 'show_if_arsol_server'],
+            'style'    => 'display: none;',
             'priority' => 50,
         );
 
