@@ -547,6 +547,33 @@ jQuery(document).ready(function($) {
 
 <?php 
 
+// Add the script to the admin footer
+add_action('admin_footer', 'add_admin_footer_script');
+
+function add_admin_footer_script() {
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // Handle tab visibility on load and checkbox change
+        function toggle_arsol_server_settings_tab() {
+            var $elements = $('.show_if_arsol_server');
+            var isChecked = $('#_arsol_server').is(':checked');
+            
+            if (isChecked) {
+                $elements.attr('style', '');  // Remove inline style
+            } else {
+                $elements.attr('style', 'display: none !important');
+                $('.wc-tabs .general_tab a').click();
+            }
+        }
+
+        // Initial state and change handler
+        toggle_arsol_server_settings_tab();
+        $('#_arsol_server').on('change', toggle_arsol_server_settings_tab);
+    });
+    </script>
+    <?php
+}
 ?>
 
 
