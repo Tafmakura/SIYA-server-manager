@@ -92,9 +92,9 @@ class Product {
         
         // Define and sanitize basic fields
         $fields = [
-            'arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
-            'arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
-            'arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
+            '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
+            '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
+            '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
             'arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
             '_arsol_sites_server' => $is_sites_server ? 'yes' : 'no',
             '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
@@ -109,8 +109,8 @@ class Product {
         }
 
         // Get existing values for region and image
-        $existing_region = get_post_meta($post_id, 'arsol_server_region', true);
-        $existing_image = get_post_meta($post_id, 'arsol_server_image', true);
+        $existing_region = get_post_meta($post_id, '_arsol_server_region', true);
+        $existing_image = get_post_meta($post_id, '_arsol_server_image', true);
         
         // Handle region and image fields
         $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
@@ -201,9 +201,9 @@ class Product {
         }
 
         // Save validated data
-        update_post_meta($post_id, 'arsol_server_provider_slug', $provider);
-        update_post_meta($post_id, 'arsol_server_plan_group_slug', $group_slug);
-        update_post_meta($post_id, 'arsol_server_plan_slug', $plan_slug);
+        update_post_meta($post_id, '_arsol_server_provider_slug', $provider);
+        update_post_meta($post_id, '_arsol_server_plan_group_slug', $group_slug);
+        update_post_meta($post_id, '_arsol_server_plan_slug', $plan_slug);
     }
 
     /**

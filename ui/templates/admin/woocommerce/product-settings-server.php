@@ -10,7 +10,7 @@
             </div>
         </div>
         <?php
-        $server_type = get_post_meta($post->ID, 'arsol_server_type', true);
+        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
         $all_types = [
             'sites_server'          => __('Sites Server', 'woocommerce'),
             'application_server'    => __('Application Server', 'woocommerce'),
@@ -54,11 +54,11 @@
         <?php
         $is_sites_server = $server_type === 'sites_server';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
-        $is_server_manager = get_post_meta($post->ID, 'arsol_server_manager_required', true) === 'yes';
+        $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
 
         // Initialize Runcloud checkbox
         woocommerce_wp_checkbox(array(
-            'id'          => 'arsol_server_manager_required',
+            'id'          => '_arsol_server_manager_required',
             'label'       => __('Runcloud', 'woocommerce'),
             'description' => __('Connect this server to Runcloud server manager.', 'woocommerce'),
             'desc_tip'    => 'true',
@@ -81,7 +81,7 @@
         <?php
         // Provider Dropdown
         $providers = $slugs->get_provider_slugs();
-        $selected_provider = get_post_meta($post->ID, 'arsol_server_provider_slug', true);
+        $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_provider_slug',
@@ -94,7 +94,7 @@
         ));
 
         // Group Dropdown
-        $selected_group = get_post_meta($post->ID, 'arsol_server_plan_group_slug', true);
+        $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
@@ -108,7 +108,7 @@
         ));
 
         // Plan Dropdown
-        $selected_plan = get_post_meta($post->ID, 'arsol_server_plan_slug', true);
+        $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
         $plans = $selected_provider && $selected_group ? 
             $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
         $plan_options = [];
@@ -131,7 +131,7 @@
         <div class="arsol_non_sites_server_fields">
             <?php
             // Region Text Field
-            $region = get_post_meta($post->ID, 'arsol_server_region', true);
+            $region = get_post_meta($post->ID, '_arsol_server_region', true);
             woocommerce_wp_text_input(array(
                 'id'          => 'arsol_server_region',
                 'label'       => __('Server region (optional)', 'woocommerce'),
@@ -145,7 +145,7 @@
             ));
 
             // Server Image Text Field
-            $server_image = get_post_meta($post->ID, 'arsol_server_image', true);
+            $server_image = get_post_meta($post->ID, '_arsol_server_image', true);
             woocommerce_wp_text_input(array(
                 'id'          => 'arsol_server_image',
                 'label'       => __('Server image (optional)', 'woocommerce'),
@@ -326,7 +326,7 @@ jQuery(document).ready(function($) {
                     });
 
                     // Set the selected plan
-                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, 'arsol_server_plan_slug', true)); ?>';
+                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
                     $planSelect.val(selectedPlan);
                 }
             },
