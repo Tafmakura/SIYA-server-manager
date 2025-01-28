@@ -237,7 +237,11 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Remove form validation code, WooCommerce will handle it
+    // Remove validation code
+    // $('#post').on('submit'...) - removed
+    // $('#arsol_server_region, #arsol_server_image').on('input'...) - removed
+    
+    // Keep only visibility and UI handling code
     function updateGroups(provider, callback) {
         var serverType = $('#arsol_server_type').val();
         $.ajax({
@@ -526,11 +530,6 @@ jQuery(document).ready(function($) {
         $('#arsol_server_manager_required').prop('checked', true).prop('disabled', true);
         setSitesProvider();
     }
-
-    // Add validation for region and server image fields
-    $('#arsol_server_region, #arsol_server_image').on('input', function() {
-        this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '');
-    });
 
     // Handle tab visibility on load and checkbox change
     function togglearsol_server_settings_tab() {

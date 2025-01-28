@@ -236,6 +236,12 @@ class Product {
             }
         }
 
+        // Add max length validation for region
+        if (!empty($_POST['arsol_server_region']) && strlen($_POST['arsol_server_region']) > 50) {
+            wc_add_notice(__('Server Region cannot exceed 50 characters.', 'woocommerce'), 'error');
+            $passed = false;
+        }
+
         return $passed;
     }
 }
