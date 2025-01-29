@@ -110,10 +110,7 @@ class Product {
 
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                $this->add_admin_notice(
-                    sprintf(__('%s is required.', 'woocommerce'), $label),
-                    'error'
-                );
+                $this->validation_errors[] = sprintf(__('%s is required.', 'woocommerce'), $label);
                 $has_errors = true;
             }
         }
@@ -127,10 +124,7 @@ class Product {
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                $this->add_admin_notice(
-                    sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label),
-                    'error'
-                );
+                $this->validation_errors[] = sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label);
                 $has_errors = true;
             }
         }
@@ -138,10 +132,7 @@ class Product {
         // 3. Length Validation
         $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
         if (strlen($region) > 50) {
-            $this->add_admin_notice(
-                __('Server Region cannot exceed 50 characters.', 'woocommerce'),
-                'error'
-            );
+            $this->validation_errors[] = __('Server Region cannot exceed 50 characters.', 'woocommerce');
             $has_errors = true;
         }
 
@@ -149,16 +140,13 @@ class Product {
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
-                $this->add_admin_notice(
-                    __('Maximum Applications must be at least 1.', 'woocommerce'),
-                    'error'
-                );
+                $this->validation_errors[] = __('Maximum Applications must be at least 1.', 'woocommerce');
                 $has_errors = true;
             }
         }
 
         if ($has_errors) {
-            return false;
+            return $product;
         }
 
         // Save all fields if validation passes
@@ -182,7 +170,7 @@ class Product {
         $server_image = sanitize_text_field($_POST['arsol_server_image'] ?? $product->get_meta('_arsol_server_image', true));
 
         if (strlen($region) > 50) {
-            $this->add_admin_notice(__('Server Region cannot exceed 50 characters.', 'woocommerce'), 'error');
+            $this->validation_errors[] = __('Server Region cannot exceed 50 characters.', 'woocommerce');
             return $product;
         }
 
@@ -196,12 +184,13 @@ class Product {
         return $product;
     }
 
-    public function add_admin_notice($message, $type = 'error') {
-        add_action('admin_notices', function() use ($message, $type) {
-            echo '<div class="notice notice-' . esc_attr($type) . ' is-dismissible">
-                    <p>' . esc_html($message) . '</p>
-                  </div>';
-        });
+    public function add_admin_notices() {
+        if (!empty($this->validation_errors)) {
+            foreach ($this->validation_errors as $error_message) {
+                echo '<div class="notice notice-error is-dismissible">
+                        <p>' . esc_html($error_message) . '</p>
+                      </div>';
+            }
+        }
     }
 }
-
