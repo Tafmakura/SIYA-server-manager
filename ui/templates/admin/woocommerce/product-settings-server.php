@@ -30,7 +30,7 @@
             'value'       => $server_type ?: ''  // Ensure the value is empty if not set
         ));
         ?>
-        <div class="aarsol_max_applications_field show_if_arsol_application_server show_if_arsol_sites_server hidden">
+        <div class="arsol_max_applications_field">
             <?php
             $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
             woocommerce_wp_text_input(array(
@@ -389,8 +389,6 @@ jQuery(document).ready(function($) {
         toggleServerElements();
     }
 
-    /*
-    
     function toggleApplicationsField() {
         var serverType = $('#arsol_server_type').val();
         if (serverType === 'sites_server' || serverType === 'application_server') {
@@ -399,8 +397,6 @@ jQuery(document).ready(function($) {
             $('.arsol_max_applications_field').addClass('hidden');
         }
     }
-
-    */
 
     function updateProvidersByServerType(serverType) {
         if (!serverType) return;
