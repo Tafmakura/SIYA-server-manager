@@ -1319,6 +1319,8 @@ class ServerOrchestrator {
             return false;// Add fallback return false
         }
 
+        $subscription_id = $subscription->get_id();
+
         // Initialize the server provider instance
         $task_id = uniqid();
 
