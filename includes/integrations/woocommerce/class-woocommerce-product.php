@@ -26,7 +26,6 @@ class Product {
 
         // Product type hooks
         add_filter('product_type_options', [$this, 'add_arsol_server_product_option']);
-        add_action('save_post_product', [$this, 'save_arsol_server_option_fields'], 10, 3);
         
         // Server settings tab hooks
         add_filter('woocommerce_product_data_tabs', [$this, 'add_arsol_server_settings_tab']);
@@ -42,11 +41,6 @@ class Product {
             'default'       => 'no'
         ];
         return $product_type_options;
-    }
-
-    public function save_arsol_server_option_fields($post_ID, $product, $update) {
-        $is_arsol_server = isset($_POST['arsol_server']) ? 'yes' : 'no';
-        update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Save with underscore prefix
     }
 
     public function add_arsol_server_settings_tab($tabs) {
@@ -71,6 +65,23 @@ class Product {
     }
 
     public function validate_and_save_fields($product) {
+        // Early validation
+        if (!$this->validate_server_fields($product)) {
+            // Add error notice
+            WC_Admin_Notices::add_custom_notice(
+                'validation_failed', 
+                __('Server validation failed. Changes were not saved.', 'woocommerce')
+            );
+            // Prevent save by returning false
+            return false;
+        }
+
+        // Continue with save if validation passes
+        $this->save_server_fields($product);
+        return $product;
+    }
+
+    private function validate_server_fields($product) {
         // Get post ID from product object
         $post_id = $product->get_id();
 
@@ -155,6 +166,10 @@ class Product {
             return false;
         }
 
+        return true;
+    }
+
+    private function save_server_fields($product) {
         // Save all fields if validation passes
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
