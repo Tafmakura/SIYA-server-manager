@@ -200,15 +200,31 @@ class Product {
         // Get post ID from product object
         $post_id = $product->get_id();
 
-        // Check if product has server option enabled using post data (not meta)
-        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
+        // Check multiple ways since WooCommerce can be inconsistent
+        $is_server = false;
+        
+        // Check POST data
+        if (isset($_POST['_arsol_server'])) {
+            $is_server = $_POST['_arsol_server'] === 'yes';
+        } else if (isset($_POST['arsol_server'])) {
+            $is_server = $_POST['arsol_server'] === 'yes';
+        }
+        
+        // Fallback to product meta if POST check fails
+        if (!$is_server) {
+            $is_server = $product->get_meta('_arsol_server') === 'yes';
+        }
+
+        // If not a server product, return early
+        if (!$is_server) {
             return $product;
         }
 
+        // Debug output to see what's happening
+        error_log('POST data: ' . print_r($_POST, true));
+        error_log('Product meta _arsol_server: ' . $product->get_meta('_arsol_server'));
 
-        die('You hit the right hook!');
-
-        
+        die('Validation complete');
 
         $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
