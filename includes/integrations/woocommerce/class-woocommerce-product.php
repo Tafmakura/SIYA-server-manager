@@ -174,8 +174,8 @@ class Product {
             ];
 
             // Set subscription limit type for sites server
-            $product->update_meta_data('_subscription_limit_type', 'active');
-            $product->update_meta_data('_subscription_limit', '1'); // Required for active limitation
+            $product->update_meta_data('_subscription_limit', 'active');
+            
         } else {
             // Normal field handling for other server types
             $fields = [
