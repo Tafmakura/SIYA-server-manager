@@ -2,6 +2,8 @@
 
 namespace Siya\Integrations\WooCommerce\Product;
 
+use WC_Admin_Notices;
+
 defined('ABSPATH') || exit;
 
 class Variation {
@@ -74,11 +76,17 @@ class Variation {
  
 
                 if (strlen($region) > 15) {
-                    wc_add_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    WC_Admin_Notices::add_custom_notice(
+                        'region_length_error',
+                        __('Server region cannot exceed 15 characters.', 'woocommerce')
+                    );
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                    wc_add_notice(__('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                    WC_Admin_Notices::add_custom_notice(
+                        'region_pattern_error', 
+                        __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                    );
                     $has_errors = true;
                 }
             }
@@ -98,12 +106,18 @@ class Variation {
 
 
                 if (strlen($image) > 15) {
-                    wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    WC_Admin_Notices::add_custom_notice(
+                        'image_length_error',
+                        __('Server image cannot exceed 15 characters.', 'woocommerce')
+                    );
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
-                wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
-                $has_errors = true;
+                    WC_Admin_Notices::add_custom_notice(
+                        'image_pattern_error',
+                        __('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                    );
+                    $has_errors = true;
                 }
             }
 
