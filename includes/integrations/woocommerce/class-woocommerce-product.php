@@ -173,8 +173,8 @@ class Product {
                 '_arsol_server_type' => 'sites_server',
             ];
 
-            // Set subscription limit type for sites server
-            $product->update_meta_data('_subscription_limit', 'active');
+             $product->update_meta_data('_subscription_limit', 'active');
+        
             
         } else {
             // Normal field handling for other server types
