@@ -64,21 +64,17 @@ class Variation {
 
         $has_errors = false;
 
-
         // Validate and save region
         if (isset($_POST['arsol_server_variation_region'][$loop])) {
             $region = sanitize_text_field($_POST['arsol_server_variation_region'][$loop]);
             
             if (!empty($region)) {
-
- 
-
                 if (strlen($region) > 15) {
-                    wc_add_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    WC_Admin_Notices::add_custom_notice('custom_error', __('Server region cannot exceed 15 characters.', 'woocommerce'));
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                    wc_add_notice(__('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                    WC_Admin_Notices::add_custom_notice('custom_error', __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce'));
                     $has_errors = true;
                 }
             }
@@ -93,17 +89,13 @@ class Variation {
             $image = sanitize_text_field($_POST['arsol_server_variation_image'][$loop]);
             
             if (!empty($image)) {
-
- 
-
-
                 if (strlen($image) > 15) {
-                    wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
+                    WC_Admin_Notices::add_custom_notice('custom_error', __('Server image cannot exceed 15 characters.', 'woocommerce'));
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
-                wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
-                $has_errors = true;
+                    WC_Admin_Notices::add_custom_notice('custom_error', __('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'));
+                    $has_errors = true;
                 }
             }
 
