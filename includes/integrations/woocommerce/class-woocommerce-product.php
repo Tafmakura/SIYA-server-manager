@@ -248,10 +248,6 @@ class Product {
         }
 
         // Save server groups and tags
-        $product->update_meta_data('_arsol_additional_server_groups', 
-            isset($_POST['arsol_additional_server_groups']) ? array_map('sanitize_text_field', $_POST['arsol_additional_server_groups']) : []
-        );
-        
         $product->update_meta_data('_arsol_assigned_server_groups',
             isset($_POST['arsol_assigned_server_groups']) ? array_map('intval', $_POST['arsol_assigned_server_groups']) : []
         );
