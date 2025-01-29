@@ -146,6 +146,7 @@ class Product {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
                 WC_Admin_Notices::add_custom_notice('custom_error', __('Custom field cannot be empty.', 'woocommerce'));
+                return false;
                 $has_errors = true;
             }
         }
