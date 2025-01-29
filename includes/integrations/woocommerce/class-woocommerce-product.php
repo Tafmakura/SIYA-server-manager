@@ -3,6 +3,7 @@
 namespace Siya\Integrations\WooCommerce;
 
 use Siya\AdminSettings\Slugs;
+use WC_Data_Exception; // Ensure the correct namespace for WC_Data_Exception
 
 defined('ABSPATH') || exit;
 
@@ -11,13 +12,11 @@ class Product {
     protected $validation_errors = [];
 
     public function __construct() {
-        
         // Basic hooks
         add_action('init', [$this, 'init']);
         
         // Validation and save hook - run before saving but after product init
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
-
     }
 
     public function init() {
