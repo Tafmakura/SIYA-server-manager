@@ -14,6 +14,8 @@ class Product {
     public function __construct() {
         // Basic hooks
         add_action('init', [$this, 'init']);
+        add_action('admin_notices', [$this, 'add_admin_notices']);
+
         
         // Validation and save hook - run before saving but after product init
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
