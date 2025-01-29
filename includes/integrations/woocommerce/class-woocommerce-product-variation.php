@@ -88,16 +88,16 @@ class Variation {
             $image = sanitize_text_field($_POST['arsol_server_variation_image'][$loop]);
             
             if (!empty($image)) {
+
+                die('You hit the right hook!');
+
+
                 if (strlen($image) > 15) {
                     wc_add_notice(__('Server image cannot exceed 15 characters.', 'woocommerce'), 'error');
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
                 wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
-                   
-                die('You hit the right hook!');
-
-                
                 $has_errors = true;
                 }
             }
