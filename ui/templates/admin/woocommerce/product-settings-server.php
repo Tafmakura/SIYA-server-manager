@@ -510,13 +510,11 @@ jQuery(document).ready(function($) {
 
     $('#arsol_server_type').on('change', function() {
         var serverType = $(this).val();
-        // First run visibility toggles
-        toggleArsolSitesServerElements();
-        toggleArsolApplicationServerElements();
-        toggleArsolHideSitesServerElements();
-        toggleArsolHideApplicationServerElements();
-        // Then run other updates that might override
         updateServerTypeFields(serverType);
+        toggleArsolSitesServerElements();
+        toggleArsolApplicationServerElements(); // Add this line
+        toggleArsolHideSitesServerElements(); // Add this line
+        toggleArsolHideApplicationServerElements(); // Add this line
     });
 
     // Initial load
@@ -566,25 +564,11 @@ jQuery(document).ready(function($) {
         var $elements = $('.show_if_arsol_sites_server');
         var serverType = $('#arsol_server_type').val();
         
-        console.log('Sites Server Toggle:', {
-            'Server Type': serverType,
-            'Elements Found': $elements.length,
-            'Current Visibility': $elements.is(':visible'),
-            'Has Hidden Class': $elements.hasClass('hidden'),
-            'Current Style': $elements.attr('style')
-        });
-        
         if (serverType === 'sites_server') {
             $elements.attr('style', '').removeClass('hidden');
         } else {
             $elements.attr('style', 'display: none !important').addClass('hidden');
         }
-        
-        console.log('After Toggle:', {
-            'Visibility': $elements.is(':visible'),
-            'Has Hidden Class': $elements.hasClass('hidden'),
-            'Style': $elements.attr('style')
-        });
     }
 
     // Handle application server element visibility
