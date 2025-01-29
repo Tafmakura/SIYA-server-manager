@@ -37,7 +37,7 @@ class Variation {
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
@@ -51,7 +51,7 @@ class Variation {
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-last show_if_arsol_server {$hidden_class}",
+            'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
@@ -65,7 +65,7 @@ class Variation {
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
             'label'       => __('Server max applications (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_server show_if_arsol_sites_server show_if_arsol_application_server {$hidden_class}",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_sites_server show_if_arsol_application_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the maximum number of applications allowed for this server variation.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
@@ -147,6 +147,23 @@ class Variation {
             }
         }
 
+        // Validate and save max applications
+        if (isset($_POST['arsol_server_variation_max_applications'][$loop])) {
+            $max_applications = absint($_POST['arsol_server_variation_max_applications'][$loop]);
+            
+            if ($max_applications > 999) {
+                WC_Admin_Notices::add_custom_notice(
+                    'max_applications_error',
+                    __('Maximum applications cannot exceed 999.', 'woocommerce')
+                );
+                $has_errors = true;
+            }
+
+            if (!$has_errors) {
+                $variation->update_meta_data('_arsol_server_variation_max_applications', $max_applications);
+            }
+        }
+
         if (!$has_errors) {
             $variation->save();
         }
@@ -156,6 +173,7 @@ class Variation {
         // Add custom fields to variation data with arsol prefix
         $variation_data['arsol_server_variation_region'] = $variation->get_meta('_arsol_server_variation_region');
         $variation_data['arsol_server_variation_image'] = $variation->get_meta('_arsol_server_variation_image');
+        $variation_data['arsol_server_variation_max_applications'] = $variation->get_meta('_arsol_server_variation_max_applications');
         
         return $variation_data;
     }

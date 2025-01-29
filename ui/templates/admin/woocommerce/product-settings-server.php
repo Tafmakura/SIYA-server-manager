@@ -513,6 +513,8 @@ jQuery(document).ready(function($) {
         updateServerTypeFields(serverType);
         toggleArsolSitesServerElements();
         toggleArsolApplicationServerElements(); // Add this line
+        toggleArsolHideSitesServerElements(); // Add this line
+        toggleArsolHideApplicationServerElements(); // Add this line
     });
 
     // Initial load
@@ -530,7 +532,9 @@ jQuery(document).ready(function($) {
     toggleSitesFields();
     toggleApplicationsField();
     toggleArsolSitesServerElements();
-    toggleArsolApplicationServerElements(); // Add this line
+    toggleArsolApplicationServerElements();
+    toggleArsolHideSitesServerElements(); // Add this line
+    toggleArsolHideApplicationServerElements(); // Add this line
 
     // Ensure Runcloud checkbox is correctly set and disabled on initial load
     if ($('#arsol_server_type').val() === 'sites_server') {
@@ -576,6 +580,30 @@ jQuery(document).ready(function($) {
             $elements.attr('style', '').removeClass('hidden');
         } else {
             $elements.attr('style', 'display: none !important').addClass('hidden');
+        }
+    }
+
+    // Handle elements that should hide for sites server
+    function toggleArsolHideSitesServerElements() {
+        var $elements = $('.hide_if_arsol_sites_server');
+        var serverType = $('#arsol_server_type').val();
+        
+        if (serverType === 'sites_server') {
+            $elements.attr('style', 'display: none !important').addClass('hidden');
+        } else {
+            $elements.attr('style', '').removeClass('hidden');
+        }
+    }
+
+    // Handle elements that should hide for application server
+    function toggleArsolHideApplicationServerElements() {
+        var $elements = $('.hide_if_arsol_application_server');
+        var serverType = $('#arsol_server_type').val();
+        
+        if (serverType === 'application_server') {
+            $elements.attr('style', 'display: none !important').addClass('hidden');
+        } else {
+            $elements.attr('style', '').removeClass('hidden');
         }
     }
 });
