@@ -144,7 +144,7 @@ class Product {
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
-                throw new WC_Data_Exception(__('Custom field cannot be empty.', 'woocommerce'));
+                throw new WC_Data_Exception(__('Custom field cannot be empty.', 400));
                 $has_errors = true;
             }
         }
