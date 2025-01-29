@@ -511,10 +511,7 @@ jQuery(document).ready(function($) {
     $('#arsol_server_type').on('change', function() {
         var serverType = $(this).val();
         updateServerTypeFields(serverType);
-        toggleArsolSitesServerElements();
-        toggleArsolApplicationServerElements(); // Add this line
-        toggleArsolHideSitesServerElements(); // Add this line
-        toggleArsolHideApplicationServerElements(); // Add this line
+        toggleServerElements();
     });
 
     // Initial load
@@ -531,10 +528,7 @@ jQuery(document).ready(function($) {
     // Initial state
     toggleSitesFields();
     toggleApplicationsField();
-    toggleArsolSitesServerElements();
-    toggleArsolApplicationServerElements();
-    toggleArsolHideSitesServerElements(); // Add this line
-    toggleArsolHideApplicationServerElements(); // Add this line
+    toggleServerElements();
 
     // Ensure Runcloud checkbox is correctly set and disabled on initial load
     if ($('#arsol_server_type').val() === 'sites_server') {
@@ -560,51 +554,28 @@ jQuery(document).ready(function($) {
     $('#arsol_server').on('change', togglearsol_server_settings_tab);
 
     // Handle sites server element visibility
-    function toggleArsolSitesServerElements() {
-        var $elements = $('.show_if_arsol_sites_server');
+    function toggleServerElements() {
         var serverType = $('#arsol_server_type').val();
-        
+
+        // Show/hide sites server fields
         if (serverType === 'sites_server') {
-            $elements.attr('style', '').removeClass('hidden');
+            $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
         } else {
-            $elements.attr('style', 'display: none !important').addClass('hidden');
+            $('.show_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
+            $('.hide_if_arsol_sites_server').attr('style', '').removeClass('hidden');
         }
-    }
 
-    // Handle application server element visibility
-    function toggleArsolApplicationServerElements() {
-        var $elements = $('.show_if_arsol_application_server');
-        var serverType = $('#arsol_server_type').val();
-        
+        // Show/hide application server fields
         if (serverType === 'application_server') {
-            $elements.attr('style', '').removeClass('hidden');
+            $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
         } else {
-            $elements.attr('style', 'display: none !important').addClass('hidden');
+            $('.show_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
+            $('.hide_if_arsol_application_server').attr('style', '').removeClass('hidden');
         }
-    }
 
-    // Handle elements that should hide for sites server
-    function toggleArsolHideSitesServerElements() {
-        var $elements = $('.hide_if_arsol_sites_server');
-        var serverType = $('#arsol_server_type').val();
-        
-        if (serverType === 'sites_server') {
-            $elements.attr('style', 'display: none !important').addClass('hidden');
-        } else {
-            $elements.attr('style', '').removeClass('hidden');
-        }
-    }
-
-    // Handle elements that should hide for application server
-    function toggleArsolHideApplicationServerElements() {
-        var $elements = $('.hide_if_arsol_application_server');
-        var serverType = $('#arsol_server_type').val();
-        
-        if (serverType === 'application_server') {
-            $elements.attr('style', 'display: none !important').addClass('hidden');
-        } else {
-            $elements.attr('style', '').removeClass('hidden');
-        }
+        // Additional logic can go here...
     }
 });
 </script>
