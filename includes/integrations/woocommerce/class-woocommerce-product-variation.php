@@ -78,7 +78,7 @@ class Variation {
             'step' => '1',
             'required' => 'required',
             'style' => 'width: 3em; text-align: center;',
-            'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')"
+            'oninput' => "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)"
             ]
         ]);
     }
