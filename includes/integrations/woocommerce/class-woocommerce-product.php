@@ -153,6 +153,10 @@ class Product {
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
+                
+                
+                add_action('admin_notices', [$this, 'display_validation_notice']);
+                
                 WC_Admin_Notices::add_notice(
                     'max_apps_error',
                     __('Maximum Applications must be at least 1.', 'woocommerce')
@@ -263,6 +267,10 @@ class Product {
         $product->save();
 
         return $product;
+    }
+
+    public function display_validation_notice() {
+        echo '<div class="notice notice-error">HELLLLLO<p>';
     }
 
 }
