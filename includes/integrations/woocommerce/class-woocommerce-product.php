@@ -3,7 +3,7 @@
 namespace Siya\Integrations\WooCommerce;
 
 use Siya\AdminSettings\Slugs;
-use WC_Data_Exception; // Ensure the correct namespace for WC_Data_Exception
+use WC_Data_Exception; 
 
 defined('ABSPATH') || exit;
 
