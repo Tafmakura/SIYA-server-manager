@@ -3,7 +3,7 @@
 namespace Siya\Integrations\WooCommerce;
 
 use Siya\AdminSettings\Slugs;
-use WC_Admin_Notices;
+ //use WC_Admin_Notices;
 
 defined('ABSPATH') || exit;
 
