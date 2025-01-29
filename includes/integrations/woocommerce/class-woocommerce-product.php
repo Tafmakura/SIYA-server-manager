@@ -151,7 +151,7 @@ class Product {
             $has_errors = true;
         }
 
-        // 4. Applications Validation
+        // 4. Applications Validation.
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
