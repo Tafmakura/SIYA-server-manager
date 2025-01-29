@@ -171,10 +171,11 @@ class Product {
                 '_arsol_server_manager_required' => 'yes', // Always yes for sites server
                 '_arsol_ecommerce_optimized' => isset($_POST['arsol_ecommerce_optimized']) ? 'yes' : 'no',
                 '_arsol_server_type' => 'sites_server',
-
-                //WooCommerce settings
-                '_subscription_limit' => 'active' // Add subscription limit for sites server
             ];
+
+            // Set subscription limit type for sites server
+            $product->update_meta_data('_subscription_limit_type', 'active');
+            $product->update_meta_data('_subscription_limit', '1'); // Required for active limitation
         } else {
             // Normal field handling for other server types
             $fields = [
