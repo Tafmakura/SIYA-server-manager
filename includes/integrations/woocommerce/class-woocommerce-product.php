@@ -166,7 +166,7 @@ class Product {
                 '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
                 '_arsol_server_manager_required' => 'yes', // Always yes for sites server
                 '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
-                'arsol_server_type' => 'sites_server'
+                '_arsol_server_type' => 'sites_server'
             ];
         } else {
             // Normal field handling for other server types
@@ -175,6 +175,7 @@ class Product {
                 '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
                 '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
                 '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
+                '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '') // Fixed: Added underscore prefix
             ];
         }
 
