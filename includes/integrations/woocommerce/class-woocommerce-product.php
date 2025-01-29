@@ -202,7 +202,14 @@ class Product {
 
         // Check multiple ways since WooCommerce can be inconsistent
         $is_server = false;
-       
+        
+        // Check POST data
+        if (isset($_POST['_arsol_server'])) {
+            $is_server = $_POST['_arsol_server'] === 'yes';
+        } else if (isset($_POST['arsol_server'])) {
+            $is_server = $_POST['arsol_server'] === 'yes';
+        }
+        
         // Fallback to product meta if POST check fails
         if (!$is_server) {
             $is_server = $product->get_meta('_arsol_server') === 'yes';
