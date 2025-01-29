@@ -112,12 +112,10 @@ class Product {
             ];
         }
 
+// ...existing code...
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                WC_Admin_Notices::add_notice(
-                    'required_field_error_' . $field,
-                    sprintf(__('%s is required.', 'woocommerce'), $label)
-                );
+                $this->validation_errors[] = sprintf(__('%s is required.', 'woocommerce'), $label);
                 $has_errors = true;
             }
         }
@@ -131,10 +129,7 @@ class Product {
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                WC_Admin_Notices::add_notice(
-                    'pattern_error_' . $field,
-                    sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label)
-                );
+                $this->validation_errors[] = sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label);
                 $has_errors = true;
             }
         }
@@ -142,41 +137,23 @@ class Product {
         // 3. Length Validation
         $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
         if (strlen($region) > 50) {
-            WC_Admin_Notices::add_notice(
-                'region_length_error',
-                __('Server Region cannot exceed 50 characters.', 'woocommerce')
-            );
+            $this->validation_errors[] = __('Server Region cannot exceed 50 characters.', 'woocommerce');
             $has_errors = true;
         }
 
         // 4. Applications Validation
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
-            if ($max_apps < 1) {
-                
-                
-                add_action('admin_notices', [$this, 'display_validation_notice']);
-                
-                WC_Admin_Notices::add_notice(
-                    'max_apps_error',
-                    __('Maximum Applications must be at least 1.', 'woocommerce')
-                );
-
-                die ('DIIIIE!!!!!');
-
-                $has_errors = true; 
-
+            if ($max_apps < 999) {
+                $this->validation_errors[] = __('Maximum Applications must be at least 1.', 'woocommerce');
+                $has_errors = true;
             }
         }
 
         if ($has_errors) {
-            // Add error notice
-            WC_Admin_Notices::add_notice(
-                'validation_failed',
-                __('Validation failed: Please check the server settings.', 'woocommerce')
-            );
             return false;
         }
+// ...existing code...
 
         // Save all fields if validation passes
         $fields = [
@@ -207,20 +184,15 @@ class Product {
         // Only validate if fields are not empty and were modified
         if (!empty($region) && $region !== $existing_region) {
             if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                WC_Admin_Notices::add_notice(
-                    'region_pattern_error',
-                    __('Region field can only contain letters, numbers, and hyphens.', 'woocommerce')
-                );
-                return;
+                $this->validation_errors[] = __('Region field can only contain letters, numbers, and hyphens.', 'woocommerce');
+                return false;
             }
             if (strlen($region) > 50) {
-                WC_Admin_Notices::add_notice(
-                    'region_length_error',
-                    __('Region field cannot exceed 50 characters.', 'woocommerce')
-                );
-                return;
+                $this->validation_errors[] = __('Region field cannot exceed 50 characters.', 'woocommerce');
+                return false;
             }
         }
+// ...existing code...
 
         // Set region and image values - only clear if Sites server is being enabled
         $was_sites_server = $product->get_meta('_arsol_sites_server', true) === 'yes';
