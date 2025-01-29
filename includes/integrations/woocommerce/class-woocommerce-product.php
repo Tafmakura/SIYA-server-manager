@@ -158,6 +158,12 @@ class Product {
             return false;
         }
 
+        if ($is_sites_server) {
+            // Override provider and group with WP options for sites server
+            $_POST['arsol_server_provider_slug'] = get_option('siya_wp_server_provider');
+            $_POST['arsol_server_plan_group_slug'] = get_option('siya_wp_server_group');
+        }
+
         // Save all fields if validation passes
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),

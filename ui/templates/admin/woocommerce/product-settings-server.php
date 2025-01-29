@@ -223,6 +223,10 @@
     </div>
 </div>
 
+// Add hidden fields to store WP options
+<input type="hidden" id="wp_server_provider" value="<?php echo esc_attr(get_option('siya_wp_server_provider')); ?>">
+<input type="hidden" id="wp_server_group" value="<?php echo esc_attr(get_option('siya_wp_server_group')); ?>">
+
 <style>
     .hidden {
         display: none;
@@ -461,51 +465,25 @@ jQuery(document).ready(function($) {
 
     function updateServerTypeFields(serverType) {
         if (serverType === 'sites_server') {
-            // Set provider and UI first before disabling anything
-            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+            // Get values from hidden fields
+            var wpProvider = $('#wp_server_provider').val();
+            var wpGroup = $('#wp_server_group').val();
             
-            var $providerSelect = $('#arsol_server_provider_slug');
+            // Set provider and group
+            $('#arsol_server_provider_slug').val(wpProvider).prop('disabled', true);
+            $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
             
-            // Set values first
-            $providerSelect.empty().append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider));
-            $providerSelect.val(wpProvider);
+            // Update plans based on these values
+            updatePlans(wpProvider, wpGroup);
             
-            // Update UI
+            // Hide non-sites server fields
             $('.arsol_non_sites_server_fields').addClass('hidden');
-            $('.arsol_ecommerce_optimized_field').removeClass('hidden');
-            setRuncloudCheckboxState(true, true);
-            
-            // Now disable after setting values
-            $providerSelect.prop('disabled', true);
-            
-            // Update groups and plans
-            updateGroups(wpProvider, function(groups) {
-                if (groups.includes(wpGroup)) {
-                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
-                    updatePlans(wpProvider, wpGroup);
-                }
-            });
         } else {
-            // Rest of the non-sites server logic
-            var $providerSelect = $('#arsol_server_provider_slug');
-            var $groupSelect = $('#arsol_server_plan_group_slug');
-            var $planSelect = $('#arsol_server_plan_slug');
-            
+            // Reset to normal behavior
+            $('#arsol_server_provider_slug').prop('disabled', false);
+            $('#arsol_server_plan_group_slug').prop('disabled', false);
             $('.arsol_non_sites_server_fields').removeClass('hidden');
-            $('.arsol_ecommerce_optimized_field').addClass('hidden');
-            setRuncloudCheckboxState(false, false);
-            
-            // Clear and disable dropdowns
-            $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            
-            // Fetch new provider options
-            updateProvidersByServerType(serverType);
         }
-        
-        toggleApplicationsField();
     }
 
     $('#arsol_server_type').on('change', function() {
