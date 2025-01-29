@@ -69,7 +69,7 @@
         <div class="arsol_ecommerce_optimized_field hidden">
             <?php
             woocommerce_wp_checkbox(array(
-                'id'          => '_arsol_ecommerce_optimized',
+                'id'          => 'arsol_ecommerce_optimized',
                 'label'       => __('E-commerce', 'woocommerce'),
                 'description' => __('Enable this option if the server setup is optimized for ecommerce.', 'woocommerce'),
                 'desc_tip'    => 'true',

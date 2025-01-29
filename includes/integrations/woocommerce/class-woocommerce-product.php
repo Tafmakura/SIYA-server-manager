@@ -165,7 +165,7 @@ class Product {
                 '_arsol_server_plan_group_slug' => get_option('siya_wp_server_group'),
                 '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
                 '_arsol_server_manager_required' => 'yes', // Always yes for sites server
-                '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
+                '_arsol_ecommerce_optimized' => isset($_POST['arsol_ecommerce_optimized']) ? 'yes' : 'no',
                 '_arsol_server_type' => 'sites_server'
             ];
         } else {
