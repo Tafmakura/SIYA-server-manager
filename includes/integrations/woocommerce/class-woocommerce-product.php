@@ -212,15 +212,15 @@ class Product {
 
         if ($is_sites_server && !$was_sites_server) {
             // Only clear values when transitioning to Sites server
-            $fields['arsol_server_region'] = '';
-            $fields['arsol_server_image'] = '';
+            $fields['_arsol_server_region'] = '';
+            $fields['_arsol_server_image'] = '';
         } else {
             // Keep existing or updated values
-            $fields['arsol_server_region'] = $region;
-            $fields['arsol_server_image'] = $server_image;
+            $fields['_arsol_server_region'] = $region;
+            $fields['_arsol_server_image'] = $server_image;
         }
 
-        $fields['arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
+        $fields['_arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
 
         // Save all fields 
         foreach ($fields as $meta_key => $value) {
