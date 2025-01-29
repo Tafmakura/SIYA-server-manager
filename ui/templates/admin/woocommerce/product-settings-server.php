@@ -359,7 +359,7 @@ jQuery(document).ready(function($) {
             
             // Update UI visibility
             $('.arsol_non_sites_server_fields').addClass('hidden');
-            $('.arsol_ecommerce_optimized_field').removeClass('hidden');
+       //     $('.arsol_ecommerce_optimized_field').removeClass('hidden');
             
             // Set provider
             $providerSelect.empty()
@@ -380,7 +380,7 @@ jQuery(document).ready(function($) {
         } else {
             // Non-sites server setup
             $('.arsol_non_sites_server_fields').removeClass('hidden');
-            $('.arsol_ecommerce_optimized_field').addClass('hidden');
+        //    $('.arsol_ecommerce_optimized_field').addClass('hidden');
             setRuncloudCheckboxState(false, false);
             
             // Clear and disable dropdowns
