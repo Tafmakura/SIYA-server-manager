@@ -131,7 +131,7 @@
 
         // Add wrapper div for region and image fields
         ?>
-        <div class="arsol_non_sites_server_fields">
+        <div class="hide_if_arsol_sites_server">
             <?php
             // Region Text Field
             $region = get_post_meta($post->ID, '_arsol_server_region', true);
