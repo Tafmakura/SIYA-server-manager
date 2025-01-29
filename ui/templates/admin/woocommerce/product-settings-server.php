@@ -84,12 +84,15 @@
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_provider_slug',
+            'id'          => 'arsol_server_provider_slug', 
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine($providers, array_map([$slugs, 'get_provider_name'], $providers)),
+            'options'     => array_combine($providers, array_map(function($provider) {
+            return ucfirst($provider); // Capitalize first letter
+            }, $providers)),
             'value'       => $selected_provider,
+            'required'    => true,
             'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
         ));
 

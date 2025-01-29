@@ -4,7 +4,6 @@ namespace Siya\Integrations\WooCommerce;
 
 use Siya\AdminSettings\Slugs;
 use WC_Admin_Notices;
-use WC_Admin_Settings;
 
 defined('ABSPATH') || exit;
 
@@ -146,8 +145,7 @@ class Product {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
                // wc_add_notice(__('Maximum Applications must be at least 1.', 'woocommerce'), 'error');
-                WC_Admin_Settings::add_error( esc_html__( 'Ongeldige licentie sleutel!', 'restaurant-nybe' ) );
-                $has_errors = true; 
+               $has_errors = true; 
             }
         }
 
