@@ -388,8 +388,7 @@ jQuery(document).ready(function($) {
         toggleApplicationsField();
         toggleServerElements();
     }
-
-    /*
+    
     function toggleApplicationsField() {
         var serverType = $('#arsol_server_type').val();
         if (serverType === 'sites_server' || serverType === 'application_server') {
@@ -398,7 +397,6 @@ jQuery(document).ready(function($) {
             $('.arsol_max_applications_field').addClass('hidden');
         }
     }
-        */
 
     function updateProvidersByServerType(serverType) {
         if (!serverType) return;
