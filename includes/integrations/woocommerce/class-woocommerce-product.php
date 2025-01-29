@@ -142,7 +142,7 @@ class Product {
 
         // 4. Applications Validation
         if ($is_sites_server || $server_type === 'application_server') {
-            $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
+            $max_apps = absint($_POST['arsol_max_applications'] ?? 0);
             if ($max_apps > 99) {
                 // Removed the WC_Admin_Notices::add_notice
                 $has_errors = true; 
@@ -181,7 +181,7 @@ class Product {
 
         // Only include max applications if server type is sites_server or application_server
         if ($server_type === 'sites_server' || $server_type === 'application_server') {
-            $fields['_arsol_max_applications'] = absint($_POST['_arsol_max_applications'] ?? 0);
+            $fields['_arsol_max_applications'] = absint($_POST['arsol_max_applications'] ?? 0);
         } else {
             // Delete max applications meta if server type is not sites_server or application_server
             $product->delete_meta_data('_arsol_max_applications');

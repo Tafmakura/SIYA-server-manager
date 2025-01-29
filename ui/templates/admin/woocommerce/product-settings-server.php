@@ -34,7 +34,7 @@
             <?php
             $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
             woocommerce_wp_text_input(array(
-                'id'          => '_arsol_max_applications',
+                'id'          => 'arsol_max_applications',
                 'label'       => __('Maximum applications', 'woocommerce'),
                 'description' => __('Enter the maximum number of applications or sites that can be installed on this server, 0 indicates no restriction.', 'woocommerce'),
                 'desc_tip'    => 'true',
