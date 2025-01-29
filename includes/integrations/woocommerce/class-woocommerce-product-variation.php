@@ -58,12 +58,16 @@ class Variation {
     }
 
     public function save_custom_fields($variation_id, $loop) {
+
+
+        die('You hit the right hook!');
+
+
         $variation = wc_get_product($variation_id);
         if (!$variation) return;
 
         $has_errors = false;
 
-        die('You hit the right hook!');
 
         // Validate and save region
         if (isset($_POST['arsol_server_variation_region'][$loop])) {
