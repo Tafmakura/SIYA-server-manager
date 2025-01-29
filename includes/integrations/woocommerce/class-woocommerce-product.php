@@ -207,7 +207,7 @@ class Product {
             }
         }
 
-        // Set region and image values - only clear if Sites server is being enabled
+        // Set region and image values - only clear if Sites server is being enabled 
         $was_sites_server = $product->get_meta('_arsol_sites_server', true) === 'yes';
 
         if ($is_sites_server && !$was_sites_server) {
