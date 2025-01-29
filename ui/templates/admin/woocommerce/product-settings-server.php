@@ -30,7 +30,7 @@
             'value'       => $server_type ?: ''  // Ensure the value is empty if not set
         ));
         ?>
-        <div class="arsol_max_applications_field">
+        <div class="aarsol_max_applications_field">
             <?php
             $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
             woocommerce_wp_text_input(array(
@@ -227,9 +227,6 @@
     .hidden {
         display: none;
     }
-    .arsol_non_sites_server_fields.hidden {
-        display: none;
-    }
     .arsol_max_applications_field.hidden {
         display: none;
     }
@@ -356,11 +353,7 @@ jQuery(document).ready(function($) {
         if (serverType === 'sites_server') {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-            
-            // Update UI visibility
-          //  $('.arsol_non_sites_server_fields').addClass('hidden');
-       //     $('.arsol_ecommerce_optimized_field').removeClass('hidden');
-            
+
             // Set provider
             $providerSelect.empty()
                           .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
@@ -378,9 +371,8 @@ jQuery(document).ready(function($) {
                 }
             });
         } else {
-            // Non-sites server setup
-         //   $('.arsol_non_sites_server_fields').removeClass('hidden');
-        //    $('.arsol_ecommerce_optimized_field').addClass('hidden');
+
+            // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
             
             // Clear and disable dropdowns
