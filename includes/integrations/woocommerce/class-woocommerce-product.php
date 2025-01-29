@@ -74,10 +74,12 @@ class Product {
     }
 
     public function validate_and_save_fields($product) {
-        // Get post ID from product object
-        $post_id = $product->get_id();
-
-        // Check multiple ways since WooCommerce can be inconsistent
+        // Ensure $product is valid
+        if (is_null($product) || !is_a($product, 'WC_Product')) {
+            return $product; // Return early if $product is not valid
+        }
+    
+        // Check if the product is valid and handle the validation process
         $is_server = false;
         
         // Check POST data
@@ -91,21 +93,21 @@ class Product {
         if (!$is_server) {
             $is_server = $product->get_meta('_arsol_server') === 'yes';
         }
-
+    
         // If not a server product, return early
         if (!$is_server) {
             return $product;
         }
-
+    
         $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
         $is_sites_server = $server_type === 'sites_server';
-
+    
         // 1. Required Fields Validation
         $required_fields = [
             'arsol_server_type' => __('Server Type', 'woocommerce')
         ];
-
+    
         // Add provider fields only if not sites server
         if (!$is_sites_server) {
             $required_fields += [
@@ -114,20 +116,20 @@ class Product {
                 'arsol_server_plan_slug' => __('Server Plan', 'woocommerce')
             ];
         }
-
+    
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
                 wc_add_notice(sprintf(__('%s is required.', 'woocommerce'), $label), 'error');
                 $has_errors = true;
             }
         }
-
+    
         // 2. Pattern Validation
         $pattern_fields = [
             'arsol_server_region' => __('Server Region', 'woocommerce'),
             'arsol_server_image' => __('Server Image', 'woocommerce')
         ];
-
+    
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
@@ -135,14 +137,14 @@ class Product {
                 $has_errors = true;
             }
         }
-
+    
         // 3. Length Validation
         $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
         if (strlen($region) > 50) {
             wc_add_notice(__('Server Region cannot exceed 50 characters.', 'woocommerce'), 'error');
             $has_errors = true;
         }
-
+    
         // 4. Applications Validation
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
@@ -151,13 +153,13 @@ class Product {
                 $has_errors = true;
             }
         }
-
+    
         if ($has_errors) {
             // Add error notice instead of redirecting
             wc_add_notice(__('Validation failed: Please check the server settings.', 'woocommerce'), 'error');
             return false;
         }
-
+    
         // Save all fields if validation passes
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
@@ -167,7 +169,7 @@ class Product {
             '_arsol_sites_server' => $is_sites_server ? 'yes' : 'no',
             '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
         ];
-
+    
         // Only include max applications if server type is sites_server or application_server
         if ($server_type === 'sites_server' || $server_type === 'application_server') {
             $fields['_arsol_max_applications'] = absint($_POST['_arsol_max_applications'] ?? 0);
@@ -175,7 +177,7 @@ class Product {
             // Delete max applications meta if server type is not sites_server or application_server
             $product->delete_meta_data('_arsol_max_applications');
         }
-
+    
         // Get existing values for region and image
         $existing_region = $product->get_meta('_arsol_server_region', true);
         $existing_image = $product->get_meta('_arsol_server_image', true);
@@ -183,7 +185,7 @@ class Product {
         // Handle region and image fields
         $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
         $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
-
+    
         // Only validate if fields are not empty and were modified
         if (!empty($region) && $region !== $existing_region) {
             if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
@@ -195,10 +197,10 @@ class Product {
                 return;
             }
         }
-
+    
         // Set region and image values - only clear if Sites server is being enabled
         $was_sites_server = $product->get_meta('_arsol_sites_server', true) === 'yes';
-
+    
         if ($is_sites_server && !$was_sites_server) {
             // Only clear values when transitioning to Sites server
             $fields['arsol_server_region'] = '';
@@ -208,22 +210,22 @@ class Product {
             $fields['arsol_server_region'] = $region;
             $fields['arsol_server_image'] = $server_image;
         }
-
+    
         $fields['arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
-
+    
         // Ensure Runcloud is saved as 'yes' if server type is 'sites_server' 
         if ($is_sites_server) {
             $product->update_meta_data('_arsol_server_manager_required', 'yes');
         }
-
+    
         // Save all fields 
         foreach ($fields as $meta_key => $value) {
             $product->update_meta_data($meta_key, $value);
         }
-
+    
         return $product;
     }
-
+    
     public function display_admin_notices() {
         // Display notices in the admin area
         if (!empty($this->validation_errors)) {
