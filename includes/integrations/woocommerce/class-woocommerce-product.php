@@ -199,6 +199,9 @@ class Product {
     public function validate_fields($product) {
         // Get post ID from product object
         $post_id = $product->get_id();
+
+        die('You hit the right hook!');
+
         
         // Check if product has server option enabled using post data (not meta)
         if (!isset($_POST['_arsol_server']) || $_POST['_arsol_server'] !== 'yes') {
