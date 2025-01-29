@@ -201,7 +201,7 @@ class Product {
         $post_id = $product->get_id();
 
         // Check if product has server option enabled using post data (not meta)
-        if (!isset($_POST['_arsol_server']) || $_POST['_arsol_server'] !== 'yes') {
+        if (!isset($_POST['arsol_server']) || $_POST['arsol_server'] !== 'yes') {
             return $product;
         }
 
