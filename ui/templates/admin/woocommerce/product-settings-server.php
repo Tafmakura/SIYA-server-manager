@@ -58,7 +58,7 @@
 
         // Initialize Runcloud checkbox
         woocommerce_wp_checkbox(array(
-            'id'          => '_arsol_server_manager_required',
+            'id'          => 'arsol_server_manager_required',
             'label'       => __('Runcloud', 'woocommerce'),
             'description' => __('Connect this server to Runcloud server manager.', 'woocommerce'),
             'desc_tip'    => 'true',
