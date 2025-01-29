@@ -8,13 +8,13 @@ class Variation {
     
     public function __construct() {
         // Display fields
-        add_action('woocommerce_variation_options', [$this, 'add_custom_fields'], 10, 3);
+      //  add_action('woocommerce_variation_options', [$this, 'add_custom_fields'], 10, 3);
         
         // Save fields
-        add_action('woocommerce_save_product_variation', [$this, 'save_custom_fields'], 10, 2);
+     //   add_action('woocommerce_save_product_variation', [$this, 'save_custom_fields'], 10, 2);
         
         // Load variation data
-        add_filter('woocommerce_available_variation', [$this, 'load_variation_fields'], 10, 3);
+   //     add_filter('woocommerce_available_variation', [$this, 'load_variation_fields'], 10, 3);
     }
 
     public function add_custom_fields($loop, $variation_data, $variation) {

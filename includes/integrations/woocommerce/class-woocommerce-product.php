@@ -17,20 +17,6 @@ class Product {
         
         // Validation and save hook - run before saving but after product init
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
-        
-        // Add filter to prevent saving on validation failure
-        add_filter('pre_post_update', [$this, 'prevent_save_on_validation_error'], 10, 2);
-    }
-
-    // Add new method to prevent saving
-    public function prevent_save_on_validation_error($post_ID, $data) {
-        if (isset($_POST['action']) && $_POST['action'] === 'editpost') {
-            if (isset($this->validation_errors) && !empty($this->validation_errors)) {
-                wp_die(__('Validation failed. Please check the server settings.', 'woocommerce'));
-                return false;
-            }
-        }
-        return $data;
     }
 
     public function init() {
@@ -81,16 +67,18 @@ class Product {
     public function validate_and_save_fields($product) {
         // Early validation
         if (!$this->validate_server_fields($product)) {
-            $this->validation_errors[] = __('Server validation failed. Changes were not saved.', 'woocommerce');
+            // Add error notice
             WC_Admin_Notices::add_custom_notice(
                 'validation_failed', 
                 __('Server validation failed. Changes were not saved.', 'woocommerce')
             );
+            // Prevent save by returning false
             return false;
         }
 
-        // If validation passes, save the fields
-        return $this->save_server_fields($product);
+        // Continue with save if validation passes
+        $this->save_server_fields($product);
+        return $product;
     }
 
     private function validate_server_fields($product) {
@@ -176,7 +164,6 @@ class Product {
         if ($has_errors) {
             // Add error notice instead of redirecting
             WC_Admin_Notices::add_custom_notice('custom_error', __('Validation failed: Please check the server settings.', 'woocommerce'));
-            $this->validation_errors[] = __('Validation failed: Please check the server settings.', 'woocommerce');
             return false;
         }
 
@@ -184,11 +171,6 @@ class Product {
     }
 
     private function save_server_fields($product) {
-        // Early return if there are validation errors
-        if (!empty($this->validation_errors)) {
-            return false;
-        }
-
         // Save all fields if validation passes
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
