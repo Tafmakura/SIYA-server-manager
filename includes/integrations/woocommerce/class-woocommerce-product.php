@@ -148,10 +148,8 @@ class Product {
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($product->get_meta('_arsol_max_applications', true));
             if ($max_apps < 1) {
-                WC_Admin_Notices::add_custom_notice(
-                    'max_apps_error',
-                    __('Maximum applications must be at least 1.', 'woocommerce')
-                );
+                die('here');
+                WC_Admin_Notices::add_custom_notice('custom_error', __('Maximum Applications must be at least 1.', 'woocommerce'));
                 $has_errors = true;
             }
         }
