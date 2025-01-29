@@ -66,7 +66,7 @@
             'value'       => $is_server_manager ? 'yes' : 'no' // Use saved value directly
         ));
         ?>
-        <div class="arsol_ecommerce_optimized_field show_if_aarsol_sites_server">
+        <div class="arsol_ecommerce_optimized_field show_if_arsol_sites_server">
             <?php
             woocommerce_wp_checkbox(array(
                 'id'          => 'arsol_ecommerce_optimized',
