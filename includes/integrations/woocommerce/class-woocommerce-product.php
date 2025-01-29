@@ -3,13 +3,12 @@
 namespace Siya\Integrations\WooCommerce;
 
 use Siya\AdminSettings\Slugs;
-use WC_Data_Exception;
 use WC_Admin_Notices;
 
 defined('ABSPATH') || exit;
 
 class Product {
-   
+
     protected $validation_errors = [];
 
     public function __construct() {
@@ -18,6 +17,9 @@ class Product {
         
         // Validation and save hook - run before saving but after product init
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
+
+        // Ensure notices are printed in the admin area
+        add_action('woocommerce_admin_notices', [$this, 'display_admin_notices']);
     }
 
     public function init() {
@@ -145,8 +147,7 @@ class Product {
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
-                WC_Admin_Notices::add_custom_notice('custom_error', __('Custom field cannot be empty.', 'woocommerce'));
-                return false;
+                wc_add_notice(__('Maximum Applications must be at least 1.', 'woocommerce'), 'error');
                 $has_errors = true;
             }
         }
@@ -220,30 +221,17 @@ class Product {
             $product->update_meta_data($meta_key, $value);
         }
 
-        $additional_groups = isset($_POST['_arsol_additional_server_groups'])
-            ? array_map('sanitize_text_field', $_POST['_arsol_additional_server_groups'])
-            : [];
-        $product->update_meta_data('_arsol_additional_server_groups', $additional_groups);
-
-        $server_groups = isset($_POST['arsol_server_groups'])
-            ? array_map('sanitize_text_field', $_POST['arsol_server_groups'])
-            : [];
-        $product->update_meta_data('arsol_server_groups', $server_groups);
-
-        $assigned_server_groups = isset($_POST['_arsol_assigned_server_groups'])
-            ? array_map('intval', $_POST['_arsol_assigned_server_groups'])
-            : [];
-        $product->update_meta_data('_arsol_assigned_server_groups', $assigned_server_groups);
-
-        // Save assigned server tags
-        $assigned_server_tags = isset($_POST['_arsol_assigned_server_tags'])
-            ? array_map('intval', $_POST['_arsol_assigned_server_tags'])
-            : [];
-        $product->update_meta_data('_arsol_assigned_server_tags', $assigned_server_tags);
-
-        $product->save();
-
         return $product;
     }
 
+    public function display_admin_notices() {
+        // Display notices in the admin area
+        if (!empty($this->validation_errors)) {
+            foreach ($this->validation_errors as $error) {
+                echo '<div class="notice notice-error"><p>' . esc_html($error) . '</p></div>';
+            }
+        }
+    }
+
 }
+
