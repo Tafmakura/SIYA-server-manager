@@ -95,7 +95,8 @@ class Variation {
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
                 wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
                    
-                echo "Invalid server image. Only letters, numbers, and hyphens allowed.";
+                die('You hit the right hook!');
+
                 
                 $has_errors = true;
                 }
