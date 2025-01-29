@@ -152,8 +152,8 @@ class Product {
         }
 
         if ($has_errors) {
-            // Add error to product object instead of redirecting
-          //  $product->add_error('Validation failed: Please check the server settings.');
+            // Add error notice instead of redirecting
+            wc_add_notice(__('Validation failed: Please check the server settings.', 'woocommerce'), 'error');
             return false;
         }
 
@@ -172,12 +172,12 @@ class Product {
             $fields['_arsol_max_applications'] = absint($_POST['_arsol_max_applications'] ?? 0);
         } else {
             // Delete max applications meta if server type is not sites_server or application_server
-            delete_post_meta($post_id, '_arsol_max_applications');
+            $product->delete_meta_data('_arsol_max_applications');
         }
 
         // Get existing values for region and image
-        $existing_region = get_post_meta($post_id, '_arsol_server_region', true);
-        $existing_image = get_post_meta($post_id, '_arsol_server_image', true);
+        $existing_region = $product->get_meta('_arsol_server_region', true);
+        $existing_image = $product->get_meta('_arsol_server_image', true);
         
         // Handle region and image fields
         $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
@@ -196,7 +196,7 @@ class Product {
         }
 
         // Set region and image values - only clear if Sites server is being enabled
-        $was_sites_server = get_post_meta($post_id, '_arsol_sites_server', true) === 'yes';
+        $was_sites_server = $product->get_meta('_arsol_sites_server', true) === 'yes';
 
         if ($is_sites_server && !$was_sites_server) {
             // Only clear values when transitioning to Sites server
@@ -212,29 +212,31 @@ class Product {
 
         // Save all fields
         foreach ($fields as $meta_key => $value) {
-            update_post_meta($post_id, $meta_key, $value);
+            $product->update_meta_data($meta_key, $value);
         }
 
         $additional_groups = isset($_POST['_arsol_additional_server_groups'])
             ? array_map('sanitize_text_field', $_POST['_arsol_additional_server_groups'])
             : [];
-        update_post_meta($post_id, '_arsol_additional_server_groups', $additional_groups);
+        $product->update_meta_data('_arsol_additional_server_groups', $additional_groups);
 
         $server_groups = isset($_POST['arsol_server_groups'])
             ? array_map('sanitize_text_field', $_POST['arsol_server_groups'])
             : [];
-        update_post_meta($post_id, 'arsol_server_groups', $server_groups);
+        $product->update_meta_data('arsol_server_groups', $server_groups);
 
         $assigned_server_groups = isset($_POST['_arsol_assigned_server_groups'])
             ? array_map('intval', $_POST['_arsol_assigned_server_groups'])
             : [];
-        update_post_meta($post_id, '_arsol_assigned_server_groups', $assigned_server_groups);
+        $product->update_meta_data('_arsol_assigned_server_groups', $assigned_server_groups);
 
         // Save assigned server tags
         $assigned_server_tags = isset($_POST['_arsol_assigned_server_tags'])
             ? array_map('intval', $_POST['_arsol_assigned_server_tags'])
             : [];
-        update_post_meta($post_id, '_arsol_assigned_server_tags', $assigned_server_tags);
+        $product->update_meta_data('_arsol_assigned_server_tags', $assigned_server_tags);
+
+        $product->save();
 
         return $product;
     }
