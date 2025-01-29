@@ -10,7 +10,7 @@
             </div>
         </div>
         <?php
-        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
+        $server_type = $product->get_meta('_arsol_server_type');
         $all_types = [
             'sites_server'          => __('Sites Server', 'woocommerce'),
             'application_server'    => __('Application Server', 'woocommerce'),
@@ -22,7 +22,7 @@
         ];
         $enabled_types = array_intersect_key($all_types, array_flip($enabled_server_types));
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_type',
+            'id'          => 'arsol_server_type', // Keep ID without underscore
             'label'       => __('Server Type', 'woocommerce'),
             'description' => __('Select the server type.', 'woocommerce'),
             'desc_tip'    => true,
@@ -34,7 +34,7 @@
             <?php
             $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
             woocommerce_wp_text_input(array(
-                'id'          => '_arsol_max_applications',
+                'id'          => 'arsol_max_applications', // Keep ID without underscore
                 'label'       => __('Maximum applications', 'woocommerce'),
                 'description' => __('Enter the maximum number of applications or sites that can be installed on this server, 0 indicates no restriction.', 'woocommerce'),
                 'desc_tip'    => 'true',
@@ -53,8 +53,8 @@
         </div>
         <?php
         $is_sites_server = $server_type === 'sites_server';
-        $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
-        $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
+        $is_ecommerce = $product->get_meta('_arsol_ecommerce_optimized') === 'yes';
+        $is_server_manager = $product->get_meta('_arsol_server_manager_required') === 'yes';
 
         // Initialize Runcloud checkbox
         woocommerce_wp_checkbox(array(
@@ -84,16 +84,18 @@
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_provider_slug', 
+            'id'          => 'arsol_server_provider_slug', // Keep ID without underscore
             'label'       => __('Server provider', 'woocommerce'),
-            'description' => __('Select the server provider.', 'woocommerce'),
+            'description' => __('Select the server provider.', 'woocommerce'), 
             'desc_tip'    => true,
             'options'     => array_combine($providers, array_map(function($provider) {
             return ucfirst($provider); // Capitalize first letter
             }, $providers)),
             'value'       => $selected_provider,
-            'required'    => true,
-            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
+            'custom_attributes' => array(
+                'disabled' => 'disabled', // Disable on load
+                'required' => 'required'
+            )
         ));
 
         // Group Dropdown
@@ -101,7 +103,7 @@
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_plan_group_slug',
+            'id'          => 'arsol_server_plan_group_slug', // Keep ID without underscore
             'label'       => __('Server plan group', 'woocommerce'),
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
@@ -120,7 +122,7 @@
         }
 
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_plan_slug',
+            'id'          => 'arsol_server_plan_slug', // Keep ID without underscore
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
@@ -136,7 +138,7 @@
             // Region Text Field
             $region = get_post_meta($post->ID, '_arsol_server_region', true);
             woocommerce_wp_text_input(array(
-                'id'          => 'arsol_server_region',
+                'id'          => 'arsol_server_region', // Keep ID without underscore
                 'label'       => __('Server region (optional)', 'woocommerce'),
                 'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
                 'desc_tip'    => true,
@@ -150,7 +152,7 @@
             // Server Image Text Field
             $server_image = get_post_meta($post->ID, '_arsol_server_image', true);
             woocommerce_wp_text_input(array(
-                'id'          => 'arsol_server_image',
+                'id'          => 'arsol_server_image', // Keep ID without underscore
                 'label'       => __('Server image (optional)', 'woocommerce'),
                 'description' => __('Enter the server image identifier. Only letters, numbers and hyphens allowed.', 'woocommerce'),
                 'desc_tip'    => true,
