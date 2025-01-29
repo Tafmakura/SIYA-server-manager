@@ -68,6 +68,9 @@ class Variation {
             $region = sanitize_text_field($_POST['arsol_server_variation_region'][$loop]);
             
             if (!empty($region)) {
+
+                die('You hit the right hook!');
+
                 if (strlen($region) > 15) {
                     wc_add_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
                     $has_errors = true;
