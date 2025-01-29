@@ -151,8 +151,8 @@ class Product {
         }
 
         if ($has_errors) {
-            // Add error to product object instead of redirecting
-            $product->add_error('Validation failed: Please check the server settings.');
+            // Add error notice instead of redirecting
+            wc_add_notice(__('Validation failed: Please check the server settings.', 'woocommerce'), 'error');
             return false;
         }
 
