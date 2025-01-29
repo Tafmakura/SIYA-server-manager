@@ -93,10 +93,11 @@ class Variation {
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
-                    \WC_Admin_Settings::add_error(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'));
-                    wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
-                    $has_errors = true;
-                    return;
+                wc_add_notice(__('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce'), 'error');
+                   
+                echo "Invalid server image. Only letters, numbers, and hyphens allowed.";
+                
+                $has_errors = true;
                 }
             }
 
