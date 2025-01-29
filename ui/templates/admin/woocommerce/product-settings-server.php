@@ -30,7 +30,7 @@
             'value'       => $server_type ?: ''  // Ensure the value is empty if not set
         ));
         ?>
-        <div class="aarsol_max_applications_field show_if_arsol_application_server show_if_arsol_sites_server">
+        <div class="aarsol_max_applications_field show_if_arsol_application_server show_if_arsol_sites_server hidden">
             <?php
             $max_applications = get_post_meta($post->ID, '_arsol_max_applications', true);
             woocommerce_wp_text_input(array(
