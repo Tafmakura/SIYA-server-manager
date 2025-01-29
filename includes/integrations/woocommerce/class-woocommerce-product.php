@@ -215,7 +215,7 @@ class Product {
             $product->update_meta_data('_arsol_server_manager_required', 'yes');
         }
 
-        // Save all fields
+        // Save all fields 
         foreach ($fields as $meta_key => $value) {
             $product->update_meta_data($meta_key, $value);
         }
