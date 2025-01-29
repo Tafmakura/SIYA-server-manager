@@ -143,7 +143,7 @@ class Product {
         // 4. Applications Validation
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
-            if ($max_apps < 1) {
+            if ($max_apps > 99) {
                 // Removed the WC_Admin_Notices::add_notice
                 $has_errors = true; 
             }
@@ -159,20 +159,24 @@ class Product {
         }
 
         if ($is_sites_server) {
-            // Override provider and group with WP options for sites server
-            $_POST['arsol_server_provider_slug'] = get_option('siya_wp_server_provider');
-            $_POST['arsol_server_plan_group_slug'] = get_option('siya_wp_server_group');
+            // For sites server, use WP options directly
+            $fields = [
+                '_arsol_server_provider_slug' => get_option('siya_wp_server_provider'),
+                '_arsol_server_plan_group_slug' => get_option('siya_wp_server_group'),
+                '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
+                '_arsol_server_manager_required' => 'yes', // Always yes for sites server
+                '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
+                '_arsol_server_type' => 'sites_server'
+            ];
+        } else {
+            // Normal field handling for other server types
+            $fields = [
+                '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
+                '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
+                '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
+                '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
+            ];
         }
-
-        // Save all fields if validation passes
-        $fields = [
-            '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
-            '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
-            '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
-            '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
-            '_arsol_sites_server' => $is_sites_server ? 'yes' : 'no',
-            '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
-        ];
 
         // Only include max applications if server type is sites_server or application_server
         if ($server_type === 'sites_server' || $server_type === 'application_server') {
@@ -216,11 +220,6 @@ class Product {
         }
 
         $fields['arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
-
-        // Ensure Runcloud is saved as 'yes' if server type is 'sites_server' 
-        if ($is_sites_server) {
-            $product->update_meta_data('_arsol_server_manager_required', 'yes');
-        }
 
         // Save all fields 
         foreach ($fields as $meta_key => $value) {
