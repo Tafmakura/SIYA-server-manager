@@ -358,7 +358,7 @@ jQuery(document).ready(function($) {
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
             
             // Update UI visibility
-            $('.arsol_non_sites_server_fields').addClass('hidden');
+          //  $('.arsol_non_sites_server_fields').addClass('hidden');
        //     $('.arsol_ecommerce_optimized_field').removeClass('hidden');
             
             // Set provider
@@ -379,7 +379,7 @@ jQuery(document).ready(function($) {
             });
         } else {
             // Non-sites server setup
-            $('.arsol_non_sites_server_fields').removeClass('hidden');
+         //   $('.arsol_non_sites_server_fields').removeClass('hidden');
         //    $('.arsol_ecommerce_optimized_field').addClass('hidden');
             setRuncloudCheckboxState(false, false);
             
