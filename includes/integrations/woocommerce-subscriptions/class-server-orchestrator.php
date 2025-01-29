@@ -142,7 +142,7 @@ class ServerOrchestrator {
                     $circuit_breaker_instance->test_circuit($subscription);
                 }
             }
-            error_log('#PFC006 [SIYA Server Manager - ServerOrchestrator] Circuit breaker test completed successfully');
+            error_log('#PFC006 [SIYA Server Manager - ServerOrchestrator] Preflight check completed');
 
         } catch (\Exception $e) {
 
