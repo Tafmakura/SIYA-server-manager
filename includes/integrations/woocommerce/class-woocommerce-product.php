@@ -147,7 +147,7 @@ class Product {
             if ($max_apps < 1) {
                // wc_add_notice(__('Maximum Applications must be at least 1.', 'woocommerce'), 'error');
                 WC_Admin_Settings::add_error( esc_html__( 'Ongeldige licentie sleutel!', 'restaurant-nybe' ) );
-                $has_errors = true;
+                $has_errors = true; 
             }
         }
 
