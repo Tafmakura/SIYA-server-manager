@@ -247,26 +247,18 @@ class Product {
             $product->update_meta_data($meta_key, $value);
         }
 
-        $additional_groups = isset($_POST['_arsol_additional_server_groups'])
-            ? array_map('sanitize_text_field', $_POST['_arsol_additional_server_groups'])
-            : [];
-        $product->update_meta_data('_arsol_additional_server_groups', $additional_groups);
-
-        $server_groups = isset($_POST['arsol_server_groups'])
-            ? array_map('sanitize_text_field', $_POST['arsol_server_groups'])
-            : [];
-        $product->update_meta_data('arsol_server_groups', $server_groups);
-
-        $assigned_server_groups = isset($_POST['_arsol_assigned_server_groups'])
-            ? array_map('intval', $_POST['_arsol_assigned_server_groups'])
-            : [];
-        $product->update_meta_data('_arsol_assigned_server_groups', $assigned_server_groups);
-
-        // Save assigned server tags
-        $assigned_server_tags = isset($_POST['_arsol_assigned_server_tags'])
-            ? array_map('intval', $_POST['_arsol_assigned_server_tags'])
-            : [];
-        $product->update_meta_data('_arsol_assigned_server_tags', $assigned_server_tags);
+        // Save server groups and tags
+        $product->update_meta_data('_arsol_additional_server_groups', 
+            isset($_POST['arsol_additional_server_groups']) ? array_map('sanitize_text_field', $_POST['arsol_additional_server_groups']) : []
+        );
+        
+        $product->update_meta_data('_arsol_assigned_server_groups',
+            isset($_POST['arsol_assigned_server_groups']) ? array_map('intval', $_POST['arsol_assigned_server_groups']) : []
+        );
+        
+        $product->update_meta_data('_arsol_assigned_server_tags',
+            isset($_POST['arsol_assigned_server_tags']) ? array_map('intval', $_POST['arsol_assigned_server_tags']) : []
+        );
 
         $product->save();
 

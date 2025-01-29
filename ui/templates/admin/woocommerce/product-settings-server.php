@@ -173,8 +173,8 @@
         <p class="form-field">
             <label><?php _e('Add server to groups', 'woocommerce'); ?></label>
             <select
-                id="_arsol_assigned_server_groups"
-                name="_arsol_assigned_server_groups[]"
+                id="arsol_assigned_server_groups"
+                name="arsol_assigned_server_groups[]"
                 class="wc-enhanced-select"
                 multiple="multiple"
                 style="width: 50%;"
@@ -201,8 +201,8 @@
         <p class="form-field">
             <label><?php _e('Add tags to server', 'woocommerce'); ?></label>
             <select
-                id="_arsol_assigned_server_tags"
-                name="_arsol_assigned_server_tags[]"
+                id="arsol_assigned_server_tags"
+                name="arsol_assigned_server_tags[]"
                 class="wc-enhanced-select"
                 multiple="multiple"
                 style="width: 50%;"
