@@ -174,8 +174,8 @@ class Product {
                 '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
                 '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
                 '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
-                '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
-                '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '') // Fixed: Added underscore prefix
+                '_arsol_server_manager_required' => isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no',
+                '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '')
             ];
         }
 
