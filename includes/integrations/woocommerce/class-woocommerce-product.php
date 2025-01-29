@@ -94,6 +94,7 @@ class Product {
             return $product;
         }
 
+
         $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
         $is_sites_server = $server_type === 'sites_server';
@@ -158,6 +159,9 @@ class Product {
             return false;
         }
 
+        // Set WooCOmmerce setting here required server product settings
+        $product->set_sold_individually(true);
+
         if ($is_sites_server) {
             // For sites server, use WP options directly
             $fields = [
@@ -166,7 +170,10 @@ class Product {
                 '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
                 '_arsol_server_manager_required' => 'yes', // Always yes for sites server
                 '_arsol_ecommerce_optimized' => isset($_POST['arsol_ecommerce_optimized']) ? 'yes' : 'no',
-                '_arsol_server_type' => 'sites_server'
+                '_arsol_server_type' => 'sites_server',
+
+                //WooCommerce settings
+                '_subscription_limit' => 'active' // Add subscription limit for sites server
             ];
         } else {
             // Normal field handling for other server types
@@ -221,6 +228,16 @@ class Product {
         }
 
         $fields['_arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
+
+        // Set _sold_individually to 'yes' for all server products
+        if ($is_server) {
+            $product->set_sold_individually(true);
+        }
+
+        // Set _subscription_limit to 'active' for sites_server
+        if ($is_sites_server) {
+            $product->update_meta_data('_subscription_limit', 'active');
+        }
 
         // Save all fields 
         foreach ($fields as $meta_key => $value) {
