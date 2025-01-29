@@ -76,12 +76,9 @@ class Product {
     public function validate_and_save_fields($product) {
         // Get the post ID from the product object
         $post_id = $product->get_id();
-    
-        // Check if the product is marked as a server product
-        $is_server = $product->get_meta('_arsol_server') === 'yes';
-    
-        // If it's not a server product, no validation needed, return the product
-        if (!$is_server) {
+        
+        // Check if product has server option enabled using post data (not meta)
+        if (!isset($_POST['_arsol_server']) || $_POST['_arsol_server'] !== 'yes') {
             return $product;
         }
     
