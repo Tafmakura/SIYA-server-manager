@@ -114,7 +114,7 @@ class Product {
 
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
-                WC_Admin_Notices::add_custom_notice(
+                WC_Admin_Notices::add_notice(
                     'required_field_error_' . $field,
                     sprintf(__('%s is required.', 'woocommerce'), $label)
                 );
@@ -131,7 +131,7 @@ class Product {
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                WC_Admin_Notices::add_custom_notice(
+                WC_Admin_Notices::add_notice(
                     'pattern_error_' . $field,
                     sprintf(__('%s can only contain letters, numbers, and hyphens.', 'woocommerce'), $label)
                 );
@@ -142,7 +142,7 @@ class Product {
         // 3. Length Validation
         $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
         if (strlen($region) > 50) {
-            WC_Admin_Notices::add_custom_notice(
+            WC_Admin_Notices::add_notice(
                 'region_length_error',
                 __('Server Region cannot exceed 50 characters.', 'woocommerce')
             );
@@ -153,7 +153,7 @@ class Product {
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
-                WC_Admin_Notices::add_custom_notice(
+                WC_Admin_Notices::add_notice(
                     'max_apps_error',
                     __('Maximum Applications must be at least 1.', 'woocommerce')
                 );
@@ -163,7 +163,7 @@ class Product {
 
         if ($has_errors) {
             // Add error notice
-            WC_Admin_Notices::add_custom_notice(
+            WC_Admin_Notices::add_notice(
                 'validation_failed',
                 __('Validation failed: Please check the server settings.', 'woocommerce')
             );
@@ -199,14 +199,14 @@ class Product {
         // Only validate if fields are not empty and were modified
         if (!empty($region) && $region !== $existing_region) {
             if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                WC_Admin_Notices::add_custom_notice(
+                WC_Admin_Notices::add_notice(
                     'region_pattern_error',
                     __('Region field can only contain letters, numbers, and hyphens.', 'woocommerce')
                 );
                 return;
             }
             if (strlen($region) > 50) {
-                WC_Admin_Notices::add_custom_notice(
+                WC_Admin_Notices::add_notice(
                     'region_length_error',
                     __('Region field cannot exceed 50 characters.', 'woocommerce')
                 );
