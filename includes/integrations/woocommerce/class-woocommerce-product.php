@@ -210,6 +210,11 @@ class Product {
 
         $fields['arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
 
+        // Ensure Runcloud is saved as 'yes' if server type is 'sites_server'
+        if ($is_sites_server) {
+            $fields['arsol_server_manager_required'] = 'yes';
+        }
+
         // Save all fields
         foreach ($fields as $meta_key => $value) {
             $product->update_meta_data($meta_key, $value);
