@@ -162,7 +162,7 @@ class Product {
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
             '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
             '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
-            'arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
+            '_arsol_server_manager_required' => $is_sites_server ? 'yes' : (isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'),
             '_arsol_sites_server' => $is_sites_server ? 'yes' : 'no',
             '_arsol_ecommerce_optimized' => isset($_POST['_arsol_ecommerce_optimized']) ? 'yes' : 'no',
         ];
@@ -210,9 +210,9 @@ class Product {
 
         $fields['arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
 
-        // Ensure Runcloud is saved as 'yes' if server type is 'sites_server'
+        // Ensure Runcloud is saved as 'yes' if server type is 'sites_server' 
         if ($is_sites_server) {
-            $fields['arsol_server_manager_required'] = 'yes';
+            $product->update_meta_data('_arsol_server_manager_required', 'yes');
         }
 
         // Save all fields
