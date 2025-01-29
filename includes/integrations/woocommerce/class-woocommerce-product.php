@@ -213,6 +213,12 @@ class Product {
             return $product;
         }
 
+        // Debug output to see what's happening
+        error_log('POST data: ' . print_r($_POST, true));
+        error_log('Product meta _arsol_server: ' . $product->get_meta('_arsol_server'));
+
+        die('Validation complete');
+
         $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
         $is_sites_server = $server_type === 'sites_server';
