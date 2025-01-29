@@ -162,6 +162,7 @@ class Product {
                     __('Maximum Applications must be at least 1.', 'woocommerce')
                 );
                 $has_errors = true; 
+                
             }
         }
 
