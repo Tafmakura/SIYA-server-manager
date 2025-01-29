@@ -161,8 +161,11 @@ class Product {
                     'max_apps_error',
                     __('Maximum Applications must be at least 1.', 'woocommerce')
                 );
+
+                die ('DIIIIE!!!!!');
+
                 $has_errors = true; 
-                
+
             }
         }
 
