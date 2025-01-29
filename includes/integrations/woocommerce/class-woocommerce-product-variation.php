@@ -78,14 +78,14 @@ class Variation {
                 if (strlen($region) > 15) {
                     WC_Admin_Notices::add_custom_notice(
                         'region_length_error',
-                        __('Server region cannot exceed 15 characters.', 'woocommerce')
+                        __('Variation server region cannot exceed 15 characters.', 'woocommerce')
                     );
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
                     WC_Admin_Notices::add_custom_notice(
                         'region_pattern_error', 
-                        __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                        __('Invalid variation server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
                     );
                     $has_errors = true;
                 }
@@ -108,14 +108,14 @@ class Variation {
                 if (strlen($image) > 15) {
                     WC_Admin_Notices::add_custom_notice(
                         'image_length_error',
-                        __('Server image cannot exceed 15 characters.', 'woocommerce')
+                        __('Variation server image cannot exceed 15 characters.', 'woocommerce')
                     );
                     $has_errors = true;
                 }
                 if (!preg_match('/^[a-zA-Z0-9-]+$/', $image)) {
                     WC_Admin_Notices::add_custom_notice(
                         'image_pattern_error',
-                        __('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                        __('Invalid variation server image. Only letters, numbers, and hyphens allowed.', 'woocommerce')
                     );
                     $has_errors = true;
                 }
