@@ -72,7 +72,7 @@ class Product {
                 __('Server validation failed. Changes were not saved.', 'woocommerce')
             );
             // Return false to prevent saving
-            wp_die(__('Validation failed. Please check the server settings.', 'woocommerce'));
+          //  wp_die(__('Validation failed. Please check the server settings.', 'woocommerce'));
             return false;
         }
 
