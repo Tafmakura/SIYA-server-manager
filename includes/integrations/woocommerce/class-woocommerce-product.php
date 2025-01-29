@@ -247,15 +247,20 @@ class Product {
             $product->update_meta_data($meta_key, $value);
         }
 
-        // Save server groups and tags
-        $product->update_meta_data('_arsol_assigned_server_groups',
-            isset($_POST['arsol_assigned_server_groups']) ? array_map('intval', $_POST['arsol_assigned_server_groups']) : []
-        );
-        
-        $product->update_meta_data('_arsol_assigned_server_tags',
-            isset($_POST['arsol_assigned_server_tags']) ? array_map('intval', $_POST['arsol_assigned_server_tags']) : []
-        );
+        // Save server groups and tags with better array handling
+        $assigned_server_groups = !empty($_POST['arsol_assigned_server_groups']) && is_array($_POST['arsol_assigned_server_groups']) 
+            ? array_map('intval', $_POST['arsol_assigned_server_groups']) 
+            : [];
+            
+        $assigned_server_tags = !empty($_POST['arsol_assigned_server_tags']) && is_array($_POST['arsol_assigned_server_tags'])
+            ? array_map('intval', $_POST['arsol_assigned_server_tags'])
+            : [];
+            
+        // Update meta with explicit array values
+        $product->update_meta_data('_arsol_assigned_server_groups', $assigned_server_groups);
+        $product->update_meta_data('_arsol_assigned_server_tags', $assigned_server_tags);
 
+        // Make sure to save
         $product->save();
 
         return $product;
