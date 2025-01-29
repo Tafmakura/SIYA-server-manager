@@ -63,6 +63,8 @@ class Variation {
 
         $has_errors = false;
 
+        die('You hit the right hook!');
+
         // Validate and save region
         if (isset($_POST['arsol_server_variation_region'][$loop])) {
             $region = sanitize_text_field($_POST['arsol_server_variation_region'][$loop]);
