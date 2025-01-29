@@ -25,10 +25,13 @@ class Variation {
 
         error_log('variation_object: ' . print_r($variation_object, true));
 
-        // Check if arsol_server is enabled on parent
+        // Check if arsol_server is enabled on parent and get server type
         $parent = wc_get_product($variation_object->get_parent_id());
         $is_server_enabled = $parent ? $parent->get_meta('_arsol_server') === 'yes' : false;
-        $hidden_class = $is_server_enabled ? '' : 'hidden';
+        $server_type = $parent ? $parent->get_meta('_arsol_server_type') : '';
+        
+        // Hide fields if server type is sites_server or if server is not enabled
+        $hidden_class = ($is_server_enabled && $server_type !== 'sites_server') ? '' : 'hidden';
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
