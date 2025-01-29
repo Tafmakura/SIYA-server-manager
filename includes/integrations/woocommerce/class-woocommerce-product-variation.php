@@ -59,10 +59,6 @@ class Variation {
 
     public function save_custom_fields($variation_id, $loop) {
 
-
-        die('You hit the right hook!');
-
-
         $variation = wc_get_product($variation_id);
         if (!$variation) return;
 
@@ -75,7 +71,7 @@ class Variation {
             
             if (!empty($region)) {
 
-                die('You hit the right hook!');
+ 
 
                 if (strlen($region) > 15) {
                     wc_add_notice(__('Server region cannot exceed 15 characters.', 'woocommerce'), 'error');
@@ -98,7 +94,7 @@ class Variation {
             
             if (!empty($image)) {
 
-                die('You hit the right hook!');
+ 
 
 
                 if (strlen($image) > 15) {
