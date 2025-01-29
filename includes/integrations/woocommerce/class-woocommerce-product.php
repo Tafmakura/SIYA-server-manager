@@ -16,7 +16,7 @@ class Product {
         add_action('init', [$this, 'init']);
         
         // Validation and save hook - run before saving but after product init
-        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
+        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 75);
     }
 
     public function init() {
