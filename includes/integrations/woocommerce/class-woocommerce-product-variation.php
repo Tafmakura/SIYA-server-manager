@@ -29,13 +29,13 @@ class Variation {
         $hidden_class = $is_server_enabled ? '' : 'hidden';
 
         woocommerce_wp_text_input([
-            'id'          => "arsol_server_variation_region{$loop}",
-            'name'        => "arsol_server_variation_region[{$loop}]",
+            'id'          => "arsol_server_variation_region{$loop}", // Keep ID without underscore
+            'name'        => "arsol_server_variation_region[{$loop}]", // Keep name without underscore
             'label'       => __('Server region slug (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
+            'value'       => $variation_object->get_meta('_arsol_server_variation_region'), // Use underscore for meta
             'custom_attributes' => [
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
@@ -43,13 +43,13 @@ class Variation {
         ]);
 
         woocommerce_wp_text_input([
-            'id'          => "arsol_server_variation_image{$loop}",
-            'name'        => "arsol_server_variation_image[{$loop}]",
+            'id'          => "arsol_server_variation_image{$loop}", // Keep ID without underscore
+            'name'        => "arsol_server_variation_image[{$loop}]", // Keep name without underscore
             'label'       => __('Server image slug (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-last show_if_arsol_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-            'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
+            'value'       => $variation_object->get_meta('_arsol_server_variation_image'), // Use underscore for meta
             'custom_attributes' => [
                 'pattern' => '^[a-zA-Z0-9-]+$',
                 'title'   => 'Only letters, numbers and hyphens allowed'
@@ -65,7 +65,7 @@ class Variation {
         $has_errors = false;
 
         // Validate and save region
-        if (isset($_POST['arsol_server_variation_region'][$loop])) {
+        if (isset($_POST['arsol_server_variation_region'][$loop])) { // Read from non-prefixed POST field
             $region = sanitize_text_field($_POST['arsol_server_variation_region'][$loop]);
             
             if (!empty($region)) {
@@ -80,12 +80,12 @@ class Variation {
             }
 
             if (!$has_errors) {
-                $variation->update_meta_data('_arsol_server_variation_region', $region);
+                $variation->update_meta_data('_arsol_server_variation_region', $region); // Save with underscore
             }
         }
 
         // Validate and save image
-        if (isset($_POST['arsol_server_variation_image'][$loop])) {
+        if (isset($_POST['arsol_server_variation_image'][$loop])) { // Read from non-prefixed POST field
             $image = sanitize_text_field($_POST['arsol_server_variation_image'][$loop]);
             
             if (!empty($image)) {
@@ -100,7 +100,7 @@ class Variation {
             }
 
             if (!$has_errors) {
-                $variation->update_meta_data('_arsol_server_variation_image', $image);
+                $variation->update_meta_data('_arsol_server_variation_image', $image); // Save with underscore
             }
         }
 
@@ -111,8 +111,8 @@ class Variation {
 
     public function load_variation_fields($variation_data, $product, $variation) {
         // Add custom fields to variation data with arsol prefix
-        $variation_data['arsol_server_variation_region'] = $variation->get_meta('_arsol_server_variation_region');
-        $variation_data['arsol_server_variation_image'] = $variation->get_meta('_arsol_server_variation_image');
+        $variation_data['arsol_server_variation_region'] = $variation->get_meta('_arsol_server_variation_region'); // Use underscore for get_meta
+        $variation_data['arsol_server_variation_image'] = $variation->get_meta('_arsol_server_variation_image'); // Use underscore for get_meta
         
         return $variation_data;
     }
