@@ -15,8 +15,8 @@ class Product {
         // Basic hooks
         add_action('init', [$this, 'init']);
         
-        // Validation and save hook - run before saving but after product init
-        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
+        // Change priority to 1 to run before other processes
+        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 1);
     }
 
     public function init() {
@@ -67,12 +67,12 @@ class Product {
     public function validate_and_save_fields($product) {
         // Early validation
         if (!$this->validate_server_fields($product)) {
-            // Add error notice
             WC_Admin_Notices::add_custom_notice(
                 'validation_failed', 
                 __('Server validation failed. Changes were not saved.', 'woocommerce')
             );
-            // Prevent save by returning false
+            // Return false to prevent saving
+            wp_die(__('Validation failed. Please check the server settings.', 'woocommerce'));
             return false;
         }
 
@@ -162,8 +162,7 @@ class Product {
         }
 
         if ($has_errors) {
-            // Add error notice instead of redirecting
-            WC_Admin_Notices::add_custom_notice('custom_error', __('Validation failed: Please check the server settings.', 'woocommerce'));
+            $this->validation_errors[] = __('Validation failed: Please check the server settings.', 'woocommerce');
             return false;
         }
 
@@ -171,6 +170,11 @@ class Product {
     }
 
     private function save_server_fields($product) {
+        // Early return if there are validation errors
+        if (!empty($this->validation_errors)) {
+            return false;
+        }
+
         // Save all fields if validation passes
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
