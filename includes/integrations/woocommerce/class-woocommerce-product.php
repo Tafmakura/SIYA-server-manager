@@ -15,18 +15,8 @@ class Product {
         // Basic hooks
         add_action('init', [$this, 'init']);
         
-        // Change priority to 1 to run before other processes
-        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 1);
-        
-        // Remove "Product Updated" notice if validation fails
-        add_filter('woocommerce_add_success_notice', [$this, 'maybe_prevent_success_notice'], 1, 2);
-    }
-
-    public function maybe_prevent_success_notice($message, $notice) {
-        if (!empty($this->validation_errors)) {
-            return false;
-        }
-        return $message;
+        // Validation and save hook - run before saving but after product init
+        add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 5);
     }
 
     public function init() {
@@ -77,21 +67,20 @@ class Product {
     public function validate_and_save_fields($product) {
         // Early validation
         if (!$this->validate_server_fields($product)) {
-            // Remove any existing success notices
-            WC_Admin_Meta_Boxes::remove_notice('product_updated');
-            
-            // Add our error notice
+            // Add error notice
             WC_Admin_Notices::add_custom_notice(
                 'validation_failed', 
                 __('Server validation failed. Changes were not saved.', 'woocommerce')
             );
-            
-            // Prevent save by returning null
-            return null;
+            // Prevent save by returning false
+            return false;
         }
 
         // Continue with save if validation passes
-        return $this->save_server_fields($product);
+        $this->save_server_fields($product);
+
+        return $product;
+
     }
 
     private function validate_server_fields($product) {
@@ -164,18 +153,18 @@ class Product {
             $has_errors = true;
         }
 
-        // 4. Applications Validation.
+        // 4. Applications Validation
         if ($is_sites_server || $server_type === 'application_server') {
             $max_apps = absint($_POST['_arsol_max_applications'] ?? 0);
             if ($max_apps < 1) {
-                //die('here');
                 WC_Admin_Notices::add_custom_notice('custom_error', __('Maximum Applications must be at least 1.', 'woocommerce'));
                 $has_errors = true;
             }
         }
 
         if ($has_errors) {
-            $this->validation_errors[] = __('Validation failed: Please check the server settings.', 'woocommerce');
+            // Add error notice instead of redirecting
+            WC_Admin_Notices::add_custom_notice('custom_error', __('Validation failed: Please check the server settings.', 'woocommerce'));
             return false;
         }
 
@@ -183,11 +172,6 @@ class Product {
     }
 
     private function save_server_fields($product) {
-        // Early return if there are validation errors
-        if (!empty($this->validation_errors)) {
-            return false;
-        }
-
         // Save all fields if validation passes
         $fields = [
             '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
