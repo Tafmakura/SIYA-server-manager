@@ -10,7 +10,7 @@
             </div>
         </div>
         <?php
-        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
+        $server_type = $product->get_meta('_arsol_server_type');
         $all_types = [
             'sites_server'          => __('Sites Server', 'woocommerce'),
             'application_server'    => __('Application Server', 'woocommerce'),
@@ -53,8 +53,8 @@
         </div>
         <?php
         $is_sites_server = $server_type === 'sites_server';
-        $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
-        $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
+        $is_ecommerce = $product->get_meta('_arsol_ecommerce_optimized') === 'yes';
+        $is_server_manager = $product->get_meta('_arsol_server_manager_required') === 'yes';
 
         // Initialize Runcloud checkbox
         woocommerce_wp_checkbox(array(
