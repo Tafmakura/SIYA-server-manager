@@ -18,8 +18,12 @@ class Product {
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_fields'], 5);
         
         // Save hooks (should run after validation)
+        add_action('woocommerce_process_product_meta', [$this, 'save_custom_fields'], 10);
         add_action('woocommerce_process_product_meta', [$this, 'save_product_meta'], 15);
         add_action('woocommerce_process_product_meta', [$this, 'save_arsol_server_settings_tab_content'], 20);
+        
+        // UI hooks
+        add_action('woocommerce_product_options_general_product_data', [$this, 'add_custom_fields']);
         
         add_action('admin_notices', [$this, 'display_validation_errors']);
     }
@@ -50,7 +54,7 @@ class Product {
     }
 
     public function save_arsol_server_option_fields($post_ID, $product, $update) {
-        $is_arsol_server = isset($_POST['arsol_server']) ? 'yes' : 'no';
+        $is_arsol_server = isset($_POST['_arsol_server']) ? 'yes' : 'no';
         update_post_meta($post_ID, '_arsol_server', $is_arsol_server); // Save with underscore prefix
     }
 
@@ -166,7 +170,16 @@ class Product {
         update_post_meta($post_id, '_arsol_assigned_server_tags', $assigned_server_tags);
     }
 
-  
+    public function add_custom_fields() {
+        global $post;
+        $slugs = new Slugs();
+        // Add your custom fields here
+    }
+
+    public function save_custom_fields($post_id) {
+        // Save your custom fields here
+    }
+
     /**
      * Save product meta data
      */
@@ -199,32 +212,11 @@ class Product {
     public function validate_fields($product) {
         // Get post ID from product object
         $post_id = $product->get_id();
-
-        // Check multiple ways since WooCommerce can be inconsistent
-        $is_server = false;
         
-        // Check POST data
-        if (isset($_POST['_arsol_server'])) {
-            $is_server = $_POST['_arsol_server'] === 'yes';
-        } else if (isset($_POST['arsol_server'])) {
-            $is_server = $_POST['arsol_server'] === 'yes';
-        }
-        
-        // Fallback to product meta if POST check fails
-        if (!$is_server) {
-            $is_server = $product->get_meta('_arsol_server') === 'yes';
-        }
-
-        // If not a server product, return early
-        if (!$is_server) {
+        // Check if product has server option enabled using post data (not meta)
+        if (!isset($_POST['_arsol_server']) || $_POST['_arsol_server'] !== 'yes') {
             return $product;
         }
-
-        // Debug output to see what's happening
-        error_log('POST data: ' . print_r($_POST, true));
-        error_log('Product meta _arsol_server: ' . $product->get_meta('_arsol_server'));
-
-        die('Validation complete');
 
         $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
