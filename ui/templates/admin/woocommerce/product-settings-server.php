@@ -86,14 +86,16 @@
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_provider_slug', 
             'label'       => __('Server provider', 'woocommerce'),
-            'description' => __('Select the server provider.', 'woocommerce'),
+            'description' => __('Select the server provider.', 'woocommerce'), 
             'desc_tip'    => true,
             'options'     => array_combine($providers, array_map(function($provider) {
             return ucfirst($provider); // Capitalize first letter
             }, $providers)),
             'value'       => $selected_provider,
-            'required'    => true,
-            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
+            'custom_attributes' => array(
+                'disabled' => 'disabled', // Disable on load
+                'required' => 'required'
+            )
         ));
 
         // Group Dropdown
