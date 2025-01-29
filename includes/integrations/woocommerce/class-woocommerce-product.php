@@ -17,6 +17,16 @@ class Product {
         
         // Change priority to 1 to run before other processes
         add_filter('woocommerce_admin_process_product_object', [$this, 'validate_and_save_fields'], 1);
+        
+        // Remove "Product Updated" notice if validation fails
+        add_filter('woocommerce_add_success_notice', [$this, 'maybe_prevent_success_notice'], 1, 2);
+    }
+
+    public function maybe_prevent_success_notice($message, $notice) {
+        if (!empty($this->validation_errors)) {
+            return false;
+        }
+        return $message;
     }
 
     public function init() {
@@ -67,18 +77,21 @@ class Product {
     public function validate_and_save_fields($product) {
         // Early validation
         if (!$this->validate_server_fields($product)) {
+            // Remove any existing success notices
+            WC_Admin_Meta_Boxes::remove_notice('product_updated');
+            
+            // Add our error notice
             WC_Admin_Notices::add_custom_notice(
                 'validation_failed', 
                 __('Server validation failed. Changes were not saved.', 'woocommerce')
             );
-            // Return false to prevent saving
-          //  wp_die(__('Validation failed. Please check the server settings.', 'woocommerce'));
-            return false;
+            
+            // Prevent save by returning null
+            return null;
         }
 
         // Continue with save if validation passes
-        $this->save_server_fields($product);
-        return $product;
+        return $this->save_server_fields($product);
     }
 
     private function validate_server_fields($product) {
