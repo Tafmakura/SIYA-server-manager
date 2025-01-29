@@ -511,6 +511,8 @@ jQuery(document).ready(function($) {
     $('#arsol_server_type').on('change', function() {
         var serverType = $(this).val();
         updateServerTypeFields(serverType);
+        toggleArsolSitesServerElements();
+        toggleArsolApplicationServerElements(); // Add this line
     });
 
     // Initial load
@@ -527,6 +529,8 @@ jQuery(document).ready(function($) {
     // Initial state
     toggleSitesFields();
     toggleApplicationsField();
+    toggleArsolSitesServerElements();
+    toggleArsolApplicationServerElements(); // Add this line
 
     // Ensure Runcloud checkbox is correctly set and disabled on initial load
     if ($('#arsol_server_type').val() === 'sites_server') {
@@ -550,6 +554,30 @@ jQuery(document).ready(function($) {
     // Initial state and change handler
     togglearsol_server_settings_tab();
     $('#arsol_server').on('change', togglearsol_server_settings_tab);
+
+    // Handle sites server element visibility
+    function toggleArsolSitesServerElements() {
+        var $elements = $('.show_if_arsol_sites_server');
+        var serverType = $('#arsol_server_type').val();
+        
+        if (serverType === 'sites_server') {
+            $elements.attr('style', '').removeClass('hidden');
+        } else {
+            $elements.attr('style', 'display: none !important').addClass('hidden');
+        }
+    }
+
+    // Handle application server element visibility
+    function toggleArsolApplicationServerElements() {
+        var $elements = $('.show_if_arsol_application_server');
+        var serverType = $('#arsol_server_type').val();
+        
+        if (serverType === 'application_server') {
+            $elements.attr('style', '').removeClass('hidden');
+        } else {
+            $elements.attr('style', 'display: none !important').addClass('hidden');
+        }
+    }
 });
 </script>
 

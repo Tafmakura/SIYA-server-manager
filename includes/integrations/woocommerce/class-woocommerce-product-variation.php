@@ -60,6 +60,24 @@ class Variation {
                 'title'   => 'Only letters, numbers and hyphens allowed'
             ]
         ]);
+
+        woocommerce_wp_text_input([
+            'id'          => "arsol_server_variation_max_applications{$loop}",
+            'name'        => "arsol_server_variation_max_applications[{$loop}]",
+            'label'       => __('Server max applications (optional override)', 'woocommerce'),
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server show_if_arsol_sites_server show_if_arsol_application_server {$hidden_class}",
+            'desc_tip'    => true,
+            'description' => __('Enter the maximum number of applications allowed for this server variation.', 'woocommerce'),
+            'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
+            'custom_attributes' => [
+            'min' => '0',
+            'max' => '999',
+            'step' => '1',
+            'required' => 'required',
+            'style' => 'width: 3em; text-align: center;',
+            'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')"
+            ]
+        ]);
     }
 
     public function save_custom_fields($variation_id, $loop) {
