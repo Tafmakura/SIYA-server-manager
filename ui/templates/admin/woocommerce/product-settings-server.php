@@ -241,6 +241,10 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    // Remove validation code
+    // $('#post').on('submit'...) - removed
+    // $('#arsol_server_region, #arsol_server_image').on('input'...) - removed
+    
     // Keep only visibility and UI handling code
     function updateGroups(provider, callback) {
         var serverType = $('#arsol_server_type').val();
@@ -256,13 +260,19 @@ jQuery(document).ready(function($) {
                 var currentValue = $groupSelect.val();
                 $groupSelect.empty();
                 
-                groups.forEach(function(group) {
-                    $groupSelect.append(new Option(group, group));
-                });
-                
-                // Try to keep existing selection if still valid
-                if (groups.includes(currentValue)) {
-                    $groupSelect.val(currentValue);
+                if (groups.length === 0 && serverType !== 'sites_server') {
+                    $groupSelect.prop('disabled', true);
+                    $groupSelect.append(new Option('empty', '')); // Add empty text
+                } else {
+                    $groupSelect.prop('disabled', false);
+                    groups.forEach(function(group) {
+                        $groupSelect.append(new Option(group, group));
+                    });
+                    
+                    // Try to keep existing selection if still valid
+                    if (groups.includes(currentValue)) {
+                        $groupSelect.val(currentValue);
+                    }
                 }
                 
                 $groupSelect.trigger('change');
@@ -276,8 +286,13 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#arsol_server_plan_slug');
         var savedPlan = '<?php echo esc_js($selected_plan); ?>';
         
-        if (!provider || !group) {
-            $planSelect.empty();
+        // Always disable first before making the AJAX call
+        $planSelect.empty()
+            .prop('disabled', true)
+            .append(new Option('empty', ''));
+        
+        // Validate inputs before making AJAX call
+        if (!provider || !group || group === 'empty' || provider === 'empty') {
             return;
         }
         
@@ -291,22 +306,111 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 $planSelect.empty();
+                
                 try {
                     var plans = typeof response === 'string' ? JSON.parse(response) : response;
                     if (!Array.isArray(plans)) {
                         plans = Object.values(plans);
                     }
+                    
+                    // Keep disabled if no plans
+                    if (!plans || plans.length === 0) {
+                        $planSelect.prop('disabled', true)
+                            .append(new Option('empty', ''));
+                        return;
+                    }
+                    
+                    // Only enable if we have valid plans
+                    $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
                         $planSelect.append(new Option(plan.slug, plan.slug));
                     });
+                    
+                    // Try to set saved value if it exists in new plans
                     if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
                         $planSelect.val(savedPlan);
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
+                    $planSelect.empty()
+                        .prop('disabled', true)
+                        .append(new Option('empty', ''));
                 }
+            },
+            error: function() {
+                $planSelect.empty()
+                    .prop('disabled', true)
+                    .append(new Option('empty', ''));
             }
         });
+    }
+
+    function setRuncloudCheckboxState(checked = true, disabled = true) {
+        var $checkbox = $('#arsol_server_manager_required');
+        var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
+        
+        $checkbox.prop('checked', checked ? true : (savedValue === 'yes'))
+                .prop('disabled', disabled)
+                .trigger('change');
+    }
+
+    function updateServerTypeFields(serverType) {
+        var $providerSelect = $('#arsol_server_provider_slug');
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        var $planSelect = $('#arsol_server_plan_slug');
+
+        if (serverType === 'sites_server') {
+            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+
+            // Set provider for sites server
+            $providerSelect.empty()
+                          .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
+                          .val(wpProvider)
+                          .prop('disabled', true);
+            
+            // Set Runcloud state
+            setRuncloudCheckboxState(true, true);
+            
+            // Update groups and plans for sites server
+            updateGroups(wpProvider, function(groups) {
+                if (groups.includes(wpGroup)) {
+                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
+                    updatePlans(wpProvider, wpGroup);
+                }
+            });
+        } else {
+            // Reset Runcloud state
+            setRuncloudCheckboxState(false, false);
+            
+            // Only clear and disable if empty
+            if (!$providerSelect.val()) {
+                $providerSelect.prop('disabled', false).empty();
+            }
+            if (!$groupSelect.val()) {
+                $groupSelect.prop('disabled', false).empty();
+            }
+            if (!$planSelect.val()) {
+                $planSelect.prop('disabled', false).empty();
+            }
+            
+            if (serverType) {
+                updateProvidersByServerType(serverType);
+            }
+        }
+    }
+
+    function disableAllDropdowns(serverType) {
+        if (serverType === 'sites_server') return;
+
+        var $providerSelect = $('#arsol_server_provider_slug');
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        var $planSelect = $('#arsol_server_plan_slug');
+
+        // Disable and clear all dropdowns at once
+        $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
     }
 
     function updateProvidersByServerType(serverType) {
@@ -323,13 +427,20 @@ jQuery(document).ready(function($) {
                 var currentValue = $providerSelect.val();
                 $providerSelect.empty();
                 
-                providers.forEach(function(provider) {
-                    var providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
-                    $providerSelect.append(new Option(providerName, provider));
-                });
-                
-                if (providers.includes(currentValue)) {
-                    $providerSelect.val(currentValue);
+                if (providers.length === 0) {
+                    $providerSelect.prop('disabled', true);
+                    $providerSelect.append(new Option('empty', '')); // Add empty text
+                } else {
+                    $providerSelect.prop('disabled', false);
+                    providers.forEach(function(provider) {
+                        var providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+                        $providerSelect.append(new Option(providerName, provider));
+                    });
+                    
+                    // Try to keep existing selection if still valid
+                    if (providers.includes(currentValue)) {
+                        $providerSelect.val(currentValue);
+                    }
                 }
                 $providerSelect.trigger('change');
             }
@@ -544,10 +655,14 @@ jQuery(document).ready(function($) {
     // Add provider change handler
     $('#arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
+        var serverType = $('#arsol_server_type').val();
+        
         if (provider) {
             updateGroups(provider);
         } else {
-            $('#arsol_server_plan_group_slug').empty();
+            $('#arsol_server_plan_group_slug').empty()
+                .prop('disabled', true)
+                .append(new Option('empty', ''));
         }
     });
 
@@ -567,16 +682,22 @@ jQuery(document).ready(function($) {
                 $groupSelect.empty();
                 
                 if (Array.isArray(groups) && groups.length > 0) {
+                    $groupSelect.prop('disabled', false);
                     groups.forEach(function(group) {
                         $groupSelect.append(new Option(group, group));
                     });
                     $groupSelect.trigger('change');
+                } else {
+                    $groupSelect.prop('disabled', true)
+                        .append(new Option('empty', ''));
                 }
                 
                 if (callback) callback(groups);
             },
             error: function() {
-                $groupSelect.empty();
+                $groupSelect.empty()
+                    .prop('disabled', true)
+                    .append(new Option('empty', ''));
             }
         });
     }
@@ -585,10 +706,13 @@ jQuery(document).ready(function($) {
     $('#arsol_server_plan_group_slug').on('change', function() {
         var provider = $('#arsol_server_provider_slug').val();
         var group = $(this).val();
-        if (provider && group) {
+        
+        if (provider && group && group !== 'empty') {  // Added check for 'empty' value
             updatePlans(provider, group);
         } else {
-            $('#arsol_server_plan_slug').empty();
+            $('#arsol_server_plan_slug').empty()
+                .prop('disabled', true)
+                .append(new Option('empty', ''));
         }
     });
 
@@ -599,10 +723,10 @@ jQuery(document).ready(function($) {
         var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
         // Always disable first before making the AJAX call
-        $planSelect.empty();
+        $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
         
         // Validate inputs before making AJAX call
-        if (!provider || !group) {
+        if (!provider || !group || group === 'empty' || provider === 'empty') {
             return;
         }
         
@@ -623,23 +747,29 @@ jQuery(document).ready(function($) {
                         plans = Object.values(plans);
                     }
                     
-                    plans.forEach(function(plan) {
-                        $planSelect.append(new Option(plan.slug, plan.slug));
-                    });
-                    
-                    // Try to select the saved plan if it exists in the new options
-                    if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-                        $planSelect.val(savedPlan);
+                    if (plans.length === 0) {
+                        $planSelect.prop('disabled', true);
                     } else {
-                        $planSelect.val(null);
+                        $planSelect.prop('disabled', false);
+                        plans.forEach(function(plan) {
+                            $planSelect.append(new Option(plan.slug, plan.slug));
+                        });
+                        
+                        // Try to select the saved plan if it exists in the new options
+                        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                            $planSelect.val(savedPlan);
+                        } else {
+                            $planSelect.val(null);
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
+                    $planSelect.prop('disabled', true).append(new Option('empty', ''));
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
-                $planSelect.empty();
+                $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
             }
         });
     }
