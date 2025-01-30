@@ -73,7 +73,6 @@ class Variation {
             'min' => '0',
             'max' => '999',
             'step' => '1',
-            'required' => 'required',
             'style' => 'width: 3em; text-align: center;',
             'oninput' => "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)"
             ]
