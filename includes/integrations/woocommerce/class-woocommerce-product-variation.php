@@ -52,7 +52,7 @@ class Variation {
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-last show_if_arsol_server hhide_if_arsol_sites_server {$hidden_class} ",
+            'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class} ",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
