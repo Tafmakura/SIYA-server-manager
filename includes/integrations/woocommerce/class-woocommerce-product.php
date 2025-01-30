@@ -203,16 +203,55 @@ class Product {
         $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
         $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
 
-        // Only validate if fields are not empty and were modified
-        if (!empty($region) && $region !== $existing_region) {
+        // Validate region if not empty
+        if (!empty($region)) {
             if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                // Removed the WC_Admin_Notices::add_notice
-                return;
+                WC_Admin_Notices::add_custom_notice(
+                    'region_pattern_error', 
+                    __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                );
+                $has_errors = true;
             }
             if (strlen($region) > 50) {
-                // Removed the WC_Admin_Notices::add_notice
-                return;
+                WC_Admin_Notices::add_custom_notice(
+                    'region_length_error',
+                    __('Server region cannot exceed 50 characters.', 'woocommerce')
+                );
+                $has_errors = true;
             }
+        }
+
+        // Validate image if not empty
+        if (!empty($server_image)) {
+            if (!preg_match('/^[a-zA-Z0-9-]+$/', $server_image)) {
+                WC_Admin_Notices::add_custom_notice(
+                    'image_pattern_error',
+                    __('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                );
+                $has_errors = true;
+            }
+            if (strlen($server_image) > 50) {
+                WC_Admin_Notices::add_custom_notice(
+                    'image_length_error',
+                    __('Server image cannot exceed 50 characters.', 'woocommerce')
+                );
+                $has_errors = true;
+            }
+        }
+
+        if ($has_errors) {
+            return false;
+        }
+
+        // Set region and image values
+        if ($is_sites_server && !$was_sites_server) {
+            // Only clear values when transitioning to Sites server
+            $fields['_arsol_server_region'] = '';
+            $fields['_arsol_server_image'] = '';
+        } else {
+            // Save region and image (even if empty - allows clearing)
+            $fields['_arsol_server_region'] = $region;
+            $fields['_arsol_server_image'] = $server_image;
         }
 
         // Set region and image values - only clear if Sites server is being enabled 
