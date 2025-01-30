@@ -392,37 +392,33 @@ jQuery(document).ready(function($) {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // Step 1: Default state - hide everything first
-        $('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
-            .attr('style', 'display: none !important')
-            .addClass('hidden');
-
-        // Step 2: Early exit if server is not enabled
+        // First, handle the base server visibility
         if (!isServerEnabled) {
+            // Hide all server-related elements when server is disabled
+            $('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
+                .attr('style', 'display: none !important')
+                .addClass('hidden');
             return;
         }
 
-        // Step 3: Show general server elements that don't have type-specific hide classes
-        $('.show_if_arsol_server')
-            .not('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
-            .attr('style', '')
-            .removeClass('hidden');
+        // When server is enabled, show general server elements first
+        $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
 
-        // Step 4: Handle type-specific visibility
+        // Then handle server type specific elements
         if (serverType === 'sites_server') {
-            // Hide elements specifically marked to hide for sites server
+            // Hide elements that should be hidden for sites server
             $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
-            // Show sites server elements
+            // Show sites server specific elements
             $('.show_if_arsol_sites_server').not('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
-        }
+        } 
         else if (serverType === 'application_server') {
-            // Hide elements specifically marked to hide for application server
+            // Hide elements that should be hidden for application server
             $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
-            // Show application server elements
+            // Show application server specific elements
             $('.show_if_arsol_application_server').not('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
         }
 
-        // Step 5: Handle elements that should show for both types
+        // Handle elements that should show for both types
         if (serverType === 'sites_server' || serverType === 'application_server') {
             $('.show_if_arsol_sites_server.show_if_arsol_application_server')
                 .not('.hide_if_arsol_server')
@@ -430,7 +426,10 @@ jQuery(document).ready(function($) {
                 .removeClass('hidden');
         }
 
-        // Step 6: Handle max applications field separately
+        // Ensure hide_if classes take precedence
+        $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+
+        // Handle max applications field
         $('.arsol_max_applications_field')
             .toggleClass('hidden', !(serverType === 'sites_server' || serverType === 'application_server'));
     }
