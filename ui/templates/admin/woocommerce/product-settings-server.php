@@ -119,14 +119,15 @@
             $plan_options[$plan['slug']] = $plan['slug'];
         }
 
+        // Modify the select to always be disabled and show 'empty' if no options available
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $plan_options,
-            'value'       => $selected_plan,
-            'custom_attributes' => empty($selected_group) ? array('disabled' => 'disabled') : array()
+            'options'     => empty($plan_options) ? array('' => 'empty') : $plan_options,
+            'value'       => empty($plan_options) ? '' : $selected_plan,
+            'custom_attributes' => array('disabled' => empty($plan_options) ? 'disabled' : false)
         ));
 
         // Add wrapper div for region and image fields
@@ -285,8 +286,11 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#arsol_server_plan_slug');
         var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
-        if (!provider || !group) {
-            $planSelect.empty().prop('disabled', true);
+        // Added stricter validation
+        if (!provider || !group || group === 'empty' || provider === 'empty') {
+            $planSelect.empty()
+                .prop('disabled', true)
+                .append(new Option('empty', ''));
             return;
         }
         
@@ -307,29 +311,37 @@ jQuery(document).ready(function($) {
                         plans = Object.values(plans);
                     }
                     
-                    if (plans.length === 0) {
-                        $planSelect.prop('disabled', true);
+                    // Always disable and show empty if no plans
+                    if (!plans || plans.length === 0) {
+                        $planSelect.prop('disabled', true)
+                            .append(new Option('empty', ''));
+                        return;
+                    }
+                    
+                    // Only enable and populate if we have plans
+                    $planSelect.prop('disabled', false);
+                    plans.forEach(function(plan) {
+                        $planSelect.append(new Option(plan.slug, plan.slug));
+                    });
+                    
+                    // Only try to set saved value if we have plans
+                    if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                        $planSelect.val(savedPlan);
                     } else {
-                        $planSelect.prop('disabled', false);
-                        plans.forEach(function(plan) {
-                            $planSelect.append(new Option(plan.slug, plan.slug));
-                        });
-                        
-                        // Try to select the saved plan if it exists in the new options
-                        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-                            $planSelect.val(savedPlan);
-                        } else {
-                            $planSelect.val(null);
-                        }
+                        $planSelect.val(null);
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.prop('disabled', true);
+                    $planSelect.empty()
+                        .prop('disabled', true)
+                        .append(new Option('empty', ''));
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
-                $planSelect.empty().prop('disabled', true);
+                $planSelect.empty()
+                    .prop('disabled', true)
+                    .append(new Option('empty', ''));
             }
         });
     }
@@ -751,12 +763,12 @@ jQuery(document).ready(function($) {
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.prop('disabled', true);
+                    $planSelect.prop('disabled', true).append(new Option('empty', ''));
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
-                $planSelect.empty().prop('disabled', true);
+                $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
             }
         });
     }
