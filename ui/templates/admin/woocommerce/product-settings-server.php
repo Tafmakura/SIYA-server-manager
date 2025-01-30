@@ -500,7 +500,7 @@ jQuery(document).ready(function($) {
     $('#arsol_server').on('change', function() {
         if (!$(this).is(':checked')) {
             // Check if we're currently on the server settings tab
-            if ($('.arsol_server_settings_tab a').hasClass('active')) {
+            if ($('.arsol_server_settings_tab').hasClass('active')) {
                 // Try to find and click general tab first, then variations tab as fallback
                 const $generalTab = $('.general_tab a');
                 const $variationsTab = $('.variations_tab a');
