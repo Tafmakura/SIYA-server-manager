@@ -422,36 +422,58 @@ jQuery(document).ready(function($) {
         });
     }
 
+    /**
+     * Controls server visibility based on checkbox state with performance optimizations
+     * @returns {Function} Cleanup function to remove observers and timeouts
+     */
     function toggleServerVisibility() {
+        // Get current server enabled state from checkbox
         var isServerEnabled = $('#arsol_server').is(':checked');
+        
+        // Cache the container selector for better performance
         const $container = $('#woocommerce-product-data');
         
-        // Debounce the observer callback
+        // Debounce timer to prevent rapid-fire updates
         let timeout;
+
+        /**
+         * MutationObserver watches for DOM changes and updates visibility accordingly
+         * Debounced to improve performance by limiting update frequency
+         */
         const observer = new MutationObserver((mutations) => {
+            // Clear existing timeout to prevent multiple queued updates
             if (timeout) {
                 clearTimeout(timeout);
             }
+            // Delay visibility updates by 100ms to batch multiple changes
             timeout = setTimeout(() => {
                 applyVisibilityRules(isServerEnabled);
-            }, 100); // Delay of 100ms
+            }, 100);
         });
 
-        // Observe only when needed
+        // Track observer state to prevent multiple attachments
         let isObserving = false;
 
+        /**
+         * Starts observing DOM changes if not already observing
+         * Optimized to watch only necessary mutation types
+         */
         function startObserver() {
             if (!isObserving) {
                 observer.observe($container[0], {
-                    childList: true,
-                    subtree: true,
-                    attributes: false,
-                    characterData: false
+                    childList: true,    // Watch for added/removed elements
+                    subtree: true,      // Watch nested elements
+                    attributes: false,   // Ignore attribute changes
+                    characterData: false // Ignore text content changes
                 });
                 isObserving = true;
             }
         }
 
+        /**
+         * Stops the observer to prevent unnecessary updates
+         * Used during DOM updates to prevent feedback loops
+         */
         function stopObserver() {
             if (isObserving) {
                 observer.disconnect();
@@ -459,34 +481,49 @@ jQuery(document).ready(function($) {
             }
         }
 
+        /**
+         * Applies visibility rules based on server enabled state
+         * Optimized to minimize DOM operations
+         * @param {boolean} isEnabled - Current server enabled state
+         */
         function applyVisibilityRules(isEnabled) {
-            stopObserver(); // Pause observation during DOM updates
+            // Pause observation during updates to prevent loops
+            stopObserver();
 
             if (!isEnabled) {
+                // Hide all server-related elements
                 $container.find('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
                     .hide()
                     .addClass('hidden');
+                // Show elements that should be visible when server is disabled
                 $container.find('.hide_if_arsol_server')
                     .show()
                     .removeClass('hidden');
             } else {
+                // Show base server elements
                 $container.find('.show_if_arsol_server')
                     .show()
                     .removeClass('hidden');
+                // Hide elements that shouldn't show when server is enabled
                 $container.find('.hide_if_arsol_server')
                     .hide()
                     .addClass('hidden');
                 
+                // Update type-specific visibility
                 toggleServerTypeVisibility();
             }
 
-            startObserver(); // Resume observation after updates
+            // Resume observation after updates
+            startObserver();
         }
 
-        // Initial application
+        // Initial visibility setup
         applyVisibilityRules(isServerEnabled);
 
-        // Cleanup function
+        /**
+         * Returns cleanup function for proper memory management
+         * Important for preventing memory leaks and zombie observers
+         */
         return function cleanup() {
             stopObserver();
             if (timeout) {
@@ -495,29 +532,40 @@ jQuery(document).ready(function($) {
         };
     }
 
+    /**
+     * Manages visibility of server type specific elements
+     * Optimized with cached selectors and minimal DOM operations
+     */
     function toggleServerTypeVisibility() {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
-        const $container = $('#woocommerce-product-data');
         
-        // Performance optimization: Cache selectors
+        // Cache all commonly used selectors for performance
+        const $container = $('#woocommerce-product-data');
         const $siteServer = $container.find('.show_if_arsol_sites_server');
         const $hideSiteServer = $container.find('.hide_if_arsol_sites_server');
         const $appServer = $container.find('.show_if_arsol_application_server');
         const $hideAppServer = $container.find('.hide_if_arsol_application_server');
         const $maxApps = $container.find('.arsol_max_applications_field');
 
+        /**
+         * Applies visibility rules based on server type and enabled state
+         * Uses CSS classes and minimal DOM operations for better performance
+         * @param {string} type - Server type
+         * @param {boolean} enabled - Whether server is enabled
+         */
         function applyTypeVisibilityRules(type, enabled) {
-            // Use CSS classes for performance
+            // Define CSS classes for consistent visibility handling
             const showClass = 'visible';
             const hideClass = 'hidden';
 
-            // Hide all first
+            // Start with hiding all type-specific elements
             $siteServer.addClass(hideClass).hide();
             $appServer.addClass(hideClass).hide();
             $hideSiteServer.removeClass(hideClass).show();
             $hideAppServer.removeClass(hideClass).show();
 
+            // Show relevant elements based on server type
             if (enabled) {
                 if (type === 'sites_server') {
                     $siteServer.removeClass(hideClass).show();
@@ -529,13 +577,13 @@ jQuery(document).ready(function($) {
                 }
             }
 
-            // Toggle max applications visibility
+            // Handle max applications field visibility
             $maxApps.toggleClass(hideClass, 
                 !(enabled && (type === 'sites_server' || type === 'application_server'))
             );
         }
 
-        // Apply rules immediately
+        // Apply visibility rules immediately
         applyTypeVisibilityRules(serverType, isServerEnabled);
     }
 
