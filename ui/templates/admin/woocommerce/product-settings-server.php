@@ -442,36 +442,34 @@ jQuery(document).ready(function($) {
     }
 
     function toggleServerTypeVisibility() {
+        var $form = $('#woocommerce-product-data');
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // Hide all type-specific elements first
-        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
-            .attr('style', 'display: none !important')
-            .addClass('hidden');
-        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
-            .attr('style', '')
-            .removeClass('hidden');
+        // First remove all visibility-related classes
+        $form.find('.show_if_arsol_sites_server, .show_if_arsol_application_server')
+             .hide()
+             .addClass('hidden');
+             
+        $form.find('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+             .show()
+             .removeClass('hidden');
 
-        // Only proceed with showing elements if server is enabled
+        // Then apply new visibility based on server type
         if (isServerEnabled) {
             if (serverType === 'sites_server') {
-                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_sites_server')
-                    .attr('style', 'display: none !important')
-                    .addClass('hidden');
+                $form.find('.show_if_arsol_sites_server').show().removeClass('hidden');
+                $form.find('.hide_if_arsol_sites_server').hide().addClass('hidden');
             } 
             else if (serverType === 'application_server') {
-                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_application_server')
-                    .attr('style', 'display: none !important')
-                    .addClass('hidden');
+                $form.find('.show_if_arsol_application_server').show().removeClass('hidden');
+                $form.find('.hide_if_arsol_application_server').hide().addClass('hidden');
             }
         }
 
         // Handle max applications field visibility
-        $('.arsol_max_applications_field')
-            .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
+        $form.find('.arsol_max_applications_field')
+             .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
     }
 
     // Event handlers
@@ -620,20 +618,6 @@ jQuery(document).ready(function($) {
             }
         });
     }
-
-    // Add tab click handler for WooCommerce product tabs and variations
-    $('.product_data_tabs li a, .woocommerce_variation h3').on('click', function() {
-        // Small delay to let WooCommerce finish its own tab handling
-        setTimeout(function() {
-            // Re-apply visibility rules
-            toggleServerVisibility();
-            
-            // Re-apply server type specific visibility if server is enabled
-            if ($('#arsol_server').is(':checked')) {
-                toggleServerTypeVisibility();
-            }
-        }, 100);
-    });
 
 });
 </script>
