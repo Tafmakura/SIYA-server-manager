@@ -424,54 +424,107 @@ jQuery(document).ready(function($) {
 
     function toggleServerVisibility() {
         var isServerEnabled = $('#arsol_server').is(':checked');
+        
+        // Use a more specific parent container
+        const $container = $('#woocommerce-product-data');
+        
+        // Create mutation observer to handle dynamic content
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length) {
+                    applyVisibilityRules(isServerEnabled);
+                }
+            });
+        });
 
-        if (!isServerEnabled) {
-            // Hide all server-related elements
-            $('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
-                .attr('style', 'display: none !important')
-                .addClass('hidden');
-            $('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
-        } else {
-            // Show base server elements
-            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
-            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
-            
-            // Re-apply server type specific visibility
-            toggleServerTypeVisibility();
+        // Start observing the container for dynamic content
+        observer.observe($container[0], {
+            childList: true,
+            subtree: true
+        });
+
+        // Initial application of rules
+        applyVisibilityRules(isServerEnabled);
+
+        function applyVisibilityRules(isEnabled) {
+            if (!isEnabled) {
+                $container.find('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
+                    .attr('style', 'display: none !important')
+                    .addClass('hidden');
+                $container.find('.hide_if_arsol_server')
+                    .attr('style', '')
+                    .removeClass('hidden');
+            } else {
+                $container.find('.show_if_arsol_server')
+                    .attr('style', '')
+                    .removeClass('hidden');
+                $container.find('.hide_if_arsol_server')
+                    .attr('style', 'display: none !important')
+                    .addClass('hidden');
+                
+                // Re-apply server type specific visibility
+                toggleServerTypeVisibility();
+            }
         }
     }
 
     function toggleServerTypeVisibility() {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
+        
+        // Use a more specific parent container
+        const $container = $('#woocommerce-product-data');
+        
+        // Create mutation observer for type-specific content
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length) {
+                    applyTypeVisibilityRules(serverType, isServerEnabled);
+                }
+            });
+        });
 
-        // Hide all type-specific elements first
-        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
-            .attr('style', 'display: none !important')
-            .addClass('hidden');
-        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
-            .attr('style', '')
-            .removeClass('hidden');
+        // Start observing the container
+        observer.observe($container[0], {
+            childList: true,
+            subtree: true
+        });
 
-        // Only proceed with showing elements if server is enabled
-        if (isServerEnabled) {
-            if (serverType === 'sites_server') {
-                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_sites_server')
-                    .attr('style', 'display: none !important')
-                    .addClass('hidden');
-            } 
-            else if (serverType === 'application_server') {
-                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_application_server')
-                    .attr('style', 'display: none !important')
-                    .addClass('hidden');
+        // Initial application of rules
+        applyTypeVisibilityRules(serverType, isServerEnabled);
+
+        function applyTypeVisibilityRules(type, enabled) {
+            // Hide all type-specific elements first
+            $container.find('.show_if_arsol_sites_server, .show_if_arsol_application_server')
+                .attr('style', 'display: none !important')
+                .addClass('hidden');
+            $container.find('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+                .attr('style', '')
+                .removeClass('hidden');
+
+            if (enabled) {
+                if (type === 'sites_server') {
+                    $container.find('.show_if_arsol_sites_server')
+                        .attr('style', '')
+                        .removeClass('hidden');
+                    $container.find('.hide_if_arsol_sites_server')
+                        .attr('style', 'display: none !important')
+                        .addClass('hidden');
+                } 
+                else if (type === 'application_server') {
+                    $container.find('.show_if_arsol_application_server')
+                        .attr('style', '')
+                        .removeClass('hidden');
+                    $container.find('.hide_if_arsol_application_server')
+                        .attr('style', 'display: none !important')
+                        .addClass('hidden');
+                }
             }
-        }
 
-        // Handle max applications field visibility
-        $('.arsol_max_applications_field')
-            .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
+            // Handle max applications field visibility
+            $container.find('.arsol_max_applications_field')
+                .toggleClass('hidden', !(enabled && (type === 'sites_server' || type === 'application_server')));
+        }
     }
 
     // Event handlers
