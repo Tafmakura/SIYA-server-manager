@@ -130,7 +130,7 @@ class Product {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
                 // Removed the WC_Admin_Notices::add_notice
-                $has_errors = true;
+                //$has_errors = true;
             }
         }
 
@@ -138,7 +138,7 @@ class Product {
         $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
         if (strlen($region) > 50) {
             // Removed the WC_Admin_Notices::add_notice
-            $has_errors = true;
+          // $has_errors = true;
         }
 
         // 4. Applications Validation
@@ -146,7 +146,7 @@ class Product {
             $max_apps = absint($_POST['arsol_max_applications'] ?? 0);
             if ($max_apps > 99) {
                 // Removed the WC_Admin_Notices::add_notice
-                $has_errors = true; 
+              //  $has_errors = true; 
             }
         }
 
@@ -156,7 +156,7 @@ class Product {
                 'validation_failed',
                 __('Validation failed: Please check the server settings.', 'woocommerce')
             );
-            return false;
+          //  return false;
         }
 
         // Set WooCOmmerce setting here required server product settings
