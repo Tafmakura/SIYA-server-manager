@@ -391,7 +391,9 @@ jQuery(document).ready(function($) {
 
     function toggleApplicationsField() {
         var serverType = $('#arsol_server_type').val();
-        if (serverType === 'sites_server' || serverType === 'application_server') {
+        var isServerEnabled = $('#arsol_server').is(':checked');
+        
+        if (isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')) {
             $('.arsol_max_applications_field').removeClass('hidden');
         } else {
             $('.arsol_max_applications_field').addClass('hidden');
@@ -497,9 +499,10 @@ jQuery(document).ready(function($) {
     // Handle sites server element visibility
     function toggleServerElements() {
         var serverType = $('#arsol_server_type').val();
+        var isServerEnabled = $('#arsol_server').is(':checked');
 
         // Show/hide sites server fields
-        if (serverType === 'sites_server') {
+        if (isServerEnabled && serverType === 'sites_server') {
             $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
             $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
         } else {
@@ -508,7 +511,7 @@ jQuery(document).ready(function($) {
         }
 
         // Show/hide application server fields
-        if (serverType === 'application_server') {
+        if (isServerEnabled && serverType === 'application_server') {
             $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
             $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
         } else {
@@ -517,6 +520,12 @@ jQuery(document).ready(function($) {
         }
         
     }
+
+    // Add arsol_server checkbox change handler to trigger toggles
+    $('#arsol_server').on('change', function() {
+        toggleApplicationsField();
+        toggleServerElements();
+    });
 });
 </script>
 
