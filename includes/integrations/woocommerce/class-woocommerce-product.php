@@ -180,19 +180,15 @@ class Product {
             }
         }
 
-        // Only save plan if we have valid context
-        $current_provider = sanitize_text_field($_POST['arsol_server_provider_slug'] ?? '');
-        $current_group = sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? '');
-        $current_plan = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
-        
         if ($is_sites_server) {
+            $saved_plan = $product->get_meta('_arsol_server_plan_slug', true);
             $wp_provider = get_option('siya_wp_server_provider');
             $wp_group = get_option('siya_wp_server_group');
             
-            // For sites server, only save plan if WP provider and group are set
-            $new_plan = ($wp_provider && $wp_group && !empty($current_plan)) ? 
-                $current_plan : 
-                '';
+            // Only update plan if explicitly set in POST
+            $new_plan = !empty($_POST['arsol_server_plan_slug']) ? 
+                sanitize_text_field($_POST['arsol_server_plan_slug']) : 
+                $saved_plan;
 
             $fields = [
                 '_arsol_server_provider_slug' => $wp_provider,
@@ -207,14 +203,16 @@ class Product {
 
             $product->update_meta_data('_subscription_limit', 'active');
         } else {
-            // For other servers, only save plan if provider and group are set
-            $new_plan = ($current_provider && $current_group && !empty($current_plan)) ? 
-                $current_plan : 
-                '';
+            $saved_plan = $product->get_meta('_arsol_server_plan_slug', true);
+            
+            // Only update plan if explicitly set in POST
+            $new_plan = !empty($_POST['arsol_server_plan_slug']) ? 
+                sanitize_text_field($_POST['arsol_server_plan_slug']) : 
+                $saved_plan;
 
             $fields = [
-                '_arsol_server_provider_slug' => $current_provider,
-                '_arsol_server_plan_group_slug' => $current_group,
+                '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
+                '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
                 '_arsol_server_plan_slug' => $new_plan,
                 '_arsol_server_manager_required' => isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no',
                 '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '')

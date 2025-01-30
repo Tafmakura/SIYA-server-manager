@@ -111,20 +111,12 @@
         ));
 
         // Plan Dropdown
-        $selected_plan = ''; // Always start empty
+        $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
+        $plans = $selected_provider && $selected_group ? 
+            $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
         $plan_options = [];
-        if ($selected_provider && $selected_group) {
-            $plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
-            foreach ($plans as $plan) {
-                $plan_options[$plan['slug']] = $plan['slug'];
-            }
-            // Only set selected plan if we have valid context
-            if (!empty($plan_options)) {
-                $saved_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-                if (array_key_exists($saved_plan, $plan_options)) {
-                    $selected_plan = $saved_plan;
-                }
-            }
+        foreach ($plans as $plan) {
+            $plan_options[$plan['slug']] = $plan['slug'];
         }
 
         woocommerce_wp_select(array(
@@ -134,7 +126,7 @@
             'desc_tip'    => true,
             'options'     => $plan_options,
             'value'       => $selected_plan,
-            'custom_attributes' => empty($plan_options) ? array('disabled' => 'disabled') : array()
+            'custom_attributes' => empty($selected_group) ? array('disabled' => 'disabled') : array()
         ));
 
         // Add wrapper div for region and image fields
@@ -401,17 +393,15 @@ jQuery(document).ready(function($) {
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
             
-            // Always clear plan field when changing server type
-            $('#arsol_server_plan_slug').empty()
-                                      .prop('disabled', true)
-                                      .append(new Option('', ''));
-            
             // Only clear and disable if empty
             if (!$providerSelect.val()) {
                 $providerSelect.prop('disabled', false).empty();
             }
             if (!$groupSelect.val()) {
                 $groupSelect.prop('disabled', false).empty();
+            }
+            if (!$planSelect.val()) {
+                $planSelect.prop('disabled', false).empty();
             }
             
             if (serverType) {
