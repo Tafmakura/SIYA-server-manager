@@ -234,16 +234,6 @@ class Product {
         // Set region and image values - only clear if Sites server is being enabled 
         $was_sites_server = $product->get_meta('_arsol_sites_server', true) === 'yes';
 
-        if ($is_sites_server && !$was_sites_server) {
-            // Only clear values when transitioning to Sites server
-            $fields['_arsol_server_region'] = '';
-            $fields['_arsol_server_image'] = '';
-        } else {
-            // Keep existing or updated values
-            $fields['_arsol_server_region'] = $region;
-            $fields['_arsol_server_image'] = $server_image;
-        }
-
         $fields['_arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
 
         // Set _sold_individually to 'yes' for all server products
