@@ -283,6 +283,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
         if (!provider || !group) {
             $planSelect.empty().prop('disabled', true);
@@ -313,8 +314,13 @@ jQuery(document).ready(function($) {
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-                        // Clear selection without adding empty option
-                        $planSelect.val(null);
+                        
+                        // Try to select the saved plan if it exists in the new options
+                        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                            $planSelect.val(savedPlan);
+                        } else {
+                            $planSelect.val(null);
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
@@ -703,6 +709,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
         if (!provider || !group) {
             $planSelect.empty().prop('disabled', true);
@@ -718,7 +725,7 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
-                $planSelect.empty();
+                $planSelect.empty();  // This line clears the plan field
                 
                 try {
                     var plans = typeof response === 'string' ? JSON.parse(response) : response;
@@ -733,8 +740,13 @@ jQuery(document).ready(function($) {
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-                        // Clear selection without adding empty option
-                        $planSelect.val(null);
+                        
+                        // Try to select the saved plan if it exists in the new options
+                        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                            $planSelect.val(savedPlan);
+                        } else {
+                            $planSelect.val(null);
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
