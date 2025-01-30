@@ -385,8 +385,8 @@ jQuery(document).ready(function($) {
             }
         }
         
-        toggleApplicationsField();
         toggleServerElements();
+        toggleApplicationsField();
     }
 
     function toggleApplicationsField() {
@@ -464,20 +464,31 @@ jQuery(document).ready(function($) {
         updateServerTypeFields($(this).val());
     });
 
-    // Initial load
-    var initialProvider = $('#arsol_server_provider_slug').val();
-    if (initialProvider) {
-        updateGroups(initialProvider, function(groups) {
-            var selectedGroup = $('#arsol_server_plan_group_slug').val();
-            if (selectedGroup) {
-                updatePlans(initialProvider, selectedGroup);
-            }
-        });
+    // Remove old initialization code and consolidate into a single init function
+    function initializeServerSettings() {
+        var initialProvider = $('#arsol_server_provider_slug').val();
+        var initialServerType = $('#arsol_server_type').val();
+        
+        // First trigger server elements visibility
+        toggleServerElements();
+        
+        // Then handle provider and plans if needed
+        if (initialProvider) {
+            updateGroups(initialProvider, function(groups) {
+                var selectedGroup = $('#arsol_server_plan_group_slug').val();
+                if (selectedGroup) {
+                    updatePlans(initialProvider, selectedGroup);
+                }
+            });
+        }
+        
+        if (initialServerType) {
+            updateServerTypeFields(initialServerType);
+        }
     }
 
-    // Initial state
-    var initialServerType = $('#arsol_server_type').val();
-    updateServerTypeFields(initialServerType);
+    // Initialize everything
+    initializeServerSettings();
 
     // Handle sites server element visibility
     function toggleServerElements() {
