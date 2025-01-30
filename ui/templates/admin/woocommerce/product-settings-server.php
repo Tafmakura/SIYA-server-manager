@@ -433,35 +433,28 @@ jQuery(document).ready(function($) {
         });
     }
 
-    function toggleServerVisibility() {
+    function masterVisibilityController() {
         var isServerEnabled = $('#arsol_server').is(':checked');
-
-        // Handle base server visibility
-        if (!isServerEnabled) {
-            $('.show_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
-            $('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
-        } else {
-            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
-            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
-        }
-    }
-
-    function toggleServerTypeVisibility() {
         var serverType = $('#arsol_server_type').val();
-        var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // Only handle type-specific visibility if server is enabled
-        if (!isServerEnabled) return;
-
-        // First reset all type-specific elements
-        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
+        // 1. Default state - hide all visibility-controlled elements
+        $('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
             .attr('style', 'display: none !important')
             .addClass('hidden');
-        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+        $('.hide_if_arsol_server, .hide_if_arsol_sites_server, .hide_if_arsol_application_server')
             .attr('style', '')
             .removeClass('hidden');
 
-        // Then handle specific server type visibility
+        // 2. Early exit if server is not enabled
+        if (!isServerEnabled) {
+            return;
+        }
+
+        // 3. Show general server elements
+        $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
+        $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+
+        // 4. Apply server type specific visibility
         if (serverType === 'sites_server') {
             $('.show_if_arsol_sites_server').not('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
             $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
@@ -471,33 +464,28 @@ jQuery(document).ready(function($) {
             $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
         }
 
-        // Handle elements that should show for both types
-        if (serverType === 'sites_server' || serverType === 'application_server') {
+        // 5. Handle shared elements
+        if ((serverType === 'sites_server' || serverType === 'application_server') && isServerEnabled) {
             $('.show_if_arsol_sites_server.show_if_arsol_application_server')
                 .not('.hide_if_arsol_server')
                 .attr('style', '')
                 .removeClass('hidden');
-        }
 
-        // Handle max applications field
-        $('.arsol_max_applications_field')
-            .toggleClass('hidden', !(serverType === 'sites_server' || serverType === 'application_server'));
+            $('.arsol_max_applications_field').removeClass('hidden');
+        } else {
+            $('.arsol_max_applications_field').addClass('hidden');
+        }
     }
 
     // Event handlers
-    $('#arsol_server').on('change', function() {
-        toggleServerVisibility();
-        toggleServerTypeVisibility(); // Re-apply type visibility after server toggle
-    });
-
+    $('#arsol_server').on('change', masterVisibilityController);
     $('#arsol_server_type').on('change', function() {
         updateServerTypeFields($(this).val());
-        toggleServerTypeVisibility();
+        masterVisibilityController();
     });
 
-    // Initialize
-    toggleServerVisibility();
-    toggleServerTypeVisibility();
+    // Initialize all UI elements
+    masterVisibilityController();
     updateServerTypeFields($('#arsol_server_type').val());
 });
 </script>
