@@ -358,7 +358,7 @@ jQuery(document).ready(function($) {
     function updateServerTypeFields(serverType) {
         var $providerSelect = $('#arsol_server_provider_slug');
         var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
+        var $planSelect   = $('#arsol_server_plan_slug');
 
         if (serverType === 'sites_server') {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
@@ -380,6 +380,13 @@ jQuery(document).ready(function($) {
                     updatePlans(wpProvider, wpGroup);
                 }
             });
+        } else if (serverType === 'application_server') {
+            // Don't set provider from WP config, keep Runcloud optional
+            setRuncloudCheckboxState(false, false);
+            $providerSelect.prop('disabled', false).empty();
+            $groupSelect.prop('disabled', false).empty();
+            $planSelect.prop('disabled', false).empty();
+            updateProvidersByServerType(serverType);
         } else {
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
