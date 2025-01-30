@@ -350,8 +350,7 @@ jQuery(document).ready(function($) {
     function updateServerTypeFields(serverType) {
         var $providerSelect = $('#arsol_server_provider_slug');
         var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
+        
         if (serverType === 'sites_server') {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
@@ -376,16 +375,14 @@ jQuery(document).ready(function($) {
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
             
-            // Only clear and disable if empty
+            // Only clear and disable provider/group if empty
             if (!$providerSelect.val()) {
                 $providerSelect.prop('disabled', false).empty();
             }
             if (!$groupSelect.val()) {
                 $groupSelect.prop('disabled', false).empty();
             }
-            if (!$planSelect.val()) {
-                $planSelect.prop('disabled', false).empty();
-            }
+            // Remove plan field handling from here
             
             if (serverType) {
                 updateProvidersByServerType(serverType);
@@ -393,17 +390,17 @@ jQuery(document).ready(function($) {
         }
     }
 
+    // Either remove disableAllDropdowns or modify it to preserve plan state
     function disableAllDropdowns(serverType) {
         if (serverType === 'sites_server') return;
 
         var $providerSelect = $('#arsol_server_provider_slug');
         var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
-        // Disable and clear all dropdowns at once
+        
+        // Only disable provider and group
         $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
         $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        // Remove plan handling from here
     }
 
     function updateProvidersByServerType(serverType) {
