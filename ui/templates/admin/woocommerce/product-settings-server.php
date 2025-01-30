@@ -479,33 +479,24 @@ jQuery(document).ready(function($) {
     var initialServerType = $('#arsol_server_type').val();
     updateServerTypeFields(initialServerType);
 
-    // Handle tab visibility on load and checkbox change
-    function togglearsol_server_settings_tab() {
-        var $elements = $('.show_if_arsol_server');
-        var isChecked = $('#arsol_server').is(':checked');
-        
-        if (isChecked) {
-            $elements.attr('style', '').removeClass('hidden');  // Remove both inline style and hidden class
-        } else {
-            $elements.attr('style', 'display: none !important').addClass('hidden');
-            $('.wc-tabs .general_tab a').click();
-        }
-    }
-
-    // Initial state and change handler
-    togglearsol_server_settings_tab();
-    $('#arsol_server').on('change', togglearsol_server_settings_tab);
-
     // Handle sites server element visibility
     function toggleServerElements() {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // First hide all server-type specific elements
-        $('.show_if_arsol_sites_server, .show_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
-        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server').attr('style', '').removeClass('hidden');
+        // First hide all server-type specific elements and general server elements
+        $('.show_if_arsol_sites_server, .show_if_arsol_application_server, .show_if_arsol_server')
+            .attr('style', 'display: none !important')
+            .addClass('hidden');
+        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server, .hide_if_arsol_server')
+            .attr('style', '')
+            .removeClass('hidden');
 
         if (isServerEnabled) {
+            // Show general server elements first
+            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+            
             // Show elements based on server type
             if (serverType === 'sites_server') {
                 $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
@@ -520,6 +511,9 @@ jQuery(document).ready(function($) {
             if (serverType === 'sites_server' || serverType === 'application_server') {
                 $('.show_if_arsol_sites_server.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
             }
+        } else {
+            // When server is disabled, switch to general tab
+            $('.wc-tabs .general_tab a').click();
         }
     }
 
