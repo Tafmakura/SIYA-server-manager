@@ -442,34 +442,36 @@ jQuery(document).ready(function($) {
     }
 
     function toggleServerTypeVisibility() {
-        var $form = $('#woocommerce-product-data');
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // First remove all visibility-related classes
-        $form.find('.show_if_arsol_sites_server, .show_if_arsol_application_server')
-             .hide()
-             .addClass('hidden');
-             
-        $form.find('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
-             .show()
-             .removeClass('hidden');
+        // Hide all type-specific elements first
+        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
+            .attr('style', 'display: none !important')
+            .addClass('hidden');
+        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+            .attr('style', '')
+            .removeClass('hidden');
 
-        // Then apply new visibility based on server type
+        // Only proceed with showing elements if server is enabled
         if (isServerEnabled) {
             if (serverType === 'sites_server') {
-                $form.find('.show_if_arsol_sites_server').show().removeClass('hidden');
-                $form.find('.hide_if_arsol_sites_server').hide().addClass('hidden');
+                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
+                $('.hide_if_arsol_sites_server')
+                    .attr('style', 'display: none !important')
+                    .addClass('hidden');
             } 
             else if (serverType === 'application_server') {
-                $form.find('.show_if_arsol_application_server').show().removeClass('hidden');
-                $form.find('.hide_if_arsol_application_server').hide().addClass('hidden');
+                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+                $('.hide_if_arsol_application_server')
+                    .attr('style', 'display: none !important')
+                    .addClass('hidden');
             }
         }
 
         // Handle max applications field visibility
-        $form.find('.arsol_max_applications_field')
-             .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
+        $('.arsol_max_applications_field')
+            .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
     }
 
     // Event handlers
