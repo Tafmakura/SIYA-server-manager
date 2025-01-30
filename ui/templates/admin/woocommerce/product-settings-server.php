@@ -433,28 +433,35 @@ jQuery(document).ready(function($) {
         });
     }
 
-    function masterVisibilityController() {
+    function toggleServerVisibility() {
         var isServerEnabled = $('#arsol_server').is(':checked');
-        var serverType = $('#arsol_server_type').val();
 
-        // 1. Default state - hide all visibility-controlled elements
-        $('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
+        // Handle base server visibility
+        if (!isServerEnabled) {
+            $('.show_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+            $('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
+        } else {
+            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+        }
+    }
+
+    function toggleServerTypeVisibility() {
+        var serverType = $('#arsol_server_type').val();
+        var isServerEnabled = $('#arsol_server').is(':checked');
+
+        // Only handle type-specific visibility if server is enabled
+        if (!isServerEnabled) return;
+
+        // First reset all type-specific elements
+        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
             .attr('style', 'display: none !important')
             .addClass('hidden');
-        $('.hide_if_arsol_server, .hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
             .attr('style', '')
             .removeClass('hidden');
 
-        // 2. Early exit if server is not enabled
-        if (!isServerEnabled) {
-            return;
-        }
-
-        // 3. Show general server elements
-        $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
-        $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
-
-        // 4. Apply server type specific visibility
+        // Then handle specific server type visibility
         if (serverType === 'sites_server') {
             $('.show_if_arsol_sites_server').not('.hide_if_arsol_server').attr('style', '').removeClass('hidden');
             $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
@@ -464,28 +471,33 @@ jQuery(document).ready(function($) {
             $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
         }
 
-        // 5. Handle shared elements
-        if ((serverType === 'sites_server' || serverType === 'application_server') && isServerEnabled) {
+        // Handle elements that should show for both types
+        if (serverType === 'sites_server' || serverType === 'application_server') {
             $('.show_if_arsol_sites_server.show_if_arsol_application_server')
                 .not('.hide_if_arsol_server')
                 .attr('style', '')
                 .removeClass('hidden');
-
-            $('.arsol_max_applications_field').removeClass('hidden');
-        } else {
-            $('.arsol_max_applications_field').addClass('hidden');
         }
+
+        // Handle max applications field
+        $('.arsol_max_applications_field')
+            .toggleClass('hidden', !(serverType === 'sites_server' || serverType === 'application_server'));
     }
 
     // Event handlers
-    $('#arsol_server').on('change', masterVisibilityController);
-    $('#arsol_server_type').on('change', function() {
-        updateServerTypeFields($(this).val());
-        masterVisibilityController();
+    $('#arsol_server').on('change', function() {
+        toggleServerVisibility();
+        toggleServerTypeVisibility(); // Re-apply type visibility after server toggle
     });
 
-    // Initialize all UI elements
-    masterVisibilityController();
+    $('#arsol_server_type').on('change', function() {
+        updateServerTypeFields($(this).val());
+        toggleServerTypeVisibility();
+    });
+
+    // Initialize
+    toggleServerVisibility();
+    toggleServerTypeVisibility();
     updateServerTypeFields($('#arsol_server_type').val());
 });
 </script>
