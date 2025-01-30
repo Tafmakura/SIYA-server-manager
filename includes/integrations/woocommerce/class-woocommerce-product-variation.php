@@ -34,13 +34,13 @@ class Variation {
         // Change this line from:
         // $hidden_class = ($is_server_enabled && $server_type !== 'sites_server') ? '' : 'hidden';
         // To:
-        $hidden_class = ($is_server_enabled) ? '' : 'hidden';
+       // $hidden_class = ($is_server_enabled) ? '' : 'hidden';
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_server show_if_arsol_application_server hide_if_arsol_sites_server {$hidden_class}",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server show_if_arsol_application_server hide_if_arsol_sites_server",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
@@ -54,7 +54,7 @@ class Variation {
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-last show_if_arsol_server show_if_arsol_application_server hide_if_arsol_sites_server {$hidden_class}",
+            'wrapper_class' => "form-row form-row-last show_if_arsol_server show_if_arsol_application_server hide_if_arsol_sites_server ",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
@@ -68,7 +68,7 @@ class Variation {
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
             'label'       => __('Server max applications (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_sites_server show_if_arsol_application_server {$hidden_class}",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_sites_server show_if_arsol_application_server",
             'desc_tip'    => true,
             'description' => __('Enter the maximum number of applications allowed for this server variation.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
