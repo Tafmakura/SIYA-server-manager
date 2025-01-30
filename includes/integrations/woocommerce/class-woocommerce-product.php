@@ -85,7 +85,7 @@ class Product {
             '_arsol_server_manager_required' => isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no'
         ];
 
-        // Add server type specific fields
+        // Add server type specific fieldss
         $is_sites_server = ($fields['_arsol_server_type'] === 'sites_server');
         
         if ($is_sites_server) {
