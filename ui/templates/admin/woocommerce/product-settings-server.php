@@ -514,6 +514,56 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // Add provider change handler
+    $('#arsol_server_provider_slug').on('change', function() {
+        var provider = $(this).val();
+        var serverType = $('#arsol_server_type').val();
+        
+        if (provider) {
+            updateGroups(provider);
+        } else {
+            $('#arsol_server_plan_group_slug').empty()
+                .prop('disabled', true)
+                .append(new Option('empty', ''));
+        }
+    });
+
+    // Modify updateGroups function
+    function updateGroups(provider, callback) {
+        var serverType = $('#arsol_server_type').val();
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_provider_groups',
+                provider: provider,
+                server_type: serverType !== 'sites_server' ? serverType : null
+            },
+            success: function(groups) {
+                $groupSelect.empty();
+                
+                if (Array.isArray(groups) && groups.length > 0) {
+                    $groupSelect.prop('disabled', false);
+                    groups.forEach(function(group) {
+                        $groupSelect.append(new Option(group, group));
+                    });
+                    $groupSelect.trigger('change');
+                } else {
+                    $groupSelect.prop('disabled', true)
+                        .append(new Option('empty', ''));
+                }
+                
+                if (callback) callback(groups);
+            },
+            error: function() {
+                $groupSelect.empty()
+                    .prop('disabled', true)
+                    .append(new Option('empty', ''));
+            }
+        });
+    }
+
 });
 </script>
 
