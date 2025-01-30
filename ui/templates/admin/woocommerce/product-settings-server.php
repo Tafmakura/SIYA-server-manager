@@ -515,8 +515,7 @@ jQuery(document).ready(function($) {
             $('.show_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
             $('.hide_if_arsol_application_server').attr('style', '').removeClass('hidden');
         }
-
-        // Additional logic can go here...
+        
     }
 });
 </script>
