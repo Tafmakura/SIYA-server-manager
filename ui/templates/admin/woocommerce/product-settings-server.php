@@ -356,10 +356,41 @@ jQuery(document).ready(function($) {
     }
 
     function updateServerTypeFields(serverType) {
+        var $providerSelect = $('#arsol_server_provider_slug');
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        var $planSelect = $('#arsol_server_plan_slug');
+
         if (serverType === 'sites_server') {
+            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+
+            // Sites server specific logic
+            $providerSelect.empty()
+                          .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
+                          .val(wpProvider)
+                          .prop('disabled', true);
+            
             setRuncloudCheckboxState(true, true);
+            
+            updateGroups(wpProvider, function(groups) {
+                if (groups.includes(wpGroup)) {
+                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
+                    updatePlans(wpProvider, wpGroup);
+                }
+            });
         } else {
+            // Non-sites server logic
             setRuncloudCheckboxState(false, false);
+            
+            // Enable all dropdowns for non-sites servers
+            $providerSelect.prop('disabled', false);
+            $groupSelect.prop('disabled', false);
+            $planSelect.prop('disabled', false);
+            
+            // Update available providers based on server type
+            if (serverType) {
+                updateProvidersByServerType(serverType);
+            }
         }
     }
 
