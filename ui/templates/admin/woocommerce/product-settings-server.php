@@ -500,14 +500,14 @@ jQuery(document).ready(function($) {
     $('#arsol_server').on('change', function() {
         if (!$(this).is(':checked')) {
             // Check if we're currently on the server settings tab
-            if ($('.arsol_server_settings_tab a').hasClass('active')) {
-                // Try to find and click general tab first, then variations tab as fallback
-                const $generalTab = $('.general_tab a');
-                const $variationsTab = $('.variations_tab a');
+            if ($('.arsol_server_settings_tab').hasClass('active')) {
+                // Try to find visible tabs
+                const $generalTab = $('.general_tab a:visible');
+                const $variationsTab = $('.variations_tab a:visible'); 
                 
-                if ($generalTab.length) {
+                if ($generalTab.length && $generalTab.is(':visible')) {
                     $generalTab[0].click();
-                } else if ($variationsTab.length) {
+                } else if ($variationsTab.length && $variationsTab.is(':visible')) {
                     $variationsTab[0].click();
                 }
             }
