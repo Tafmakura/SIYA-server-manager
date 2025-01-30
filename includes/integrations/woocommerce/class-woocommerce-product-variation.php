@@ -68,7 +68,7 @@ class Variation {
             'label'       => __('Server max applications (variation override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true, 
-            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty.', 'woocommerce'),
+            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty to use product default.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications', true),
             'type'        => 'number',
             'custom_attributes' => [
@@ -148,20 +148,24 @@ class Variation {
             }
         }
 
-        // Validate and save max applications
+        // Handle max applications with support for empty values
         if (isset($_POST['arsol_server_variation_max_applications'][$loop])) {
-            $max_applications = absint($_POST['arsol_server_variation_max_applications'][$loop]);
+            $max_applications = $_POST['arsol_server_variation_max_applications'][$loop];
             
-            if ($max_applications > 999) {
-                WC_Admin_Notices::add_custom_notice(
-                    'max_applications_error',
-                    __('Maximum applications cannot exceed 999.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-
-            if (!$has_errors) {
+            // Allow empty string or "0"
+            if ($max_applications === '' || $max_applications === '0') {
                 $variation->update_meta_data('_arsol_server_variation_max_applications', $max_applications);
+            } else {
+                $max_applications = absint($max_applications);
+                if ($max_applications <= 99) {
+                    $variation->update_meta_data('_arsol_server_variation_max_applications', $max_applications);
+                } else {
+                    WC_Admin_Notices::add_custom_notice(
+                        'max_applications_error',
+                        __('Maximum applications cannot exceed 999.', 'woocommerce')
+                    );
+                    $has_errors = true;
+                }
             }
         }
 
