@@ -53,7 +53,7 @@ class Product {
         $tabs['arsol_server_settings'] = [
             'label'    => __('Server Settings', 'woocommerce'),
             'target'   => 'arsol_server_settings_data',
-            'class'    => ['show_if_arsol_server'], // Fix underscore naming
+            'class'    => ['show_if_arsol_server'],
             'priority' => 50,
         ];
 
