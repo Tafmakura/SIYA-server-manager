@@ -622,7 +622,7 @@ jQuery(document).ready(function($) {
     }
 
     // Add tab click handler for WooCommerce product tabs
-    $('.product_data_tabs .product_data_tab').on('click', function() {
+    $('.product_data_tabs li a').on('click', function() {
         // Small delay to let WooCommerce finish its own tab handling
         setTimeout(function() {
             // Re-apply visibility rules
