@@ -79,27 +79,22 @@
             ?>
         </div>
         <?php
-        // Provider Dropdownn
-        $providers = $slugs->get_provider_slugs();
-        $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
-
+        // Provider Dropdown - Only disable if sites_server or no value
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_provider_slug', 
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($providers, array_map(function($provider) {
-            return ucfirst($provider); // Capitalize first letter
+                return ucfirst($provider);
             }, $providers)),
             'value'       => $selected_provider,
             'required'    => true,
-            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
+            'custom_attributes' => ($is_sites_server || empty($selected_provider)) ? 
+                array('disabled' => 'disabled') : array()
         ));
 
-        // Group Dropdown
-        $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
-
+        // Group Dropdown - Only disable if sites_server or no value
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
@@ -107,7 +102,8 @@
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
             'value'       => $selected_group,
-            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
+            'custom_attributes' => ($is_sites_server || empty($selected_group)) ? 
+                array('disabled' => 'disabled') : array()
         ));
 
         // Plan Dropdown
