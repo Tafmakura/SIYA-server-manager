@@ -502,8 +502,8 @@ jQuery(document).ready(function($) {
             // Check if we're currently on the server settings tab
             if ($('.arsol_server_settings_tab').hasClass('active')) {
                 // Try to find and click general tab first, then variations tab as fallback
-                const $generalTab = $('.general_tab');
-                const $variationsTab = $('.variations_tab');
+                const $generalTab = $('.general_tab a');
+                const $variationsTab = $('.variations_tab a');
                 
                 if ($generalTab.length) {
                     $generalTab[0].click();
