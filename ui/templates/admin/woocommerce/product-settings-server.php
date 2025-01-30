@@ -385,19 +385,58 @@ jQuery(document).ready(function($) {
             }
         }
         
-        toggleServerElements();
-        toggleApplicationsField();
+        toggleVisibilityElements();
     }
 
-    function toggleApplicationsField() {
+    function toggleVisibilityElements() {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
-        
-        if (isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')) {
-            $('.arsol_max_applications_field').removeClass('hidden');
-        } else {
-            $('.arsol_max_applications_field').addClass('hidden');
+
+        // First hide all elements by default
+        $('.show_if_arsol_sites_server, .show_if_arsol_application_server, .show_if_arsol_server')
+            .attr('style', 'display: none !important')
+            .addClass('hidden');
+        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server, .hide_if_arsol_server')
+            .attr('style', '')
+            .removeClass('hidden');
+
+        // Handle max applications field
+        $('.arsol_max_applications_field')
+            .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
+
+        if (isServerEnabled) {
+            // Show general server elements first
+            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+            
+            // Show elements based on server type
+            if (serverType === 'sites_server') {
+                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
+                $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
+            }
+            else if (serverType === 'application_server') {
+                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+                $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
+            }
+            
+            // Handle elements that should show for both types
+            if (serverType === 'sites_server' || serverType === 'application_server') {
+                $('.show_if_arsol_sites_server.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+            }
         }
+    }
+
+    function disableAllDropdowns(serverType) {
+        if (serverType === 'sites_server') return;
+
+        var $providerSelect = $('#arsol_server_provider_slug');
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        var $planSelect = $('#arsol_server_plan_slug');
+
+        // Disable and clear all dropdowns at once
+        $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
     }
 
     function updateProvidersByServerType(serverType) {
@@ -434,105 +473,24 @@ jQuery(document).ready(function($) {
         });
     }
 
-    function disableAllDropdowns(serverType) {
-        if (serverType === 'sites_server') return;
-
-        var $providerSelect = $('#arsol_server_provider_slug');
-        var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
-        // Disable and clear all dropdowns at once
-        $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-    }
-
+    // Event handlers
+    $('#arsol_server').on('change', toggleVisibilityElements);
+    $('#arsol_server_type').on('change', function() {
+        updateServerTypeFields($(this).val());
+    });
     $('#arsol_server_provider_slug').on('change', function() {
         var provider = $(this).val();
-        if (provider) {
-            updateGroups(provider);
-        }
+        if (provider) updateGroups(provider);
     });
-
     $('#arsol_server_plan_group_slug').on('change', function() {
         var provider = $('#arsol_server_provider_slug').val();
         var group = $(this).val();
         updatePlans(provider, group);
     });
 
-    $('#arsol_server_type').on('change', function() {
-        updateServerTypeFields($(this).val());
-    });
-
-    // Remove old initialization code and consolidate into a single init function
-    function initializeServerSettings() {
-        var initialProvider = $('#arsol_server_provider_slug').val();
-        var initialServerType = $('#arsol_server_type').val();
-        
-        // First trigger server elements visibility
-        toggleServerElements();
-        
-        // Then handle provider and plans if needed
-        if (initialProvider) {
-            updateGroups(initialProvider, function(groups) {
-                var selectedGroup = $('#arsol_server_plan_group_slug').val();
-                if (selectedGroup) {
-                    updatePlans(initialProvider, selectedGroup);
-                }
-            });
-        }
-        
-        if (initialServerType) {
-            updateServerTypeFields(initialServerType);
-        }
-    }
-
-    // Initialize everything
-    initializeServerSettings();
-
-    // Handle sites server element visibility
-    function toggleServerElements() {
-        var serverType = $('#arsol_server_type').val();
-        var isServerEnabled = $('#arsol_server').is(':checked');
-
-        // First hide all server-type specific elements and general server elements
-        $('.show_if_arsol_sites_server, .show_if_arsol_application_server, .show_if_arsol_server')
-            .attr('style', 'display: none !important')
-            .addClass('hidden');
-        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server, .hide_if_arsol_server')
-            .attr('style', '')
-            .removeClass('hidden');
-
-        if (isServerEnabled) {
-            // Show general server elements first
-            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
-            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
-            
-            // Show elements based on server type
-            if (serverType === 'sites_server') {
-                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
-            }
-            else if (serverType === 'application_server') {
-                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
-            }
-            
-            // Handle elements that should show for both types
-            if (serverType === 'sites_server' || serverType === 'application_server') {
-                $('.show_if_arsol_sites_server.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
-            }
-        } else {
-            // When server is disabled, switch to general tab
-          //  $('.wc-tabs .general_tab a').click();
-        }
-    }
-
-    // Add arsol_server checkbox change handler to trigger toggles
-    $('#arsol_server').on('change', function() {
-        toggleApplicationsField();
-        toggleServerElements();
-    });
+    // Initialize
+    toggleVisibilityElements();
+    updateServerTypeFields($('#arsol_server_type').val());
 });
 </script>
 
