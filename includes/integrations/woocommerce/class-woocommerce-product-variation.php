@@ -69,13 +69,14 @@ class Variation {
             'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true, 
             'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty.', 'woocommerce'),
-            'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
+            'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications', true),
+            'type'        => 'number',
             'custom_attributes' => [
             'min' => '0',
             'max' => '999',
             'step' => '1',
             'style' => 'width: 3em; text-align: center;',
-            'oninput' => "this.value = this.value ? this.value.replace(/[^0-9]/g, '').slice(0, 3) : ''"
+            'onkeyup' => "if(this.value !== '') { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3); }"
             ]
         ]);
     }
