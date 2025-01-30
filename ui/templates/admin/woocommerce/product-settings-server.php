@@ -605,7 +605,7 @@ jQuery(document).ready(function($) {
 
             // Handle max applications field visibility
             $maxApps.toggleClass(hideClass, 
-                !(enabled && (type === 'sites_server'))
+                !(enabled && (type === 'sites_server' || type === 'application_server'))
             );
         }
 
