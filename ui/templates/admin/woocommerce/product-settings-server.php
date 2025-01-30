@@ -119,8 +119,12 @@
             $plan_options[$plan['slug']] = $plan['slug'];
         }
 
+        // Modify the select to always be disabled and show 'empty' if no options available
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
+            'label'       => __('Server plan', 'woocommerce'),
+            'description' => __('Select the server plan.', 'woocommerce'),
+            'desc_tip'    => true,
             'options'     => empty($plan_options) ? array('' => 'empty') : $plan_options,
             'value'       => empty($plan_options) ? '' : $selected_plan,
             'custom_attributes' => array('disabled' => empty($plan_options) ? 'disabled' : false)
