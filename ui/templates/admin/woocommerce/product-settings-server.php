@@ -392,38 +392,50 @@ jQuery(document).ready(function($) {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // First hide all elements by default
-        $('.show_if_arsol_sites_server, .show_if_arsol_application_server, .show_if_arsol_server')
+        // Handle general server visibility first
+        if (!isServerEnabled) {
+            // Hide all server-related elements when server is not enabled
+            $('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
+                .attr('style', 'display: none !important')
+                .addClass('hidden');
+            
+            $('.hide_if_arsol_server, .hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+                .attr('style', '')
+                .removeClass('hidden');
+                
+            return; // Exit early if server is not enabled
+        }
+
+        // Server is enabled - show general server elements first
+        $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
+        $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
+
+        // Then handle server type specific visibility
+        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
             .attr('style', 'display: none !important')
             .addClass('hidden');
-        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server, .hide_if_arsol_server')
+        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
             .attr('style', '')
             .removeClass('hidden');
 
+        // Show type-specific elements
+        if (serverType === 'sites_server') {
+            $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
+        }
+        else if (serverType === 'application_server') {
+            $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+            $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
+        }
+
+        // Handle elements that should show for both types
+        if (serverType === 'sites_server' || serverType === 'application_server') {
+            $('.show_if_arsol_sites_server.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+        }
+
         // Handle max applications field
         $('.arsol_max_applications_field')
-            .toggleClass('hidden', !(isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')));
-
-        if (isServerEnabled) {
-            // Show general server elements first
-            $('.show_if_arsol_server').attr('style', '').removeClass('hidden');
-            $('.hide_if_arsol_server').attr('style', 'display: none !important').addClass('hidden');
-            
-            // Show elements based on server type
-            if (serverType === 'sites_server') {
-                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_sites_server').attr('style', 'display: none !important').addClass('hidden');
-            }
-            else if (serverType === 'application_server') {
-                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
-                $('.hide_if_arsol_application_server').attr('style', 'display: none !important').addClass('hidden');
-            }
-            
-            // Handle elements that should show for both types
-            if (serverType === 'sites_server' || serverType === 'application_server') {
-                $('.show_if_arsol_sites_server.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
-            }
-        }
+            .toggleClass('hidden', !(serverType === 'sites_server' || serverType === 'application_server'));
     }
 
     function disableAllDropdowns(serverType) {
