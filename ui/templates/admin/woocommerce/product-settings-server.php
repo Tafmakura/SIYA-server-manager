@@ -285,8 +285,9 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>';
         
-        // Always start by disabling and clearing
+        // Always start with disabled empty state
         $planSelect.empty()
                   .prop('disabled', true)
                   .append(new Option('', ''));
@@ -310,30 +311,46 @@ jQuery(document).ready(function($) {
                         plans = Object.values(plans);
                     }
                     
-                    // If no plans available, keep select disabled and empty
+                    // If no plans available, keep disabled empty state
                     if (!plans || plans.length === 0) {
                         return;
                     }
                     
-                    // Enable select and add plans
+                    // Check if saved plan exists in current context
+                    var planExists = savedPlan && plans.some(p => p.slug === savedPlan);
+                    
+                    // Enable field if we have plans
                     $planSelect.prop('disabled', false).empty();
                     $planSelect.append(new Option('', '')); // Empty option first
                     
+                    // Add all available plans
                     plans.forEach(function(plan) {
                         $planSelect.append(new Option(plan.slug, plan.slug));
                     });
                     
-                    // Only restore previous selection if it exists in available plans
-                    var savedPlan = '<?php echo esc_js($selected_plan); ?>';
-                    if (savedPlan && plans.some(p => p.slug === savedPlan)) {
+                    // Set value based on context
+                    if (planExists) {
+                        // Case 1: Saved plan matches context - show it
                         $planSelect.val(savedPlan);
+                    } else {
+                        // Case 2: Saved plan doesn't match but we have alternatives - leave empty but enabled
+                        $planSelect.val('');
                     }
+                    
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
+                    // Case 3: Error - disabled empty state
+                    $planSelect.empty()
+                              .prop('disabled', true)
+                              .append(new Option('', ''));
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
+                // Case 3: Error - disabled empty state
+                $planSelect.empty()
+                          .prop('disabled', true)
+                          .append(new Option('', ''));
             }
         });
     }
@@ -350,7 +367,8 @@ jQuery(document).ready(function($) {
     function updateServerTypeFields(serverType) {
         var $providerSelect = $('#arsol_server_provider_slug');
         var $groupSelect = $('#arsol_server_plan_group_slug');
-        
+        var $planSelect = $('#arsol_server_plan_slug');
+
         if (serverType === 'sites_server') {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
@@ -375,14 +393,16 @@ jQuery(document).ready(function($) {
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
             
-            // Only clear and disable provider/group if empty
+            // Only clear and disable if empty
             if (!$providerSelect.val()) {
                 $providerSelect.prop('disabled', false).empty();
             }
             if (!$groupSelect.val()) {
                 $groupSelect.prop('disabled', false).empty();
             }
-            // Remove plan field handling from here
+            if (!$planSelect.val()) {
+                $planSelect.prop('disabled', false).empty();
+            }
             
             if (serverType) {
                 updateProvidersByServerType(serverType);
@@ -390,17 +410,17 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Either remove disableAllDropdowns or modify it to preserve plan state
     function disableAllDropdowns(serverType) {
         if (serverType === 'sites_server') return;
 
         var $providerSelect = $('#arsol_server_provider_slug');
         var $groupSelect = $('#arsol_server_plan_group_slug');
-        
-        // Only disable provider and group
+        var $planSelect = $('#arsol_server_plan_slug');
+
+        // Disable and clear all dropdowns at once
         $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
         $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        // Remove plan handling from here
+        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
     }
 
     function updateProvidersByServerType(serverType) {
