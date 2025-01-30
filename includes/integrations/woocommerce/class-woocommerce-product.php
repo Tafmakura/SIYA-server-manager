@@ -150,6 +150,32 @@ class Product {
             }
         }
 
+        // Get existing values for region and image
+        $existing_region = $product->get_meta('_arsol_server_region', true);
+        $existing_image = $product->get_meta('_arsol_server_image', true);
+        
+        // Handle region and image fields
+        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
+        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
+
+        // Validate region if not empty
+        if (!empty($region)) {
+            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
+                WC_Admin_Notices::add_custom_notice(
+                    'region_pattern_error', 
+                    __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
+                );
+                $has_errors = true;
+            }
+            if (strlen($region) > 50) {
+                WC_Admin_Notices::add_custom_notice(
+                    'region_length_error',
+                    __('Server region cannot exceed 50 characters.', 'woocommerce')
+                );
+                $has_errors = true;
+            }
+        }
+
         if ($has_errors) {
             // Add error notice
             WC_Admin_Notices::add_notice(
@@ -195,62 +221,13 @@ class Product {
             $product->delete_meta_data('_arsol_max_applications');
         }
 
-        // Get existing values for region and image
-        $existing_region = $product->get_meta('_arsol_server_region', true);
-        $existing_image = $product->get_meta('_arsol_server_image', true);
-        
-        // Handle region and image fields
-        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
-        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
+        // Always save region value regardless of server type
+        $fields['_arsol_server_region'] = $region;
 
-        // Validate region if not empty
-        if (!empty($region)) {
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                WC_Admin_Notices::add_custom_notice(
-                    'region_pattern_error', 
-                    __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-            if (strlen($region) > 50) {
-                WC_Admin_Notices::add_custom_notice(
-                    'region_length_error',
-                    __('Server region cannot exceed 50 characters.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-        }
-
-        // Validate image if not empty
-        if (!empty($server_image)) {
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $server_image)) {
-                WC_Admin_Notices::add_custom_notice(
-                    'image_pattern_error',
-                    __('Invalid server image. Only letters, numbers, and hyphens allowed.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-            if (strlen($server_image) > 50) {
-                WC_Admin_Notices::add_custom_notice(
-                    'image_length_error',
-                    __('Server image cannot exceed 50 characters.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-        }
-
-        if ($has_errors) {
-            return false;
-        }
-
-        // Set region and image values
+        // Only clear image for sites server transition
         if ($is_sites_server && !$was_sites_server) {
-            // Only clear values when transitioning to Sites server
-            $fields['_arsol_server_region'] = '';
             $fields['_arsol_server_image'] = '';
         } else {
-            // Save region and image (even if empty - allows clearing)
-            $fields['_arsol_server_region'] = $region;
             $fields['_arsol_server_image'] = $server_image;
         }
 
