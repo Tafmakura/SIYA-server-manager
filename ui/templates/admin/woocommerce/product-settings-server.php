@@ -494,7 +494,26 @@ jQuery(document).ready(function($) {
 
     // Initialize visibility on page load
     toggleServerVisibility();
-    // ...rest of existing code...
+
+
+    // Add event handler for server checkbox that switches tabs when unchecked
+    $('#arsol_server').on('change', function() {
+        if (!$(this).is(':checked')) {
+            // Check if we're currently on the server settings tab
+            if ($('.arsol_server_settings_tab a').hasClass('active')) {
+                // Try to find and click general tab first, then variations tab as fallback
+                const $generalTab = $('.general_tab a');
+                const $variationsTab = $('.variations_tab a');
+                
+                if ($generalTab.length) {
+                    $generalTab[0].click();
+                } else if ($variationsTab.length) {
+                    $variationsTab[0].click();
+                }
+            }
+        }
+    });
+
 });
 </script>
 
