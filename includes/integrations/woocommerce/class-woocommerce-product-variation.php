@@ -30,7 +30,7 @@ class Variation {
         $is_server_enabled = $parent ? $parent->get_meta('_arsol_server') === 'yes' : false;
         $server_type = $parent ? $parent->get_meta('_arsol_server_type') : '';
         
-        // Hide if server is not enabled, or if it's enabled and is a sites server
+        // Hide if server is not enabled, or if it's enabled and is a sites server !!!!
         $hidden_class = (!$is_server_enabled || ($is_server_enabled && $server_type === 'sites_server')) ? 'hidden' : '';
 
       // $hidden_class = '';
