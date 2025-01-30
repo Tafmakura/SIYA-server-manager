@@ -484,6 +484,11 @@ jQuery(document).ready(function($) {
     // Initialize visibility on page load
     toggleServerVisibility();
 
+    // Initialize server type fields if sites_server is selected
+    var initialServerType = $('#arsol_server_type').val();
+    if (initialServerType === 'sites_server') {
+        updateServerTypeFields('sites_server');
+    }
 
     // Add event handler for server checkbox that switches tabs when unchecked
     $('#arsol_server').on('change', function() {
