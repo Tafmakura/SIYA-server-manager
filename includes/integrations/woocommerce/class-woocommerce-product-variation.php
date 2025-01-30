@@ -31,8 +31,9 @@ class Variation {
         $server_type = $parent ? $parent->get_meta('_arsol_server_type') : '';
         
         // Hide if server is not enabled, or if it's enabled and is a sites server
-        $hidden_class = (!$is_server_enabled || ($is_server_enabled && $server_type === 'sites_server')) ? 'hidden' : '';
+       // $hidden_class = (!$is_server_enabled || ($is_server_enabled && $server_type === 'sites_server')) ? 'hidden' : '';
 
+       $hidden_class = '';
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
