@@ -61,6 +61,7 @@ class Variation {
             ]
         ]);
 
+        
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
