@@ -237,18 +237,18 @@
     .show_if_arsol_server,
     .show_if_arsol_sites_server,
     .show_if_arsol_application_server {
-        display: none;
+        display: none !important;
     }
     
-    .arsol-server .show_if_arsol_server,
-    .arsol-sites-server .show_if_arsol_sites_server,
-    .arsol-application-server .show_if_arsol_application_server {
-        display: block;
+    .product-type-arsol-server .show_if_arsol_server,
+    .product-type-arsol-sites-server .show_if_arsol_sites_server,
+    .product-type-arsol-application-server .show_if_arsol_application_server {
+        display: block !important;
     }
     
-    .arsol-sites-server .hide_if_arsol_sites_server,
-    .arsol-application-server .hide_if_arsol_application_server {
-        display: none;
+    .product-type-arsol-sites-server .hide_if_arsol_sites_server,
+    .product-type-arsol-application-server .hide_if_arsol_application_server {
+        display: none !important;
     }
 </style>
 
@@ -464,12 +464,12 @@ jQuery(document).ready(function($) {
         var isServerEnabled = $('#arsol_server').is(':checked');
 
         // Remove all server type classes
-        $form.removeClass('arsol-server arsol-sites-server arsol-application-server');
+        $form.removeClass('product-type-arsol-server product-type-arsol-sites-server product-type-arsol-application-server');
         
         if (isServerEnabled) {
-            $form.addClass('arsol-server');
+            $form.addClass('product-type-arsol-server');
             if (serverType) {
-                $form.addClass('arsol-' + serverType);
+                $form.addClass('product-type-arsol-' + serverType);
             }
         }
 
