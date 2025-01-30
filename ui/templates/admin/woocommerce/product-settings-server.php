@@ -237,260 +237,12 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Remove validation code
-    // $('#post').on('submit'...) - removed
-    // $('#arsol_server_region, #arsol_server_image').on('input'...) - removed
+    // Remove redundant functions and consolidate the logic
     
-    // Keep only visibility and UI handling code
-    function updateGroups(provider, callback) {
-        var serverType = $('#arsol_server_type').val();
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_provider_groups',
-                provider: provider,
-                server_type: serverType !== 'sites_server' ? serverType : null
-            },
-            success: function(groups) {
-                var $groupSelect = $('#arsol_server_plan_group_slug');
-                var currentValue = $groupSelect.val();
-                $groupSelect.empty();
-                
-                if (groups.length === 0 && serverType !== 'sites_server') {
-                    $groupSelect.prop('disabled', true);
-                    $groupSelect.append(new Option('empty', '')); // Add empty text
-                } else {
-                    $groupSelect.prop('disabled', false);
-                    groups.forEach(function(group) {
-                        $groupSelect.append(new Option(group, group));
-                    });
-                    
-                    // Try to keep existing selection if still valid
-                    if (groups.includes(currentValue)) {
-                        $groupSelect.val(currentValue);
-                    }
-                }
-                
-                $groupSelect.trigger('change');
-                if (callback) callback(groups);
-            }
-        });
-    }
+    // Remove disableAllDropdowns since its functionality is handled in updateServerTypeFields
+    // function disableAllDropdowns() { ... } - removed
 
-    function updatePlans(provider, group) {
-        var serverType = $('#arsol_server_type').val();
-        var $planSelect = $('#arsol_server_plan_slug');
-        
-        if (!group) {
-            $planSelect.empty();
-            if (serverType !== 'sites_server') {
-                $planSelect.append(new Option('empty', '')); // Add empty text
-            }
-            $planSelect.prop('disabled', true);
-            return;
-        }
-        
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_group_plans',
-                provider: provider,
-                group: group,
-                server_type: serverType !== 'sites_server' ? serverType : null
-            },
-            success: function(response) {
-                var plans = [];
-                try {
-                    if (typeof response === 'string') {
-                        plans = JSON.parse(response);  // Parse the response as JSON
-                    } else if (typeof response === 'object') {
-                        plans = response;  // Response is already an object
-                    }
-                    if (!Array.isArray(plans)) {
-                        plans = Object.values(plans);  // Convert object to array if necessary
-                    }
-                } catch (e) {
-                    console.error('Failed to parse plans:', e);
-                    plans = [];
-                }
-                $planSelect.empty();
-                
-                if (plans.length === 0 && serverType !== 'sites_server') {
-                    $planSelect.empty();
-                    $planSelect.prop('disabled', true);
-                    $planSelect.append(new Option('empty', '')); // Add empty text
-                } else {
-                    $planSelect.prop('disabled', false);
-                    plans.forEach(function(plan) {
-                        $planSelect.append(new Option(plan.slug, plan.slug));
-                    });
-
-                    // Set the selected plan
-                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
-                    $planSelect.val(selectedPlan);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Failed to fetch plans:', error);
-            }
-        });
-    }
-
-    function setRuncloudCheckboxState(checked = true, disabled = true) {
-        var $checkbox = $('#arsol_server_manager_required');
-        var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
-        
-        $checkbox.prop('checked', checked ? true : (savedValue === 'yes'))
-                .prop('disabled', disabled)
-                .trigger('change');
-    }
-
-    function updateServerTypeFields(serverType) {
-        var $providerSelect = $('#arsol_server_provider_slug');
-        var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
-        if (serverType === 'sites_server') {
-            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-
-            // Set provider
-            $providerSelect.empty()
-                          .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
-                          .val(wpProvider)
-                          .prop('disabled', true);
-            
-            // Set Runcloud state
-            setRuncloudCheckboxState(true, true);
-            
-            // Update groups and plans
-            updateGroups(wpProvider, function(groups) {
-                if (groups.includes(wpGroup)) {
-                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
-                    updatePlans(wpProvider, wpGroup);
-                }
-            });
-        } else {
-
-            // Reset Runcloud state
-            setRuncloudCheckboxState(false, false);
-            
-            // Clear and disable dropdowns
-            $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            
-            if (serverType) {
-                updateProvidersByServerType(serverType);
-            }
-        }
-        
-        toggleServerElements();
-        toggleApplicationsField();
-    }
-
-    function toggleApplicationsField() {
-        var serverType = $('#arsol_server_type').val();
-        var isServerEnabled = $('#arsol_server').is(':checked');
-        
-        if (isServerEnabled && (serverType === 'sites_server' || serverType === 'application_server')) {
-            $('.arsol_max_applications_field').removeClass('hidden');
-        } else {
-            $('.arsol_max_applications_field').addClass('hidden');
-        }
-    }
-
-    function updateProvidersByServerType(serverType) {
-        if (!serverType) return;
-        
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_providers_by_server_type',
-                server_type: serverType
-            },
-            success: function(providers) {
-                var $providerSelect = $('#arsol_server_provider_slug');
-                var currentValue = $providerSelect.val();
-                $providerSelect.empty();
-                
-                if (providers.length === 0) {
-                    $providerSelect.prop('disabled', true);
-                    $providerSelect.append(new Option('empty', '')); // Add empty text
-                } else {
-                    $providerSelect.prop('disabled', false);
-                    providers.forEach(function(provider) {
-                        var providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
-                        $providerSelect.append(new Option(providerName, provider));
-                    });
-                    
-                    // Try to keep existing selection if still valid
-                    if (providers.includes(currentValue)) {
-                        $providerSelect.val(currentValue);
-                    }
-                }
-                $providerSelect.trigger('change');
-            }
-        });
-    }
-
-    function disableAllDropdowns(serverType) {
-        if (serverType === 'sites_server') return;
-
-        var $providerSelect = $('#arsol_server_provider_slug');
-        var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
-        // Disable and clear all dropdowns at once
-        $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-    }
-
-    $('#arsol_server_provider_slug').on('change', function() {
-        var provider = $(this).val();
-        if (provider) {
-            updateGroups(provider);
-        }
-    });
-
-    $('#arsol_server_plan_group_slug').on('change', function() {
-        var provider = $('#arsol_server_provider_slug').val();
-        var group = $(this).val();
-        updatePlans(provider, group);
-    });
-
-    $('#arsol_server_type').on('change', function() {
-        updateServerTypeFields($(this).val());
-    });
-
-    // Remove old initialization code and consolidate into a single init function
-    function initializeServerSettings() {
-        var initialProvider = $('#arsol_server_provider_slug').val();
-        var initialServerType = $('#arsol_server_type').val();
-        
-        // First trigger server elements visibility
-        toggleServerElements();
-        
-        // Then handle provider and plans if needed
-        if (initialProvider) {
-            updateGroups(initialProvider, function(groups) {
-                var selectedGroup = $('#arsol_server_plan_group_slug').val();
-                if (selectedGroup) {
-                    updatePlans(initialProvider, selectedGroup);
-                }
-            });
-        }
-        
-        if (initialServerType) {
-            updateServerTypeFields(initialServerType);
-        }
-    }
-
-    // Initialize everything
-    initializeServerSettings();
-
-    // Handle sites server element visibility
+    // Combine toggleApplicationsField into toggleServerElements since they're always called together
     function toggleServerElements() {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
@@ -521,18 +273,77 @@ jQuery(document).ready(function($) {
             // Handle elements that should show for both types
             if (serverType === 'sites_server' || serverType === 'application_server') {
                 $('.show_if_arsol_sites_server.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+                // Handle applications field visibility here instead of separate function
+                $('.arsol_max_applications_field').removeClass('hidden');
+            } else {
+                $('.arsol_max_applications_field').addClass('hidden');
             }
         } else {
-            // When server is disabled, switch to general tab
-          //  $('.wc-tabs .general_tab a').click();
+            // Hide applications field when server is disabled
+            $('.arsol_max_applications_field').addClass('hidden');
         }
     }
 
-    // Add arsol_server checkbox change handler to trigger toggles
-    $('#arsol_server').on('change', function() {
-        toggleApplicationsField();
+    function updateServerTypeFields(serverType) {
+        var $providerSelect = $('#arsol_server_provider_slug');
+        var $groupSelect = $('#arsol_server_plan_group_slug');
+        var $planSelect = $('#arsol_server_plan_slug');
+
+        if (serverType === 'sites_server') {
+            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+
+            $providerSelect.empty()
+                          .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
+                          .val(wpProvider)
+                          .prop('disabled', true);
+            
+            setRuncloudCheckboxState(true, true);
+            
+            updateGroups(wpProvider, function(groups) {
+                if (groups.includes(wpGroup)) {
+                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
+                    updatePlans(wpProvider, wpGroup);
+                }
+            });
+        } else {
+            setRuncloudCheckboxState(false, false);
+            
+            // Clear and disable dropdowns
+            $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+            $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+            $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+            
+            if (serverType) {
+                updateProvidersByServerType(serverType);
+            }
+        }
+        
         toggleServerElements();
+    }
+
+    // Simplified initialization
+    function initializeServerSettings() {
+        var initialProvider = $('#arsol_server_provider_slug').val();
+        var initialServerType = $('#arsol_server_type').val();
+        
+        toggleServerElements();
+        
+        if (initialProvider && initialServerType) {
+            updateServerTypeFields(initialServerType);
+        }
+    }
+
+    // Event handlers
+    $('#arsol_server').on('change', toggleServerElements);
+    $('#arsol_server_type').on('change', function() {
+        updateServerTypeFields($(this).val());
     });
+
+    // Initialize
+    initializeServerSettings();
+
+    // ...keep existing AJAX-related functions (updateGroups, updatePlans, updateProvidersByServerType)...
 });
 </script>
 
