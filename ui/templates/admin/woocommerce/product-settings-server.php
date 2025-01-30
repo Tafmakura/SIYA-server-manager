@@ -126,10 +126,8 @@
             <?php
                 // Region Text Field
                 $region = get_post_meta($post->ID, '_arsol_server_region', true);
-                error_log('Current region value: ' . $region); // Debug existing value
                 woocommerce_wp_text_input(array(
-                    'id'          => 'arsol_server_region', // Verify ID matches what we check in save
-                    'name'        => 'arsol_server_region', // Add explicit name
+                    'id'          => 'arsol_server_region',
                     'label'       => __('Server region (optional)', 'woocommerce'),
                     'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
                     'desc_tip'    => true,
