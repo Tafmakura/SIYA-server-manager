@@ -186,11 +186,8 @@ class Product {
             $wp_provider = get_option('siya_wp_server_provider');
             $wp_group = get_option('siya_wp_server_group');
             
-            // Check if there's a new plan being submitted
-            $submitted_plan = isset($_POST['arsol_server_plan_slug']) ? sanitize_text_field($_POST['arsol_server_plan_slug']) : '';
-            
-            // Use submitted plan if provided, otherwise keep existing plan
-            $plan_slug = !empty($submitted_plan) ? $submitted_plan : $current_plan_slug;
+            // Always preserve plan if empty in POST
+            $plan_slug = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? $current_plan_slug);
 
             $fields = [
                 '_arsol_server_provider_slug' => $wp_provider,
@@ -205,26 +202,15 @@ class Product {
 
             $product->update_meta_data('_subscription_limit', 'active');
         } else {
-            // Get the current values
-            $current_provider = $product->get_meta('_arsol_server_provider_slug', true);
-            $current_group = $product->get_meta('_arsol_server_plan_group_slug', true);
+            // Get current values
             $current_plan = $product->get_meta('_arsol_server_plan_slug', true);
             
-            // Get new values
-            $new_provider = sanitize_text_field($_POST['arsol_server_provider_slug'] ?? '');
-            $new_group = sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? '');
-            $new_plan = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
-
-            // Only clear plan if provider or group changed
-            if ($new_provider !== $current_provider || $new_group !== $current_group) {
-                $new_plan = '';
-            } else if (empty($new_plan)) {
-                $new_plan = $current_plan;
-            }
+            // Simple plan handling - keep existing if empty
+            $new_plan = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? $current_plan);
 
             $fields = [
-                '_arsol_server_provider_slug' => $new_provider,
-                '_arsol_server_plan_group_slug' => $new_group,
+                '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
+                '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
                 '_arsol_server_plan_slug' => $new_plan,
                 '_arsol_server_manager_required' => isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no',
                 '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '')
