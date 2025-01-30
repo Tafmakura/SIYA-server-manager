@@ -39,11 +39,13 @@ class Variation {
             'label'       => __('Server region slug (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+            'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed (max 50 characters).', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
             'custom_attributes' => [
             'pattern' => '^[a-zA-Z0-9-]+$',
-            'title'   => 'Only letters, numbers and hyphens allowed'
+            'maxlength' => '50',
+            'title'   => 'Only letters, numbers and hyphens allowed',
+            'onkeyup' => "this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')"
             ]
         ]);
 
@@ -53,11 +55,13 @@ class Variation {
             'label'       => __('Server image slug (optional override)', 'woocommerce'), 
             'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the server image for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+            'description' => __('Enter the server image for this variation. Only letters, numbers and hyphens allowed (max 50 characters).', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
             'custom_attributes' => [
             'pattern' => '^[a-zA-Z0-9-]+$',
-            'title'   => 'Only letters, numbers and hyphens allowed'
+            'maxlength' => '50',
+            'title'   => 'Only letters, numbers and hyphens allowed',
+            'onkeyup' => "this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')"
             ]
         ]);
 
