@@ -285,6 +285,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
+        var currentPlan = $planSelect.val(); // Store current selection
         
         if (!provider || !group) {
             $planSelect.empty().prop('disabled', true);
@@ -300,6 +301,7 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
+                var oldValue = $planSelect.val(); // Store current value
                 $planSelect.empty();
                 
                 try {
@@ -315,8 +317,11 @@ jQuery(document).ready(function($) {
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-                        // Clear selection without adding empty option
-                        $planSelect.val(null);
+                        
+                        // Restore previous selection if it exists in new options
+                        if (oldValue && plans.some(p => p.slug === oldValue)) {
+                            $planSelect.val(oldValue);
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
@@ -705,6 +710,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
+        var currentPlan = $planSelect.val(); // Store current selection
         
         if (!provider || !group) {
             $planSelect.empty().prop('disabled', true);
@@ -720,6 +726,7 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
+                var oldValue = $planSelect.val(); // Store current value
                 $planSelect.empty();
                 
                 try {
@@ -735,8 +742,11 @@ jQuery(document).ready(function($) {
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-                        // Clear selection without adding empty option
-                        $planSelect.val(null);
+                        
+                        // Restore previous selection if it exists in new options
+                        if (oldValue && plans.some(p => p.slug === oldValue)) {
+                            $planSelect.val(oldValue);
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
