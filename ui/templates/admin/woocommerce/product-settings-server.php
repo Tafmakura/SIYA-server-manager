@@ -92,8 +92,7 @@
             return ucfirst($provider); // Capitalize first letter
             }, $providers)),
             'value'       => $selected_provider,
-            'required'    => true,
-            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
+            'required'    => true
         ));
 
         // Group Dropdown
@@ -106,8 +105,7 @@
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
-            'value'       => $selected_group,
-            'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
+            'value'       => $selected_group
         ));
 
         // Plan Dropdown setup
@@ -126,8 +124,7 @@
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => empty($plan_options) ? array('' => 'empty') : $plan_options,
-            'value'       => empty($plan_options) ? '' : $selected_plan,
-            'custom_attributes' => array('disabled' => empty($plan_options) ? 'disabled' : false)
+            'value'       => empty($plan_options) ? '' : $selected_plan
         ));
 
         // Add wrapper div for region and image fields
