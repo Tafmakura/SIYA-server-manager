@@ -36,7 +36,7 @@ class Variation {
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
-            'label'       => __('Server region slug (variation override)', 'woocommerce'),
+            'label'       => __('Server region slug (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
             'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
@@ -50,7 +50,7 @@ class Variation {
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
-            'label'       => __('Server image slug (variation override)', 'woocommerce'), 
+            'label'       => __('Server image slug (optional override)', 'woocommerce'), 
             'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
             'description' => __('Enter the server image for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
@@ -65,7 +65,7 @@ class Variation {
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
-            'label'       => __('Server max applications (variation override)', 'woocommerce'),
+            'label'       => __('Server max applications (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true, 
             'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty to use product default.', 'woocommerce'),
