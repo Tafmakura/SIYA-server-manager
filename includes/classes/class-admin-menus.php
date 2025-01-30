@@ -11,7 +11,7 @@ class AdminMenus {
     }
 
     /**
-     * Add top-level SIYA menu to the WordPress admin.
+     * Add top-level SIYA menu to the WordPress admin. 
      */
     public function add_siya_menu() {
         add_menu_page(
