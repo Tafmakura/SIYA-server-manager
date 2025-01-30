@@ -37,7 +37,7 @@ class Variation {
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
             'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
@@ -68,7 +68,7 @@ class Variation {
             'label'       => __('Server max applications (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true, 
-            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty to use product default.', 'woocommerce'),
+            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty to use main subscription default.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications', true),
             'type'        => 'number',
             'custom_attributes' => [
