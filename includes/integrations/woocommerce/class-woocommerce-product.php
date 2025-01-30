@@ -74,7 +74,7 @@ class Product {
         // Get post ID from product object
         $post_id = $product->get_id();
 
-        // Check multiple ways since WooCommerce can be inconsistents
+        // Check multiple ways since WooCommerce can be inconsistent
         $is_server = false;
         
         // Check POST data
