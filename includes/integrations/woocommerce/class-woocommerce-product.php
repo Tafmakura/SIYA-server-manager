@@ -162,20 +162,38 @@ class Product {
         // Set WooCOmmerce setting here required server product settings
         $product->set_sold_individually(true);
 
+        // Get existing values for region and image
+        $existing_region = $product->get_meta('_arsol_server_region', true);
+        $existing_image = $product->get_meta('_arsol_server_image', true);
+        
+        // Handle region and image fields
+        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
+        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
+
+        // Only validate if fields are not empty and were modified
+        if (!empty($region) && $region !== $existing_region) {
+            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
+                return;
+            }
+            if (strlen($region) > 50) {
+                return;
+            }
+        }
+
         if ($is_sites_server) {
-            // For sites server, use WP options directly
+            // Modified to include region for sites server
             $fields = [
                 '_arsol_server_provider_slug' => get_option('siya_wp_server_provider'),
                 '_arsol_server_plan_group_slug' => get_option('siya_wp_server_group'),
                 '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
-                '_arsol_server_manager_required' => 'yes', // Always yes for sites server
+                '_arsol_server_manager_required' => 'yes',
                 '_arsol_ecommerce_optimized' => isset($_POST['arsol_ecommerce_optimized']) ? 'yes' : 'no',
                 '_arsol_server_type' => 'sites_server',
+                '_arsol_server_region' => $region, // Add region for sites server
+                '_arsol_server_image' => $server_image
             ];
 
-             $product->update_meta_data('_subscription_limit', 'active');
-        
-            
+            $product->update_meta_data('_subscription_limit', 'active');
         } else {
             // Normal field handling for other server types
             $fields = [
@@ -194,41 +212,6 @@ class Product {
             // Delete max applications meta if server type is not sites_server or application_server
             $product->delete_meta_data('_arsol_max_applications');
         }
-
-        // Get existing values for region and image
-        $existing_region = $product->get_meta('_arsol_server_region', true);
-        $existing_image = $product->get_meta('_arsol_server_image', true);
-        
-        // Handle region and image fields
-        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
-        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
-
-        // Only validate if fields are not empty and were modified
-        if (!empty($region) && $region !== $existing_region) {
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                // Removed the WC_Admin_Notices::add_notice
-                return;
-            }
-            if (strlen($region) > 50) {
-                // Removed the WC_Admin_Notices::add_notice
-                return;
-            }
-        }
-
-        // Set region and image values - only clear if Sites server is being enabled 
-        $was_sites_server = $product->get_meta('_arsol_sites_server', true) === 'yes';
-
-        if ($is_sites_server && !$was_sites_server) {
-            // Only clear values when transitioning to Sites server
-            $fields['_arsol_server_region'] = '';
-            $fields['_arsol_server_image'] = '';
-        } else {
-            // Keep existing or updated values
-            $fields['_arsol_server_region'] = $region;
-            $fields['_arsol_server_image'] = $server_image;
-        }
-
-        $fields['_arsol_server_type'] = sanitize_text_field($_POST['arsol_server_type'] ?? '');
 
         // Set _sold_individually to 'yes' for all server products
         if ($is_server) {
