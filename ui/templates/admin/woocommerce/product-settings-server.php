@@ -346,7 +346,7 @@ jQuery(document).ready(function($) {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
 
-            // Set provider
+            // Set provider for sites server
             $providerSelect.empty()
                           .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
                           .val(wpProvider)
@@ -355,7 +355,7 @@ jQuery(document).ready(function($) {
             // Set Runcloud state
             setRuncloudCheckboxState(true, true);
             
-            // Update groups and plans
+            // Update groups and plans for sites server
             updateGroups(wpProvider, function(groups) {
                 if (groups.includes(wpGroup)) {
                     $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
@@ -363,14 +363,19 @@ jQuery(document).ready(function($) {
                 }
             });
         } else {
-
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
             
-            // Clear and disable dropdowns
-            $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-            $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
+            // Only clear and disable if empty
+            if (!$providerSelect.val()) {
+                $providerSelect.prop('disabled', false).empty();
+            }
+            if (!$groupSelect.val()) {
+                $groupSelect.prop('disabled', false).empty();
+            }
+            if (!$planSelect.val()) {
+                $planSelect.prop('disabled', false).empty();
+            }
             
             if (serverType) {
                 updateProvidersByServerType(serverType);
