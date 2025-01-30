@@ -181,11 +181,21 @@ class Product {
         }
 
         if ($is_sites_server) {
-            // Modified to include region for sites server
+            // Get the current plan slug
+            $current_plan_slug = $product->get_meta('_arsol_server_plan_slug', true);
+            $wp_provider = get_option('siya_wp_server_provider');
+            $wp_group = get_option('siya_wp_server_group');
+            
+            // Only clear plan if it doesn't belong to WP provider and group
+            $plan_slug = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
+            if (empty($plan_slug)) {
+                $plan_slug = $current_plan_slug;
+            }
+
             $fields = [
-                '_arsol_server_provider_slug' => get_option('siya_wp_server_provider'),
-                '_arsol_server_plan_group_slug' => get_option('siya_wp_server_group'),
-                '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
+                '_arsol_server_provider_slug' => $wp_provider,
+                '_arsol_server_plan_group_slug' => $wp_group,
+                '_arsol_server_plan_slug' => $plan_slug,
                 '_arsol_server_manager_required' => 'yes',
                 '_arsol_ecommerce_optimized' => isset($_POST['arsol_ecommerce_optimized']) ? 'yes' : 'no',
                 '_arsol_server_type' => 'sites_server',
@@ -195,11 +205,27 @@ class Product {
 
             $product->update_meta_data('_subscription_limit', 'active');
         } else {
-            // Normal field handling for other server types
+            // Get the current values
+            $current_provider = $product->get_meta('_arsol_server_provider_slug', true);
+            $current_group = $product->get_meta('_arsol_server_plan_group_slug', true);
+            $current_plan = $product->get_meta('_arsol_server_plan_slug', true);
+            
+            // Get new values
+            $new_provider = sanitize_text_field($_POST['arsol_server_provider_slug'] ?? '');
+            $new_group = sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? '');
+            $new_plan = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
+
+            // Only clear plan if provider or group changed
+            if ($new_provider !== $current_provider || $new_group !== $current_group) {
+                $new_plan = '';
+            } else if (empty($new_plan)) {
+                $new_plan = $current_plan;
+            }
+
             $fields = [
-                '_arsol_server_provider_slug' => sanitize_text_field($_POST['arsol_server_provider_slug'] ?? ''),
-                '_arsol_server_plan_group_slug' => sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? ''),
-                '_arsol_server_plan_slug' => sanitize_text_field($_POST['arsol_server_plan_slug'] ?? ''),
+                '_arsol_server_provider_slug' => $new_provider,
+                '_arsol_server_plan_group_slug' => $new_group,
+                '_arsol_server_plan_slug' => $new_plan,
                 '_arsol_server_manager_required' => isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no',
                 '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '')
             ];
