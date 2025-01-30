@@ -181,16 +181,16 @@ class Product {
         }
 
         if ($is_sites_server) {
-            // Get the current plan slug
+            // Get the current plan slug from meta
             $current_plan_slug = $product->get_meta('_arsol_server_plan_slug', true);
             $wp_provider = get_option('siya_wp_server_provider');
             $wp_group = get_option('siya_wp_server_group');
             
-            // Only clear plan if it doesn't belong to WP provider and group
-            $plan_slug = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
-            if (empty($plan_slug)) {
-                $plan_slug = $current_plan_slug;
-            }
+            // Check if there's a new plan being submitted
+            $submitted_plan = isset($_POST['arsol_server_plan_slug']) ? sanitize_text_field($_POST['arsol_server_plan_slug']) : '';
+            
+            // Use submitted plan if provided, otherwise keep existing plan
+            $plan_slug = !empty($submitted_plan) ? $submitted_plan : $current_plan_slug;
 
             $fields = [
                 '_arsol_server_provider_slug' => $wp_provider,
