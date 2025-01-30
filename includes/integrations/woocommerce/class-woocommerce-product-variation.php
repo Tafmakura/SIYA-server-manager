@@ -33,42 +33,41 @@ class Variation {
         // Hide if server is not enabled, or if it's enabled and is a sites server !!!!
         $hidden_class_on_load = (!$is_server_enabled || ($is_server_enabled && $server_type === 'sites_server')) ? 'hidden' : '';
 
-      // $hidden_class = '';
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
-            'label'       => __('Server region slug (optional override)', 'woocommerce'),
+            'label'       => __('Server region slug (variation override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+            'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
             'custom_attributes' => [
-                'pattern' => '^[a-zA-Z0-9-]+$',
-                'title'   => 'Only letters, numbers and hyphens allowed'
+            'pattern' => '^[a-zA-Z0-9-]+$',
+            'title'   => 'Only letters, numbers and hyphens allowed'
             ]
         ]);
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
-            'label'       => __('Server image slug (optional override)', 'woocommerce'),
+            'label'       => __('Server image slug (variation override)', 'woocommerce'), 
             'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+            'description' => __('Enter the server image for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
             'custom_attributes' => [
-                'pattern' => '^[a-zA-Z0-9-]+$',
-                'title'   => 'Only letters, numbers and hyphens allowed'
+            'pattern' => '^[a-zA-Z0-9-]+$',
+            'title'   => 'Only letters, numbers and hyphens allowed'
             ]
         ]);
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
-            'label'       => __('Server max applications (optional override)', 'woocommerce'),
+            'label'       => __('Server max applications (variation override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the maximum number of applications allowed for this server variation.', 'woocommerce'),
+            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999).', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
             'custom_attributes' => [
             'min' => '0',
