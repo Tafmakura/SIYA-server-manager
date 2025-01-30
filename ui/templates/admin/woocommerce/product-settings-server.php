@@ -110,24 +110,15 @@
             'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
         ));
 
-        // Plan Dropdown setup
-        $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = $selected_provider && $selected_group ? 
-            $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
-        $plan_options = [];
-        foreach ($plans as $plan) {
-            $plan_options[$plan['slug']] = $plan['slug'];
-        }
-
-        // Modify the select to always be disabled and show 'empty' if no options available
+        // Plan Dropdown setup - Always start disabled with empty
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => empty($plan_options) ? array('' => 'empty') : $plan_options,
-            'value'       => empty($plan_options) ? '' : $selected_plan,
-            'custom_attributes' => array('disabled' => empty($plan_options) ? 'disabled' : false)
+            'options'     => array('' => 'empty'),
+            'value'       => '',
+            'custom_attributes' => array('disabled' => 'disabled')
         ));
 
         // Add wrapper div for region and image fields
@@ -281,16 +272,39 @@ jQuery(document).ready(function($) {
         });
     }
 
+    function setServerPlanState(options = [], savedPlan = null, isDisabled = true) {
+        const $planSelect = $('#arsol_server_plan_slug');
+        $planSelect.empty();
+
+        // Highest priority: Disabled state
+        if (isDisabled) {
+            $planSelect.prop('disabled', true)
+                .append(new Option('empty', ''));
+            return;
+        }
+
+        // Otherwise populate options
+        options.forEach(plan => {
+            $planSelect.append(new Option(plan.slug, plan.slug));
+        });
+        
+        // Try to select saved plan if valid
+        if (savedPlan && options.some(plan => plan.slug === savedPlan)) {
+            $planSelect.val(savedPlan);
+        } else {
+            $planSelect.val(null);
+        }
+        
+        $planSelect.prop('disabled', false);
+    }
+
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
-        var $planSelect = $('#arsol_server_plan_slug');
-        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>';
         
-        // Added stricter validation
+        // Highest priority - Invalid provider/group
         if (!provider || !group || group === 'empty' || provider === 'empty') {
-            $planSelect.empty()
-                .prop('disabled', true)
-                .append(new Option('empty', ''));
+            setServerPlanState([], null, true);
             return;
         }
         
@@ -303,45 +317,28 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
-                $planSelect.empty();
-                
                 try {
                     var plans = typeof response === 'string' ? JSON.parse(response) : response;
                     if (!Array.isArray(plans)) {
                         plans = Object.values(plans);
                     }
                     
-                    // Always disable and show empty if no plans
+                    // High priority - No plans
                     if (!plans || plans.length === 0) {
-                        $planSelect.prop('disabled', true)
-                            .append(new Option('empty', ''));
+                        setServerPlanState([], null, true);
                         return;
                     }
                     
-                    // Only enable and populate if we have plans
-                    $planSelect.prop('disabled', false);
-                    plans.forEach(function(plan) {
-                        $planSelect.append(new Option(plan.slug, plan.slug));
-                    });
+                    // Medium/Low priority - Has plans
+                    setServerPlanState(plans, savedPlan, false);
                     
-                    // Only try to set saved value if we have plans
-                    if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-                        $planSelect.val(savedPlan);
-                    } else {
-                        $planSelect.val(null);
-                    }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.empty()
-                        .prop('disabled', true)
-                        .append(new Option('empty', ''));
+                    setServerPlanState([], null, true);
                 }
             },
-            error: function(xhr, status, error) {
-                console.error('Failed to fetch plans:', error);
-                $planSelect.empty()
-                    .prop('disabled', true)
-                    .append(new Option('empty', ''));
+            error: function() {
+                setServerPlanState([], null, true);
             }
         });
     }
@@ -720,12 +717,11 @@ jQuery(document).ready(function($) {
     // Modify updatePlans function to handle the response better
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
-        var $planSelect = $('#arsol_server_plan_slug');
         var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
         // Added stricter validation
         if (!provider || !group || group === 'empty' || provider === 'empty') {
-            $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
+            setServerPlanState([], null, true);
             return;
         }
         
@@ -747,28 +743,18 @@ jQuery(document).ready(function($) {
                     }
                     
                     if (plans.length === 0) {
-                        $planSelect.prop('disabled', true);
+                        setServerPlanState([], null, true);
                     } else {
-                        $planSelect.prop('disabled', false);
-                        plans.forEach(function(plan) {
-                            $planSelect.append(new Option(plan.slug, plan.slug));
-                        });
-                        
-                        // Try to select the saved plan if it exists in the new options
-                        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-                            $planSelect.val(savedPlan);
-                        } else {
-                            $planSelect.val(null);
-                        }
+                        setServerPlanState(plans, savedPlan, false);
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.prop('disabled', true).append(new Option('empty', ''));
+                    setServerPlanState([], null, true);
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
-                $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
+                setServerPlanState([], null, true);
             }
         });
     }
