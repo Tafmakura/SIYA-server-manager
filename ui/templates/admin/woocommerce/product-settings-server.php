@@ -364,14 +364,16 @@ jQuery(document).ready(function($) {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
 
-            // Sites server specific logic
+            // Set provider for sites server
             $providerSelect.empty()
                           .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
                           .val(wpProvider)
                           .prop('disabled', true);
             
+            // Set Runcloud state
             setRuncloudCheckboxState(true, true);
             
+            // Update groups and plans for sites server
             updateGroups(wpProvider, function(groups) {
                 if (groups.includes(wpGroup)) {
                     $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
@@ -379,15 +381,20 @@ jQuery(document).ready(function($) {
                 }
             });
         } else {
-            // Non-sites server logic
+            // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
             
-            // Enable all dropdowns for non-sites servers
-            $providerSelect.prop('disabled', false);
-            $groupSelect.prop('disabled', false);
-            $planSelect.prop('disabled', false);
+            // Only clear and disable if empty
+            if (!$providerSelect.val()) {
+                $providerSelect.prop('disabled', false).empty();
+            }
+            if (!$groupSelect.val()) {
+                $groupSelect.prop('disabled', false).empty();
+            }
+            if (!$planSelect.val()) {
+                $planSelect.prop('disabled', false).empty();
+            }
             
-            // Update available providers based on server type
             if (serverType) {
                 updateProvidersByServerType(serverType);
             }
