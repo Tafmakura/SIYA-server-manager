@@ -233,23 +233,6 @@
     .arsol_ecommerce_optimized_field.hidden {
         display: none;
     }
-    /* WooCommerce-style visibility classes */
-    .show_if_arsol_server,
-    .show_if_arsol_sites_server,
-    .show_if_arsol_application_server {
-        display: none !important;
-    }
-    
-    .product-type-arsol-server .show_if_arsol_server,
-    .product-type-arsol-sites-server .show_if_arsol_sites_server,
-    .product-type-arsol-application-server .show_if_arsol_application_server {
-        display: block !important;
-    }
-    
-    .product-type-arsol-sites-server .hide_if_arsol_sites_server,
-    .product-type-arsol-application-server .hide_if_arsol_application_server {
-        display: none !important;
-    }
 </style>
 
 <script type="text/javascript">
@@ -459,17 +442,30 @@ jQuery(document).ready(function($) {
     }
 
     function toggleServerTypeVisibility() {
-        var $form = $('#woocommerce-product-data');
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
 
-        // Remove all server type classes
-        $form.removeClass('product-type-arsol-server product-type-arsol-sites-server product-type-arsol-application-server');
-        
+        // Hide all type-specific elements first
+        $('.show_if_arsol_sites_server, .show_if_arsol_application_server')
+            .attr('style', 'display: none !important')
+            .addClass('hidden');
+        $('.hide_if_arsol_sites_server, .hide_if_arsol_application_server')
+            .attr('style', '')
+            .removeClass('hidden');
+
+        // Only proceed with showing elements if server is enabled
         if (isServerEnabled) {
-            $form.addClass('product-type-arsol-server');
-            if (serverType) {
-                $form.addClass('product-type-arsol-' + serverType);
+            if (serverType === 'sites_server') {
+                $('.show_if_arsol_sites_server').attr('style', '').removeClass('hidden');
+                $('.hide_if_arsol_sites_server')
+                    .attr('style', 'display: none !important')
+                    .addClass('hidden');
+            } 
+            else if (serverType === 'application_server') {
+                $('.show_if_arsol_application_server').attr('style', '').removeClass('hidden');
+                $('.hide_if_arsol_application_server')
+                    .attr('style', 'display: none !important')
+                    .addClass('hidden');
             }
         }
 
