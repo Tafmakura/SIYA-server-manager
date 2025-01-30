@@ -281,12 +281,11 @@ jQuery(document).ready(function($) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
         
-        if (!group) {
-            $planSelect.empty();
+        if (!provider || !group) {
+            $planSelect.empty().prop('disabled', true);
             if (serverType !== 'sites_server') {
-                $planSelect.append(new Option('empty', '')); // Add empty text
+                $planSelect.append(new Option('empty', ''));
             }
-            $planSelect.prop('disabled', true);
             return;
         }
         
@@ -299,39 +298,38 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
-                var plans = [];
+                $planSelect.empty();
+                
                 try {
-                    if (typeof response === 'string') {
-                        plans = JSON.parse(response);  // Parse the response as JSON
-                    } else if (typeof response === 'object') {
-                        plans = response;  // Response is already an object
-                    }
+                    var plans = typeof response === 'string' ? JSON.parse(response) : response;
                     if (!Array.isArray(plans)) {
-                        plans = Object.values(plans);  // Convert object to array if necessary
+                        plans = Object.values(plans);
+                    }
+                    
+                    if (plans.length === 0 && serverType !== 'sites_server') {
+                        $planSelect.prop('disabled', true)
+                            .append(new Option('empty', ''));
+                    } else {
+                        $planSelect.prop('disabled', false);
+                        // Add empty option first
+                        $planSelect.append(new Option('Select a plan', ''));
+                        plans.forEach(function(plan) {
+                            $planSelect.append(new Option(plan.slug, plan.slug));
+                        });
+                        // Don't auto-select any option
+                        $planSelect.val('');
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    plans = [];
-                }
-                $planSelect.empty();
-                
-                if (plans.length === 0 && serverType !== 'sites_server') {
-                    $planSelect.empty();
-                    $planSelect.prop('disabled', true);
-                    $planSelect.append(new Option('empty', '')); // Add empty text
-                } else {
-                    $planSelect.prop('disabled', false);
-                    plans.forEach(function(plan) {
-                        $planSelect.append(new Option(plan.slug, plan.slug));
-                    });
-
-                    // Set the selected plan
-                    var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
-                    $planSelect.val(selectedPlan);
+                    $planSelect.prop('disabled', true)
+                        .append(new Option('empty', ''));
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
+                $planSelect.empty()
+                    .prop('disabled', true)
+                    .append(new Option('empty', ''));
             }
         });
     }
@@ -613,14 +611,13 @@ jQuery(document).ready(function($) {
                             .append(new Option('empty', ''));
                     } else {
                         $planSelect.prop('disabled', false);
+                        // Add empty option first
+                        $planSelect.append(new Option('Select a plan', ''));
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-
-                        var selectedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
-                        if (selectedPlan) {
-                            $planSelect.val(selectedPlan);
-                        }
+                        // Don't auto-select any option
+                        $planSelect.val('');
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
