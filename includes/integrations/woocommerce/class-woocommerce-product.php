@@ -94,172 +94,32 @@ class Product {
             return $product;
         }
 
-
-        $has_errors = false;
         $server_type = sanitize_text_field($_POST['arsol_server_type'] ?? '');
-        $is_sites_server = $server_type === 'sites_server';
+        $provider    = sanitize_text_field($_POST['arsol_server_provider_slug'] ?? '');
+        $group       = sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? '');
+        $plan        = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
 
-        // 1. Required Fields Validation
-        $required_fields = [
-            'arsol_server_type' => __('Server Type', 'woocommerce')
+        // Simplify region/image checks
+        $region      = sanitize_text_field($_POST['arsol_server_region'] ?? '');
+        $server_image = sanitize_text_field($_POST['arsol_server_image'] ?? '');
+
+        // Minimal required fields check
+        if (!$server_type) { return $product; }
+
+        // Store meta fields
+        $fields = [
+            '_arsol_server_type'             => $server_type,
+            '_arsol_server_provider_slug'    => $provider,
+            '_arsol_server_plan_group_slug'  => $group,
+            '_arsol_server_plan_slug'        => $plan,
+            '_arsol_server_region'           => $region,
+            '_arsol_server_image'            => $server_image
         ];
 
-        // Add provider fields only if not sites server
-        if (!$is_sites_server) {
-            $required_fields += [
-                'arsol_server_provider_slug' => __('Server Provider', 'woocommerce'),
-                'arsol_server_plan_group_slug' => __('Server Plan Group', 'woocommerce'),
-                'arsol_server_plan_slug' => __('Server Plan', 'woocommerce')
-            ];
-        }
-
-        foreach ($required_fields as $field => $label) {
-            if (empty($_POST[$field])) {
-                // Removed the WC_Admin_Notices::add_notice
-                $has_errors = true;
-            }
-        }
-
-        // 2. Pattern Validation
-        $pattern_fields = [
-            'arsol_server_region' => __('Server Region', 'woocommerce'),
-            'arsol_server_image' => __('Server Image', 'woocommerce')
-        ];
-
-        foreach ($pattern_fields as $field => $label) {
-            $value = sanitize_text_field($_POST[$field] ?? '');
-            if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-                // Removed the WC_Admin_Notices::add_notice
-                //$has_errors = true;
-            }
-        }
-
-        // 3. Length Validation
-        $region = sanitize_text_field($_POST['arsol_server_region'] ?? '');
-        if (strlen($region) > 50) {
-            // Removed the WC_Admin_Notices::add_notice
-          // $has_errors = true;
-        }
-
-        // 4. Applications Validation
-        if ($is_sites_server || $server_type === 'application_server') {
-            $max_apps = absint($_POST['arsol_max_applications'] ?? 0);
-            if ($max_apps > 99) {
-                // Removed the WC_Admin_Notices::add_notice
-              //  $has_errors = true; 
-            }
-        }
-
-        if ($has_errors) {
-            // Add error notice
-            WC_Admin_Notices::add_notice(
-                'validation_failed',
-                __('Validation failed: Please check the server settings.', 'woocommerce')
-            );
-          //  return false;
-        }
-
-        // Set WooCOmmerce setting here required server product settings
-        $product->set_sold_individually(true);
-
-        // Get existing values for region and image
-        $existing_region = $product->get_meta('_arsol_server_region', true);
-        $existing_image = $product->get_meta('_arsol_server_image', true);
-        
-        // Handle region and image fields
-        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
-        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
-
-        // Only validate if fields are not empty and were modified
-        if (!empty($region) && $region !== $existing_region) {
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                return;
-            }
-            if (strlen($region) > 50) {
-                return;
-            }
-        }
-
-        // Only save plan if we have valid context
-        $current_provider = sanitize_text_field($_POST['arsol_server_provider_slug'] ?? '');
-        $current_group = sanitize_text_field($_POST['arsol_server_plan_group_slug'] ?? '');
-        $current_plan = sanitize_text_field($_POST['arsol_server_plan_slug'] ?? '');
-        
-        if ($is_sites_server) {
-            $wp_provider = get_option('siya_wp_server_provider');
-            $wp_group = get_option('siya_wp_server_group');
-            
-            // For sites server, only save plan if WP provider and group are set
-            $new_plan = ($wp_provider && $wp_group && !empty($current_plan)) ? 
-                $current_plan : 
-                '';
-
-            $fields = [
-                '_arsol_server_provider_slug' => $wp_provider,
-                '_arsol_server_plan_group_slug' => $wp_group,
-                '_arsol_server_plan_slug' => $new_plan,
-                '_arsol_server_manager_required' => 'yes',
-                '_arsol_ecommerce_optimized' => isset($_POST['arsol_ecommerce_optimized']) ? 'yes' : 'no',
-                '_arsol_server_type' => 'sites_server',
-                '_arsol_server_region' => $region, // Add region for sites server
-                '_arsol_server_image' => $server_image
-            ];
-
-            $product->update_meta_data('_subscription_limit', 'active');
-        } else {
-            // For other servers, only save plan if provider and group are set
-            $new_plan = ($current_provider && $current_group && !empty($current_plan)) ? 
-                $current_plan : 
-                '';
-
-            $fields = [
-                '_arsol_server_provider_slug' => $current_provider,
-                '_arsol_server_plan_group_slug' => $current_group,
-                '_arsol_server_plan_slug' => $new_plan,
-                '_arsol_server_manager_required' => isset($_POST['arsol_server_manager_required']) ? 'yes' : 'no',
-                '_arsol_server_type' => sanitize_text_field($_POST['arsol_server_type'] ?? '')
-            ];
-        }
-
-        // Only include max applications if server type is sites_server or application_server
-        if ($server_type === 'sites_server' || $server_type === 'application_server') {
-            $fields['_arsol_max_applications'] = absint($_POST['arsol_max_applications'] ?? 0);
-        } else {
-            // Delete max applications meta if server type is not sites_server or application_server
-            $product->delete_meta_data('_arsol_max_applications');
-        }
-
-        // Set _sold_individually to 'yes' for all server products
-        if ($is_server) {
-            $product->set_sold_individually(true);
-        }
-
-        // Set _subscription_limit to 'active' for sites_server
-        if ($is_sites_server) {
-            $product->update_meta_data('_subscription_limit', 'active');
-        }
-
-        // Save all fields 
         foreach ($fields as $meta_key => $value) {
             $product->update_meta_data($meta_key, $value);
         }
-
-        // Save server groups and tags with better array handling
-        $assigned_server_groups = !empty($_POST['arsol_assigned_server_groups']) && is_array($_POST['arsol_assigned_server_groups']) 
-            ? array_map('intval', $_POST['arsol_assigned_server_groups']) 
-            : [];
-            
-        $assigned_server_tags = !empty($_POST['arsol_assigned_server_tags']) && is_array($_POST['arsol_assigned_server_tags'])
-            ? array_map('intval', $_POST['arsol_assigned_server_tags'])
-            : [];
-            
-        // Update meta with explicit array values
-        $product->update_meta_data('_arsol_assigned_server_groups', $assigned_server_groups);
-        $product->update_meta_data('_arsol_assigned_server_tags', $assigned_server_tags);
-
-        // Make sure to save
         $product->save();
-
         return $product;
     }
 

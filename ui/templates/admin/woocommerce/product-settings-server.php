@@ -79,52 +79,43 @@
             ?>
         </div>
         <?php
-        // Provider Dropdownn
+        // Simplify provider/group/plan dropdowns
         $providers = $slugs->get_provider_slugs();
-        $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
-
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_provider_slug', 
-            'label'       => __('Server provider', 'woocommerce'),
+            'id'      => 'arsol_server_provider_slug',
+            'label'   => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine($providers, array_map(function($provider) {
-            return ucfirst($provider); // Capitalize first letter
-            }, $providers)),
+            'options' => array_combine($providers, array_map('ucfirst', $providers)),
             'value'       => $selected_provider,
             'required'    => true,
             'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
         ));
 
-        // Group Dropdown
-        $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
-
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_plan_group_slug',
-            'label'       => __('Server plan group', 'woocommerce'),
+            'id'      => 'arsol_server_plan_group_slug',
+            'label'   => __('Server plan group', 'woocommerce'),
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine($groups, $groups),
+            'options' => array_combine($groups, $groups),
             'value'       => $selected_group,
             'custom_attributes' => array('disabled' => 'disabled')  // Disable on load
         ));
 
-        // Plan Dropdown
-        $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = $selected_provider && $selected_group ? 
-            $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
+        $plans = ($selected_provider && $selected_group)
+            ? $slugs->get_filtered_plans($selected_provider, $selected_group)
+            : [];
         $plan_options = [];
         foreach ($plans as $plan) {
             $plan_options[$plan['slug']] = $plan['slug'];
         }
-
         woocommerce_wp_select(array(
-            'id'          => 'arsol_server_plan_slug',
-            'label'       => __('Server plan', 'woocommerce'),
+            'id'      => 'arsol_server_plan_slug',
+            'label'   => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $plan_options,
+            'options' => $plan_options,
             'value'       => $selected_plan,
             'custom_attributes' => empty($selected_group) ? array('disabled' => 'disabled') : array()
         ));
