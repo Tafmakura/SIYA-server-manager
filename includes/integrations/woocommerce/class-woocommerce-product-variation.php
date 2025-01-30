@@ -30,17 +30,14 @@ class Variation {
         $is_server_enabled = $parent ? $parent->get_meta('_arsol_server') === 'yes' : false;
         $server_type = $parent ? $parent->get_meta('_arsol_server_type') : '';
         
-        // The current logic is backwards - it's hiding when it should show
-        // Change this line from:
-        // $hidden_class = ($is_server_enabled && $server_type !== 'sites_server') ? '' : 'hidden';
-        // To:
-       // $hidden_class = ($is_server_enabled) ? '' : 'hidden';
+        // Hide if server is not enabled, or if it's enabled and is a sites server
+        $hidden_class = (!$is_server_enabled || ($is_server_enabled && $server_type === 'sites_server')) ? 'hidden' : '';
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
             'label'       => __('Server region slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server hidden",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server {$hidden_class}",
             'desc_tip'    => true,
             'description' => __('Enter the server region override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
@@ -54,7 +51,7 @@ class Variation {
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
             'label'       => __('Server image slug (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server hidden ",
+            'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class} ",
             'desc_tip'    => true,
             'description' => __('Enter the server image override. Only letters, numbers and hyphens allowed.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
