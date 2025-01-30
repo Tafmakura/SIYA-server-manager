@@ -311,12 +311,12 @@ jQuery(document).ready(function($) {
                             .append(new Option('empty', ''));
                     } else {
                         $planSelect.prop('disabled', false);
-                        // Add empty option first
-                        $planSelect.append(new Option('Select a plan', ''));
+                        // Add empty option with no text
+                        $planSelect.append(new Option('', ''));
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-                        // Don't auto-select any option
+                        // Clear selection
                         $planSelect.val('');
                     }
                 } catch (e) {
@@ -611,12 +611,12 @@ jQuery(document).ready(function($) {
                             .append(new Option('empty', ''));
                     } else {
                         $planSelect.prop('disabled', false);
-                        // Add empty option first
-                        $planSelect.append(new Option('Select a plan', ''));
+                        // Add empty option with no text
+                        $planSelect.append(new Option('', ''));
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
-                        // Don't auto-select any option
+                        // Clear selection
                         $planSelect.val('');
                     }
                 } catch (e) {
