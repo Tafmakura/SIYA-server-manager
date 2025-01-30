@@ -131,35 +131,38 @@
 
         // Add wrapper div for region and image fields
         ?>
-        <div class="hide_if_arsol_sites_server">
+        <div class="show_if_arsol_server">
             <?php
-            // Region Text Field
-            $region = get_post_meta($post->ID, '_arsol_server_region', true);
-            woocommerce_wp_text_input(array(
-                'id'          => 'arsol_server_region',
-                'label'       => __('Server region (optional)', 'woocommerce'),
-                'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-                'desc_tip'    => true,
-                'value'       => $region,
-                'custom_attributes' => array(
-                    'pattern' => '^[a-zA-Z0-9-]+$',
-                    'title' => 'Only letters, numbers and hyphens allowed'
-                )
-            ));
-
-            // Server Image Text Field
-            $server_image = get_post_meta($post->ID, '_arsol_server_image', true);
-            woocommerce_wp_text_input(array(
-                'id'          => 'arsol_server_image',
-                'label'       => __('Server image (optional)', 'woocommerce'),
-                'description' => __('Enter the server image identifier. Only letters, numbers and hyphens allowed.', 'woocommerce'),
-                'desc_tip'    => true,
-                'value'       => $server_image,
-                'custom_attributes' => array(
-                    'pattern' => '^[a-zA-Z0-9-]+$',
-                    'title' => 'Only letters, numbers and hyphens allowed'
-                )
-            ));
+                // Region Text Field
+                $region = get_post_meta($post->ID, '_arsol_server_region', true);
+                woocommerce_wp_text_input(array(
+                    'id'          => 'arsol_server_region',
+                    'label'       => __('Server region (optional)', 'woocommerce'),
+                    'description' => __('Enter the server region. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+                    'desc_tip'    => true,
+                    'value'       => $region,
+                    'custom_attributes' => array(
+                        'pattern' => '^[a-zA-Z0-9-]+$',
+                        'title' => 'Only letters, numbers and hyphens allowed'
+                    )
+                ));
+            ?>
+        </div>
+        <div class="hide_if_arsol_sites_server">
+            <?php 
+                // Server Image Text Field
+                $server_image = get_post_meta($post->ID, '_arsol_server_image', true);
+                woocommerce_wp_text_input(array(
+                    'id'          => 'arsol_server_image',
+                    'label'       => __('Server image (optional)', 'woocommerce'),
+                    'description' => __('Enter the server image identifier. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+                    'desc_tip'    => true,
+                    'value'       => $server_image,
+                    'custom_attributes' => array(
+                        'pattern' => '^[a-zA-Z0-9-]+$',
+                        'title' => 'Only letters, numbers and hyphens allowed'
+                    )
+                ));
             ?>
         </div>
         <?php
