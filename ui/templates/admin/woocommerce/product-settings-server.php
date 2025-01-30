@@ -524,7 +524,7 @@ jQuery(document).ready(function($) {
             }
         } else {
             // When server is disabled, switch to general tab
-            $('.wc-tabs .general_tab a').click();
+          //  $('.wc-tabs .general_tab a').click();
         }
     }
 
