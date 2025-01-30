@@ -284,13 +284,15 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
-        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>';
         
-        // Added stricter validation
+        // Always disable first before making the AJAX call
+        $planSelect.empty()
+            .prop('disabled', true)
+            .append(new Option('empty', ''));
+        
+        // Validate inputs before making AJAX call
         if (!provider || !group || group === 'empty' || provider === 'empty') {
-            $planSelect.empty()
-                .prop('disabled', true)
-                .append(new Option('empty', ''));
             return;
         }
         
@@ -311,24 +313,22 @@ jQuery(document).ready(function($) {
                         plans = Object.values(plans);
                     }
                     
-                    // Always disable and show empty if no plans
+                    // Keep disabled if no plans
                     if (!plans || plans.length === 0) {
                         $planSelect.prop('disabled', true)
                             .append(new Option('empty', ''));
                         return;
                     }
                     
-                    // Only enable and populate if we have plans
+                    // Only enable if we have valid plans
                     $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
                         $planSelect.append(new Option(plan.slug, plan.slug));
                     });
                     
-                    // Only try to set saved value if we have plans
+                    // Try to set saved value if it exists in new plans
                     if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
                         $planSelect.val(savedPlan);
-                    } else {
-                        $planSelect.val(null);
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
@@ -337,8 +337,7 @@ jQuery(document).ready(function($) {
                         .append(new Option('empty', ''));
                 }
             },
-            error: function(xhr, status, error) {
-                console.error('Failed to fetch plans:', error);
+            error: function() {
                 $planSelect.empty()
                     .prop('disabled', true)
                     .append(new Option('empty', ''));
@@ -723,9 +722,11 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#arsol_server_plan_slug');
         var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
-        // Added stricter validation
+        // Always disable first before making the AJAX call
+        $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
+        
+        // Validate inputs before making AJAX call
         if (!provider || !group || group === 'empty' || provider === 'empty') {
-            $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
             return;
         }
         
