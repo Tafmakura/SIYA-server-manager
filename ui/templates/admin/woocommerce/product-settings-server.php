@@ -1,4 +1,4 @@
-<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">
+<div id="arsol_server_settings_data" class="panel woocommerce_options_pane show_if_arsol_server">
     <div class="options_group">
         <div id="arsol_server_settings" style="padding: 9px 12px;">
             <div class="toolbar toolbar-top">
@@ -500,7 +500,7 @@ jQuery(document).ready(function($) {
     $('#arsol_server').on('change', function() {
         if (!$(this).is(':checked')) {
             // Check if we're currently on the server settings tab
-            if ($('.arsol_server_settings_tab').hasClass('active')) {
+            if ($('.arsol_server_settings_tab a').hasClass('active')) {
                 // Try to find and click general tab first, then variations tab as fallback
                 const $generalTab = $('.general_tab a');
                 const $variationsTab = $('.variations_tab a');
