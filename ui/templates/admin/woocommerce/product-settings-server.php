@@ -285,13 +285,13 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
-        var currentPlan = $planSelect.val();
         
-        // Disable and clear plan select if group is empty or not provided
+        // Always start by disabling and clearing
+        $planSelect.empty()
+                  .prop('disabled', true)
+                  .append(new Option('', ''));
+        
         if (!provider || !group) {
-            $planSelect.empty()
-                      .prop('disabled', true)
-                      .append(new Option('', ''));
             return;
         }
         
@@ -304,52 +304,36 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
-                var oldValue = $planSelect.val();
-                $planSelect.empty();
-                
                 try {
                     var plans = typeof response === 'string' ? JSON.parse(response) : response;
                     if (!Array.isArray(plans)) {
                         plans = Object.values(plans);
                     }
                     
-                    if (plans.length === 0) {
-                        // No plans available
-                        $planSelect.prop('disabled', true)
-                                  .append(new Option('', ''));
-                    } else {
-                        $planSelect.prop('disabled', false);
-                        
-                        // Add empty option first
-                        $planSelect.append(new Option('', ''));
-                        
-                        // Add plan options
-                        plans.forEach(function(plan) {
-                            $planSelect.append(new Option(plan.slug, plan.slug));
-                        });
-                        
-                        // Check if current plan exists in new options
-                        var planExists = plans.some(p => p.slug === oldValue);
-                        
-                        if (planExists) {
-                            // Keep current plan if it exists in new options
-                            $planSelect.val(oldValue);
-                        } else {
-                            // Clear selection if current plan doesn't exist in new context
-                            $planSelect.val('');
-                        }
+                    // If no plans available, keep select disabled and empty
+                    if (!plans || plans.length === 0) {
+                        return;
+                    }
+                    
+                    // Enable select and add plans
+                    $planSelect.prop('disabled', false).empty();
+                    $planSelect.append(new Option('', '')); // Empty option first
+                    
+                    plans.forEach(function(plan) {
+                        $planSelect.append(new Option(plan.slug, plan.slug));
+                    });
+                    
+                    // Only restore previous selection if it exists in available plans
+                    var savedPlan = '<?php echo esc_js($selected_plan); ?>';
+                    if (savedPlan && plans.some(p => p.slug === savedPlan)) {
+                        $planSelect.val(savedPlan);
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.prop('disabled', true)
-                              .append(new Option('', ''));
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
-                $planSelect.empty()
-                          .prop('disabled', true)
-                          .append(new Option('', ''));
             }
         });
     }
@@ -718,11 +702,10 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#arsol_server_plan_slug');
         
         if (!group) {
-            // Clear and disable plan select if no group selected
             $planSelect.empty()
                       .prop('disabled', true)
                       .append(new Option('', ''));
-        } else if (provider) {
+        } else {
             updatePlans(provider, group);
         }
     });
@@ -731,13 +714,10 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
-        var currentPlan = $planSelect.val();
+        var currentPlan = $planSelect.val(); // Store current selection
         
-        // Disable and clear plan select if group is empty or not provided
         if (!provider || !group) {
-            $planSelect.empty()
-                      .prop('disabled', true)
-                      .append(new Option('', ''));
+            $planSelect.empty().prop('disabled', true);
             return;
         }
         
@@ -750,7 +730,7 @@ jQuery(document).ready(function($) {
                 server_type: serverType !== 'sites_server' ? serverType : null
             },
             success: function(response) {
-                var oldValue = $planSelect.val();
+                var oldValue = $planSelect.val(); // Store current value
                 $planSelect.empty();
                 
                 try {
@@ -760,42 +740,26 @@ jQuery(document).ready(function($) {
                     }
                     
                     if (plans.length === 0) {
-                        // No plans available
-                        $planSelect.prop('disabled', true)
-                                  .append(new Option('', ''));
+                        $planSelect.prop('disabled', true);
                     } else {
                         $planSelect.prop('disabled', false);
-                        
-                        // Add empty option first
-                        $planSelect.append(new Option('', ''));
-                        
-                        // Add plan options
                         plans.forEach(function(plan) {
                             $planSelect.append(new Option(plan.slug, plan.slug));
                         });
                         
-                        // Check if current plan exists in new options
-                        var planExists = plans.some(p => p.slug === oldValue);
-                        
-                        if (planExists) {
-                            // Keep current plan if it exists in new options
+                        // Restore previous selection if it exists in new options
+                        if (oldValue && plans.some(p => p.slug === oldValue)) {
                             $planSelect.val(oldValue);
-                        } else {
-                            // Clear selection if current plan doesn't exist in new context
-                            $planSelect.val('');
                         }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.prop('disabled', true)
-                              .append(new Option('', ''));
+                    $planSelect.prop('disabled', true);
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Failed to fetch plans:', error);
-                $planSelect.empty()
-                          .prop('disabled', true)
-                          .append(new Option('', ''));
+                $planSelect.empty().prop('disabled', true);
             }
         });
     }
