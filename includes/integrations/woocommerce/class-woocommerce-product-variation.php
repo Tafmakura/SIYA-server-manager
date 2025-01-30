@@ -43,7 +43,7 @@ class Variation {
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
             'custom_attributes' => [
             'pattern' => '^[a-zA-Z0-9-]+$',
-            'maxlength' => '20',
+            'maxlength' => '30',
             'title'   => 'Only letters, numbers and hyphens allowed',
             'onkeyup' => "this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')"
             ]
@@ -59,7 +59,7 @@ class Variation {
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
             'custom_attributes' => [
             'pattern' => '^[a-zA-Z0-9-]+$',
-            'maxlength' => '20',
+            'maxlength' => '30',
             'title'   => 'Only letters, numbers and hyphens allowed',
             'onkeyup' => "this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')"
             ]
