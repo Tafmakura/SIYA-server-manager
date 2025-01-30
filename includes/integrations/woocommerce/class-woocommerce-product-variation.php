@@ -68,7 +68,7 @@ class Variation {
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
             'label'       => __('Server max applications (optional override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_sites_server show_if_arsol_application_server",
+            'wrapper_class' => "form-row form-row-first show_if_arsol_sites_server ",
             'desc_tip'    => true,
             'description' => __('Enter the maximum number of applications allowed for this server variation.', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
