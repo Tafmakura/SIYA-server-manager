@@ -696,7 +696,7 @@ jQuery(document).ready(function($) {
         var provider = $('#arsol_server_provider_slug').val();
         var group = $(this).val();
         
-        if (provider && group) {
+        if (provider && group && group !== 'empty') {  // Added check for 'empty' value
             updatePlans(provider, group);
         } else {
             $('#arsol_server_plan_slug').empty()
@@ -711,8 +711,9 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#arsol_server_plan_slug');
         var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
-        if (!provider || !group) {
-            $planSelect.empty().prop('disabled', true);
+        // Added stricter validation
+        if (!provider || !group || group === 'empty' || provider === 'empty') {
+            $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
             return;
         }
         
