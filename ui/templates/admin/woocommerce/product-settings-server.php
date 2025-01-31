@@ -108,14 +108,19 @@
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = isset($providers[$selected_provider]['groups']) ? $providers[$selected_provider]['groups'] : [];
-        
+        $groups = $slugs->get_filtered_plans($selected_provider);
+
         // Only show saved group if it exists
         $group_options = [];
-        if (!empty($selected_group) && isset($groups[$selected_group])) {
-            $group_options[$selected_group] = $groups[$selected_group];
+        if (!empty($selected_group)) {
+            foreach ($groups as $group) {
+                if ($group['group_slug'] === $selected_group) {
+                    $group_options[$selected_group] = $selected_group;
+                    break;
+                }
+            }
         }
-        
+
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
@@ -127,14 +132,25 @@
 
         // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = isset($groups[$selected_group]['plans']) ? $groups[$selected_group]['plans'] : [];
-        
+        $plans = [];
+        foreach ($groups as $group) {
+            if ($group['group_slug'] === $selected_group) {
+                $plans = $group['plans'] ?? [];
+                break;
+            }
+        }
+
         // Only show saved plan if it exists
         $plan_options = [];
-        if (!empty($selected_plan) && isset($plans[$selected_plan])) {
-            $plan_options[$selected_plan] = $plans[$selected_plan];
+        if (!empty($selected_plan)) {
+            foreach ($plans as $plan) {
+                if ($plan['slug'] === $selected_plan) {
+                    $plan_options[$selected_plan] = $selected_plan;
+                    break;
+                }
+            }
         }
-          
+
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
