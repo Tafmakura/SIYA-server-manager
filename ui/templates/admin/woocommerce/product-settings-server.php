@@ -21,11 +21,12 @@
             'vps_server'            => __('VPS Server', 'woocommerce'),
         ];
         
-        // Create options array with only the saved value if it exists
-        $options = [];
-        if (!empty($selected_server_type) && isset($all_types[$selected_server_type])) {
-            $options[$selected_server_type] = $all_types[$selected_server_type];
-        }
+        // Set options based on whether there's a saved value
+        $options = empty($selected_server_type) ? $all_types : (
+            isset($all_types[$selected_server_type]) ? 
+            [$selected_server_type => $all_types[$selected_server_type]] : 
+            []
+        );
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_type',
