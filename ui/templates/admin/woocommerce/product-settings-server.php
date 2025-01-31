@@ -299,7 +299,45 @@ jQuery(document).ready(function($) {
     clearServerOptionFields();
     initializeServerTypeField();
 
+    function initializeServerProviderField() {
+        var $providerField = $('#arsol_server_provider_slug');
+        var selectedServerType = $('#arsol_server_type').val();
+        var savedProvider = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_provider_slug', true)); ?>';
 
+        // Get providers for selected server type via AJAX
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_providers_by_server_type',
+                server_type: selectedServerType
+            },
+            success: function(providers) {
+                // Enable field and clear existing options
+                $providerField.prop('disabled', false).empty();
+                
+                // Add provider options
+                providers.forEach(function(provider) {
+                    var providerName = '<?php echo json_encode($slugs->get_provider_name("' + provider + '")); ?>';
+                    $providerField.append($('<option></option>')
+                        .val(provider)
+                        .text(providerName)
+                    );
+                });
+                
+                // Select saved provider if it exists in allowed list
+                if (savedProvider && providers.includes(savedProvider)) {
+                    $providerField.val(savedProvider);
+                }
+                
+                $providerField.trigger('change');
+            }
+        });
+    }
+
+    // Add event listener for server type changes
+    $('#arsol_server_type').on('change', function() {
+        initializeServerProviderField();
+    });
     
 
     function setRuncloudCheckboxState(checked = true, disabled = true) {
@@ -462,6 +500,8 @@ jQuery(document).ready(function($) {
             }
         }
     });
+
+
 });
 </script>
 
