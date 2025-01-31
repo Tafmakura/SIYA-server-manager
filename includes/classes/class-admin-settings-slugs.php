@@ -3,7 +3,7 @@
 namespace Siya\AdminSettings;
 
 class Slugs {
-    
+
     private const MENU_SLUG = 'siya-slugs-settings';
     private const OPTION_GROUP = 'siya_settings_slugs';
     private const PROVIDERS = [
@@ -138,7 +138,7 @@ class Slugs {
 
     /**
      * Group Methods
-     *//*
+     */
     public function get_provider_group_slugs(string $provider_slug): array {
         if (!$this->provider_exists($provider_slug)) {
             return [];
@@ -160,7 +160,7 @@ class Slugs {
         }
         return $providers;
     }
-*/
+    
     /**
      * Plan Methods
      */
