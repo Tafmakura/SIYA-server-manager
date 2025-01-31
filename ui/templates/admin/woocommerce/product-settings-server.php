@@ -302,7 +302,8 @@ jQuery(document).ready(function($) {
 
         if (selectedServerType === 'sites_server') {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-            $providerField.empty()
+            $providerField.prop('disabled', true)
+                         .empty()
                          .append($('<option></option>').val(wpProvider).text(wpProvider))
                          .val(wpProvider)
                          .trigger('change');
@@ -346,7 +347,8 @@ jQuery(document).ready(function($) {
 
         if (selectedServerType === 'sites_server') {
             var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-            $groupField.empty()
+            $groupField.prop('disabled', true)
+                      .empty()
                       .append($('<option></option>').val(wpGroup).text(wpGroup))
                       .val(wpGroup)
                       .trigger('change');
