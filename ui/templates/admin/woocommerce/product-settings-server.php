@@ -10,7 +10,7 @@
             </div>
         </div>
         <?php
-        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
+        $selected_server_type = get_post_meta($post->ID, '_arsol_server_type', true);
         $all_types = [
             'sites_server'          => __('Sites Server', 'woocommerce'),
             'application_server'    => __('Application Server', 'woocommerce'),
@@ -20,14 +20,13 @@
             'object_storage_server' => __('Object Storage Server', 'woocommerce'),
             'vps_server'            => __('VPS Server', 'woocommerce'),
         ];
-        $enabled_types = array_intersect_key($all_types, array_flip($enabled_server_types));
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_type',
             'label'       => __('Server Type', 'woocommerce'),
             'description' => __('Select the server type.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $enabled_types,  // No placeholder option
-            'value'       => $server_type ?: ''  // Ensure the value is empty if not set
+            'options'     => [],
+            'value'       => $selected_server_type ?: ''  // Ensure the value is empty if not set
         ));
         ?>
         <div class="arsol_max_applications_field">
