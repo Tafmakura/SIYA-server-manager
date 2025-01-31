@@ -49,7 +49,8 @@ function render_repeater_section($provider_slug, $plans) {
                                         'vps_server'            => 'VPS Server',
                                     ];
                                     foreach ($saved_types as $type) {
-                                        $checked = in_array($type, $plan['server_types'] ?? []) ? 'checked' : '';
+                                        $checked = in_array($type, (array) $plan['server_types'], true) ? 'checked' : '';
+
                                         echo '<label><input type="checkbox" name="siya_' . esc_attr($provider_slug) . '_plans[' . $index . '][server_types][]" value="' . esc_attr($type) . '" ' . $checked . '> ' . esc_html($all_types[$type]) . '</label>';
                                     }
                                     ?>
