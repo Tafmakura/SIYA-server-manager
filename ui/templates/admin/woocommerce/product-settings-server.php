@@ -58,6 +58,7 @@
             ?>
         </div>
         <?php
+        // Fix undefined variable by moving declaration here
         $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
         $is_sites_server = $server_type === 'sites_server';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
