@@ -126,17 +126,11 @@
 
         // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $all_plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
-
-        // Only show saved plan if it exists
         $plan_options = [];
+
+        // Simply check if we have a selected plan and add it to options
         if (!empty($selected_plan)) {
-            foreach ($all_plans as $plan) {
-                if ($plan['slug'] === $selected_plan) {
-                    $plan_options[$selected_plan] = $selected_plan;
-                    break;
-                }
-            }
+            $plan_options[$selected_plan] = $selected_plan;
         }
 
         woocommerce_wp_select(array(
