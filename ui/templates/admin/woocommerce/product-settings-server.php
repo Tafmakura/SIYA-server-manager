@@ -88,35 +88,31 @@
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array('' => __('Select provider', 'woocommerce')) + array_combine($providers, array_map(function($provider) {
-                return ucfirst($provider);
-            }, $providers)),
+            'options'     => [],
             'value'       => $selected_provider ?: ''
         ));
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = $selected_provider ? $slugs->get_provider_plan_group_slugs($selected_provider) : [];
-
+        
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array('' => __('Select plan group', 'woocommerce')) + array_combine($groups, $groups),
+            'options'     => [],
             'value'       => $selected_group ?: ''
         ));
 
         // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = $slugs->get_group_plans_by_server_type($selected_provider, $selected_group, $server_type);
           
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array('' => __('Select plan', 'woocommerce')) + array_combine(array_column($plans, 'slug'), array_column($plans, 'name')),
+            'options'     => [],
             'value'       => $selected_plan ?: ''
         ));
 
