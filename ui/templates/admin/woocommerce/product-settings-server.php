@@ -347,7 +347,7 @@ jQuery(document).ready(function($) {
         // Only proceed if we have both server type and provider
         if (!selectedServerType || !selectedProvider) {
             $groupField.prop('disabled', true).empty();
-            $('#arsol_server_plan_group_slug').empty().trigger('change');
+            $('#arsol_server_plan_group_slug').empty().trigger('change'); // 
             return;
         }
 
@@ -401,6 +401,16 @@ jQuery(document).ready(function($) {
             return;
         }
 
+        if (selectedServerType === 'sites_server') {
+            var wpPlan = '<?php echo esc_js(get_option('siya_wp_server_plan')); ?>';
+            $planField.prop('disabled', true)
+                     .empty()
+                     .append($('<option></option>').val(wpPlan).text(wpPlan))
+                     .val(wpPlan)
+                     .trigger('change');
+            return;
+        }
+
         // Get available plans via AJAX
         $.ajax({
             url: ajaxurl,
@@ -424,7 +434,7 @@ jQuery(document).ready(function($) {
                 plans.forEach(function(plan) {
                     $planField.append($('<option></option>')
                         .val(plan.slug)
-                        .text(plan.description || plan.slug)
+                        .text(plan.slug + ' - ' + (plan.description || ''))
                     );
                 });
 
