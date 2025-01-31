@@ -283,13 +283,12 @@ jQuery(document).ready(function($) {
         var $planSelect = $('#arsol_server_plan_slug');
         var savedPlan = '<?php echo esc_js($selected_plan); ?>';
         
-        // Always disable first before making the AJAX call
-        $planSelect.empty()
-            .prop('disabled', true)
-            .append(new Option('empty', ''));
+        // Always empty and disable first
+        $planSelect.empty().prop('disabled', true);
         
-        // Validate inputs before making AJAX call
+        // Early return if no valid provider or group
         if (!provider || !group || group === 'empty' || provider === 'empty') {
+            $planSelect.append(new Option('empty', ''));
             return;
         }
         
@@ -310,34 +309,39 @@ jQuery(document).ready(function($) {
                         plans = Object.values(plans);
                     }
                     
-                    // Keep disabled if no plans
                     if (!plans || plans.length === 0) {
                         $planSelect.prop('disabled', true)
-                            .append(new Option('empty', ''));
+                                  .append(new Option('empty', ''));
                         return;
                     }
                     
-                    // Only enable if we have valid plans
+                    // Enable and populate the select
                     $planSelect.prop('disabled', false);
                     plans.forEach(function(plan) {
-                        $planSelect.append(new Option(plan.slug, plan.slug));
+                        var option = new Option(plan.slug, plan.slug);
+                        $planSelect.append(option);
                     });
                     
-                    // Try to set saved value if it exists in new plans
+                    // Try to restore saved value if it exists in new plans
                     if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
                         $planSelect.val(savedPlan);
+                    } else {
+                        // Select first plan if no saved plan matches
+                        $planSelect.val(plans[0].slug);
                     }
+                    
+                    // Trigger change event to update any dependent fields
+                    $planSelect.trigger('change');
+                    
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
-                    $planSelect.empty()
-                        .prop('disabled', true)
-                        .append(new Option('empty', ''));
+                    $planSelect.prop('disabled', true)
+                              .append(new Option('empty', ''));
                 }
             },
             error: function() {
-                $planSelect.empty()
-                    .prop('disabled', true)
-                    .append(new Option('empty', ''));
+                $planSelect.prop('disabled', true)
+                          .append(new Option('empty', ''));
             }
         });
     }
