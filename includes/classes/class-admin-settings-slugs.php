@@ -195,6 +195,7 @@ class Slugs {
      * Plan Methods
      */
 
+    // Get plan details 
     public function get_plan_details(string $provider_slug, string $plan_slug): ?array {
         $plans = $this->get_filtered_plans($provider_slug);
         $filtered = array_filter($plans, function($plan) use ($plan_slug) {
@@ -203,16 +204,20 @@ class Slugs {
         return !empty($filtered) ? reset($filtered) : null;
     }
 
+    // Check if plan exists
     public function plan_exists(string $provider_slug, string $plan_slug): bool {
         return $this->get_plan_details($provider_slug, $plan_slug) !== null;
     }
 
+    // Get plans by group
     public function get_group_plans_by_server_type(string $provider_slug, string $group_slug, string $server_type): array {
         $all_plans = $this->get_filtered_plans($provider_slug, $group_slug);
         return array_filter($all_plans, function($plan) use ($server_type) {
             return isset($plan['server_types']) && in_array($server_type, $plan['server_types']);
         });
     }
+
+    // Get all plans
     public function get_filtered_plans(?string $provider_slug = null, ?string $group_slug = null): array {
         if ($provider_slug && !$this->provider_exists($provider_slug)) {
             return [];
