@@ -85,62 +85,59 @@
             ?>
         </div>
         <?php
-        // Provider Dropdown
-        $providers = $slugs->get_provider_slugs();
-        $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
-        
-        // Only show saved provider if it exists
-        $provider_options = [];
-        if (!empty($selected_provider) && isset($providers[$selected_provider])) {
-            $provider_options[$selected_provider] = $providers[$selected_provider]['name'] ?? $selected_provider;
-        }
+    // Provider Dropdown
+    $providers = $slugs->get_provider_slugs();
+    $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
-        woocommerce_wp_select(array(
-            'id'          => 'arsol_server_provider_slug', 
-            'label'       => __('Server provider', 'woocommerce'),
-            'description' => __('Select the server provider.', 'woocommerce'),
-            'desc_tip'    => true,
-            'options'     => $provider_options,
-            'value'       => $selected_provider ?: ''
-        ));
+    $provider_options = [];
+    if (!empty($selected_provider) && isset($providers[$selected_provider])) {
+        $provider_options[$selected_provider] = $providers[$selected_provider];
+    }
 
-        // Group Dropdown
-        $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = isset($providers[$selected_provider]['groups']) ? $providers[$selected_provider]['groups'] : [];
-        
-        // Only show saved group if it exists
-        $group_options = [];
-        if (!empty($selected_group) && isset($groups[$selected_group])) {
-            $group_options[$selected_group] = $groups[$selected_group]['name'] ?? $selected_group;
-        }
-        
-        woocommerce_wp_select(array(
-            'id'          => 'arsol_server_plan_group_slug',
-            'label'       => __('Server plan group', 'woocommerce'),
-            'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
-            'desc_tip'    => true,
-            'options'     => $group_options,
-            'value'       => $selected_group ?: ''
-        ));
+    woocommerce_wp_select(array(
+        'id'          => 'arsol_server_provider_slug',
+        'label'       => __('Server provider', 'woocommerce'),
+        'description' => __('Select the server provider.', 'woocommerce'),
+        'desc_tip'    => true,
+        'options'     => $provider_options, // Only show saved provider
+        'value'       => $selected_provider ?: ''
+    ));
 
-        // Plan Dropdown setup
-        $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = isset($groups[$selected_group]['plans']) ? $groups[$selected_group]['plans'] : [];
-        
-        // Only show saved plan if it exists
-        $plan_options = [];
-        if (!empty($selected_plan) && isset($plans[$selected_plan])) {
-            $plan_options[$selected_plan] = $plans[$selected_plan]['name'] ?? $selected_plan;
-        }
-          
-        woocommerce_wp_select(array(
-            'id'          => 'arsol_server_plan_slug',
-            'label'       => __('Server plan', 'woocommerce'),
-            'description' => __('Select the server plan.', 'woocommerce'),
-            'desc_tip'    => true,
-            'options'     => $plan_options,
-            'value'       => $selected_plan ?: ''
-        ));
+    // Group Dropdown
+    $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
+    $groups = isset($providers[$selected_provider]['groups']) ? $providers[$selected_provider]['groups'] : [];
+
+    $group_options = [];
+    if (!empty($selected_group) && isset($groups[$selected_group])) {
+        $group_options[$selected_group] = $groups[$selected_group];
+    }
+
+    woocommerce_wp_select(array(
+        'id'          => 'arsol_server_plan_group_slug',
+        'label'       => __('Server plan group', 'woocommerce'),
+        'description' => __('Select the server plan group.', 'woocommerce'),
+        'desc_tip'    => true,
+        'options'     => $group_options, // Only show saved group
+        'value'       => $selected_group ?: ''
+    ));
+
+    // Plan Dropdown
+    $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
+    $plans = isset($groups[$selected_group]['plans']) ? $groups[$selected_group]['plans'] : [];
+
+    $plan_options = [];
+    if (!empty($selected_plan) && isset($plans[$selected_plan])) {
+        $plan_options[$selected_plan] = $plans[$selected_plan];
+    }
+
+    woocommerce_wp_select(array(
+        'id'          => 'arsol_server_plan_slug',
+        'label'       => __('Server plan', 'woocommerce'),
+        'description' => __('Select the server plan.', 'woocommerce'),
+        'desc_tip'    => true,
+        'options'     => $plan_options, // Only show saved plan
+        'value'       => $selected_plan ?: ''
+    ));
 
         // Add wrapper div for region and image fields
         ?>
