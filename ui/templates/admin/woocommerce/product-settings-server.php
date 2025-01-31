@@ -79,80 +79,52 @@
             ?>
         </div>
         <?php
-        // Provider Dropdown
+        // Provider Dropdownn
+        $providers = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
-        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
-
-        // Get providers based on server type if set
-        $available_providers = $server_type ? 
-            $slugs->get_providers_by_server_type($server_type) : 
-            $slugs->get_provider_slugs();
-
-        $provider_options = array_combine(
-            $available_providers, 
-            array_map(function($provider) use ($slugs) {
-                return $slugs->get_provider_name($provider);
-            }, $available_providers)
-        );
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_provider_slug', 
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $provider_options,
+            'options'     => array_combine($providers, array_map(function($provider) {
+            return ucfirst($provider); // Capitalize first letter
+            }, $providers)),
             'value'       => $selected_provider,
             'required'    => true
         ));
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $available_groups = [];
-
-        if ($selected_provider && $server_type) {
-            $available_groups = $slugs->get_provider_groups_by_server_type($selected_provider, $server_type);
-        } else if ($selected_provider) {
-            $available_groups = $slugs->get_provider_group_slugs($selected_provider);
-        }
-
-        $group_options = array_combine($available_groups, $available_groups);
+        $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
-            'description' => __('Select the server plan group.', 'woocommerce'),
+            'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $group_options,
+            'options'     => array_combine($groups, $groups),
             'value'       => $selected_group
         ));
 
-        // Plan Dropdown
+        // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $available_plans = [];
-
-        if ($selected_provider && $selected_group && $server_type) {
-            $available_plans = $slugs->get_group_plans_by_server_type($selected_provider, $selected_group, $server_type);
-        } else if ($selected_provider && $selected_group) {
-            $available_plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
-        }
-
-        // Create options array from available plans
+        $plans = $selected_provider && $selected_group ? 
+            $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
         $plan_options = [];
-        foreach ($available_plans as $plan) {
-            $plan_options[$plan['slug']] = sprintf(
-                '%s %s', 
-                $plan['slug'],
-                !empty($plan['description']) ? '- ' . $plan['description'] : ''
-            );
+        foreach ($plans as $plan) {
+            $plan_options[$plan['slug']] = $plan['slug'];
         }
 
+        // Modify the select to always be disabled and show 'empty' if no options available
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => empty($plan_options) ? array('' => __('Select a plan', 'woocommerce')) : $plan_options,
-            'value'       => $selected_plan
+            'options'     => empty($plan_options) ? array('' => 'empty') : $plan_options,
+            'value'       => empty($plan_options) ? '' : $selected_plan
         ));
 
         // Add wrapper div for region and image fields
