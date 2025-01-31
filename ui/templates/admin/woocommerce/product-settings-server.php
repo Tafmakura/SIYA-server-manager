@@ -347,6 +347,7 @@ jQuery(document).ready(function($) {
         // Only proceed if we have both server type and provider
         if (!selectedServerType || !selectedProvider) {
             $groupField.prop('disabled', true).empty();
+            $('#arsol_server_plan_slug').empty().trigger('change');
             return;
         }
 
@@ -368,8 +369,7 @@ jQuery(document).ready(function($) {
             data: {
                 action: 'get_provider_plan_groups',
                 provider: selectedProvider,
-                server_type: selectedServerType,
-                group_slug: selectedGroup  // Add this parameter
+                server_type: selectedServerType  // Added this parameter
             },
             success: function(groups) {
                 // Enable field for non-sites-server types
@@ -446,6 +446,7 @@ jQuery(document).ready(function($) {
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
         initializeServerProviderField();
+        
         // Plan group will be initialized after provider field updates
     });
 
@@ -627,7 +628,6 @@ jQuery(document).ready(function($) {
 
 });
 </script>
-
 
 
 
