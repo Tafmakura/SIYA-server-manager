@@ -73,7 +73,7 @@ class Product {
     public function validate_and_save_fields($product) {
         // Get post ID from product object
         $post_id = $product->get_id();
-
+        
         // Check multiple ways since WooCommerce can be inconsistent
         $is_server = false;
         
@@ -112,13 +112,15 @@ class Product {
                 'arsol_server_plan_slug' => __('Server Plan', 'woocommerce')
             ];
         }
-
+        
+        /*
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
                 // Removed the WC_Admin_Notices::add_notice
                 $has_errors = true;
             }
         }
+        */
 
         // 2. Pattern Validation
         $pattern_fields = [
@@ -126,6 +128,7 @@ class Product {
             'arsol_server_image' => __('Server Image', 'woocommerce')
         ];
 
+        /*
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
@@ -149,6 +152,7 @@ class Product {
                 $has_errors = true; 
             }
         }
+            */
 
         // Get existing values for region and image
         $existing_region = $product->get_meta('_arsol_server_region', true);
@@ -158,6 +162,7 @@ class Product {
         $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
         $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
 
+        /*
         // Validate region if not empty
         if (!empty($region)) {
             if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
@@ -184,7 +189,9 @@ class Product {
             );
             return false;
         }
+        */
 
+        
         // Set WooCOmmerce setting here required server product settings
         $product->set_sold_individually(true);
 
