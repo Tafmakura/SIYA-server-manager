@@ -337,7 +337,7 @@ jQuery(document).ready(function($) {
             }
         });
     }
-
+/*
     function initializeServerPlanGroupField() {
         var $groupField = $('#arsol_server_plan_group_slug');
         var selectedServerType = $('#arsol_server_type').val();
@@ -352,6 +352,9 @@ jQuery(document).ready(function($) {
                       .trigger('change');
             return;
         }
+
+        // Enable field for non-sites-server types
+        $groupField.prop('disabled', false);
 
         // Get groups filtered by both server type and provider
         $.ajax({
@@ -376,7 +379,7 @@ jQuery(document).ready(function($) {
             }
         });
     }
-
+*/
 
 
     // Add event listener for server type changes
@@ -385,7 +388,7 @@ jQuery(document).ready(function($) {
     });
 
     $('#arsol_server_provider_slug').on('change', function() {
-        initializeServerPlanGroupField();
+       // initializeServerPlanGroupField();
     });
 
     // Call both initialization functions
