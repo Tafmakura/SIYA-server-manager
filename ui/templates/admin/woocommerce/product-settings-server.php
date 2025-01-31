@@ -399,9 +399,9 @@ jQuery(document).ready(function($) {
     });
 
     $('#arsol_server_provider_slug').on('change', function() {
-        if ($(this).val()) {
+       
             initializeServerPlanGroupField();
-        }
+        
     });
 
     // Call both initialization functions
