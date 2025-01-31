@@ -108,17 +108,12 @@
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = $slugs->get_filtered_plans($selected_provider);
+        $all_groups = $slugs->get_provider_plan_group_slugs($selected_provider);
 
         // Only show saved group if it exists
         $group_options = [];
-        if (!empty($selected_group)) {
-            foreach ($groups as $group) {
-                if ($group['group_slug'] === $selected_group) {
-                    $group_options[$selected_group] = $selected_group;
-                    break;
-                }
-            }
+        if (!empty($selected_group) && in_array($selected_group, $all_groups)) {
+            $group_options[$selected_group] = $selected_group;
         }
 
         woocommerce_wp_select(array(
@@ -132,18 +127,12 @@
 
         // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = [];
-        foreach ($groups as $group) {
-            if ($group['group_slug'] === $selected_group) {
-                $plans = $group['plans'] ?? [];
-                break;
-            }
-        }
+        $all_plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
 
         // Only show saved plan if it exists
         $plan_options = [];
         if (!empty($selected_plan)) {
-            foreach ($plans as $plan) {
+            foreach ($all_plans as $plan) {
                 if ($plan['slug'] === $selected_plan) {
                     $plan_options[$selected_plan] = $selected_plan;
                     break;
