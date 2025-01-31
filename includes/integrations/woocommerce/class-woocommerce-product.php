@@ -113,14 +113,12 @@ class Product {
             ];
         }
         
-        /*
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
                 // Removed the WC_Admin_Notices::add_notice
                 $has_errors = true;
             }
         }
-        */
 
         // 2. Pattern Validation
         $pattern_fields = [
@@ -128,7 +126,6 @@ class Product {
             'arsol_server_image' => __('Server Image', 'woocommerce')
         ];
 
-        /*
         foreach ($pattern_fields as $field => $label) {
             $value = sanitize_text_field($_POST[$field] ?? '');
             if (!empty($value) && !preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
@@ -152,7 +149,6 @@ class Product {
                 $has_errors = true; 
             }
         }
-            */
 
         // Get existing values for region and image
         $existing_region = $product->get_meta('_arsol_server_region', true);
@@ -162,36 +158,6 @@ class Product {
         $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
         $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
 
-        /*
-        // Validate region if not empty
-        if (!empty($region)) {
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                WC_Admin_Notices::add_custom_notice(
-                    'region_pattern_error', 
-                    __('Invalid server region. Only letters, numbers, and hyphens allowed.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-            if (strlen($region) > 50) {
-                WC_Admin_Notices::add_custom_notice(
-                    'region_length_error',
-                    __('Server region cannot exceed 50 characters.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-        }
-
-        if ($has_errors) {
-            // Add error notice
-            WC_Admin_Notices::add_notice(
-                'validation_failed',
-                __('Validation failed: Please check the server settings.', 'woocommerce')
-            );
-            return false;
-        }
-        */
-
-        
         // Set WooCOmmerce setting here required server product settings
         $product->set_sold_individually(true);
 
@@ -206,8 +172,7 @@ class Product {
                 '_arsol_server_type' => 'sites_server',
             ];
 
-             $product->update_meta_data('_subscription_limit', 'active');
-        
+            $product->update_meta_data('_subscription_limit', 'active');
             
         } else {
             // Normal field handling for other server types
