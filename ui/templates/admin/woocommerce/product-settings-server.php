@@ -265,7 +265,7 @@ jQuery(document).ready(function($) {
     }
 
     // Call the function immediately
-    initializeServerFields();
+    ClearServerFields();
 
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
