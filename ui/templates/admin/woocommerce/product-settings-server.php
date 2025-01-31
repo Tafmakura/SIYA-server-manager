@@ -79,11 +79,8 @@
             ?>
         </div>
         <?php
-        // Provider Dropdown - only show providers available for selected server type
-        $providers = [];
-        if ($server_type) {
-            $providers = $slugs->get_providers_by_server_type($server_type);
-        }
+        // Provider Dropdownn
+        $providers = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
         woocommerce_wp_select(array(
@@ -91,22 +88,21 @@
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine($providers, array_map('ucfirst', $providers)),
+            'options'     => array_combine($providers, array_map(function($provider) {
+            return ucfirst($provider); // Capitalize first letter
+            }, $providers)),
             'value'       => $selected_provider,
             'required'    => true
         ));
 
-        // Group Dropdown - only show groups available for selected provider and server type
+        // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = [];
-        if ($selected_provider && $server_type) {
-            $groups = $slugs->get_provider_groups_by_server_type($selected_provider, $server_type);
-        }
+        $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
-            'description' => __('Select the server plan group.', 'woocommerce'),
+            'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
             'value'       => $selected_group
@@ -242,6 +238,15 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    
+    function setRuncloudCheckboxState(checked = true, disabled = true) {
+        var $checkbox = $('#arsol_server_manager_required');
+        var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
+        
+        $checkbox.prop('checked', checked ? true : (savedValue === 'yes'))
+                .prop('disabled', disabled)
+                .trigger('change');
+    }
 
     function updateServerTypeFields(serverType) {
         if (serverType === 'sites_server') {
@@ -253,15 +258,6 @@ jQuery(document).ready(function($) {
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
         }
-    }
-
-    function setRuncloudCheckboxState(checked = true, disabled = true) {
-        var $checkbox = $('#arsol_server_manager_required');
-        var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
-        
-        $checkbox.prop('checked', checked ? true : (savedValue === 'yes'))
-                .prop('disabled', disabled)
-                .trigger('change');
     }
 
     function toggleServerVisibility() {
@@ -403,106 +399,6 @@ jQuery(document).ready(function($) {
             }
         }
     });
-
-    // Add new dynamic loading functionality
-    function updateProviderOptions(serverType) {
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_providers_by_server_type',
-                server_type: serverType
-            },
-            success: function(providers) {
-                var $provider = $('#arsol_server_provider_slug');
-                $provider.empty();
-                
-                if (providers.length) {
-                    providers.forEach(function(provider) {
-                        $provider.append(new Option(
-                            provider.charAt(0).toUpperCase() + provider.slice(1),
-                            provider
-                        ));
-                    });
-                    $provider.trigger('change');
-                }
-            }
-        });
-    }
-
-    function updateGroupOptions(provider, serverType) {
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_provider_groups',
-                provider: provider,
-                server_type: serverType
-            },
-            success: function(groups) {
-                var $group = $('#arsol_server_plan_group_slug');
-                $group.empty();
-                
-                if (groups.length) {
-                    groups.forEach(function(group) {
-                        $group.append(new Option(group, group));
-                    });
-                    $group.trigger('change');
-                }
-            }
-        });
-    }
-
-    function updatePlanOptions(provider, group, serverType) {
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_group_plans',
-                provider: provider,
-                group: group,
-                server_type: serverType
-            },
-            success: function(plans) {
-                var $plan = $('#arsol_server_plan_slug');
-                $plan.empty();
-                
-                if (plans.length) {
-                    plans.forEach(function(plan) {
-                        $plan.append(new Option(plan.slug, plan.slug));
-                    });
-                }
-            }
-        });
-    }
-
-    // Event handlers
-    $('#arsol_server_type').on('change', function() {
-        var serverType = $(this).val();
-        if (serverType && serverType !== 'sites_server') {
-            updateProviderOptions(serverType);
-        }
-    });
-
-    $('#arsol_server_provider_slug').on('change', function() {
-        var provider = $(this).val();
-        var serverType = $('#arsol_server_type').val();
-        if (provider && serverType) {
-            updateGroupOptions(provider, serverType);
-        }
-    });
-
-    $('#arsol_server_plan_group_slug').on('change', function() {
-        var group = $(this).val();
-        var provider = $('#arsol_server_provider_slug').val();
-        var serverType = $('#arsol_server_type').val();
-        if (provider && group && serverType) {
-            updatePlanOptions(provider, group, serverType);
-        }
-    });
-
-    // Initial load if needed
-    var initialServerType = $('#arsol_server_type').val();
-    if (initialServerType && initialServerType !== 'sites_server') {
-        updateProviderOptions(initialServerType);
-    }
 });
 </script>
 
