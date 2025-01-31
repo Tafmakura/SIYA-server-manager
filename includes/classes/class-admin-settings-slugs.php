@@ -269,8 +269,10 @@ class Slugs {
         $server_type = isset($_GET['server_type']) ? sanitize_text_field($_GET['server_type']) : null;
         
         if ($server_type) {
+            error_log('NOPE');
             wp_send_json($this->get_group_plans_by_server_type($provider, $group, $server_type));
         } else {
+            error_log('YEP');
             wp_send_json($this->get_filtered_plans($provider, $group));
         }
     }
