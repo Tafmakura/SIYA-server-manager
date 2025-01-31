@@ -267,13 +267,9 @@ jQuery(document).ready(function($) {
     // Add this new function after clearServerOptionFields
     function initializeServerTypeField() {
         var $serverType = $('#arsol_server_type');
-        var allowedTypes = <?php echo json_encode($all_types); ?>;
-        var savedTypes = <?php echo json_encode($saved_types); ?>;
-        
-        // Get saved value and handle array format
-        var savedMetaValue = <?php 
-            $saved_meta = get_post_meta($post->ID, '_arsol_server_type', true);
-            echo json_encode(is_array($saved_meta) ? $saved_meta[0] : $saved_meta); 
+        var allowedTypes = <?php 
+            $saved_types = (array) get_option('arsol_allowed_server_types', ['sites_server']);
+            echo json_encode($all_types); // $all_types is already defined in the PHP section above
         ?>;
 
         // Enable the field
@@ -281,18 +277,15 @@ jQuery(document).ready(function($) {
 
         // Add only allowed options
         $.each(allowedTypes, function(value, text) {
-            if (savedTypes.includes(value)) {
+            if (<?php echo json_encode($saved_types); ?>.includes(value)) {
                 $serverType.append($('<option></option>').val(value).text(text));
             }
         });
 
-        // Set value based on saved meta or default to first allowed type
-        if (savedMetaValue && savedTypes.includes(savedMetaValue)) {
-            $serverType.val(savedMetaValue);
-        } else {
-            $serverType.val(savedTypes[0]);
+        // Select Sites Server by default if no value is set
+        if (!$serverType.val()) {
+            $serverType.val('sites_server').trigger('change');
         }
-        $serverType.trigger('change');
     }
 
     // Call both initialization functions
