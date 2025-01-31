@@ -387,6 +387,56 @@ jQuery(document).ready(function($) {
         });
     }
 
+    function initializeServerPlanField() {
+        var $planField = $('#arsol_server_plan_slug');
+        var selectedServerType = $('#arsol_server_type').val();
+        var selectedProvider = $('#arsol_server_provider_slug').val();
+        var selectedGroup = $('#arsol_server_plan_group_slug').val();
+        var savedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
+
+        // Return early if any required field is missing
+        if (!selectedServerType || !selectedProvider || !selectedGroup) {
+            $planField.prop('disabled', true).empty();
+            return;
+        }
+
+        // Get available plans via AJAX
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_group_plans',
+                provider: selectedProvider,
+                group: selectedGroup,
+                server_type: selectedServerType
+            },
+            success: function(plans) {
+                // If no plans available, disable field and return
+                if (!plans.length) {
+                    $planField.prop('disabled', true).empty();
+                    return;
+                }
+
+                // Enable field and update options
+                $planField.prop('disabled', false).empty();
+                
+                // Add plan options
+                plans.forEach(function(plan) {
+                    $planField.append($('<option></option>')
+                        .val(plan.slug)
+                        .text(plan.description || plan.slug)
+                    );
+                });
+
+                // Select saved plan if it exists in available plans
+                if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                    $planField.val(savedPlan);
+                }
+
+                $planField.trigger('change');
+            }
+        });
+    }
+
     // Call both initialization functions
     clearServerOptionFields();
     initializeServerTypeField();
@@ -399,9 +449,12 @@ jQuery(document).ready(function($) {
     });
 
     $('#arsol_server_provider_slug').on('change', function() {
-       
-            initializeServerPlanGroupField();
-        
+        initializeServerPlanGroupField();
+        // Plan field will be initialized after group field updates
+    });
+
+    $('#arsol_server_plan_group_slug').on('change', function() {
+        initializeServerPlanField();
     });
 
     // Call both initialization functions
