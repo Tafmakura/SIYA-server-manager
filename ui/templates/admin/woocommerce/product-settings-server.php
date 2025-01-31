@@ -264,31 +264,29 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // Add this new function after clearServerOptionFields
     function initializeServerTypeField() {
         var $serverType = $('#arsol_server_type');
-        var savedTypes = <?php echo json_encode($saved_types); ?>; // Allowed server types
-        var savedMetaValue = '<?php echo esc_js(get_post_meta($post->ID ?? 0, "_arsol_server_type", true)); ?>';
+        var savedTypes = <?php echo json_encode($saved_types); ?>; // Get allowed server types
+        var savedMetaValue = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_type', true)); ?>';
         var allowedTypes = <?php echo json_encode($all_types); ?>;
 
         // Enable the field
         $serverType.prop('disabled', false);
 
-        // Clear existing options
-        $serverType.empty();
-
         // Add only allowed options
-        if (Array.isArray(savedTypes) && savedTypes.length > 0) {
-            $.each(savedTypes, function(i, value) {
-                if (Object.prototype.hasOwnProperty.call(allowedTypes, value)) {
-                    $serverType.append($('<option></option>').val(value).text(allowedTypes[value]));
-                }
-            });
+        $.each(savedTypes, function(i, value) {
+            if (allowedTypes[value]) {
+                $serverType.append($('<option></option>').val(value).text(allowedTypes[value]));
+            }
+        });
 
-            // Set value if it exists in allowed types, otherwise default to first allowed type
-            $serverType.val(savedTypes.includes(savedMetaValue) ? savedMetaValue : savedTypes[0]);
+        // Set value if it exists in allowed types, otherwise default to first allowed type
+        if (savedMetaValue && savedTypes.includes(savedMetaValue)) {
+            $serverType.val(savedMetaValue);
+        } else {
+            $serverType.val(savedTypes[0]);
         }
-
-        // Trigger change event
         $serverType.trigger('change');
     }
 
