@@ -368,7 +368,8 @@ jQuery(document).ready(function($) {
             data: {
                 action: 'get_provider_plan_groups',
                 provider: selectedProvider,
-                server_type: selectedServerType
+                server_type: selectedServerType,
+                group_slug: selectedGroup  // Add this parameter
             },
             success: function(groups) {
                 // Enable field for non-sites-server types
@@ -626,6 +627,7 @@ jQuery(document).ready(function($) {
 
 });
 </script>
+
 
 
 
