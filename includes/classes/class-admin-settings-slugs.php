@@ -152,7 +152,7 @@ class Slugs {
     }
 
     /**
-     * Group Methods
+     * Group Methods!
      */
     public function get_provider_plan_group_slugs(string $provider_slug): array {
         if (!$this->provider_exists($provider_slug)) {
