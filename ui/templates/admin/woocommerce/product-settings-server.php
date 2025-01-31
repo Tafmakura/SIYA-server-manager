@@ -402,6 +402,7 @@ jQuery(document).ready(function($) {
         }
 
         // Get available plans via AJAX
+        // Get available plans via AJAX
         $.ajax({
             url: ajaxurl,
             data: {
@@ -411,9 +412,11 @@ jQuery(document).ready(function($) {
                 server_type: selectedServerType
             },
             success: function(plans) {
-                // If no plans available, disable field and return
+                // If no plans available, disable field and returns
+                console.log(plans);
                 if (!plans.length) {
                     $planField.prop('disabled', true).empty();
+                    console.log('No plans available');
                     return;
                 }
 
