@@ -258,8 +258,8 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     function clearServerOptionFields() {
-        // Get all select fields and clear their options
-        $('select#arsol_server_type, select#arsol_server_provider_slug, select#arsol_server_plan_group_slug, select#arsol_server_plan_slug').each(function() {
+        // Get all other select fields and clear their options
+        $('select#arsol_server_provider_slug, select#arsol_server_plan_group_slug, select#arsol_server_plan_slug').each(function() {
             $(this).empty();
         });
     }
