@@ -300,16 +300,7 @@ jQuery(document).ready(function($) {
         var selectedServerType = $('#arsol_server_type').val();
         var savedProvider = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_provider_slug', true)); ?>';
 
-        if (selectedServerType === 'sites_server') {
-            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-            $providerField.empty()
-                         .append($('<option></option>').val(wpProvider).text(wpProvider))
-                         .val(wpProvider)
-                         .trigger('change');
-            return;
-        }
-
-        // Regular AJAX flow for other server types
+        // Get providers for selected server type via AJAX
         $.ajax({
             url: ajaxurl,
             data: {
@@ -322,9 +313,10 @@ jQuery(document).ready(function($) {
                 
                 // Add provider options
                 providers.forEach(function(provider) {
+                    var providerName = '<?php echo json_encode($slugs->get_provider_name("' + provider + '")); ?>';
                     $providerField.append($('<option></option>')
                         .val(provider)
-                        .text(provider)
+                        .text(providerName)
                     );
                 });
                 
@@ -337,64 +329,18 @@ jQuery(document).ready(function($) {
             }
         });
     }
-/*
-    function initializeServerPlanGroupField() {
-        var $groupField = $('#arsol_server_plan_group_slug');
-        var selectedServerType = $('#arsol_server_type').val();
-        var selectedProvider = $('#arsol_server_provider_slug').val();
-        var savedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_group_slug', true)); ?>';
 
-        if (selectedServerType === 'sites_server') {
-            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-            $groupField.empty()
-                      .append($('<option></option>').val(wpGroup).text(wpGroup))
-                      .val(wpGroup)
-                      .trigger('change');
-            return;
-        }
-
-        // Enable field for non-sites-server types
-        $groupField.prop('disabled', false);
-
-        // Get groups filtered by both server type and provider
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_provider_plan_groups',
-                provider: selectedProvider,
-                server_type: selectedServerType
-            },
-            success: function(groups) {
-                $groupField.empty();
-                
-                groups.forEach(function(group) {
-                    $groupField.append($('<option></option>').val(group).text(group));
-                });
-                
-                if (savedGroup && groups.includes(savedGroup)) {
-                    $groupField.val(savedGroup);
-                }
-                
-                $groupField.trigger('change');
-            }
-        });
-    }
-*/
-
-
-    // Add event listener for server type changes
-    $('#arsol_server_type').on('change', function() {
-        initializeServerProviderField();
-    });
-
-    $('#arsol_server_provider_slug').on('change', function() {
-       // initializeServerPlanGroupField();
-    });
 
     // Call both initialization functions
     clearServerOptionFields();
     initializeServerTypeField();
     initializeServerProviderField();
+
+    // Add event listener for server type changes
+    $('#arsol_server_type').on('change', function() {
+        initializeServerProviderField();
+    });
+    
 
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
