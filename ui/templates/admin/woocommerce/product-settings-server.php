@@ -33,7 +33,8 @@
             'description' => __('Select the server type.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => $options,
-            'value'       => $selected_server_type ?: ''
+            'value'       => $selected_server_type ?: '',
+            'custom_attributes' => !empty($selected_server_type) ? array('disabled' => 'disabled') : array()
         ));
         ?>
         <div class="arsol_max_applications_field">
@@ -103,7 +104,8 @@
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => $provider_options,
-            'value'       => $selected_provider ?: ''
+            'value'       => $selected_provider ?: '',
+            'custom_attributes' => !empty($selected_provider) ? array('disabled' => 'disabled') : array()
         ));
 
         // Group Dropdown
@@ -121,7 +123,8 @@
             'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => $group_options,
-            'value'       => $selected_group ?: ''
+            'value'       => $selected_group ?: '',
+            'custom_attributes' => !empty($selected_group) ? array('disabled' => 'disabled') : array()
         ));
 
         // Plan Dropdown setup
@@ -139,7 +142,8 @@
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => $plan_options,
-            'value'       => $selected_plan ?: ''
+            'value'       => $selected_plan ?: '',
+            'custom_attributes' => !empty($selected_plan) ? array('disabled' => 'disabled') : array()
         ));
 
         // Add wrapper div for region and image fields
