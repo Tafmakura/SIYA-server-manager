@@ -401,16 +401,6 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        if (selectedServerType === 'sites_server') {
-            var wpPlan = '<?php echo esc_js(get_option('siya_wp_server_plan')); ?>';
-            $planField.prop('disabled', true)
-                     .empty()
-                     .append($('<option></option>').val(wpPlan).text(wpPlan))
-                     .val(wpPlan)
-                     .trigger('change');
-            return;
-        }
-
         // Get available plans via AJAX
         $.ajax({
             url: ajaxurl,
@@ -434,7 +424,7 @@ jQuery(document).ready(function($) {
                 plans.forEach(function(plan) {
                     $planField.append($('<option></option>')
                         .val(plan.slug)
-                        .text(plan.slug + ' - ' + (plan.description || ''))
+                        .text(/*plan.description || */plan.slug)
                     );
                 });
 
