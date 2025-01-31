@@ -137,19 +137,7 @@ class Slugs {
         return isset(self::PROVIDERS[$provider_slug]);
     }
 
-    public function get_providers_by_server_type(string $server_type): array {
-        $providers = [];
-        foreach ($this->get_provider_slugs() as $provider) {
-            $plans = get_option("siya_{$provider}_plans", []);
-            foreach ($plans as $plan) {
-                if (isset($plan['server_types']) && in_array($server_type, $plan['server_types'])) {
-                    $providers[] = $provider;
-                    break;
-                }
-            }
-        }
-        return array_unique($providers);
-    }
+
 
     /**
      * Group Methods
