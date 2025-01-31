@@ -110,23 +110,14 @@
 
         // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = [];
-        if ($selected_provider && $selected_group) {
-            $plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
-        }
-
-        // Create plan options array
-        $plan_options = array();
-        foreach ($plans as $plan) {
-            $plan_options[$plan['slug']] = $plan['slug'];
-        }
-
+        $plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
+      
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => $plan_options ?: array('' => 'empty'),
+            'options'     => array_combine(array_column($plans, 'slug'), array_column($plans, 'name')),
             'value'       => $selected_plan ?: ''
         ));
 
