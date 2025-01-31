@@ -417,7 +417,7 @@ jQuery(document).ready(function($) {
                     return;
                 }
 
-                // Enable field and update options
+                // Enable field and update options 
                 $planField.prop('disabled', false).empty();
                 
                 // Add plan options
