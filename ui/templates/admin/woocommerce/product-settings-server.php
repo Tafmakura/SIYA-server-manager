@@ -746,18 +746,6 @@ jQuery(document).ready(function($) {
                     
                     if (plans.length === 0) {
                         $planSelect.prop('disabled', true);
-                    } else {
-                        $planSelect.prop('disabled', false);
-                        plans.forEach(function(plan) {
-                            $planSelect.append(new Option(plan.slug, plan.slug));
-                        });
-                        
-                        // Try to select the saved plan if it exists in the new options
-                        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-                            $planSelect.val(savedPlan);
-                        } else {
-                            $planSelect.val(null);
-                        }
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
