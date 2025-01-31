@@ -238,114 +238,6 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Remove validation code
-    // $('#post').on('submit'...) - removed
-    // $('#arsol_server_region, #arsol_server_image').on('input'...) - removed
-    
-    // Keep only visibility and UI handling code
-    function updateGroups(provider, callback) {
-        var serverType = $('#arsol_server_type').val();
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_provider_groups',
-                provider: provider,
-                server_type: serverType !== 'sites_server' ? serverType : null
-            },
-            success: function(groups) {
-                var $groupSelect = $('#arsol_server_plan_group_slug');
-                var currentValue = $groupSelect.val();
-                $groupSelect.empty();
-                
-                if (groups.length === 0 && serverType !== 'sites_server') {
-                    $groupSelect.prop('disabled', true);
-                    $groupSelect.append(new Option('empty', '')); // Add empty text
-                } else {
-                    $groupSelect.prop('disabled', false);
-                    groups.forEach(function(group) {
-                        $groupSelect.append(new Option(group, group));
-                    });
-                    
-                    // Try to keep existing selection if still valid
-                    if (groups.includes(currentValue)) {
-                        $groupSelect.val(currentValue);
-                    }
-                }
-                
-                $groupSelect.trigger('change');
-                if (callback) callback(groups);
-            }
-        });
-    }
-
-    function updatePlans(provider, group) {
-        var serverType = $('#arsol_server_type').val();
-        var $planSelect = $('#arsol_server_plan_slug');
-        var savedPlan = '<?php echo esc_js($selected_plan); ?>';
-        
-        // Always empty and disable first
-        $planSelect.empty().prop('disabled', true);
-        
-        // Early return if no valid provider or group
-        if (!provider || !group || group === 'empty' || provider === 'empty') {
-            $planSelect.append(new Option('empty', ''));
-            return;
-        }
-        
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_group_plans',
-                provider: provider,
-                group: group,
-                server_type: serverType !== 'sites_server' ? serverType : null
-            },
-            success: function(response) {
-                $planSelect.empty();
-                
-                try {
-                    var plans = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (!Array.isArray(plans)) {
-                        plans = Object.values(plans);
-                    }
-                    
-                    if (!plans || plans.length === 0) {
-                        $planSelect.prop('disabled', true)
-                                  .append(new Option('empty', ''));
-                        return;
-                    }
-                    
-                    // Enable and populate the select
-                    $planSelect.prop('disabled', false);
-                    plans.forEach(function(plan) {
-                        var option = new Option(plan.slug, plan.slug);
-                        $planSelect.append(option);
-                    });
-                    
-                    // Try to restore saved value if it exists in new plans
-                    if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-                        $planSelect.val(savedPlan);
-                    } else {
-                        // Select first plan if no saved plan matches
-                        $planSelect.val(plans[0].slug);
-                    }
-                    
-                    // Trigger change event to update any dependent fields
-                    $planSelect.trigger('change');
-                    
-                } catch (e) {
-                    console.error('Failed to parse plans:', e);
-                    $planSelect.prop('disabled', true)
-                              .append(new Option('empty', ''));
-                }
-            },
-            error: function() {
-                $planSelect.prop('disabled', true)
-                          .append(new Option('empty', ''));
-            }
-        });
-    }
-
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
         var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
@@ -356,150 +248,45 @@ jQuery(document).ready(function($) {
     }
 
     function updateServerTypeFields(serverType) {
-        var $providerSelect = $('#arsol_server_provider_slug');
-        var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
         if (serverType === 'sites_server') {
             var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-
-            // Set provider for sites server
-            $providerSelect.empty()
-                          .append(new Option(wpProvider.charAt(0).toUpperCase() + wpProvider.slice(1), wpProvider))
-                          .val(wpProvider)
-                          .prop('disabled', true);
             
             // Set Runcloud state
             setRuncloudCheckboxState(true, true);
-            
-            // Update groups and plans for sites server
-            updateGroups(wpProvider, function(groups) {
-                if (groups.includes(wpGroup)) {
-                    $('#arsol_server_plan_group_slug').val(wpGroup).prop('disabled', true);
-                    updatePlans(wpProvider, wpGroup);
-                }
-            });
         } else {
             // Reset Runcloud state
             setRuncloudCheckboxState(false, false);
-            
-            // Only clear and disable if empty
-            if (!$providerSelect.val()) {
-                $providerSelect.prop('disabled', false).empty();
-            }
-            if (!$groupSelect.val()) {
-                $groupSelect.prop('disabled', false).empty();
-            }
-            if (!$planSelect.val()) {
-                $planSelect.prop('disabled', false).empty();
-            }
-            
-            if (serverType) {
-                updateProvidersByServerType(serverType);
-            }
         }
     }
 
-    function disableAllDropdowns(serverType) {
-        if (serverType === 'sites_server') return;
-
-        var $providerSelect = $('#arsol_server_provider_slug');
-        var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-
-        // Disable and clear all dropdowns at once
-        $providerSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $groupSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-        $planSelect.prop('disabled', true).empty().append(new Option('empty', ''));
-    }
-
-    function updateProvidersByServerType(serverType) {
-        if (!serverType) return;
-        
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_providers_by_server_type',
-                server_type: serverType
-            },
-            success: function(providers) {
-                var $providerSelect = $('#arsol_server_provider_slug');
-                var currentValue = $providerSelect.val();
-                $providerSelect.empty();
-                
-                if (providers.length === 0) {
-                    $providerSelect.prop('disabled', true);
-                    $providerSelect.append(new Option('empty', '')); // Add empty text
-                } else {
-                    $providerSelect.prop('disabled', false);
-                    providers.forEach(function(provider) {
-                        var providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
-                        $providerSelect.append(new Option(providerName, provider));
-                    });
-                    
-                    // Try to keep existing selection if still valid
-                    if (providers.includes(currentValue)) {
-                        $providerSelect.val(currentValue);
-                    }
-                }
-                $providerSelect.trigger('change');
-            }
-        });
-    }
-
-    /**
-     * Controls server visibility based on checkbox state with performance optimizations
-     * @returns {Function} Cleanup function to remove observers and timeouts
-     */
     function toggleServerVisibility() {
-        // Get current server enabled state from checkbox
         var isServerEnabled = $('#arsol_server').is(':checked');
-        
-        // Cache the container selector for better performance
         const $container = $('#woocommerce-product-data');
-        
-        // Debounce timer to prevent rapid-fire updates
         let timeout;
 
-        /**
-         * MutationObserver watches for DOM changes and updates visibility accordingly
-         * Debounced to improve performance by limiting update frequency
-         */
         const observer = new MutationObserver((mutations) => {
-            // Clear existing timeout to prevent multiple queued updates
             if (timeout) {
                 clearTimeout(timeout);
             }
-            // Delay visibility updates by 100ms to batch multiple changes
             timeout = setTimeout(() => {
                 applyVisibilityRules(isServerEnabled);
             }, 100);
         });
 
-        // Track observer state to prevent multiple attachments
         let isObserving = false;
 
-        /**
-         * Starts observing DOM changes if not already observing
-         * Optimized to watch only necessary mutation types
-         */
         function startObserver() {
             if (!isObserving) {
                 observer.observe($container[0], {
-                    childList: true,    // Watch for added/removed elements
-                    subtree: true,      // Watch nested elements
-                    attributes: false,   // Ignore attribute changes
-                    characterData: false // Ignore text content changes
+                    childList: true,
+                    subtree: true,
+                    attributes: false,
+                    characterData: false
                 });
                 isObserving = true;
             }
         }
 
-        /**
-         * Stops the observer to prevent unnecessary updates
-         * Used during DOM updates to prevent feedback loops
-         */
         function stopObserver() {
             if (isObserving) {
                 observer.disconnect();
@@ -507,49 +294,32 @@ jQuery(document).ready(function($) {
             }
         }
 
-        /**
-         * Applies visibility rules based on server enabled state
-         * Optimized to minimize DOM operations
-         * @param {boolean} isEnabled - Current server enabled state
-         */
         function applyVisibilityRules(isEnabled) {
-            // Pause observation during updates to prevent loops
             stopObserver();
 
             if (!isEnabled) {
-                // Hide all server-related elements
                 $container.find('.show_if_arsol_server, .show_if_arsol_sites_server, .show_if_arsol_application_server')
                     .hide()
                     .addClass('hidden');
-                // Show elements that should be visible when server is disabled
                 $container.find('.hide_if_arsol_server')
                     .show()
                     .removeClass('hidden');
             } else {
-                // Show base server elements
                 $container.find('.show_if_arsol_server')
                     .show()
                     .removeClass('hidden');
-                // Hide elements that shouldn't show when server is enabled
                 $container.find('.hide_if_arsol_server')
                     .hide()
                     .addClass('hidden');
                 
-                // Update type-specific visibility
                 toggleServerTypeVisibility();
             }
 
-            // Resume observation after updates
             startObserver();
         }
 
-        // Initial visibility setup
         applyVisibilityRules(isServerEnabled);
 
-        /**
-         * Returns cleanup function for proper memory management
-         * Important for preventing memory leaks and zombie observers
-         */
         return function cleanup() {
             stopObserver();
             if (timeout) {
@@ -558,15 +328,10 @@ jQuery(document).ready(function($) {
         };
     }
 
-    /**
-     * Manages visibility of server type specific elements
-     * Optimized with cached selectors and minimal DOM operations
-     */
     function toggleServerTypeVisibility() {
         var serverType = $('#arsol_server_type').val();
         var isServerEnabled = $('#arsol_server').is(':checked');
         
-        // Cache all commonly used selectors for performance
         const $container = $('#woocommerce-product-data');
         const $siteServer = $container.find('.show_if_arsol_sites_server');
         const $hideSiteServer = $container.find('.hide_if_arsol_sites_server');
@@ -574,24 +339,15 @@ jQuery(document).ready(function($) {
         const $hideAppServer = $container.find('.hide_if_arsol_application_server');
         const $maxApps = $container.find('.arsol_max_applications_field');
 
-        /**
-         * Applies visibility rules based on server type and enabled state
-         * Uses CSS classes and minimal DOM operations for better performance
-         * @param {string} type - Server type
-         * @param {boolean} enabled - Whether server is enabled
-         */
         function applyTypeVisibilityRules(type, enabled) {
-            // Define CSS classes for consistent visibility handling
             const showClass = 'visible';
             const hideClass = 'hidden';
 
-            // Start with hiding all type-specific elements
             $siteServer.addClass(hideClass).hide();
             $appServer.addClass(hideClass).hide();
             $hideSiteServer.removeClass(hideClass).show();
             $hideAppServer.removeClass(hideClass).show();
 
-            // Show relevant elements based on server type
             if (enabled) {
                 if (type === 'sites_server') {
                     $siteServer.removeClass(hideClass).show();
@@ -603,44 +359,34 @@ jQuery(document).ready(function($) {
                 }
             }
 
-            // Handle max applications field visibility
             $maxApps.toggleClass(hideClass, 
                 !(enabled && (type === 'sites_server' || type === 'application_server'))
             );
         }
 
-        // Apply visibility rules immediately
         applyTypeVisibilityRules(serverType, isServerEnabled);
     }
 
-    // Initialize with cleanup handling
     const cleanup = toggleServerVisibility();
 
-    // Cleanup on page unload
     $(window).on('unload', cleanup);
 
-    // Event handlers
     $('#arsol_server').on('change', toggleServerVisibility);
     $('#arsol_server_type').on('change', function() {
         updateServerTypeFields($(this).val());
         toggleServerTypeVisibility();
     });
 
-    // Initialize visibility on page load
     toggleServerVisibility();
 
-    // Initialize server type fields if sites_server is selected
     var initialServerType = $('#arsol_server_type').val();
     if (initialServerType === 'sites_server') {
         updateServerTypeFields('sites_server');
     }
 
-    // Add event handler for server checkbox that switches tabs when unchecked
     $('#arsol_server').on('change', function() {
         if (!$(this).is(':checked')) {
-            // Check if we're currently on the server settings tab
             if ($('.arsol_server_settings_tab').hasClass('active')) {
-                // Try to find visible tabs
                 const $generalTab = $('.general_tab a:visible');
                 const $variationsTab = $('.variations_tab a:visible'); 
                 
@@ -652,71 +398,6 @@ jQuery(document).ready(function($) {
             }
         }
     });
-
-    // Simple provider change handler
-    $('#arsol_server_provider_slug').on('change', function() {
-        var provider = $(this).val();
-        var $groupSelect = $('#arsol_server_plan_group_slug');
-        var $planSelect = $('#arsol_server_plan_slug');
-        
-        // Reset dependent dropdowns
-        $groupSelect.empty().prop('disabled', true);
-        $planSelect.empty().prop('disabled', true);
-        
-        if (!provider) return;
-
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_provider_groups',
-                provider: provider
-            },
-            success: function(groups) {
-                if (Array.isArray(groups) && groups.length > 0) {
-                    $groupSelect.prop('disabled', false);
-                    groups.forEach(group => {
-                        $groupSelect.append(new Option(group, group));
-                    });
-                }
-            }
-        });
-    });
-
-    // Simple group change handler 
-    $('#arsol_server_plan_group_slug').on('change', function() {
-        var provider = $('#arsol_server_provider_slug').val();
-        var group = $(this).val();
-        var $planSelect = $('#arsol_server_plan_slug');
-        
-        $planSelect.empty().prop('disabled', true);
-        
-        if (!provider || !group) return;
-
-        $.ajax({
-            url: ajaxurl,
-            data: {
-                action: 'get_group_plans',
-                provider: provider,
-                group: group
-            },
-            success: function(response) {
-                try {
-                    var plans = typeof response === 'string' ? JSON.parse(response) : response;
-                    plans = Array.isArray(plans) ? plans : Object.values(plans);
-                    
-                    if (plans.length > 0) {
-                        $planSelect.prop('disabled', false);
-                        plans.forEach(plan => {
-                            $planSelect.append(new Option(plan.slug, plan.slug));
-                        });
-                    }
-                } catch (e) {
-                    console.error('Failed to parse plans:', e);
-                }
-            }
-        });
-    });
-
 });
 </script>
 
