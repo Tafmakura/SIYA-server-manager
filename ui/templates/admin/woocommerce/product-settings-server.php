@@ -87,6 +87,8 @@
         <?php
         // Provider Dropdown
         $providers = $slugs->get_provider_slugs();
+
+        error_log(print_r($providers, true));   
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
         
         // Only show saved provider if it exists
