@@ -267,21 +267,26 @@ jQuery(document).ready(function($) {
     // Add this new function after clearServerOptionFields
     function initializeServerTypeField() {
         var $serverType = $('#arsol_server_type');
-        var serverTypes = {
-            'sites_server': 'Sites Server',
-            'application_server': 'Application Server',
-            'block_storage_server': 'Block Storage Server',
-            'cloud_server': 'Cloud Server',
-            'email_server': 'Email Server',
-            'object_storage_server': 'Object Storage Server',
-            'vps_server': 'VPS Server'
-        };
+        var allowedTypes = <?php 
+            $saved_types = (array) get_option('arsol_allowed_server_types', ['sites_server']);
+            $all_types = [
+                'sites_server'          => __('Sites Server', 'woocommerce'),
+                'application_server'    => __('Application Server', 'woocommerce'),
+                'block_storage_server'  => __('Block Storage Server', 'woocommerce'),
+                'cloud_server'          => __('Cloud Server', 'woocommerce'),
+                'email_server'          => __('Email Server', 'woocommerce'),
+                'object_storage_server' => __('Object Storage Server', 'woocommerce'),
+                'vps_server'           => __('VPS Server', 'woocommerce'),
+            ];
+            $allowed_types = array_intersect_key($all_types, array_flip($saved_types));
+            echo json_encode($allowed_types);
+        ?>;
 
         // Enable the field
         $serverType.prop('disabled', false);
 
         // Add options
-        $.each(serverTypes, function(value, text) {
+        $.each(allowedTypes, function(value, text) {
             $serverType.append($('<option></option>').val(value).text(text));
         });
 
