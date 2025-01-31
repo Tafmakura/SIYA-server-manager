@@ -20,13 +20,20 @@
             'object_storage_server' => __('Object Storage Server', 'woocommerce'),
             'vps_server'            => __('VPS Server', 'woocommerce'),
         ];
+        
+        // Create options array with only the saved value if it exists
+        $options = [];
+        if (!empty($selected_server_type) && isset($all_types[$selected_server_type])) {
+            $options[$selected_server_type] = $all_types[$selected_server_type];
+        }
+
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_type',
             'label'       => __('Server Type', 'woocommerce'),
             'description' => __('Select the server type.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => [],
-            'value'       => $selected_server_type ?: ''  // Ensure the value is empty if not set
+            'options'     => $options,
+            'value'       => $selected_server_type ?: ''
         ));
         ?>
         <div class="arsol_max_applications_field">
