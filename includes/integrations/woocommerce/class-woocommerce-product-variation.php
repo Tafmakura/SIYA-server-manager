@@ -36,46 +36,51 @@ class Variation {
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_region{$loop}",
             'name'        => "arsol_server_variation_region[{$loop}]",
-            'label'       => __('Server region slug (variation override)', 'woocommerce'),
-            'wrapper_class' => "form-row form-row-first show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
+            'label'       => __('Server region slug (optional override)', 'woocommerce'),
+            'wrapper_class' => "form-row form-row-first show_if_arsol_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+            'description' => __('Enter the server region for this variation. Only letters, numbers and hyphens allowed (max 50 characters).', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_region'),
             'custom_attributes' => [
             'pattern' => '^[a-zA-Z0-9-]+$',
-            'title'   => 'Only letters, numbers and hyphens allowed'
+            'maxlength' => '30',
+            'title'   => 'Only letters, numbers and hyphens allowed',
+            'onkeyup' => "this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')"
             ]
         ]);
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_image{$loop}",
             'name'        => "arsol_server_variation_image[{$loop}]",
-            'label'       => __('Server image slug (variation override)', 'woocommerce'), 
+            'label'       => __('Server image slug (optional override)', 'woocommerce'), 
             'wrapper_class' => "form-row form-row-last show_if_arsol_server hide_if_arsol_sites_server {$hidden_class_on_load}",
             'desc_tip'    => true,
-            'description' => __('Enter the server image for this variation. Only letters, numbers and hyphens allowed.', 'woocommerce'),
+            'description' => __('Enter the server image for this variation. Only letters, numbers and hyphens allowed (max 50 characters).', 'woocommerce'),
             'value'       => $variation_object->get_meta('_arsol_server_variation_image'),
             'custom_attributes' => [
             'pattern' => '^[a-zA-Z0-9-]+$',
-            'title'   => 'Only letters, numbers and hyphens allowed'
+            'maxlength' => '30',
+            'title'   => 'Only letters, numbers and hyphens allowed',
+            'onkeyup' => "this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')"
             ]
         ]);
+
 
         woocommerce_wp_text_input([
             'id'          => "arsol_server_variation_max_applications{$loop}",
             'name'        => "arsol_server_variation_max_applications[{$loop}]",
-            'label'       => __('Server max applications (variation override)', 'woocommerce'),
+            'label'       => __('Server max applications (optional override)', 'woocommerce'),
             'wrapper_class' => "form-row form-row-first show_if_arsol_application_server show_if_arsol_sites_server {$hidden_class_on_load}",
-            'desc_tip'    => true,
-            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999).', 'woocommerce'),
-            'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications'),
+            'desc_tip'    => true, 
+            'description' => __('Enter the maximum applications for this variation. Numbers only (0-999) or leave empty to use main subscription default.', 'woocommerce'),
+            'value'       => $variation_object->get_meta('_arsol_server_variation_max_applications', true),
+            'type'        => 'number',
             'custom_attributes' => [
             'min' => '0',
             'max' => '999',
             'step' => '1',
-            'required' => 'required',
             'style' => 'width: 3em; text-align: center;',
-            'oninput' => "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)"
+            'onkeyup' => "if(this.value !== '') { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3); }"
             ]
         ]);
     }
@@ -147,20 +152,24 @@ class Variation {
             }
         }
 
-        // Validate and save max applications
+        // Handle max applications with support for empty values
         if (isset($_POST['arsol_server_variation_max_applications'][$loop])) {
-            $max_applications = absint($_POST['arsol_server_variation_max_applications'][$loop]);
+            $max_applications = $_POST['arsol_server_variation_max_applications'][$loop];
             
-            if ($max_applications > 999) {
-                WC_Admin_Notices::add_custom_notice(
-                    'max_applications_error',
-                    __('Maximum applications cannot exceed 999.', 'woocommerce')
-                );
-                $has_errors = true;
-            }
-
-            if (!$has_errors) {
+            // Allow empty string or "0"
+            if ($max_applications === '' || $max_applications === '0') {
                 $variation->update_meta_data('_arsol_server_variation_max_applications', $max_applications);
+            } else {
+                $max_applications = absint($max_applications);
+                if ($max_applications <= 99) {
+                    $variation->update_meta_data('_arsol_server_variation_max_applications', $max_applications);
+                } else {
+                    WC_Admin_Notices::add_custom_notice(
+                        'max_applications_error',
+                        __('Maximum applications cannot exceed 999.', 'woocommerce')
+                    );
+                    $has_errors = true;
+                }
             }
         }
 

@@ -73,7 +73,7 @@ class Product {
     public function validate_and_save_fields($product) {
         // Get post ID from product object
         $post_id = $product->get_id();
-
+        
         // Check multiple ways since WooCommerce can be inconsistent
         $is_server = false;
         
@@ -112,7 +112,7 @@ class Product {
                 'arsol_server_plan_slug' => __('Server Plan', 'woocommerce')
             ];
         }
-
+        
         foreach ($required_fields as $field => $label) {
             if (empty($_POST[$field])) {
                 // Removed the WC_Admin_Notices::add_notice
@@ -150,14 +150,13 @@ class Product {
             }
         }
 
-        if ($has_errors) {
-            // Add error notice
-            WC_Admin_Notices::add_notice(
-                'validation_failed',
-                __('Validation failed: Please check the server settings.', 'woocommerce')
-            );
-            return false;
-        }
+        // Get existing values for region and image
+        $existing_region = $product->get_meta('_arsol_server_region', true);
+        $existing_image = $product->get_meta('_arsol_server_image', true);
+        
+        // Handle region and image fields
+        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
+        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
 
         // Set WooCOmmerce setting here required server product settings
         $product->set_sold_individually(true);
@@ -173,8 +172,7 @@ class Product {
                 '_arsol_server_type' => 'sites_server',
             ];
 
-             $product->update_meta_data('_subscription_limit', 'active');
-        
+            $product->update_meta_data('_subscription_limit', 'active');
             
         } else {
             // Normal field handling for other server types
@@ -195,24 +193,14 @@ class Product {
             $product->delete_meta_data('_arsol_max_applications');
         }
 
-        // Get existing values for region and image
-        $existing_region = $product->get_meta('_arsol_server_region', true);
-        $existing_image = $product->get_meta('_arsol_server_image', true);
-        
-        // Handle region and image fields
-        $region = isset($_POST['arsol_server_region']) ? sanitize_text_field($_POST['arsol_server_region']) : $existing_region;
-        $server_image = isset($_POST['arsol_server_image']) ? sanitize_text_field($_POST['arsol_server_image']) : $existing_image;
+        // Always save region value regardless of server type
+        $fields['_arsol_server_region'] = $region;
 
-        // Only validate if fields are not empty and were modified
-        if (!empty($region) && $region !== $existing_region) {
-            if (!preg_match('/^[a-zA-Z0-9-]+$/', $region)) {
-                // Removed the WC_Admin_Notices::add_notice
-                return;
-            }
-            if (strlen($region) > 50) {
-                // Removed the WC_Admin_Notices::add_notice
-                return;
-            }
+        // Only clear image for sites server transition
+        if ($is_sites_server && !$was_sites_server) {
+            $fields['_arsol_server_image'] = '';
+        } else {
+            $fields['_arsol_server_image'] = $server_image;
         }
 
         // Set region and image values - only clear if Sites server is being enabled 
@@ -220,11 +208,9 @@ class Product {
 
         if ($is_sites_server && !$was_sites_server) {
             // Only clear values when transitioning to Sites server
-            $fields['_arsol_server_region'] = '';
             $fields['_arsol_server_image'] = '';
         } else {
             // Keep existing or updated values
-            $fields['_arsol_server_region'] = $region;
             $fields['_arsol_server_image'] = $server_image;
         }
 
