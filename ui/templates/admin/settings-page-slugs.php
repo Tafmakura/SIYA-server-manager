@@ -157,7 +157,7 @@ function render_repeater_section($provider_slug, $plans) {
                         <select name="siya_wp_server_group" id="siya_wp_server_group">
                             <?php
                             $provider = get_option('siya_wp_server_provider');
-                            $groups = (new Siya\AdminSettings\Slugs())->get_provider_group_slugs($provider);
+                            $groups = (new Siya\AdminSettings\Slugs())->get_provider_plan_group_slugs($provider);
                             $selected_group = get_option('siya_wp_server_group');
                             foreach ($groups as $group) {
                                 echo '<option value="' . esc_attr($group) . '" ' . selected($selected_group, $group, false) . '>' . esc_html($group) . '</option>';
