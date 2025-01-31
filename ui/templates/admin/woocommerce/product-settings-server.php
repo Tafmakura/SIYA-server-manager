@@ -97,7 +97,7 @@
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
+        $groups = $selected_provider ? $slugs->get_provider_plan_group_slugs($selected_provider) : [];
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
