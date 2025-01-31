@@ -91,10 +91,10 @@
         $providers = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
-        // Build provider options array with all available providersa
+        // Only show saved provider if it exists
         $provider_options = [];
-        foreach ($providers as $provider) {
-            $provider_options[$provider] = $slugs->get_provider_name($provider);
+        if (!empty($selected_provider) && in_array($selected_provider, $providers)) {
+            $provider_options[$selected_provider] = $slugs->get_provider_name($selected_provider);
         }
 
         woocommerce_wp_select(array(
