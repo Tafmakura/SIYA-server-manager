@@ -108,11 +108,10 @@
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $all_groups = $slugs->get_provider_plan_group_slugs($selected_provider);
-
-        // Only show saved group if it exists
         $group_options = [];
-        if (!empty($selected_group) && in_array($selected_group, $all_groups)) {
+
+        // Simply check if we have a selected group and add it to options
+        if (!empty($selected_group)) {
             $group_options[$selected_group] = $selected_group;
         }
 
