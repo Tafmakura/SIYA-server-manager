@@ -79,8 +79,11 @@
             ?>
         </div>
         <?php
-        // Provider Dropdownn
-        $providers = $slugs->get_provider_slugs();
+        // Provider Dropdown - only show providers available for selected server type
+        $providers = [];
+        if ($server_type) {
+            $providers = $slugs->get_providers_by_server_type($server_type);
+        }
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
         woocommerce_wp_select(array(
@@ -88,21 +91,22 @@
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine($providers, array_map(function($provider) {
-            return ucfirst($provider); // Capitalize first letter
-            }, $providers)),
+            'options'     => array_combine($providers, array_map('ucfirst', $providers)),
             'value'       => $selected_provider,
             'required'    => true
         ));
 
-        // Group Dropdown
+        // Group Dropdown - only show groups available for selected provider and server type
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
-        $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
+        $groups = [];
+        if ($selected_provider && $server_type) {
+            $groups = $slugs->get_provider_groups_by_server_type($selected_provider, $server_type);
+        }
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
-            'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
+            'description' => __('Select the server plan group.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
             'value'       => $selected_group
