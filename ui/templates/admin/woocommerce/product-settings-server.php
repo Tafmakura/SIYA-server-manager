@@ -110,21 +110,24 @@
 
         // Plan Dropdown setup
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
-        $plans = $selected_provider && $selected_group ? 
-            $slugs->get_filtered_plans($selected_provider, $selected_group) : [];
-        $plan_options = [];
+        $plans = [];
+        if ($selected_provider && $selected_group) {
+            $plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
+        }
+
+        // Create plan options array
+        $plan_options = array();
         foreach ($plans as $plan) {
             $plan_options[$plan['slug']] = $plan['slug'];
         }
 
-        // Modify the select to always be disabled and show 'empty' if no options available
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => empty($plan_options) ? array('' => 'empty') : $plan_options,
-            'value'       => empty($plan_options) ? '' : $selected_plan
+            'options'     => $plan_options ?: array('' => 'empty'),
+            'value'       => $selected_plan ?: ''
         ));
 
         // Add wrapper div for region and image fields
