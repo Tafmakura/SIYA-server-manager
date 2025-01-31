@@ -257,6 +257,37 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    // New function to clear and enable fields
+    function initializeFields() {
+        // Clear all select fields except those with saved values
+        $('select#arsol_server_type, select#arsol_server_provider_slug').each(function() {
+            if (!$(this).val()) {
+                $(this).empty().prop('disabled', false);
+            }
+        });
+
+        // Enable server type field if empty
+        var $serverType = $('#arsol_server_type');
+        if (!$serverType.val()) {
+            $serverType.prop('disabled', false);
+            // Add server type options
+            var serverTypes = {
+                'sites_server': 'Sites Server',
+                'application_server': 'Application Server',
+                'block_storage_server': 'Block Storage Server',
+                'cloud_server': 'Cloud Server',
+                'email_server': 'Email Server',
+                'object_storage_server': 'Object Storage Server',
+                'vps_server': 'VPS Server'
+            };
+            $.each(serverTypes, function(value, text) {
+                $serverType.append($('<option></option>').val(value).text(text));
+            });
+        }
+    }
+
+    // Call the initialization function
+    initializeFields();
     
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
