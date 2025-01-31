@@ -313,10 +313,9 @@ jQuery(document).ready(function($) {
                 
                 // Add provider options
                 providers.forEach(function(provider) {
-                    var providerName = '<?php echo json_encode($slugs->get_provider_name("' + provider + '")); ?>';
                     $providerField.append($('<option></option>')
                         .val(provider)
-                        .text(providerName)
+                        .text(provider)
                     );
                 });
                 
