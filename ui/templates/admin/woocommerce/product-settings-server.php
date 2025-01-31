@@ -92,7 +92,7 @@
         // Only show saved provider if it exists
         $provider_options = [];
         if (!empty($selected_provider) && isset($providers[$selected_provider])) {
-            $provider_options[$selected_provider] = $providers[$selected_provider];
+            $provider_options[$selected_provider] = $providers[$selected_provider]['name'] ?? $selected_provider;
         }
 
         woocommerce_wp_select(array(
@@ -111,7 +111,7 @@
         // Only show saved group if it exists
         $group_options = [];
         if (!empty($selected_group) && isset($groups[$selected_group])) {
-            $group_options[$selected_group] = $groups[$selected_group];
+            $group_options[$selected_group] = $groups[$selected_group]['name'] ?? $selected_group;
         }
         
         woocommerce_wp_select(array(
@@ -130,7 +130,7 @@
         // Only show saved plan if it exists
         $plan_options = [];
         if (!empty($selected_plan) && isset($plans[$selected_plan])) {
-            $plan_options[$selected_plan] = $plans[$selected_plan];
+            $plan_options[$selected_plan] = $plans[$selected_plan]['name'] ?? $selected_plan;
         }
           
         woocommerce_wp_select(array(
