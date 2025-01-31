@@ -295,10 +295,6 @@ jQuery(document).ready(function($) {
         $serverType.trigger('change');
     }
 
-    // Call both initialization functions
-    clearServerOptionFields();
-    initializeServerTypeField();
-
     function initializeServerProviderField() {
         var $providerField = $('#arsol_server_provider_slug');
         var selectedServerType = $('#arsol_server_type').val();
@@ -333,6 +329,12 @@ jQuery(document).ready(function($) {
             }
         });
     }
+
+
+    // Call both initialization functions
+    clearServerOptionFields();
+    initializeServerTypeField();
+    initializeServerProviderField();
 
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
