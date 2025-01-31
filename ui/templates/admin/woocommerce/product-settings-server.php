@@ -257,38 +257,22 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // New function to clear and enable fields
-    function initializeFields() {
-        // Clear all select fields except those with saved values
-        $('select#arsol_server_type, select#arsol_server_provider_slug').each(function() {
-            if (!$(this).val()) {
-                $(this).empty().prop('disabled', false);
-            }
-        });
+    // Add this new function at the start of the jQuery ready block
+    function initializeServerFields() {
+        // Clear and enable server type select
+        $('#arsol_server_type')
+            .prop('disabled', false)
+            .html(''); // Clear options
 
-        // Enable server type field if empty
-        var $serverType = $('#arsol_server_type');
-        if (!$serverType.val()) {
-            $serverType.prop('disabled', false);
-            // Add server type options
-            var serverTypes = {
-                'sites_server': 'Sites Server',
-                'application_server': 'Application Server',
-                'block_storage_server': 'Block Storage Server',
-                'cloud_server': 'Cloud Server',
-                'email_server': 'Email Server',
-                'object_storage_server': 'Object Storage Server',
-                'vps_server': 'VPS Server'
-            };
-            $.each(serverTypes, function(value, text) {
-                $serverType.append($('<option></option>').val(value).text(text));
-            });
-        }
+        // Clear and enable provider select
+        $('#arsol_server_provider_slug')
+            .prop('disabled', false)
+            .html(''); // Clear options
     }
 
-    // Call the initialization function
-    initializeFields();
-    
+    // Call the function on page load
+    initializeServerFields();
+
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
         var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
