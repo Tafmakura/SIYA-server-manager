@@ -257,20 +257,17 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    // Add this new function at the start of the jQuery ready block
     function initializeServerFields() {
-        // Clear and enable server type select
-        $('#arsol_server_type')
-            .prop('disabled', false)
-            .html(''); // Clear options
+        // Get all select fields and clear their options
+        $('select#arsol_server_type, select#arsol_server_provider_slug, select#arsol_server_plan_group_slug, select#arsol_server_plan_slug').each(function() {
+            $(this).empty();
+        });
 
-        // Clear and enable provider select
-        $('#arsol_server_provider_slug')
-            .prop('disabled', false)
-            .html(''); // Clear options
+        // Only enable server type and provider fields
+        $('#arsol_server_type, #arsol_server_provider_slug').prop('disabled', false);
     }
 
-    // Call the function on page load
+    // Call the function immediately
     initializeServerFields();
 
     function setRuncloudCheckboxState(checked = true, disabled = true) {
