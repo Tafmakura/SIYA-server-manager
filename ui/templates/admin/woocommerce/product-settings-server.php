@@ -267,33 +267,27 @@ jQuery(document).ready(function($) {
     // Add this new function after clearServerOptionFields
     function initializeServerTypeField() {
         var $serverType = $('#arsol_server_type');
-        var allowedTypes = <?php 
-            $saved_types = (array) get_option('arsol_allowed_server_types', ['sites_server']);
-            $all_types = [
-                'sites_server'          => __('Sites Server', 'woocommerce'),
-                'application_server'    => __('Application Server', 'woocommerce'),
-                'block_storage_server'  => __('Block Storage Server', 'woocommerce'),
-                'cloud_server'          => __('Cloud Server', 'woocommerce'),
-                'email_server'          => __('Email Server', 'woocommerce'),
-                'object_storage_server' => __('Object Storage Server', 'woocommerce'),
-                'vps_server'           => __('VPS Server', 'woocommerce'),
-            ];
-            $allowed_types = array_intersect_key($all_types, array_flip($saved_types));
-            echo json_encode($allowed_types);
-        ?>;
+        var allowedTypes = <?php echo json_encode($all_types); ?>;
+        var savedTypes = <?php echo json_encode($saved_types); ?>;
+        var savedValue = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_type', true)); ?>';
 
         // Enable the field
         $serverType.prop('disabled', false);
 
-        // Add options
+        // Add only allowed options
         $.each(allowedTypes, function(value, text) {
-            $serverType.append($('<option></option>').val(value).text(text));
+            if (savedTypes.includes(value)) {
+                $serverType.append($('<option></option>').val(value).text(text));
+            }
         });
 
-        // Select Sites Server by default if no value is set
-        if (!$serverType.val()) {
-            $serverType.val('sites_server').trigger('change');
+        // Set value based on saved meta or default to first allowed type
+        if (savedValue && savedTypes.includes(savedValue)) {
+            $serverType.val(savedValue);
+        } else {
+            $serverType.val(savedTypes[0]);
         }
+        $serverType.trigger('change');
     }
 
     // Call both initialization functions
