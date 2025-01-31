@@ -91,7 +91,7 @@
         $providers = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
-        // Build provider options array with all available providers
+        // Build provider options array with all available providersa
         $provider_options = [];
         foreach ($providers as $provider) {
             $provider_options[$provider] = $slugs->get_provider_name($provider);
