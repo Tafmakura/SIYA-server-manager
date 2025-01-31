@@ -136,17 +136,22 @@
             $available_plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
         }
 
-        $plan_options = array_combine(
-            array_column($available_plans, 'slug'),
-            array_column($available_plans, 'slug')
-        );
+        // Create options array from available plans
+        $plan_options = [];
+        foreach ($available_plans as $plan) {
+            $plan_options[$plan['slug']] = sprintf(
+                '%s %s', 
+                $plan['slug'],
+                !empty($plan['description']) ? '- ' . $plan['description'] : ''
+            );
+        }
 
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => empty($plan_options) ? array('' => 'Select a plan') : $plan_options,
+            'options'     => empty($plan_options) ? array('' => __('Select a plan', 'woocommerce')) : $plan_options,
             'value'       => $selected_plan
         ));
 
