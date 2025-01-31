@@ -347,7 +347,7 @@ jQuery(document).ready(function($) {
         // Only proceed if we have both server type and provider
         if (!selectedServerType || !selectedProvider) {
             $groupField.prop('disabled', true).empty();
-            $('#arsol_server_plan_slug').empty().trigger('change');
+            $('#arsol_server_plan_group_slug').empty().trigger('change');
             return;
         }
 
