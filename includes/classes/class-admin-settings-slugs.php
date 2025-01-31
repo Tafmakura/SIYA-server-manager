@@ -239,7 +239,7 @@ class Slugs {
     }
 
     /**
-     * AJAX Handlers
+     * AJAX Handlers!
      */
 
     public function ajax_get_providers_by_server_type(): void {
