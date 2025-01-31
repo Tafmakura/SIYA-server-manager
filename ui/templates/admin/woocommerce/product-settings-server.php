@@ -401,29 +401,7 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        if (selectedServerType === 'sites_server') {
-            // For sites server, use wp options
-            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
-            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
-
-            // Get available plans for sites server type from this provider/group
-            $.ajax({
-                url: ajaxurl,
-                data: {
-                    action: 'get_group_plans',
-                    provider: wpProvider,
-                    group: wpGroup,
-                    server_type: 'sites_server'
-                },
-                success: function(plans) {
-                    // Handle plans response
-                    handlePlansResponse($planField, plans, savedPlan);
-                }
-            });
-            return;
-        }
-
-        // Regular AJAX flow for other server types
+        // Get available plans via AJAX
         $.ajax({
             url: ajaxurl,
             data: {
@@ -433,32 +411,31 @@ jQuery(document).ready(function($) {
                 server_type: selectedServerType
             },
             success: function(plans) {
-                // Handle plans response
-                handlePlansResponse($planField, plans, savedPlan);
+                // If no plans available, disable field and return
+                if (!plans.length) {
+                    $planField.prop('disabled', true).empty();
+                    return;
+                }
+
+                // Enable field and update options 
+                $planField.prop('disabled', false).empty();
+                
+                // Add plan options
+                plans.forEach(function(plan) {
+                    $planField.append($('<option></option>')
+                        .val(plan.slug)
+                        .text(/* TODO add plan names >>> plan.description <<< || */plan.slug)
+                    );
+                });
+
+                // Select saved plan if it exists in available plans
+                if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                    $planField.val(savedPlan);
+                }
+
+                $planField.trigger('change');
             }
         });
-    }
-
-    function handlePlansResponse($field, plans, savedPlan) {
-        if (!plans || !plans.length) {
-            $field.prop('disabled', true).empty();
-            return;
-        }
-
-        $field.prop('disabled', false).empty();
-        
-        plans.forEach(function(plan) {
-            $field.append($('<option></option>')
-                .val(plan.slug)
-                .text(plan.description ? `${plan.slug} - ${plan.description}` : plan.slug)
-            );
-        });
-
-        if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
-            $field.val(savedPlan);
-        }
-
-        $field.trigger('change');
     }
 
     // Call both initialization functions
