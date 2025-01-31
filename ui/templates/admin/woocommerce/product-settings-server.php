@@ -269,7 +269,12 @@ jQuery(document).ready(function($) {
         var $serverType = $('#arsol_server_type');
         var allowedTypes = <?php echo json_encode($all_types); ?>;
         var savedTypes = <?php echo json_encode($saved_types); ?>;
-        var savedValue = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_type', true)); ?>';
+        
+        // Get saved value and handle array format
+        var savedMetaValue = <?php 
+            $saved_meta = get_post_meta($post->ID, '_arsol_server_type', true);
+            echo json_encode(is_array($saved_meta) ? $saved_meta[0] : $saved_meta); 
+        ?>;
 
         // Enable the field
         $serverType.prop('disabled', false);
@@ -282,8 +287,8 @@ jQuery(document).ready(function($) {
         });
 
         // Set value based on saved meta or default to first allowed type
-        if (savedValue && savedTypes.includes(savedValue)) {
-            $serverType.val(savedValue);
+        if (savedMetaValue && savedTypes.includes(savedMetaValue)) {
+            $serverType.val(savedMetaValue);
         } else {
             $serverType.val(savedTypes[0]);
         }
