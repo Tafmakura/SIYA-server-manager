@@ -79,47 +79,49 @@
             ?>
         </div>
         <?php
-        // Provider Dropdownn
-        $providers = $slugs->get_provider_slugs();
+        // Provider Dropdown
+        $provider_slugs = $slugs->get_provider_slugs();
         $selected_provider = get_post_meta($post->ID, '_arsol_server_provider_slug', true);
 
-        woocommerce_wp_select(array(
-            'id'          => 'arsol_server_provider_slug', 
+        woocommerce_wp_select([
+            'id'          => 'arsol_server_provider_slug',
             'label'       => __('Server provider', 'woocommerce'),
             'description' => __('Select the server provider.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine($providers, array_map(function($provider) {
-            return ucfirst($provider); // Capitalize first letter
-            }, $providers)),
-            'value'       => $selected_provider,
-            'required'    => true
-        ));
+            'options'     => array_combine($provider_slugs, array_map('ucfirst', $provider_slugs)),
+            'value'       => $selected_provider
+        ]);
 
         // Group Dropdown
         $selected_group = get_post_meta($post->ID, '_arsol_server_plan_group_slug', true);
         $groups = $selected_provider ? $slugs->get_provider_group_slugs($selected_provider) : [];
 
-        woocommerce_wp_select(array(
+        woocommerce_wp_select([
             'id'          => 'arsol_server_plan_group_slug',
             'label'       => __('Server plan group', 'woocommerce'),
-            'description' => __('Select the server plan group, which the plan you want belongs to.', 'woocommerce'),
+            'description' => __('Select the server plan group.', 'woocommerce'),
             'desc_tip'    => true,
             'options'     => array_combine($groups, $groups),
             'value'       => $selected_group
-        ));
+        ]);
 
-        // Plan Dropdown setup
+        // Plan Dropdown
         $selected_plan = get_post_meta($post->ID, '_arsol_server_plan_slug', true);
         $plans = $slugs->get_filtered_plans($selected_provider, $selected_group);
-      
-        woocommerce_wp_select(array(
+
+        woocommerce_wp_select([
             'id'          => 'arsol_server_plan_slug',
             'label'       => __('Server plan', 'woocommerce'),
             'description' => __('Select the server plan.', 'woocommerce'),
             'desc_tip'    => true,
-            'options'     => array_combine(array_column($plans, 'slug'), array_column($plans, 'name')),
-            'value'       => $selected_plan ?: ''
-        ));
+            'options'     => array_combine(
+                array_column($plans, 'slug'),
+                array_map(function($plan) {
+                    return $plan['slug'] . ' - ' . $plan['description'];
+                }, $plans)
+            ),
+            'value'       => $selected_plan
+        ]);
 
         // Add wrapper div for region and image fields
         ?>
@@ -392,6 +394,85 @@ jQuery(document).ready(function($) {
                 }
             }
         }
+    });
+
+    // Handle provider change
+    $('#arsol_server_provider_slug').on('change', function() {
+        var provider = $(this).val();
+        var serverType = $('#arsol_server_type').val();
+        
+        // Update groups
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_provider_groups',
+                provider: provider,
+                server_type: serverType
+            },
+            success: function(groups) {
+                var $groupSelect = $('#arsol_server_plan_group_slug');
+                $groupSelect.empty();
+                
+                groups.forEach(function(group) {
+                    $groupSelect.append(new Option(group, group));
+                });
+                
+                $groupSelect.trigger('change');
+            }
+        });
+    });
+
+    // Handle group change
+    $('#arsol_server_plan_group_slug').on('change', function() {
+        var provider = $('#arsol_server_provider_slug').val();
+        var group = $(this).val();
+        var serverType = $('#arsol_server_type').val();
+        
+        // Update plans
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_group_plans',
+                provider: provider,
+                group: group,
+                server_type: serverType
+            },
+            success: function(plans) {
+                var $planSelect = $('#arsol_server_plan_slug');
+                $planSelect.empty();
+                
+                plans.forEach(function(plan) {
+                    var label = plan.slug + ' - ' + plan.description;
+                    $planSelect.append(new Option(label, plan.slug));
+                });
+            }
+        });
+    });
+
+    // Handle server type change
+    $('#arsol_server_type').on('change', function() {
+        var serverType = $(this).val();
+        
+        // Update providers based on server type
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_providers_by_server_type',
+                server_type: serverType
+            },
+            success: function(providers) {
+                var $providerSelect = $('#arsol_server_provider_slug');
+                var currentProvider = $providerSelect.val();
+                
+                $providerSelect.find('option').each(function() {
+                    $(this).prop('disabled', !providers.includes($(this).val()));
+                });
+                
+                if (!providers.includes(currentProvider)) {
+                    $providerSelect.val(providers[0]).trigger('change');
+                }
+            }
+        });
     });
 });
 </script>

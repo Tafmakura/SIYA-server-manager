@@ -131,7 +131,7 @@ class Slugs {
         return self::PROVIDERS[$provider_slug] ?? '';
     }
 
-    public function provider_exists(string $provider_slug): bool {
+    private function provider_exists(string $provider_slug): bool {
         return isset(self::PROVIDERS[$provider_slug]);
     }
 
