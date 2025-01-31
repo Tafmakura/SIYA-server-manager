@@ -717,7 +717,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
-        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; 
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
         
         // Always disable first before making the AJAX call
         $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
@@ -746,6 +746,14 @@ jQuery(document).ready(function($) {
                     
                     if (plans.length === 0) {
                         $planSelect.prop('disabled', true);
+                    } else {
+                        $planSelect.prop('disabled', false);
+                        plans.forEach(function(plan) {
+                            $planSelect.append(new Option(plan.slug, plan.slug));
+                        });
+   
+                        $planSelect.val(null);
+  
                     }
                 } catch (e) {
                     console.error('Failed to parse plans:', e);
