@@ -343,6 +343,13 @@ jQuery(document).ready(function($) {
         var $groupField = $('#arsol_server_plan_group_slug');
         var selectedServerType = $('#arsol_server_type').val();
         var selectedProvider = $('#arsol_server_provider_slug').val();
+
+        // Only proceed if we have both server type and provider
+        if (!selectedServerType || !selectedProvider) {
+            $groupField.prop('disabled', true).empty();
+            return;
+        }
+
         var savedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_group_slug', true)); ?>';
 
         if (selectedServerType === 'sites_server') {
@@ -388,10 +395,13 @@ jQuery(document).ready(function($) {
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
         initializeServerProviderField();
+        // Plan group will be initialized after provider field updates
     });
 
     $('#arsol_server_provider_slug').on('change', function() {
-        initializeServerPlanGroupField();
+        if ($(this).val()) {
+            initializeServerPlanGroupField();
+        }
     });
 
     // Call both initialization functions
