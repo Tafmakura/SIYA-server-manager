@@ -717,7 +717,7 @@ jQuery(document).ready(function($) {
     function updatePlans(provider, group) {
         var serverType = $('#arsol_server_type').val();
         var $planSelect = $('#arsol_server_plan_slug');
-        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; // Get the saved plan value
+        var savedPlan = '<?php echo esc_js($selected_plan); ?>'; 
         
         // Always disable first before making the AJAX call
         $planSelect.empty().prop('disabled', true).append(new Option('empty', ''));
