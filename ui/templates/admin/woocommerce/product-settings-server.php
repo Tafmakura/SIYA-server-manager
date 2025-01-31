@@ -58,6 +58,7 @@
             ?>
         </div>
         <?php
+        $server_type = get_post_meta($post->ID, '_arsol_server_type', true);
         $is_sites_server = $server_type === 'sites_server';
         $is_ecommerce = get_post_meta($post->ID, '_arsol_ecommerce_optimized', true) === 'yes';
         $is_server_manager = get_post_meta($post->ID, '_arsol_server_manager_required', true) === 'yes';
