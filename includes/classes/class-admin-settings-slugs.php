@@ -194,25 +194,6 @@ class Slugs {
     /**
      * Plan Methods
      */
-    public function get_filtered_plans(?string $provider_slug = null, ?string $group_slug = null): array {
-        if ($provider_slug && !$this->provider_exists($provider_slug)) {
-            return [];
-        }
-
-        $plans = [];
-        if ($provider_slug) {
-            $plans = get_option("siya_{$provider_slug}_plans", []);
-            if (!is_array($plans)) {
-                return [];
-            }
-            if ($group_slug) {
-                $plans = array_filter($plans, function($plan) use ($group_slug) {
-                    return $plan['group_slug'] === $group_slug;
-                });
-            }
-        }
-        return $plans;
-    }
 
     public function get_plan_details(string $provider_slug, string $plan_slug): ?array {
         $plans = $this->get_filtered_plans($provider_slug);
@@ -231,6 +212,25 @@ class Slugs {
         return array_filter($all_plans, function($plan) use ($server_type) {
             return isset($plan['server_types']) && in_array($server_type, $plan['server_types']);
         });
+    }
+    public function get_filtered_plans(?string $provider_slug = null, ?string $group_slug = null): array {
+        if ($provider_slug && !$this->provider_exists($provider_slug)) {
+            return [];
+        }
+
+        $plans = [];
+        if ($provider_slug) {
+            $plans = get_option("siya_{$provider_slug}_plans", []);
+            if (!is_array($plans)) {
+                return [];
+            }
+            if ($group_slug) {
+                $plans = array_filter($plans, function($plan) use ($group_slug) {
+                    return $plan['group_slug'] === $group_slug;
+                });
+            }
+        }
+        return $plans;
     }
 
     /**
