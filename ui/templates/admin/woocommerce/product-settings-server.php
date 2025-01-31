@@ -300,7 +300,16 @@ jQuery(document).ready(function($) {
         var selectedServerType = $('#arsol_server_type').val();
         var savedProvider = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_provider_slug', true)); ?>';
 
-        // Get providers for selected server type via AJAX
+        if (selectedServerType === 'sites_server') {
+            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+            $providerField.empty()
+                         .append($('<option></option>').val(wpProvider).text(wpProvider))
+                         .val(wpProvider)
+                         .trigger('change');
+            return;
+        }
+
+        // Regular AJAX flow for other server types
         $.ajax({
             url: ajaxurl,
             data: {
@@ -313,10 +322,9 @@ jQuery(document).ready(function($) {
                 
                 // Add provider options
                 providers.forEach(function(provider) {
-                    var providerName = '<?php echo json_encode($slugs->get_provider_name("' + provider + '")); ?>';
                     $providerField.append($('<option></option>')
                         .val(provider)
-                        .text(providerName)
+                        .text(provider)
                     );
                 });
                 
