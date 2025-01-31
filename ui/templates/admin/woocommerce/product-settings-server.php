@@ -362,7 +362,8 @@ jQuery(document).ready(function($) {
                 server_type: selectedServerType
             },
             success: function(groups) {
-                $groupField.empty();
+                // Enable field for non-sites-server types
+                $groupField.prop('disabled', false).empty();
                 
                 groups.forEach(function(group) {
                     $groupField.append($('<option></option>').val(group).text(group));
