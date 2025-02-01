@@ -24,21 +24,27 @@ class ServerCircuitBreaker extends ServerOrchestrator {
      */
     public function test_circuit($subscription) {
         error_log("[SIYA Debug] Starting test_circuit for subscription ID: " . $subscription->get_id());
-
+    
         try {
             // Retrieve the subscription ID and linked server post ID
             $subscription_id = $subscription->get_id();
             $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
-
+    
+            // Early return if server post ID is not found
+            if (!$server_post_id) {
+                error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription_id}.");
+                return;  // Exit early if server post ID is missing
+            }
+    
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Testing circuit breaker for subscription {$subscription_id} and server post ID {$server_post_id}.");
-
+    
             // Initialise the circuit breaker state if it does not exist
             $circuit_breaker = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
             $retry_counter   = (int) get_post_meta($server_post_id, '_arsol_state_00_retry_counter', true);
             $reset_counter   = (int) get_post_meta($server_post_id, '_arsol_state_00_reset_counter', true);
-
+    
             error_log("[SIYA Debug] Current state - Circuit Breaker: {$circuit_breaker}, Retry Counter: {$retry_counter}, Reset Counter: {$reset_counter}");
-
+    
             // Define metadata keys for server-related operations
             $server_metadata_keys = [
                 '_arsol_state_05_server_post',
@@ -51,18 +57,18 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 '_arsol_state_70_manager_connection',
                 '_arsol_server_manager_required',
             ];
-
+    
             // Fetch all metadata for the linked server post
             $server_metadata = [];
             foreach ($server_metadata_keys as $key) {
                 $server_metadata[$key] = get_post_meta($server_post_id, $key, true);
                 error_log("[SIYA Debug] Metadata {$key}: " . $server_metadata[$key]);
             }
-
+    
             // Check if server manager is required
             $server_manager_required = $server_metadata['_arsol_server_manager_required'] ?? 'no';
             error_log("[SIYA Debug] Server manager required: {$server_manager_required}");
-
+    
             // Validate whether all required metadata values are set to 2
             $all_status_complete = true;
             if ($server_manager_required === 'yes') {
@@ -87,9 +93,9 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                     }
                 }
             }
-
+    
             error_log("[SIYA Debug] All status complete: " . ($all_status_complete ? 'true' : 'false'));
-
+    
             if ($all_status_complete) {
                 error_log("[SIYA Debug] Resetting circuit breaker - all statuses complete");
                 $this->reset_circuit_breaker($subscription, ["Server provisioning and deployment complete."]);
@@ -97,12 +103,13 @@ class ServerCircuitBreaker extends ServerOrchestrator {
                 error_log("[SIYA Debug] Setting circuit breaker to half-open - incomplete statuses found");
                 $this->half_open_circuit_breaker($subscription);
             }
-
+    
         } catch (\Exception $e) {
             error_log("[SIYA Debug] Exception caught in test_circuit: " . $e->getMessage());
             $this->handle_exception($e);
         }
     }
+    
 
     public static function trip_circuit_breaker(\WC_Subscription $subscription, array $details = []) {
         error_log("[SIYA Debug] Tripping circuit breaker for subscription: " . $subscription->get_id());
@@ -113,6 +120,8 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             $subscription->add_order_note("Circuit breaker tripped. Manual intervention required, this server may have failed or may have degraded perfomance. " . json_encode($details));
             error_log("[SIYA Server Manager - ServerCircuitBreaker] WARNING: Circuit breaker tripped for subscription {$subscription->get_id()}. Details: " . json_encode($details));
         }
+
+        return self::CIRCUIT_BREAKER_TRIPPED;
     }
 
     public function half_open_circuit_breaker(\WC_Subscription $subscription) {
@@ -138,10 +147,10 @@ class ServerCircuitBreaker extends ServerOrchestrator {
         $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
         if ($server_post_id) {
             error_log("[SIYA Debug] Resetting circuit breaker for subscription: " . $subscription->get_id());
-            $server_post_id = $subscription->get_meta('arsol_linked_server_post_id', true);
             update_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', self::CIRCUIT_BREAKER_CLOSED);
             $subscription->add_order_note("Circuit breaker reset and subscription activated. " . json_encode($details));
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Circuit breaker reset for subscription {$subscription->get_id()}.");
+            return self::CIRCUIT_BREAKER_CLOSED;
         } else  {
             error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription->get_id()}.");
             $this->throw_exception("Server post ID not found for subscription {$subscription->get_id()}");
