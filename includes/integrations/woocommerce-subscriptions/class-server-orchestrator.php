@@ -136,7 +136,7 @@ class ServerOrchestrator {
             $circuit_breaker_instance = new ServerCircuitBreaker();
             $circuit_breaker_status = $circuit_breaker_instance->test_circuit($subscription);
 
-            if ($circuit_breaker_status == ServerCircuitBreaker::CIRCUIT_RESET) {
+            if ($circuit_breaker_status == ServerCircuitBreaker:CIRCUIT_BREAKER_CLOSED;) {
                 error_log('#PFC005c [SIYA Server Manager - ServerOrchestrator] Circuit breaker is open, starting power-up');
                 $this->start_server_powerup($subscription);
             }
