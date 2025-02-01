@@ -321,13 +321,22 @@ jQuery(document).ready(function($) {
                 // Enable field and clear existing options
                 $providerField.prop('disabled', false).empty();
                 
-                // Add provider options
-                providers.forEach(function(provider) {
+                if (providers && providers.length > 0) {
+                    // Add provider options
+                    providers.forEach(function(provider) {
+                        $providerField.append($('<option></option>')
+                            .val(provider)
+                            .text(provider)
+                        );
+                    });
+                } else {
+                    // Add disabled empty option
                     $providerField.append($('<option></option>')
-                        .val(provider)
-                        .text(provider)
+                        .val('')
+                        .text('No providers available')
+                        .prop('disabled', true)
                     );
-                });
+                }
                 
                 // Select saved provider if it exists in allowed list
                 if (savedProvider && providers.includes(savedProvider)) {
