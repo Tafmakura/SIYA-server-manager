@@ -346,7 +346,8 @@ jQuery(document).ready(function($) {
 
         // Only proceed if we have both server type and provider
         if (!selectedServerType || !selectedProvider) {
-            $groupField.prop('disabled', true).empty()
+            $groupField.prop('disabled', true).empty();
+            $('#arsol_server_plan_group_slug').empty().trigger('change'); // 
             return;
         }
 
@@ -440,6 +441,7 @@ jQuery(document).ready(function($) {
         });
     }
 
+ 
     // Call both initialization functions
     clearServerOptionFields();
     initializeServerTypeField();
@@ -448,10 +450,7 @@ jQuery(document).ready(function($) {
 
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
-        initializeServerProviderField();
-        initializeServerPlanGroupField();
-        initializeServerPlanField();
-        
+        initializeServerProviderField();    
         // Plan group will be initialized after provider field updates
     });
 
