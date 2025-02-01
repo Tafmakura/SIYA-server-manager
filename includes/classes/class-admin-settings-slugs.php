@@ -142,10 +142,15 @@ class Slugs {
         foreach ($this->get_provider_slugs() as $provider) {
             $plans = get_option("siya_{$provider}_plans", []);
             foreach ($plans as $plan) {
-                if (isset($plan['server_types']) && in_array($server_type, $plan['server_types'])) {
-                    $providers[] = $provider;
-                    break;
+                if (isset($plan['server_types'])) {
+                    $server_types = is_array($plan['server_types']) ? $plan['server_types'] : explode(',', $plan['server_types']);
+                
+                    if (in_array($server_type, $server_types, true)) {
+                        $providers[] = $provider;
+                        break;
+                    }
                 }
+                
             }
         }
         return array_unique($providers);
