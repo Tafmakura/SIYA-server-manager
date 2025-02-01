@@ -348,7 +348,7 @@ jQuery(document).ready(function($) {
         if (!selectedServerType || !selectedProvider) {
             $groupField.prop('disabled', true).empty();
             $('#arsol_server_plan_group_slug').empty().trigger('change'); // 
-          //  return;
+            return;
         }
 
         var savedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_group_slug', true)); ?>';
@@ -444,8 +444,8 @@ jQuery(document).ready(function($) {
  
     // Call both initialization functions
     clearServerOptionFields();
-
     initializeServerTypeField();
+
 
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
