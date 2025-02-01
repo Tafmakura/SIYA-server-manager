@@ -132,24 +132,13 @@ class ServerOrchestrator {
 
             error_log('#PFC005a [SIYA Server Manager - ServerOrchestrator] Server post ID: ' . $server_post_id);
 
-            if ($server_post_id) {
-                error_log('#PFC005b [SIYA Server Manager - ServerOrchestrator] Server post found, running circuit breaker test');
+            // Run circuit breaker test - this will handle state changes if needed
+            $circuit_breaker_instance = new ServerCircuitBreaker();
+            $circuit_breaker_status = $circuit_breaker_instance->test_circuit($subscription);
 
-                // Run circuit breaker test - this will handle state changes if needed
-                $circuit_breaker_instance = new ServerCircuitBreaker();
-                $circuit_breaker_instance->test_circuit($subscription);
-
-                // Fetch the updated circuit breaker state
-                $circuit_breaker_state = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-
-                // Proceed only if the circuit breaker is open (reset)
-                if ($circuit_breaker_state === '0') {
-                    error_log('#PFC005c [SIYA Server Manager - ServerOrchestrator] Circuit breaker is open, starting power-up');
-                    $this->start_server_powerup($subscription);
-                    return true;
-                } else {
-                    error_log('#PFC005d [SIYA Server Manager - ServerOrchestrator] Circuit breaker is not open, skipping power-up');
-                }
+            if ($circuit_breaker_status == ServerCircuitBreaker::CIRCUIT_RESET) {
+                error_log('#PFC005c [SIYA Server Manager - ServerOrchestrator] Circuit breaker is open, starting power-up');
+                $this->start_server_powerup($subscription);
             }
 
             error_log('#PFC006 [SIYA Server Manager - ServerOrchestrator] Preflight check completed');

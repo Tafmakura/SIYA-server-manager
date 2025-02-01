@@ -33,7 +33,7 @@ class ServerCircuitBreaker extends ServerOrchestrator {
             // Early return if server post ID is not found
             if (!$server_post_id) {
                 error_log("[SIYA Server Manager - ServerCircuitBreaker] ERROR: Server post ID not found for subscription {$subscription_id}.");
-                return;  // Exit early if server post ID is missing
+                return false;  // Exit early if server post ID is missing
             }
     
             error_log("[SIYA Server Manager - ServerCircuitBreaker] INFO: Testing circuit breaker for subscription {$subscription_id} and server post ID {$server_post_id}.");
