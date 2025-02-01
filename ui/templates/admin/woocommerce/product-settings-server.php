@@ -454,7 +454,7 @@ jQuery(document).ready(function($) {
     });
 
     $('#arsol_server_provider_slug').on('change', function() {
-        initializeServerPlanGroupField();
+     //   initializeServerPlanGroupField();
         // Plan field will be initialized after group field updates
     });
 
