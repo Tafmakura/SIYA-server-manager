@@ -134,6 +134,7 @@ class ServerOrchestrator {
 
             // Run circuit breaker test - this will handle state changes if needed
             $circuit_breaker_instance = new ServerCircuitBreaker();
+            $circuit_breaker_instance->test_circuit($subscription);
             
             error_log('#PFC005b [SIYA Server Manager - ServerOrchestrator] Circuit breaker status: ' . $circuit_breaker_status);
 
