@@ -445,8 +445,6 @@ jQuery(document).ready(function($) {
     // Call both initialization functions
     clearServerOptionFields();
     initializeServerTypeField();
-    initializeServerProviderField();
-    initializeServerPlanField();
 
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
