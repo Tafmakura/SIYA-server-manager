@@ -445,6 +445,9 @@ jQuery(document).ready(function($) {
     // Call both initialization functions
     clearServerOptionFields();
     initializeServerTypeField();
+    initializeServerProviderField();
+    initializeServerPlanGroupField();
+    initializeServerPlanField();
 
 
     // Add event listener for server type changes
