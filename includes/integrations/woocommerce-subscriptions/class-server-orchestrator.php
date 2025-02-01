@@ -137,10 +137,13 @@ class ServerOrchestrator {
             
             error_log('#PFC005b [SIYA Server Manager - ServerOrchestrator] Circuit breaker status: ' . $circuit_breaker_status);
 
-            if ($circuit_breaker_status == ServerCircuitBreaker::CIRCUIT_BREAKER_CLOSED) {
+            // Get circuit breaker status from metadata
+            $circuit_breaker_status = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+
+            if ($circuit_breaker_status == 0) { // 0 means closed/open circuit
                 error_log('#PFC005c [SIYA Server Manager - ServerOrchestrator] Circuit breaker is open, starting power-up');
-                $this->start_server_powerup($subscription);
-            } else{
+                $this->start_server_powerup($subscription); 
+            } else {
                 $this->start_server_provision($subscription);
             }
 
