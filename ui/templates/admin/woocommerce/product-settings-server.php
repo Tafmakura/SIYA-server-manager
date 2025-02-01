@@ -322,6 +322,7 @@ jQuery(document).ready(function($) {
                 $providerField.prop('disabled', false).empty();
                 
                 if (providers && providers.length > 0) {
+                    
                     // Add provider options
                     providers.forEach(function(provider) {
                         $providerField.append($('<option></option>')
@@ -329,6 +330,12 @@ jQuery(document).ready(function($) {
                             .text(provider)
                         );
                     });
+                    
+                    // Select saved provider if it exists in allowed list
+                    if (savedProvider && providers.includes(savedProvider)) {
+                        $providerField.val(savedProvider);
+                    }
+
                 } else {
                     // Add disabled empty option
                     $providerField.append($('<option></option>')
@@ -336,11 +343,6 @@ jQuery(document).ready(function($) {
                         .text('No providers available')
                         .prop('disabled', true)
                     );
-                }
-                
-                // Select saved provider if it exists in allowed list
-                if (savedProvider && providers.includes(savedProvider)) {
-                    $providerField.val(savedProvider);
                 }
                 
                 $providerField.trigger('change');
