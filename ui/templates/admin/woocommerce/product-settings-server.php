@@ -444,10 +444,13 @@ jQuery(document).ready(function($) {
     clearServerOptionFields();
     initializeServerTypeField();
     initializeServerProviderField();
+    initializeServerPlanField();
 
     // Add event listener for server type changes
     $('#arsol_server_type').on('change', function() {
         initializeServerProviderField();
+        initializeServerPlanGroupField();
+        initializeServerPlanField();
         
         // Plan group will be initialized after provider field updates
     });
@@ -460,11 +463,6 @@ jQuery(document).ready(function($) {
     $('#arsol_server_plan_group_slug').on('change', function() {
         initializeServerPlanField();
     });
-
-    // Call both initialization functions
-    clearServerOptionFields();
-    initializeServerTypeField();
-    initializeServerProviderField();
 
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
