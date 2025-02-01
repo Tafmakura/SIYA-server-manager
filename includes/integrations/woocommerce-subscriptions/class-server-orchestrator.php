@@ -1609,19 +1609,19 @@ class ServerOrchestrator {
         $server_post_instance = new ServerPost();
         
         error_log(' subscription id: ' . $subscription->get_id());
-        
-        $subscription_id = $subscription->get_id();
-        $post_id = $server_post_instance->create_server_post($subscription_id);
+
+        $this->subscription_id = $subscription->get_id(); 
+        $server_post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
-        if ($post_id) {
-            $this->server_post_id = $post_id;
+        if ($server_post_id) {
+
 
             // Get the URL for the subscription/order
             $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
                 'Server post for server ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view</a>',
-                $subscription_id,
+                $this->subscription_id,
                 $this->server_post_id,
                 esc_url($server_post_url) // Ensure the URL is properly escaped
             );
@@ -1664,21 +1664,20 @@ class ServerOrchestrator {
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
             // Update server post metadata and save
-            $subscription->update_meta_data('arsol_linked_server_post_id', $post_id);
+            $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
             $subscription->save();
 
 
             try {
                 
-                // Assign tags to the server post
                 $tag_meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
                 $tag_taxonomy = 'arsol_server_tag';
 
                 // Only attempt to assign tags if meta value exists
                 if (!empty($tag_meta_value)) {
-                    $tag_success = $this->assign_taxonomy_terms_to_server_post($post_id, $tag_meta_value, $tag_taxonomy);
+                    $tag_success = $this->assign_taxonomy_terms_to_server_post($server_post_id, $tag_meta_value, $tag_taxonomy);
                     if (!$tag_success) {
-                        error_log(sprintf('Failed to assign tags to server post ID: %d', $post_id));
+                        error_log(sprintf('Failed to assign tags to server post ID: %d', $server_post_id));
                         $this->throw_exception('Failed to assign tags to server post');
                     }
                 }
@@ -1689,9 +1688,9 @@ class ServerOrchestrator {
 
                 // Only attempt to assign groups if meta value exists
                 if (!empty($group_meta_value)) {
-                    $group_success = $this->assign_taxonomy_terms_to_server_post($post_id, $group_meta_value, $group_taxonomy);
+                    $group_success = $this->assign_taxonomy_terms_to_server_post($server_post_id, $group_meta_value, $group_taxonomy);
                     if (!$group_success) {
-                        error_log(sprintf('Failed to assign groups to server post ID: %d', $post_id));
+                        error_log(sprintf('Failed to assign groups to server post ID: %d', $server_post_id));
                         $this->throw_exception('Failed to assign groups to server post');
                     }
                 }
@@ -1706,12 +1705,12 @@ class ServerOrchestrator {
 
             }
 
-            return $post_id;
+            return $server_post_id;
 
-        } elseif ($post_id instanceof \WP_Error) {
+        } elseif ($server_post_id instanceof \WP_Error) {
             
             $subscription->add_order_note(
-                'Failed to create server post. Error: ' . $post_id->get_error_message()
+                'Failed to create server post. Error: ' . $server_post_id->get_error_message()
             );
         
             $this->throw_exception('Failed to create server post');
