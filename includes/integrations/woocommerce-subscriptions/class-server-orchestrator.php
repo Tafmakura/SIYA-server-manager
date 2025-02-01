@@ -126,13 +126,13 @@ class ServerOrchestrator {
 
             // Test the circuit
             error_log('#PFC005 [SIYA Server Manager - ServerOrchestrator] Testing circuit breaker');
-           
-           
-           
-            
+
             // Check if circuit breaker state is available and 0 (open)
             $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
+
+            error_log ('#PFC005a [SIYA Server Manager - ServerOrchestrator] Server post ID: ' . $server_post_id);
             if ($server_post_id) {
+                error_log('#PFC005b [SIYA Server Manager - ServerOrchestrator] Server post found, checking circuit breaker state');
                 $circuit_breaker_state = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
                 if ($circuit_breaker_state === '0') {
                     // Power up server if circuit breaker is open
