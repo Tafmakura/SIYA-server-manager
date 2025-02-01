@@ -1,4 +1,4 @@
-<div id="arsol_server_settings_data" class="panel woocommerce_options_panel">
+<div id="arsol_server_settings_data" class="panel woocommerce_options_panel hidden">
     <div class="options_group">
         <div id="arsol_server_settings" style="padding: 9px 12px;">
             <div class="toolbar toolbar-top">
@@ -97,7 +97,6 @@
         if (!empty($selected_provider) && in_array($selected_provider, $providers)) {
             $provider_options[$selected_provider] = $slugs->get_provider_name($selected_provider);
         }
-
         woocommerce_wp_select(array(
             'id'          => 'arsol_server_provider_slug', 
             'label'       => __('Server provider', 'woocommerce'),
@@ -105,7 +104,10 @@
             'desc_tip'    => true,
             'options'     => $provider_options,
             'value'       => $selected_provider ?: '',
-            'custom_attributes' => !empty($selected_provider) ? array('disabled' => 'disabled') : array()
+            'custom_attributes' => array_merge(
+            !empty($selected_provider) ? array('disabled' => 'disabled') : array(),
+            array('required' => 'required')
+            )
         ));
 
         // Group Dropdown
@@ -257,7 +259,223 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    function clearServerOptionFields() {
+        // Get all other select fields and clear their options
+        $('select#arsol_server_provider_slug, select#arsol_server_plan_group_slug, select#arsol_server_plan_slug').each(function() {
+            $(this).empty();
+        });
+    }
+
+    // Add this new function after clearServerOptionFields
+    function initializeServerTypeField() {
+        var $serverType = $('#arsol_server_type');
+        var allowedTypes = <?php 
+            $saved_types = (array) get_option('arsol_allowed_server_types', ['sites_server']);
+            echo json_encode($all_types); // $all_types is already defined in the PHP section above
+        ?>;
+        var savedTypes = <?php echo json_encode($saved_types); ?>;
+        
+        // Store current selection before clearing
+        var currentValue = $serverType.val();
+        
+        // Enable and clear the field
+        $serverType.prop('disabled', false).empty();
+
+        // Add allowed options
+        $.each(allowedTypes, function(value, text) {
+            if (savedTypes.includes(value)) {
+                $serverType.append($('<option></option>').val(value).text(text));
+            }
+        });
+
+        // Restore previous value if it's in allowed types, otherwise default to first allowed type
+        if (currentValue && savedTypes.includes(currentValue)) {
+            $serverType.val(currentValue);
+        } else {
+            $serverType.val(savedTypes[0]);
+        }
+        $serverType.trigger('change');
+    }
+
+    function initializeServerProviderField() {
+        var $providerField = $('#arsol_server_provider_slug');
+        var selectedServerType = $('#arsol_server_type').val();
+        var savedProvider = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_provider_slug', true)); ?>';
+
+        if (selectedServerType === 'sites_server') {
+            var wpProvider = '<?php echo esc_js(get_option('siya_wp_server_provider')); ?>';
+            $providerField.prop('disabled', true)
+                         .empty()
+                         .append($('<option></option>').val(wpProvider).text(wpProvider))
+                         .val(wpProvider)
+                         .trigger('change');
+            return;
+        }
+
+        // Regular AJAX flow for other server types
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_providers_by_server_type',
+                server_type: selectedServerType
+            },
+            success: function(providers) {
+                // Enable field and clear existing options
+                $providerField.prop('disabled', false).empty();
+                
+                if (providers && providers.length > 0) {
+                    // Add provider options
+                    providers.forEach(function(provider) {
+                        $providerField.append($('<option></option>')
+                            .val(provider)
+                            .text(provider)
+                        );
+                    });
+                    
+                    // Select saved provider if it exists in allowed list
+                    if (savedProvider && providers.includes(savedProvider)) {
+                        $providerField.val(savedProvider);
+                    }
+                } else {
+                    // Add disabled empty option and select it
+                    $providerField.append($('<option></option>')
+                        .val('')
+                        .text('No server providers assigned')
+                        .prop('disabled', true)
+                    ).val('');
+                }
+                
+                $providerField.trigger('change');
+            }
+        });
+    }
+
+    function initializeServerPlanGroupField() {
+        var $groupField = $('#arsol_server_plan_group_slug');
+        var selectedServerType = $('#arsol_server_type').val();
+        var selectedProvider = $('#arsol_server_provider_slug').val();
+
+        // Only proceed if we have both server type and provider
+        if (!selectedServerType || !selectedProvider) {
+            $groupField.prop('disabled', true).empty();
+            $('#arsol_server_plan_group_slug').empty().trigger('change'); // 
+            return;
+        }
+
+        var savedGroup = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_group_slug', true)); ?>';
+
+        if (selectedServerType === 'sites_server') {
+            var wpGroup = '<?php echo esc_js(get_option('siya_wp_server_group')); ?>';
+            $groupField.prop('disabled', true)
+                      .empty()
+                      .append($('<option></option>').val(wpGroup).text(wpGroup))
+                      .val(wpGroup)
+                      .trigger('change');
+            return;
+        }
+
+        // Get groups filtered by both server type and provider
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_provider_plan_groups',
+                provider: selectedProvider,
+                server_type: selectedServerType  // Added this parameter
+            },
+            success: function(groups) {
+                // Enable field for non-sites-server types
+                $groupField.prop('disabled', false).empty();
+                
+                groups.forEach(function(group) {
+                    $groupField.append($('<option></option>').val(group).text(group));
+                });
+                
+                if (savedGroup && groups.includes(savedGroup)) {
+                    $groupField.val(savedGroup);
+                }
+                
+                $groupField.trigger('change');
+            }
+        });
+    }
+
+    function initializeServerPlanField() {
+        var $planField = $('#arsol_server_plan_slug');
+        var selectedServerType = $('#arsol_server_type').val();
+        var selectedProvider = $('#arsol_server_provider_slug').val();
+        var selectedGroup = $('#arsol_server_plan_group_slug').val();
+        var savedPlan = '<?php echo esc_js(get_post_meta($post->ID, '_arsol_server_plan_slug', true)); ?>';
+
+        // Return early if any required field is missing
+        if (!selectedServerType || !selectedProvider || !selectedGroup) {
+            $planField.prop('disabled', true).empty();
+            return;
+        }
+
+        // Get available plans via AJAX
+        // Get available plans via AJAX
+        $.ajax({
+            url: ajaxurl,
+            data: {
+                action: 'get_group_plans',
+                provider: selectedProvider,
+                group: selectedGroup,
+                server_type: selectedServerType
+            },
+            success: function(plans) {
+                // If no plans available, disable field and returns
+                console.log(plans);
+                if (!plans.length) {
+                    $planField.prop('disabled', true).empty();
+                    console.log('No plans available');
+                    return;
+                }
+
+                // Enable field and update options 
+                $planField.prop('disabled', false).empty();
+                
+                // Add plan options
+                plans.forEach(function(plan) {
+                    $planField.append($('<option></option>')
+                        .val(plan.slug)
+                        .text(/* TODO add plan names >>> plan.description <<< || */plan.slug)
+                    );
+                });
+
+                // Select saved plan if it exists in available plans
+                if (savedPlan && plans.some(plan => plan.slug === savedPlan)) {
+                    $planField.val(savedPlan);
+                }
+
+                $planField.trigger('change');
+            }
+        });
+    }
+
+ 
+    // Call both initialization functions
+    clearServerOptionFields();
+    initializeServerTypeField();
+    initializeServerProviderField();
+    initializeServerPlanGroupField();
+    initializeServerPlanField();
     
+
+    // Add event listener for server type changes
+    $('#arsol_server_type').on('change', function() {
+        initializeServerProviderField();    
+        // Plan group will be initialized after provider field updates
+    });
+
+    $('#arsol_server_provider_slug').on('change', function() {
+        initializeServerPlanGroupField();
+        // Plan field will be initialized after group field updates
+    });
+
+    $('#arsol_server_plan_group_slug').on('change', function() {
+        initializeServerPlanField();
+    });
+
     function setRuncloudCheckboxState(checked = true, disabled = true) {
         var $checkbox = $('#arsol_server_manager_required');
         var savedValue = '<?php echo esc_js($is_server_manager ? "yes" : "no"); ?>';
@@ -418,6 +636,8 @@ jQuery(document).ready(function($) {
             }
         }
     });
+
+
 });
 </script>
 
