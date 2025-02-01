@@ -49,7 +49,8 @@ function render_repeater_section($provider_slug, $plans) {
                                         'vps_server'            => 'VPS Server',
                                     ];
                                     foreach ($saved_types as $type) {
-                                        $checked = in_array($type, is_array($plan['server_types'] ?? null) ? $plan['server_types'] : explode(',', (string) $plan['server_types'])) ? 'checked' : '';
+                                        $checked = in_array($type, (array) $plan['server_types'], true) ? 'checked' : '';
+
                                         echo '<label><input type="checkbox" name="siya_' . esc_attr($provider_slug) . '_plans[' . $index . '][server_types][]" value="' . esc_attr($type) . '" ' . $checked . '> ' . esc_html($all_types[$type]) . '</label>';
                                     }
                                     ?>
@@ -144,9 +145,17 @@ function render_repeater_section($provider_slug, $plans) {
                     <th scope="row">Server provider</th>
                     <td>
                         <select name="siya_wp_server_provider" id="siya_wp_server_provider">
-                            <option value="digitalocean" <?php selected(get_option('siya_wp_server_provider'), 'digitalocean'); ?>>DigitalOcean</option>
-                            <option value="hetzner" <?php selected(get_option('siya_wp_server_provider'), 'hetzner'); ?>>Hetzner</option>
-                            <option value="vultr" <?php selected(get_option('siya_wp_server_provider'), 'vultr'); ?>>Vultr</option>
+                                <?php
+                                $slugs = new Siya\AdminSettings\Slugs();
+                                $providers = $slugs->get_providers_by_server_type('sites_server');
+                                $selected_provider = get_option('siya_wp_server_provider');
+                                foreach ($providers as $provider) {
+                                    $provider_name = ucfirst($provider); // Capitalize first letter
+                                    echo '<option value="' . esc_attr($provider) . '" ' . 
+                                        selected($selected_provider, $provider, false) . '>' . 
+                                        esc_html($provider_name) . '</option>';
+                                }
+                                ?>
                         </select>
                         <p class="arsol-description">Select the cloud provider for Sites hosting</p>
                     </td>
