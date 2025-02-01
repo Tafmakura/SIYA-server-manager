@@ -135,8 +135,6 @@ class ServerOrchestrator {
             // Run circuit breaker test - this will handle state changes if needed
             $circuit_breaker_instance = new ServerCircuitBreaker();
             $circuit_breaker_instance->test_circuit($subscription);
-            
-            error_log('#PFC005b [SIYA Server Manager - ServerOrchestrator] Circuit breaker status: ' . $circuit_breaker_status);
 
             // Get circuit breaker status from metadata
             $circuit_breaker_status = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
@@ -1611,9 +1609,9 @@ class ServerOrchestrator {
         $server_post_instance = new ServerPost();
         
         error_log(' subscription id: ' . $subscription->get_id());
-
-        $this->subscription_id = $subscription->get_id(); 
-        $post_id = $server_post_instance->create_server_post($this->subscription_id);
+        
+        $subscription_id = $subscription->get_id();
+        $post_id = $server_post_instance->create_server_post($subscription_id);
         
         // Update server post metadata
         if ($post_id) {
@@ -1623,7 +1621,7 @@ class ServerOrchestrator {
             $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
                 'Server post for server ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view</a>',
-                $this->subscription_id,
+                $subscription_id,
                 $this->server_post_id,
                 esc_url($server_post_url) // Ensure the URL is properly escaped
             );
@@ -1666,15 +1664,13 @@ class ServerOrchestrator {
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
             // Update server post metadata and save
-            $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
+            $subscription->update_meta_data('arsol_linked_server_post_id', $post_id);
             $subscription->save();
 
 
             try {
                 
                 // Assign tags to the server post
-                $post_id = $this->server_post_id;
-
                 $tag_meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
                 $tag_taxonomy = 'arsol_server_tag';
 
