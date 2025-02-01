@@ -1610,7 +1610,7 @@ class ServerOrchestrator {
         
         error_log(' subscription id: ' . $subscription->get_id());
 
-        $this->subscription_id = $subscription->get_id(); 
+        $subscription_id = $subscription->get_id(); 
         $server_post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
@@ -1621,8 +1621,8 @@ class ServerOrchestrator {
             $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
                 'Server post for server ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view</a>',
-                $this->subscription_id,
-                $this->server_post_id,
+                $subscription_id,
+                $server_post_id,
                 esc_url($server_post_url) // Ensure the URL is properly escaped
             );
 
@@ -1664,7 +1664,7 @@ class ServerOrchestrator {
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
             // Update server post metadata and save
-            $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
+            $subscription->update_meta_data('arsol_linked_server_post_id', $server_post_id);
             $subscription->save();
 
 
