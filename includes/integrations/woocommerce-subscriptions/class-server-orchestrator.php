@@ -126,24 +126,28 @@ class ServerOrchestrator {
 
             // Test the circuit
             error_log('#PFC005 [SIYA Server Manager - ServerOrchestrator] Testing circuit breaker');
-           
-           
-           
-            
+
             // Check if circuit breaker state is available and 0 (open)
             $server_post_id = ServerPost::get_server_post_id_from_subscription($subscription);
-            if ($server_post_id) {
-                $circuit_breaker_state = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
-                if ($circuit_breaker_state === '0') {
-                    // Power up server if circuit breaker is open
-                    $this->start_server_powerup($subscription);
-                } else {
-                    // Test the circuit breaker
-                    $circuit_breaker_instance = new ServerCircuitBreaker();
-                    $circuit_breaker_instance->test_circuit($subscription);
-                }
+
+            error_log('#PFC005a [SIYA Server Manager - ServerOrchestrator] Server post ID: ' . $server_post_id);
+
+            // Run circuit breaker test - this will handle state changes if needed
+            $circuit_breaker_instance = new ServerCircuitBreaker();
+            $circuit_breaker_instance->test_circuit($subscription);
+
+            // Get circuit breaker status from metadata
+            $circuit_breaker_status = get_post_meta($server_post_id, '_arsol_state_00_circuit_breaker', true);
+
+            if ($circuit_breaker_status !== null && $circuit_breaker_status === 0) { // 0 means closed/open circuit
+                error_log('#PFC005c [SIYA Server Manager - ServerOrchestrator] Circuit breaker is open, starting power-up');
+                $this->start_server_powerup($subscription); 
+            } else {
+                $this->start_server_provision($subscription);
             }
+
             error_log('#PFC006 [SIYA Server Manager - ServerOrchestrator] Preflight check completed');
+
 
         } catch (\Exception $e) {
 
@@ -227,7 +231,7 @@ class ServerOrchestrator {
 
                 // Get server remote status
                 error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
-                error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
+                error_log('#get_installation_scriptSR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
 
                 $server_remote_status = $this->get_and_update_server_remote_status(
                     $server_post_id,
@@ -243,21 +247,22 @@ class ServerOrchestrator {
 
                     // Wait for status
                     try {
-                    error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
-                    $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
-                    
-                    if (!$status_check) {
-                        error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
-                        $this->throw_exception('Server status check failed');
-                    }
-                    
-                    error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
-                    
+
+                        error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
+                        $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
+                        
+                        if (!$status_check) {
+                            error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
+                            $this->throw_exception('Server status check failed');
+                        }
+                        
+                        error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
+                        
                     } catch (\Exception $e) {
-                    error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
-                    // Handle the exception and exit
-                    $this->handle_exception($e, true);
-                    return false;
+                        error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
+                        // Handle the exception and exit
+                        $this->handle_exception($e, true);
+                        return false;
                     }
                 } 
 
@@ -1003,41 +1008,45 @@ class ServerOrchestrator {
             if ($scriptInstallationStatus != 2) {
                 $installationTimeout = apply_filters('arsol_server_manager_script_installation_timeout', 5 * 60);
                 $startTime = time();
-
                 while ((time() - $startTime) < $installationTimeout) {
-                    
                     try {
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
-                        if (isset($status['status']) && $status['status'] === 'running') {
-                            update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
-                            update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
+                        if (isset($status['status'])) {
+                            if ($status['status'] === 'running') {
+                                update_post_meta($server_post_id, '_arsol_state_50_script_execution', 2);
+                                update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
+                                update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
 
-                            // Success message
-                            $message = 'Script installation verified.';
-                            $subscription->add_order_note($message);
-                            error_log($message);
+                                // Success message
+                                $message = 'Script installation verified.';
+                                $subscription->add_order_note($message);
+                                error_log($message);
+                                break; // Exit on success
 
-                            break; // Exit on success
-
-                        } elseif ($status['status'] === 'failed') {
-                            update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
-                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-                            return false; // Exit on failure
-
-                        } elseif ($status['status'] === 'not-installed') {
-                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
-                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-                            return false; // Exit on failure
+                            } elseif ($status['status'] === 'failed') {
+                                update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); // Set script execution to failed
+                                
+                                // Throw exception on failure
+                                $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
+                                return false; // Exit on failure
+                            } elseif ($status['status'] === 'not-installed') {
+                                update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); // Set script execution to failed
+                                error_log('Script not installed. Retrying...');
+                                continue; // Retry if not installed
+                            }
+                        } else {
+                            error_log('Installation status is missing or invalid.');
                         }
 
                     } catch (\Exception $e) {
-                        $this->handle_exception($e);
+                        // Log the exception message
+                        error_log('Exception: ' . $e->getMessage());
+                        // Handle exception and rethrow
+                        $this->handle_exception($e, true);
                     }
 
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation after 30 seconds.');
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation verification after 30 seconds.');
                     sleep(30); // Retry after 30 seconds
                 }
 
@@ -1050,6 +1059,7 @@ class ServerOrchestrator {
                     ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
                     return false; // Return false after timeout handling
                 }
+
 
             } else {
                 error_log('STATE CHECK (60): Script installation is okay.');
@@ -1069,8 +1079,20 @@ class ServerOrchestrator {
             error_log($message);
 
         } catch (\Exception $e) {
+
+            $error_definition = 'Error executing installation script';
+
+            // Update server metadata on failed provisioning and trip CB
+            update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
+
+            // Handle the exception and exit
             $this->handle_exception($e);
+
+            // Trigger the circuit breaker
+            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
             return false; // Add fallback return false
+
         }
     }
 
@@ -1118,12 +1140,11 @@ class ServerOrchestrator {
                         }
 
                         if (empty($connStatus['connected']) || empty($connStatus['online'])) {
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
                             error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
                         }
 
                     } catch (\Exception $e) {
-                        $this->handle_exception($e);
+                        $this->handle_exception($e, true);
                     }
 
                     error_log('[SIYA Server Manager - ServerOrchestrator] Retrying connection status after 15 seconds.');
@@ -1134,9 +1155,9 @@ class ServerOrchestrator {
                     $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Connection status timeout exceeded for server post ID: ' . $server_post_id;
                     error_log($timeout_message);
                     $subscription->add_order_note($timeout_message);
-                    update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
-                    $this->handle_exception(new \Exception('Timeout while fetching connection status'));
-                    ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+                    
+                    $this->throw_exception($timeout_message);
+               
                     return false; // Return false after timeout handling
                 }
 
@@ -1149,18 +1170,33 @@ class ServerOrchestrator {
             error_log($success_message);
 
             try {
+
                 // Reset circuit
                 $circuit_breaker_instance = new ServerCircuitBreaker();
                 $circuit_breaker_instance->reset_circuit_breaker($subscription);
+
             } catch (\Exception $e) {
+
                 // Handle the exception
-                $this->handle_exception($e);
+                $this->handle_exception($e, true);
                 return false;
             }
 
         } catch (\Exception $e) {
+           
+            $error_definition = 'Error verifying server manager connection';
+
+            // Update server metadata on failed provisioning and trip CB
+            update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
+
+            // Handle the exception and exit
             $this->handle_exception($e);
+
+            // Trigger the circuit breaker
+            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
             return false; // Add fallback return false
+            
         }
     }
 
@@ -1606,19 +1642,19 @@ class ServerOrchestrator {
         
         error_log(' subscription id: ' . $subscription->get_id());
 
-        $this->subscription_id = $subscription->get_id(); 
-        $post_id = $server_post_instance->create_server_post($this->subscription_id);
+        $subscription_id = $subscription->get_id(); 
+        $server_post_id = $server_post_instance->create_server_post($this->subscription_id);
         
         // Update server post metadata
-        if ($post_id) {
-            $this->server_post_id = $post_id;
+        if ($server_post_id) {
+
 
             // Get the URL for the subscription/order
             $server_post_url = get_edit_post_link($this->server_post_id);
             $message = sprintf(
                 'Server post for server ARSOL%d with Post ID %d created successfully! <a href="%s" target="_blank">view</a>',
-                $this->subscription_id,
-                $this->server_post_id,
+                $subscription_id,
+                $server_post_id,
                 esc_url($server_post_url) // Ensure the URL is properly escaped
             );
 
@@ -1660,23 +1696,20 @@ class ServerOrchestrator {
             $server_post_instance->update_meta_data($server_post_id, $metadata);
 
             // Update server post metadata and save
-            $subscription->update_meta_data('arsol_linked_server_post_id', $this->server_post_id);
+            $subscription->update_meta_data('arsol_linked_server_post_id', $server_post_id);
             $subscription->save();
 
 
             try {
                 
-                // Assign tags to the server post
-                $post_id = $this->server_post_id;
-
                 $tag_meta_value = $server_product->get_meta('_arsol_assigned_server_tags', true);
                 $tag_taxonomy = 'arsol_server_tag';
 
                 // Only attempt to assign tags if meta value exists
                 if (!empty($tag_meta_value)) {
-                    $tag_success = $this->assign_taxonomy_terms_to_server_post($post_id, $tag_meta_value, $tag_taxonomy);
+                    $tag_success = $this->assign_taxonomy_terms_to_server_post($server_post_id, $tag_meta_value, $tag_taxonomy);
                     if (!$tag_success) {
-                        error_log(sprintf('Failed to assign tags to server post ID: %d', $post_id));
+                        error_log(sprintf('Failed to assign tags to server post ID: %d', $server_post_id));
                         $this->throw_exception('Failed to assign tags to server post');
                     }
                 }
@@ -1687,9 +1720,9 @@ class ServerOrchestrator {
 
                 // Only attempt to assign groups if meta value exists
                 if (!empty($group_meta_value)) {
-                    $group_success = $this->assign_taxonomy_terms_to_server_post($post_id, $group_meta_value, $group_taxonomy);
+                    $group_success = $this->assign_taxonomy_terms_to_server_post($server_post_id, $group_meta_value, $group_taxonomy);
                     if (!$group_success) {
-                        error_log(sprintf('Failed to assign groups to server post ID: %d', $post_id));
+                        error_log(sprintf('Failed to assign groups to server post ID: %d', $server_post_id));
                         $this->throw_exception('Failed to assign groups to server post');
                     }
                 }
@@ -1704,12 +1737,12 @@ class ServerOrchestrator {
 
             }
 
-            return $post_id;
+            return $server_post_id;
 
-        } elseif ($post_id instanceof \WP_Error) {
+        } elseif ($server_post_id instanceof \WP_Error) {
             
             $subscription->add_order_note(
-                'Failed to create server post. Error: ' . $post_id->get_error_message()
+                'Failed to create server post. Error: ' . $server_post_id->get_error_message()
             );
         
             $this->throw_exception('Failed to create server post');
