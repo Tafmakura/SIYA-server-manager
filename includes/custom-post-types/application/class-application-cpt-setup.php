@@ -68,7 +68,7 @@ class Setup {
         $labels = array(
             'name'               => _x('Applications', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('Application', 'post type singular name', 'your-text-domain'),
-            'menu_name'          => _x('Applications', 'admin menu', 'your-text-domain'),
+            'menu_name'          => _x('Apps', 'admin menu', 'your-text-domain'),
             'add_new'            => _x('Add New', 'application', 'your-text-domain'),
             'add_new_item'       => __('Add New Application', 'your-text-domain'),
             'edit_item'          => __('Edit Application', 'your-text-domain'),

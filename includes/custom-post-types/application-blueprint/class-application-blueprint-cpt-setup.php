@@ -42,7 +42,7 @@ class Setup {
         $labels = array(
             'name'               => _x('Application Blueprints', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('Application Blueprint', 'post type singular name', 'your-text-domain'),
-            'menu_name'          => _x('Application Blueprints', 'admin menu', 'your-text-domain'),
+            'menu_name'          => _x('App Blueprints', 'admin menu', 'your-text-domain'),
             'add_new'            => _x('Add New', 'application_blueprint', 'your-text-domain'),
             'add_new_item'       => __('Add New Application Blueprint', 'your-text-domain'),
             'edit_item'          => __('Edit Application Blueprint', 'your-text-domain'),
