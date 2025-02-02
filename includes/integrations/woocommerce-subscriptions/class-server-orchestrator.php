@@ -231,7 +231,7 @@ class ServerOrchestrator {
 
                 // Get server remote status
                 error_log('#SR004 [SIYA Server Manager - ServerOrchestrator] Getting server remote status');
-                error_log('#SR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
+                error_log('#get_installation_scriptSR005 [SIYA Server Manager - ServerOrchestrator] Server remote status: ' . print_r($server_remote_status, true));
 
                 $server_remote_status = $this->get_and_update_server_remote_status(
                     $server_post_id,
@@ -247,21 +247,22 @@ class ServerOrchestrator {
 
                     // Wait for status
                     try {
-                    error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
-                    $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
-                    
-                    if (!$status_check) {
-                        error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
-                        $this->throw_exception('Server status check failed');
-                    }
-                    
-                    error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
-                    
+
+                        error_log('#SR007 [SIYA Server Manager - ServerOrchestrator] Waiting for server to become active');
+                        $status_check = $this->wait_for_remote_server_status($server_post_id, 'active');
+                        
+                        if (!$status_check) {
+                            error_log('#SR008 [SIYA Server Manager - ServerOrchestrator] Server status check failed');
+                            $this->throw_exception('Server status check failed');
+                        }
+                        
+                        error_log('#SR009 [SIYA Server Manager - ServerOrchestrator] Server successfully powered up');
+                        
                     } catch (\Exception $e) {
-                    error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
-                    // Handle the exception and exit
-                    $this->handle_exception($e, true);
-                    return false;
+                        error_log('#SR010 [SIYA Server Manager - ServerOrchestrator] Exception during power up: ' . $e->getMessage());
+                        // Handle the exception and exit
+                        $this->handle_exception($e, true);
+                        return false;
                     }
                 } 
 
@@ -1032,13 +1033,14 @@ class ServerOrchestrator {
 
                         } elseif ($status['status'] === 'not-installed') {
                             update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
+                          //TODO Delete this as it is causing failure of loop -  $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
                             ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
                             return false; // Exit on failure
                         }
 
                     } catch (\Exception $e) {
-                        $this->handle_exception($e);
+                        // Handle exception and rethrow
+                        $this->handle_exception($e, true);
                     }
 
                     error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation after 30 seconds.');
