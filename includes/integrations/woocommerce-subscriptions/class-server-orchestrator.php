@@ -1015,6 +1015,7 @@ class ServerOrchestrator {
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
                         if (isset($status['status']) && $status['status'] === 'running') {
+                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', 2);
                             update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
                             update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
 
@@ -1022,20 +1023,18 @@ class ServerOrchestrator {
                             $message = 'Script installation verified.';
                             $subscription->add_order_note($message);
                             error_log($message);
-
                             break; // Exit on success
 
                         } elseif ($status['status'] === 'failed') {
-                            update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
+                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); //   Set script execution to failed
+                            
+                            // Throw exception on failure
                             $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
-                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
                             return false; // Exit on failure
 
                         } elseif ($status['status'] === 'not-installed') {
-                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
-                          //TODO Delete this as it is causing failure of loop -  $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
-                           // ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-                          //  return false; // Exit on failure
+                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); // Set script execution to failed
+                            continue;    
                         }
 
                     } catch (\Exception $e) {
@@ -1076,6 +1075,19 @@ class ServerOrchestrator {
 
         } catch (\Exception $e) {
             $this->handle_exception($e);
+            return false; // Add fallback return false
+
+            $error_definition = 'Error executing installation script';
+
+            // Update server metadata on failed provisioning and trip CB
+            update_post_meta($server_post_id, '_arsol_state_60_script_installation', -1);
+
+            // Handle the exception and exit
+            $this->handle_exception($e);
+
+            // Trigger the circuit breaker
+            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
             return false; // Add fallback return false
         }
     }
@@ -1167,6 +1179,7 @@ class ServerOrchestrator {
         } catch (\Exception $e) {
             $this->handle_exception($e);
             return false; // Add fallback return false
+            
         }
     }
 
