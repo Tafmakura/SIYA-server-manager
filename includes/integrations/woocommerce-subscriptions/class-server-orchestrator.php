@@ -1009,40 +1009,46 @@ class ServerOrchestrator {
                 $installationTimeout = apply_filters('arsol_server_manager_script_installation_timeout', 5 * 60);
                 $startTime = time();
 
+                $startTime = time(); // Ensure $startTime is initialized
                 while ((time() - $startTime) < $installationTimeout) {
-                    
                     try {
                         $status = $server_manager_instance->get_installation_status($server_post_id);
 
-                        if (isset($status['status']) && $status['status'] === 'running') {
-                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', 2);
-                            update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
-                            update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
+                        if (isset($status['status'])) {
+                            if ($status['status'] === 'running') {
+                                update_post_meta($server_post_id, '_arsol_state_50_script_execution', 2);
+                                update_post_meta($server_post_id, '_arsol_state_60_script_installation', 2);
+                                update_post_meta($server_post_id, 'arsol_server_manager_installation_status', $status['status']);
 
-                            // Success message
-                            $message = 'Script installation verified.';
-                            $subscription->add_order_note($message);
-                            error_log($message);
-                            break; // Exit on success
+                                // Success message
+                                $message = 'Script installation verified.';
+                                $subscription->add_order_note($message);
+                                error_log($message);
+                                break; // Exit on success
 
-                        } elseif ($status['status'] === 'failed') {
-                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); //   Set script execution to failed
-                            
-                            // Throw exception on failure
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
-                            return false; // Exit on failure
-
-                        } elseif ($status['status'] === 'not-installed') {
-                            update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); // Set script execution to failed
-                            continue;    
+                            } elseif ($status['status'] === 'failed') {
+                                update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); // Set script execution to failed
+                                
+                                // Throw exception on failure
+                                $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script installation failed.');
+                                return false; // Exit on failure
+                            } elseif ($status['status'] === 'not-installed') {
+                                update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1); // Set script execution to failed
+                                error_log('Script not installed. Retrying...');
+                                continue; // Retry if not installed
+                            }
+                        } else {
+                            error_log('Installation status is missing or invalid.');
                         }
 
                     } catch (\Exception $e) {
+                        // Log the exception message
+                        error_log('Exception: ' . $e->getMessage());
                         // Handle exception and rethrow
                         $this->handle_exception($e, true);
                     }
 
-                    error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation after 30 seconds.');
+                    error_log('[SIYA Server Manager - ServerOrchestrator] Retrying script installation verification after 30 seconds.');
                     sleep(30); // Retry after 30 seconds
                 }
 
@@ -1055,6 +1061,7 @@ class ServerOrchestrator {
                     ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
                     return false; // Return false after timeout handling
                 }
+
 
             } else {
                 error_log('STATE CHECK (60): Script installation is okay.');
