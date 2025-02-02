@@ -4,6 +4,6 @@ namespace Siya\CustomPostTypes;
 
 
 
-class ApplicationPost {
+class AppPost {
 
 }
