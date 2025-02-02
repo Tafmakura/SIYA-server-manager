@@ -1074,8 +1074,6 @@ class ServerOrchestrator {
             error_log($message);
 
         } catch (\Exception $e) {
-            $this->handle_exception($e);
-            return false; // Add fallback return false
 
             $error_definition = 'Error executing installation script';
 
@@ -1089,6 +1087,7 @@ class ServerOrchestrator {
             ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
 
             return false; // Add fallback return false
+
         }
     }
 
@@ -1141,7 +1140,7 @@ class ServerOrchestrator {
                         }
 
                     } catch (\Exception $e) {
-                        $this->handle_exception($e);
+                        $this->handle_exception($e, true);
                     }
 
                     error_log('[SIYA Server Manager - ServerOrchestrator] Retrying connection status after 15 seconds.');
@@ -1152,9 +1151,9 @@ class ServerOrchestrator {
                     $timeout_message = '[SIYA Server Manager - ServerOrchestrator] Connection status timeout exceeded for server post ID: ' . $server_post_id;
                     error_log($timeout_message);
                     $subscription->add_order_note($timeout_message);
-                    update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
-                    $this->handle_exception(new \Exception('Timeout while fetching connection status'));
-                    ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+                    
+                    $this->throw_exception($timeout_message);
+               
                     return false; // Return false after timeout handling
                 }
 
@@ -1167,17 +1166,31 @@ class ServerOrchestrator {
             error_log($success_message);
 
             try {
+
                 // Reset circuit
                 $circuit_breaker_instance = new ServerCircuitBreaker();
                 $circuit_breaker_instance->reset_circuit_breaker($subscription);
+
             } catch (\Exception $e) {
+
                 // Handle the exception
-                $this->handle_exception($e);
+                $this->handle_exception($e, true);
                 return false;
             }
 
         } catch (\Exception $e) {
+           
+            $error_definition = 'Error verifying server manager connection';
+
+            // Update server metadata on failed provisioning and trip CB
+            update_post_meta($server_post_id, '_arsol_state_70_manager_connection', -1);
+
+            // Handle the exception and exit
             $this->handle_exception($e);
+
+            // Trigger the circuit breaker
+            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+
             return false; // Add fallback return false
             
         }
