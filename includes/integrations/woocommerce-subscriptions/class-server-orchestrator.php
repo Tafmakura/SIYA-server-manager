@@ -1009,7 +1009,7 @@ class ServerOrchestrator {
                 $installationTimeout = apply_filters('arsol_server_manager_script_installation_timeout', 5 * 60);
                 $startTime = time();
 
-                $startTime = time(); // Ensure $startTime is initialized
+                $startTime = time(); // Ensure $startTime is initializedd
                 while ((time() - $startTime) < $installationTimeout) {
                     try {
                         $status = $server_manager_instance->get_installation_status($server_post_id);
