@@ -11,16 +11,16 @@ class Setup {
         add_action('init', array($this, 'register_app_blueprint_taxonomies'));
        // add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
-        add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
+      //  add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
         add_filter('manage_arsol_app_blueprint_posts_columns', array($this, 'customize_columns'));
       //  add_action('admin_head', array($this, 'disable_title_editing'));
       //  add_action('admin_head', array($this, 'disable_status_editing'));
       //  add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
-        add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
-        add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
-        add_action('edit_form_top', array($this, 'display_custom_title'));
-        add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
+      //  add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
+      //  add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
+      //  add_action('edit_form_top', array($this, 'display_custom_title'));
+      //  add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
         add_action('admin_head', array($this, 'remove_preview_button'));
 
         // Add new filters
