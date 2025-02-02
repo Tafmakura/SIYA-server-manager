@@ -10,7 +10,6 @@ class Setup {
         add_action('init', array($this, 'create_app_blueprint_post_type'));
         add_action('init', array($this, 'register_app_blueprint_taxonomies'));
         add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
-        add_action('admin_menu', array($this, 'remove_add_new_button'));
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
         add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
         add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
