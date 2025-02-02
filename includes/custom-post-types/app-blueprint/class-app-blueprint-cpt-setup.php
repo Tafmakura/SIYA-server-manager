@@ -43,7 +43,7 @@ class Setup {
         $labels = array(
             'name'               => _x('App Blueprints', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('App Blueprint', 'post type singular name', 'your-text-domain'),
-            'menu_name'          => _x('App Blueprints', 'admin menu', 'your-text-domain'),
+            'menu_name'          => _x('App Blueprintsss', 'admin menu', 'your-text-domain'),
             'add_new'            => _x('Add New', 'arsol_app_blueprint', 'your-text-domain'),
             'add_new_item'       => __('Add New App Blueprint', 'your-text-domain'),
             'edit_item'          => __('Edit App Blueprint', 'your-text-domain'),
