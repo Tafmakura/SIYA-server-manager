@@ -2,6 +2,8 @@
 
 namespace Siya\CustomPostTypes\AppBlueprintPost;
 
+use \WC_Subscriptions;
+
 class Setup {
 
     public function __construct() {
