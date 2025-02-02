@@ -377,7 +377,7 @@ class Runcloud /*implements ServerManager*/ {
         error_log('[SIYA Server Manager][RunCloud] Installation Script Response: ' . $script_body);
 
         if ($response_code !== 200) {
-            throw new \Exception('Invalid response code from RunCloud: ' . $response_code . ' - ' . $script_body);
+            throw new \Exception('Invalid response code from RunCloud, Status: ' . $response_code . ' - Message: ' . $script_body);
         }
 
         if (!is_array($script_data) || !isset($script_data['script'])) {
