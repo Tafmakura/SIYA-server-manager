@@ -9,16 +9,18 @@ class Setup {
     public function __construct() {
         add_action('init', array($this, 'create_app_blueprint_post_type'));
         add_action('init', array($this, 'register_app_blueprint_taxonomies'));
-        add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
-        add_action('admin_menu', array($this, 'remove_add_new_button'));
-        add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
-        add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
-        add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
-        add_filter('manage_arsol_app_blueprint_posts_columns', array($this, 'customize_columns'));
-        add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
-        add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
-        add_action('edit_form_top', array($this, 'display_custom_title'));
-        add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
+       // add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
+      //  add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
+      //  add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
+      //  add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
+      //  add_filter('manage_arsol_app_blueprint_posts_columns', array($this, 'customize_columns'));
+      //  add_action('admin_head', array($this, 'disable_title_editing'));
+      //  add_action('admin_head', array($this, 'disable_status_editing'));
+      //  add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
+      //  add_filter('wp_insert_post_data', array($this, 'prevent_permalink_and_status_editing'), 10, 2);
+      //  add_filter('get_sample_permalink_html', array($this, 'remove_permalink_editor'), 10, 4);
+      //  add_action('edit_form_top', array($this, 'display_custom_title'));
+      //  add_filter('gettext', array($this, 'change_published_to_provisioned'), 10, 3);
         add_action('admin_head', array($this, 'remove_preview_button'));
 
         // Add new filters
@@ -63,7 +65,7 @@ class Setup {
             'has_archive'        => true,
             'hierarchical'       => false,
             'menu_position'      => null,
-            'supports'           => array('title', 'author', 'custom-fields', 'comments'),
+            'supports'           => array('author','custom-fields','comments'),
             'capability_type'    => 'post',
             'map_meta_cap' => true,
         );
@@ -168,6 +170,44 @@ class Setup {
             $translated_text = __('Provisioned', 'your-text-domain');
         }
         return $translated_text;
+    }
+
+    public function disable_title_editing() {
+        global $post_type;
+        if ($post_type == 'arsol_app_blueprint') {
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const titleField = document.getElementById("title");
+                    if (titleField) {
+                        titleField.setAttribute("readonly", "readonly");
+                    }
+                });
+            </script>';
+        }
+    }
+
+    public function disable_status_editing() {
+        global $post_type;
+        if ($post_type == 'arsol_app_blueprint') {
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const statusField = document.getElementById("post_status");
+                    if (statusField) {
+                        statusField.setAttribute("disabled", "disabled");
+                    }
+                });
+            </script>';
+        }
+    }
+
+    public function prevent_title_editing($data, $postarr) {
+        if ($data['post_type'] === 'arsol_app_blueprint') {
+            $original_post = get_post($postarr['ID']);
+            if ($original_post && $original_post->post_title !== $data['post_title']) {
+                $data['post_title'] = $original_post->post_title; // Revert to the original title
+            }
+        }
+        return $data;
     }
 
     public function prevent_permalink_and_status_editing($data, $postarr) {
