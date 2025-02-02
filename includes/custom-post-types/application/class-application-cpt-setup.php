@@ -48,8 +48,8 @@ class Setup {
      */
     private function include_files() {
         require_once plugin_dir_path(__FILE__) . 'class-application-cpt.php';
-        require_once plugin_dir_path(__FILE__) . 'class-application-cpt-admin-tables.php';
-        require_once plugin_dir_path(__FILE__) . 'class-application-cpt-admin-page-subscription.php';
+      //  require_once plugin_dir_path(__FILE__) . 'class-application-cpt-admin-tables.php';
+     //   require_once plugin_dir_path(__FILE__) . 'class-application-cpt-admin-page-subscription.php';
     }
 
     /**
@@ -57,8 +57,8 @@ class Setup {
      */
     private function instantiate_classes() {
         new \Siya\CustomPostTypes\ApplicationPost();
-        new \Siya\CustomPostTypes\ApplicationPost\Admin\Tables();
-        new \Siya\CustomPostTypes\ApplicationPost\Admin\Page\Subscription();
+     //   new \Siya\CustomPostTypes\ApplicationPost\Admin\Tables();
+     //   new \Siya\CustomPostTypes\ApplicationPost\Admin\Page\Subscription();
     }
 
     /**
