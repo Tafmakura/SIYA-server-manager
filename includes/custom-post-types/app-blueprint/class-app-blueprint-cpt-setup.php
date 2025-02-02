@@ -66,9 +66,7 @@ class Setup {
             'hierarchical'       => false,
             'menu_position'      => null,
             'supports'           => array('author','custom-fields','comments'),
-            'capabilities' => array(
-                'create_posts' => 'do_not_allow',
-            ),
+            'capability_type'    => 'post',
             'map_meta_cap' => true,
         );
 
