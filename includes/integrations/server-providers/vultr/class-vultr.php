@@ -46,7 +46,7 @@ class Vultr /*implements ServerProvider*/ {
                 'plan' => $server_plan,
                 'region' => $server_region,
                 'os_id' => $server_image,
-                'user_data' => base64_encode($user_script),
+              //  'user_data' => base64_encode($user_script),
                 'sshkey_id' => [$ssh_key_id]
             ])
         ]);
