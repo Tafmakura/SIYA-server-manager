@@ -128,13 +128,6 @@ class Setup {
         return array();
     }
 
-    public function remove_add_new_button() {
-        global $submenu;
-        if (isset($submenu['edit.php?post_type=arsol_app_blueprint'])) {
-            unset($submenu['edit.php?post_type=arsol_app_blueprint'][10]); // Removes 'Add New'
-        }
-    }
-
     public function restrict_capabilities($caps, $cap, $user_id, $args) {
         if (in_array($cap, ['delete_post', 'create_posts', 'delete_posts'])) {
             if (isset($args[0])) {
