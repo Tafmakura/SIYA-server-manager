@@ -12,8 +12,8 @@ class Setup {
        // add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
         add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
       //  add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
-        add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
-        add_filter('manage_arsol_app_blueprint_posts_columns', array($this, 'customize_columns'));
+      //  add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
+      //  add_filter('manage_arsol_app_blueprint_posts_columns', array($this, 'customize_columns'));
       //  add_action('admin_head', array($this, 'disable_title_editing'));
       //  add_action('admin_head', array($this, 'disable_status_editing'));
       //  add_filter('wp_insert_post_data', array($this, 'prevent_title_editing'), 10, 2);
