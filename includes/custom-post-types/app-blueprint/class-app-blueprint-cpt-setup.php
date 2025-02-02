@@ -10,7 +10,7 @@ class Setup {
         add_action('init', array($this, 'create_app_blueprint_post_type'));
         add_action('init', array($this, 'register_app_blueprint_taxonomies'));
        // add_filter('post_row_actions', array($this, 'remove_post_table_actions'), 999999, 2);
-        add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
+      //  add_filter('map_meta_cap', array($this, 'restrict_capabilities'), 10, 4);
       //  add_filter('bulk_actions-edit-arsol_app_blueprint', array($this, 'remove_bulk_actions'));
       //  add_filter('display_post_states', array($this, 'remove_post_states'), 10, 2);
       //  add_filter('manage_arsol_app_blueprint_posts_columns', array($this, 'customize_columns'));
@@ -43,7 +43,7 @@ class Setup {
         $labels = array(
             'name'               => _x('App Blueprints', 'post type general name', 'your-text-domain'),
             'singular_name'      => _x('App Blueprint', 'post type singular name', 'your-text-domain'),
-            'menu_name'          => _x('App Blueprintss', 'admin menu', 'your-text-domain'),
+            'menu_name'          => _x('App Blueprints', 'admin menu', 'your-text-domain'),
             'add_new'            => _x('Add New', 'arsol_app_blueprint', 'your-text-domain'),
             'add_new_item'       => __('Add New App Blueprint', 'your-text-domain'),
             'edit_item'          => __('Edit App Blueprint', 'your-text-domain'),
