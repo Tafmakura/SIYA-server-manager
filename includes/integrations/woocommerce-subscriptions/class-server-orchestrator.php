@@ -1034,8 +1034,8 @@ class ServerOrchestrator {
                         } elseif ($status['status'] === 'not-installed') {
                             update_post_meta($server_post_id, '_arsol_state_50_script_execution', -1);
                           //TODO Delete this as it is causing failure of loop -  $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Script could not be found on server.');
-                            ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
-                            return false; // Exit on failure
+                           // ServerCircuitBreaker::trip_circuit_breaker($this->subscription);
+                          //  return false; // Exit on failure
                         }
 
                     } catch (\Exception $e) {
