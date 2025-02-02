@@ -1008,8 +1008,6 @@ class ServerOrchestrator {
             if ($scriptInstallationStatus != 2) {
                 $installationTimeout = apply_filters('arsol_server_manager_script_installation_timeout', 5 * 60);
                 $startTime = time();
-
-                $startTime = time(); // Ensure $startTime is initialized
                 while ((time() - $startTime) < $installationTimeout) {
                     try {
                         $status = $server_manager_instance->get_installation_status($server_post_id);
@@ -1142,7 +1140,6 @@ class ServerOrchestrator {
                         }
 
                         if (empty($connStatus['connected']) || empty($connStatus['online'])) {
-                            $this->throw_exception('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
                             error_log('[SIYA Server Manager - ServerOrchestrator] Server manager is not connected or online.');
                         }
 
